@@ -75,6 +75,11 @@ namespace Duskborn.Core
         private void BeginNight()
         {
             CurrentNight++;
+            if (CurrentNight >= TotalNights)
+            {
+                BeginBossNight();
+                return;
+            }
             Phase = DayPhase.Night;
             PhaseTimeRemaining = nightDuration;
             OnNightStart?.Invoke(CurrentNight);
@@ -89,12 +94,21 @@ namespace Duskborn.Core
 
             if (CurrentNight >= TotalNights)
             {
-                // Night 7 end is handled by boss death, not the timer
                 _running = false;
                 return;
             }
 
             BeginDay();
+        }
+
+        private void BeginBossNight()
+        {
+            // Night 7: no safety timer — fight continues until boss dies or all players die.
+            // WaveManager will start the boss fight via OnNightStart. Timer is suspended.
+            Phase = DayPhase.Night;
+            PhaseTimeRemaining = float.MaxValue;
+            OnNightStart?.Invoke(CurrentNight);
+            Debug.Log("[DayNightCycle] Night 7 — Boss fight begins. Timer suspended.");
         }
 
         // Called by WaveManager when all enemies die before the timer

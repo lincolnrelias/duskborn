@@ -1,5 +1,5 @@
 # Duskborn — Development Progress Tracker
-> Last updated: 2026-04-27 (session 1)
+> Last updated: 2026-04-27 (session 2)
 > Version: 0.1-dev
 > Engine: Unity 6 (URP 17.0.4) · FishNet · FishySteamworks · Steamworks.NET
 
@@ -34,8 +34,8 @@
 > Status: [~] IN PROGRESS
 
 ### 0.1 Project Setup
-- [x] Unity project confirmed at URP (17.0.4) ← already done
-- [ ] FishNet imported via Unity Package Manager (OpenUPM or manual)
+- [x] Unity project confirmed at URP (17.0.4)
+- [x] FishNet imported (confirmed — .csproj files present in project root)
 - [ ] FishySteamworks imported
 - [ ] Steamworks.NET imported
 - [ ] Scene hierarchy defined: Bootstrap / MainMenu / Lobby / Game / UI
@@ -66,8 +66,9 @@
 > Status: [~] IN PROGRESS
 
 ### 1.1 Player Controller
-- [x] `PlayerController.cs` — WASD movement, third-person camera (no Input Asset wired yet)
-- [x] `PlayerStats.cs` — MaxHP, CurrentHP, MoveSpeed, damage, multiplier system
+- [x] `PlayerController.cs` — WASD movement, third-person camera
+- [x] `PlayerStats.cs` — HP, damage, speed, multiplier system; registers with PlayerRegistry; death triggers GameOver check
+- [x] `PlayerRegistry.cs` — static cache of alive players; FindNearest + FindMostIsolated
 - [ ] Animation states: Idle, Walk, Run, Attack, Hit, Die (need Animator + clips)
 - [ ] Placeholder mesh + prefab assembled in Unity
 - [ ] Health bar HUD (placeholder)
@@ -75,25 +76,29 @@
 ### 1.2 Day/Night Cycle
 - [x] `DayNightCycle.cs` — singleton, Night# (1–7), Phase, timer, lighting transition
 - [x] Events: `OnDayStart`, `OnNightStart`, `OnNightEnd`
+- [x] Night 7: safety timer suspended (boss fight runs until boss dies or all die)
 - [ ] Countdown timer UI (center-top during Day)
 - [ ] Directional Light + skybox Gradient wired in Unity Inspector
 
 ### 1.3 Basic Enemy — Swarmer
-- [x] `EnemyBase.cs` — HP, NavMesh pathfinding, melee attack interval, death, player count scaling
-- [x] `EnemyPool.cs` — pooling system (Queue-based, no Instantiate/Destroy per enemy)
-- [x] `Swarmer.cs` — subclass of EnemyBase (default behavior)
+- [x] `EnemyBase.cs` — HP (non-compounding scaling), PlayerRegistry targeting, melee attack, pool-safe reset
+- [x] `EnemyPool.cs` — Queue pool; clears event subs on reset; exposes aggregate OnAnyEnemyDied
+- [x] `Swarmer.cs` — subclass of EnemyBase
+- [x] `EnemyType.cs` — enum (Swarmer/Runner/Spitter/Brute/Elite)
 - [ ] Swarmer prefab assembled in Unity (NavMeshAgent + placeholder mesh)
 
 ### 1.4 Wave Spawner
-- [x] `WaveDefinition.cs` (ScriptableObject) — enemy type weights + base count per night
-- [x] `WaveManager.cs` — spawns wave on NightStart, tracks alive count, ends night early
+- [x] `WaveDefinition.cs` (ScriptableObject) — pure data; uses EnemyType enum (no scene refs)
+- [x] `WaveManager.cs` — owns EnemyType→EnemyPool map; subscribes to aggregate pool events; no per-enemy leaks
 - [x] `SpawnPerimeter.cs` — perimeter spawn points, gizmo visualizer
 - [ ] Night 1 WaveDefinition asset created in Unity
+- [ ] Pool GameObjects assigned in WaveManager Inspector
 
 ### 1.5 Win / Lose Conditions
-- [x] `GameStateManager.cs` — GameOver / Win / Running states, nights survived counter
-- [ ] GameOver trigger wired: all PlayerStats dead → GameStateManager.TriggerGameOver()
-- [ ] Win trigger wired: stub boss object for Night 7
+- [x] `GameStateManager.cs` — GameOver / Win / Running states
+- [x] `GameBootstrapper.cs` — starts GameStateManager + DayNightCycle on scene load
+- [x] GameOver auto-triggers: PlayerStats.HandleDeath checks PlayerRegistry.AliveCount == 0
+- [ ] Win trigger: stub boss for Night 7 (calls GameStateManager.TriggerWin on death)
 - [ ] End screen (placeholder)
 
 ---
@@ -337,9 +342,23 @@
 | Unity URP | 17.0.4 | Installed |
 | Unity InputSystem | 1.13.1 | Installed |
 | Unity AI Navigation | 2.0.6 | Installed |
-| FishNet | — | MISSING — install via OpenUPM: `com.firstgeargames.fishnet` |
+| FishNet | — | Installed (confirmed) |
 | FishySteamworks | — | MISSING — install after FishNet |
 | Steamworks.NET | — | MISSING — install after FishySteamworks |
+
+## Files Written (Session 2 — 2026-04-27, bug fixes)
+| File | Change |
+|------|--------|
+| `Core/GameSession.cs` | Removed self-referential using; seed uses TickCount not UnityEngine.Random |
+| `Core/DayNightCycle.cs` | Night 7 suspends timer (BeginBossNight); no silent stop on expired timer |
+| `Core/GameBootstrapper.cs` | NEW — starts GameStateManager + DayNightCycle on scene load |
+| `Gameplay/Player/PlayerStats.cs` | Registers with PlayerRegistry; death checks AliveCount → GameOver |
+| `Gameplay/Player/PlayerRegistry.cs` | NEW — static player cache; FindNearest + FindMostIsolated |
+| `Gameplay/Enemies/EnemyType.cs` | NEW — EnemyType enum |
+| `Gameplay/Enemies/EnemyBase.cs` | Non-compounding scaling; PlayerRegistry targeting; gold uses SeededRNG; ResetEnemy nulls events |
+| `Gameplay/Enemies/EnemyPool.cs` | Re-subscribes pool handler after reset; aggregate OnAnyEnemyDied event |
+| `Gameplay/Enemies/WaveDefinition.cs` | EnemyType enum instead of EnemyPool scene ref |
+| `Gameplay/Enemies/WaveManager.cs` | Owns EnemyType→Pool map; subscribes to pool aggregates; unsubscribes cleanly |
 
 ## Files Written (Session 1 — 2026-04-27)
 | File | System | Phase |

@@ -1,5 +1,4 @@
 using UnityEngine;
-using Duskborn.Core;
 
 namespace Duskborn.Core
 {
@@ -36,7 +35,8 @@ namespace Duskborn.Core
         // Host calls this; clients receive seed via network and also call this.
         public void GenerateAndApplySeed()
         {
-            int seed = Random.Range(int.MinValue, int.MaxValue);
+            // Use environment tick so the seed itself doesn't depend on UnityEngine.Random.
+            int seed = System.Environment.TickCount;
             InitializeSeed(seed);
         }
     }

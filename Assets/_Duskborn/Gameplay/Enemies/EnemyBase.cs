@@ -1,12 +1,14 @@
 using System;
 using UnityEngine;
 using UnityEngine.AI;
+using Duskborn.Core;
+using Duskborn.Gameplay.Player;
 
 namespace Duskborn.Gameplay.Enemies
 {
     /// <summary>
     /// Base class for all enemy types. Handles HP, NavMesh pathfinding, melee attack, and death.
-    /// Subclasses override targeting, attack behavior, and special AI patterns.
+    /// Subclasses override targeting and attack behavior.
     /// </summary>
     [RequireComponent(typeof(NavMeshAgent))]
     public class EnemyBase : MonoBehaviour
@@ -15,24 +17,29 @@ namespace Duskborn.Gameplay.Enemies
         [SerializeField] protected float maxHP = 30f;
         [SerializeField] protected float attackDamage = 8f;
         [SerializeField] protected float attackRange = 1.5f;
-        [SerializeField] protected float attackInterval = 1f; // seconds between attacks
+        [SerializeField] protected float attackInterval = 1f;
         [SerializeField] protected int goldDropMin = 1;
         [SerializeField] protected int goldDropMax = 3;
 
         protected NavMeshAgent Agent;
         protected Transform CurrentTarget;
-        protected float CurrentHP;
         protected float AttackCooldown;
 
-        public bool IsAlive => CurrentHP > 0f;
+        // Stores the prefab-configured maxHP so scaling never compounds on pool reuse.
+        private float _baseMaxHP;
+        private float _currentHP;
+
+        public float CurrentHP => _currentHP;
+        public bool IsAlive => _currentHP > 0f;
 
         public event Action<EnemyBase> OnDied;
-        public event Action<int> OnDropGold; // gold amount to drop
+        public event Action<int> OnDropGold;
 
         protected virtual void Awake()
         {
             Agent = GetComponent<NavMeshAgent>();
-            CurrentHP = maxHP;
+            _baseMaxHP = maxHP;
+            _currentHP = _baseMaxHP;
         }
 
         protected virtual void Update()
@@ -59,8 +66,8 @@ namespace Duskborn.Gameplay.Enemies
 
         protected virtual void AcquireTarget()
         {
-            // Default: target nearest player. Subclasses can override for different logic.
-            CurrentTarget = FindNearestPlayer();
+            // Uses PlayerRegistry cache — O(n players), not O(n scene objects).
+            CurrentTarget = PlayerRegistry.FindNearest(transform.position);
         }
 
         protected virtual void TryAttack()
@@ -73,57 +80,56 @@ namespace Duskborn.Gameplay.Enemies
         protected virtual void PerformAttack()
         {
             if (CurrentTarget == null) return;
-            var stats = CurrentTarget.GetComponent<Duskborn.Gameplay.Player.PlayerStats>();
+            var stats = CurrentTarget.GetComponent<PlayerStats>();
             stats?.TakeDamage(attackDamage);
         }
 
         public virtual void TakeDamage(float amount)
         {
             if (!IsAlive) return;
-            CurrentHP = Mathf.Max(0f, CurrentHP - amount);
-            if (CurrentHP <= 0f) Die();
+            _currentHP = Mathf.Max(0f, _currentHP - amount);
+            if (_currentHP <= 0f) Die();
         }
 
-        // Scale HP for player count — called by WaveManager before spawning
+        /// <summary>
+        /// Applies player-count HP scaling. Always calculates from _baseMaxHP — never compounds.
+        /// </summary>
         public void ApplyPlayerCountScaling(int playerCount)
         {
             float scale = 1f + (playerCount - 1) * 0.25f;
-            maxHP *= scale;
-            CurrentHP = maxHP;
+            float scaledHP = _baseMaxHP * scale;
+            maxHP = scaledHP;
+            _currentHP = scaledHP;
         }
 
         protected virtual void Die()
         {
             Agent.enabled = false;
-            int goldAmount = UnityEngine.Random.Range(goldDropMin, goldDropMax + 1);
+
+            SeededRNG rng = GameSession.Instance?.RNG;
+            int goldAmount = rng != null
+                ? rng.Range(goldDropMin, goldDropMax + 1)
+                : UnityEngine.Random.Range(goldDropMin, goldDropMax + 1);
+
             OnDropGold?.Invoke(goldAmount);
             OnDied?.Invoke(this);
-            gameObject.SetActive(false); // returned to pool
+            gameObject.SetActive(false);
         }
 
-        protected Transform FindNearestPlayer()
-        {
-            // Finds all PlayerStats in scene; picks the nearest alive one.
-            var players = FindObjectsByType<Duskborn.Gameplay.Player.PlayerStats>(FindObjectsSortMode.None);
-            Transform nearest = null;
-            float nearestDist = float.MaxValue;
-            foreach (var p in players)
-            {
-                if (!p.IsAlive) continue;
-                float d = Vector3.Distance(transform.position, p.transform.position);
-                if (d < nearestDist) { nearestDist = d; nearest = p.transform; }
-            }
-            return nearest;
-        }
-
-        // Called by pool when recycling this object
+        /// <summary>
+        /// Called by EnemyPool when recycling. Resets from _baseMaxHP so scaling is always fresh.
+        /// </summary>
         public virtual void ResetEnemy(Vector3 position)
         {
             transform.position = position;
-            CurrentHP = maxHP;
+            _currentHP = _baseMaxHP;
+            maxHP = _baseMaxHP;
             AttackCooldown = 0f;
             CurrentTarget = null;
             Agent.enabled = true;
+            // Clear all OnDied subscribers except the pool's own handler (pool re-adds its own in CreateAndStore).
+            OnDied = null;
+            OnDropGold = null;
             gameObject.SetActive(true);
         }
     }

@@ -111,12 +111,15 @@ namespace Duskborn.Core
             Debug.Log("[DayNightCycle] Night 7 — Boss fight begins. Timer suspended.");
         }
 
-        // Called by WaveManager when all enemies die before the timer
+        // Called by WaveManager when all enemies die before the timer.
         public void ForceEndNight()
         {
             if (Phase == DayPhase.Night)
                 PhaseTimeRemaining = 0f;
         }
+
+        // Debug / editor only — forces the current phase to end immediately regardless of type.
+        public void ForceEndCurrentPhase() => PhaseTimeRemaining = 0f;
 
         private void UpdateLighting()
         {

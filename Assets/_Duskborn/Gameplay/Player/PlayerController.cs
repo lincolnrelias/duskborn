@@ -13,10 +13,10 @@ namespace Duskborn.Gameplay.Player
     public class PlayerController : MonoBehaviour
     {
         [Header("Camera")]
-        [SerializeField] private Transform cameraTarget;
-        [SerializeField] private float cameraDistance = 8f;
-        [SerializeField] private float cameraHeight = 6f;
-        [SerializeField] private float cameraSmoothing = 5f;
+        [SerializeField] private float cameraDistance  = 8f;
+        [SerializeField] private float cameraHeight    = 10f;
+        [SerializeField] private float cameraSmoothing = 8f;
+        [SerializeField] private float cameraLookOffset = 1f; // height above player to look at
 
         [Header("Movement")]
         [SerializeField] private float gravityMultiplier = 2f;
@@ -81,12 +81,11 @@ namespace Duskborn.Gameplay.Player
         private void FollowCamera()
         {
             if (_mainCam == null) return;
-            Vector3 target = transform.position
-                + Vector3.up * cameraHeight
-                - _mainCam.transform.forward * cameraDistance;
+            // Fixed-angle isometric offset — no feedback loop.
+            Vector3 desired = transform.position + new Vector3(0f, cameraHeight, -cameraDistance);
             _mainCam.transform.position = Vector3.Lerp(
-                _mainCam.transform.position, target, cameraSmoothing * Time.deltaTime);
-            _mainCam.transform.LookAt(transform.position + Vector3.up * 1.5f);
+                _mainCam.transform.position, desired, cameraSmoothing * Time.deltaTime);
+            _mainCam.transform.LookAt(transform.position + Vector3.up * cameraLookOffset);
         }
 
         public void SetInputEnabled(bool enabled) => _inputEnabled = enabled;

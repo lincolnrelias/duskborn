@@ -1,5 +1,5 @@
 # Duskborn — Development Progress Tracker
-> Last updated: 2026-04-27 (session 2)
+> Last updated: 2026-04-28 (session 3)
 > Version: 0.1-dev
 > Engine: Unity 6 (URP 17.0.4) · FishNet · FishySteamworks · Steamworks.NET
 
@@ -87,12 +87,17 @@
 - [x] `EnemyType.cs` — enum (Swarmer/Runner/Spitter/Brute/Elite)
 - [ ] Swarmer prefab assembled in Unity (NavMeshAgent + placeholder mesh)
 
-### 1.4 Wave Spawner
-- [x] `WaveDefinition.cs` (ScriptableObject) — pure data; uses EnemyType enum (no scene refs)
-- [x] `WaveManager.cs` — owns EnemyType→EnemyPool map; subscribes to aggregate pool events; no per-enemy leaks
+### 1.4 Wave Spawner — Budget + Timeline System
+- [x] `EnemySpawnPool.cs` (SO) — named set of {EnemyType, Cost, Weight} entries; pools are pure data
+- [x] `NightDefinition.cs` (SO) — budget per night + which pools are active; replaces WaveDefinition
+- [x] `SpawnEvent.cs` / `SpawnTimeline.cs` — data classes: (timestamp, enemyType) events, sorted list
+- [x] `TimelineGenerator.cs` — static; spends budget, shuffles, distributes with per-slot jitter
+- [x] `WaveManager.cs` — generates timeline on NightStart; observes in Update; spawns by timestamp
 - [x] `SpawnPerimeter.cs` — perimeter spawn points, gizmo visualizer
-- [ ] Night 1 WaveDefinition asset created in Unity
-- [ ] Pool GameObjects assigned in WaveManager Inspector
+- [x] `WaveDefinition.cs` — retired (empty stub, GUID preserved)
+- [ ] EnemySpawnPool assets created in Unity (e.g. "Basic Melee", "Ranged Threats")
+- [ ] NightDefinition assets created (Night 1–6) with budgets and pool assignments
+- [ ] Pool GameObjects (EnemyPool MonoBehaviours) assigned in WaveManager Inspector
 
 ### 1.5 Win / Lose Conditions
 - [x] `GameStateManager.cs` — GameOver / Win / Running states
@@ -345,6 +350,16 @@
 | FishNet | — | Installed (confirmed) |
 | FishySteamworks | — | MISSING — install after FishNet |
 | Steamworks.NET | — | MISSING — install after FishySteamworks |
+
+## Files Written (Session 3 — 2026-04-28, wave system redesign)
+| File | Change |
+|------|--------|
+| `Gameplay/Enemies/EnemySpawnPool.cs` | NEW — named pool of {EnemyType, Cost, Weight} entries |
+| `Gameplay/Enemies/NightDefinition.cs` | NEW — replaces WaveDefinition; budget + pool refs |
+| `Gameplay/Enemies/SpawnTimeline.cs` | NEW — SpawnEvent (timestamp, type) + SpawnTimeline data class |
+| `Gameplay/Enemies/TimelineGenerator.cs` | NEW — budget spender + timestamp distributor |
+| `Gameplay/Enemies/WaveManager.cs` | Rewritten — generates timeline, observes in Update |
+| `Gameplay/Enemies/WaveDefinition.cs` | Retired — empty stub (GUID preserved) |
 
 ## Files Written (Session 2 — 2026-04-27, bug fixes)
 | File | Change |

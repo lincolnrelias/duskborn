@@ -73,10 +73,11 @@ namespace Duskborn.Gameplay.Enemies
             {
                 if (entry.Prefab == null) continue;
 
-                var poolGO  = new GameObject($"Pool_{entry.Type}");
+                var poolGO = new GameObject($"Pool_{entry.Type}");
                 poolGO.transform.SetParent(transform);
                 var pool = poolGO.AddComponent<EnemyPool>();
                 pool.Initialize(entry.Prefab, entry.InitialPoolSize);
+                pool.OnAnyEnemyDied += HandleEnemyDied; // subscribe once per pool, not per spawn
                 _pools[entry.Type] = pool;
             }
         }
@@ -115,7 +116,6 @@ namespace Duskborn.Gameplay.Enemies
         private void OnNightEnd(int _)
         {
             _waveActive = false;
-            UnsubscribeAllPools();
             DespawnAll();
         }
 
@@ -143,22 +143,14 @@ namespace Duskborn.Gameplay.Enemies
                 return;
             }
 
-            pool.OnAnyEnemyDied += HandleEnemyDied;
             pool.Spawn(GetSpawnPosition(), _currentPlayerCount);
             _aliveCount++;
         }
 
         private void HandleEnemyDied(EnemyBase _)
         {
+            if (!_waveActive) return;
             _aliveCount--;
-
-            bool timelineExhausted = _nextEventIndex >= (_activeTimeline?.TotalEnemies ?? 0);
-            if (_waveActive && timelineExhausted && _aliveCount <= 0)
-            {
-                Debug.Log("[WaveManager] All enemies dead — ending night early.");
-                UnsubscribeAllPools();
-                DayNightCycle.Instance?.ForceEndNight();
-            }
         }
 
         // -------------------------------------------------------------------------
@@ -167,12 +159,6 @@ namespace Duskborn.Gameplay.Enemies
         {
             foreach (var pool in _pools.Values) pool?.DespawnAll();
             _aliveCount = 0;
-        }
-
-        private void UnsubscribeAllPools()
-        {
-            foreach (var pool in _pools.Values)
-                if (pool != null) pool.OnAnyEnemyDied -= HandleEnemyDied;
         }
 
         private void OnDrawGizmosSelected()

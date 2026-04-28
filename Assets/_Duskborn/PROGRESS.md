@@ -113,7 +113,13 @@
 
 ## Phase 2 — Classes & Combat
 > Goal: 3 playable classes with abilities, passives, and status effects.
-> Status: [ ] NOT STARTED
+> Status: [~] IN PROGRESS
+
+### 2.0 Basic Combat (first pass — verify before continuing)
+- [x] `PlayerCombat.cs` — OnAttack callback, cooldown, OverlapSphere, crit roll
+- [ ] Enemy layer created + assigned in Inspector
+- [ ] PlayerCombat added to player prefab + enemyLayer wired
+- [ ] Verified: left-click hits enemies, enemies die, night ends naturally
 
 ### 2.1 Class Architecture
 - [ ] `ClassDefinition.cs` (ScriptableObject) — name, base stats, passive, ability data

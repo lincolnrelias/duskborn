@@ -2,42 +2,42 @@ using System;
 using UnityEngine;
 using UnityEngine.AI;
 using Duskborn.Core;
+using Duskborn.Gameplay.Loot;
 using Duskborn.Gameplay.Player;
 
 namespace Duskborn.Gameplay.Enemies
 {
-    /// <summary>
-    /// Base class for all enemy types. Handles HP, NavMesh pathfinding, melee attack, and death.
-    /// Subclasses override targeting and attack behavior.
-    /// </summary>
     [RequireComponent(typeof(NavMeshAgent))]
     public class EnemyBase : MonoBehaviour
     {
         [Header("Stats")]
-        [SerializeField] protected float maxHP = 30f;
-        [SerializeField] protected float attackDamage = 8f;
-        [SerializeField] protected float attackRange = 1.5f;
+        [SerializeField] protected float maxHP          = 30f;
+        [SerializeField] protected float attackDamage   = 8f;
+        [SerializeField] protected float attackRange    = 1.5f;
         [SerializeField] protected float attackInterval = 1f;
-        [SerializeField] protected int goldDropMin = 1;
-        [SerializeField] protected int goldDropMax = 3;
+        [SerializeField] protected int   goldDropMin    = 1;
+        [SerializeField] protected int   goldDropMax    = 3;
 
         protected NavMeshAgent Agent;
-        protected Transform CurrentTarget;
-        protected float AttackCooldown;
+        protected Transform    CurrentTarget;
+        protected float        AttackCooldown;
 
-        // Stores the prefab-configured maxHP so scaling never compounds on pool reuse.
         private float _baseMaxHP;
         private float _currentHP;
 
+        // One-shot diagnostics — logged once per spawn, not every frame.
+        private bool _warnedNoTarget;
+        private bool _warnedNoNavMesh;
+
         public float CurrentHP => _currentHP;
-        public bool IsAlive => _currentHP > 0f;
+        public bool  IsAlive   => _currentHP > 0f;
 
         public event Action<EnemyBase> OnDied;
-        public event Action<int> OnDropGold;
+        public event Action<int>       OnDropGold;
 
         protected virtual void Awake()
         {
-            Agent = GetComponent<NavMeshAgent>();
+            Agent      = GetComponent<NavMeshAgent>();
             _baseMaxHP = maxHP;
             _currentHP = _baseMaxHP;
         }
@@ -47,11 +47,32 @@ namespace Duskborn.Gameplay.Enemies
             if (!IsAlive) return;
 
             AcquireTarget();
-            if (CurrentTarget == null) return;
 
-            float distToTarget = Vector3.Distance(transform.position, CurrentTarget.position);
+            if (CurrentTarget == null)
+            {
+                if (!_warnedNoTarget)
+                {
+                    Debug.LogWarning($"[{name}] No target found — PlayerRegistry may be empty. " +
+                                     "Check that PlayerStats is on the player and the player is active.");
+                    _warnedNoTarget = true;
+                }
+                return;
+            }
 
-            if (distToTarget <= attackRange)
+            if (!Agent.isOnNavMesh)
+            {
+                if (!_warnedNoNavMesh)
+                {
+                    Debug.LogWarning($"[{name}] NavMeshAgent is not on a NavMesh. " +
+                                     "Bake the NavMesh: Window > AI > Navigation > Bake.");
+                    _warnedNoNavMesh = true;
+                }
+                return;
+            }
+
+            float dist = Vector3.Distance(transform.position, CurrentTarget.position);
+
+            if (dist <= attackRange)
             {
                 Agent.ResetPath();
                 TryAttack();
@@ -66,7 +87,6 @@ namespace Duskborn.Gameplay.Enemies
 
         protected virtual void AcquireTarget()
         {
-            // Uses PlayerRegistry cache — O(n players), not O(n scene objects).
             CurrentTarget = PlayerRegistry.FindNearest(transform.position);
         }
 
@@ -80,8 +100,7 @@ namespace Duskborn.Gameplay.Enemies
         protected virtual void PerformAttack()
         {
             if (CurrentTarget == null) return;
-            var stats = CurrentTarget.GetComponent<PlayerStats>();
-            stats?.TakeDamage(attackDamage);
+            CurrentTarget.GetComponent<PlayerStats>()?.TakeDamage(attackDamage);
         }
 
         public virtual void TakeDamage(float amount)
@@ -91,46 +110,45 @@ namespace Duskborn.Gameplay.Enemies
             if (_currentHP <= 0f) Die();
         }
 
-        /// <summary>
-        /// Applies player-count HP scaling. Always calculates from _baseMaxHP — never compounds.
-        /// </summary>
         public void ApplyPlayerCountScaling(int playerCount)
         {
-            float scale = 1f + (playerCount - 1) * 0.25f;
-            float scaledHP = _baseMaxHP * scale;
-            maxHP = scaledHP;
-            _currentHP = scaledHP;
+            float scaled = _baseMaxHP * (1f + (playerCount - 1) * 0.25f);
+            maxHP      = scaled;
+            _currentHP = scaled;
         }
 
         protected virtual void Die()
         {
             Agent.enabled = false;
 
-            SeededRNG rng = GameSession.Instance?.RNG;
+            SeededRNG rng  = GameSession.Instance?.RNG;
             int goldAmount = rng != null
                 ? rng.Range(goldDropMin, goldDropMax + 1)
                 : UnityEngine.Random.Range(goldDropMin, goldDropMax + 1);
 
+            GoldManager.Instance?.AddGold(goldAmount);
             OnDropGold?.Invoke(goldAmount);
             OnDied?.Invoke(this);
             gameObject.SetActive(false);
         }
 
-        /// <summary>
-        /// Called by EnemyPool when recycling. Resets from _baseMaxHP so scaling is always fresh.
-        /// </summary>
         public virtual void ResetEnemy(Vector3 position)
         {
+            // SetActive(true) FIRST so component enables run, then re-enable the agent.
+            // Enabling Agent on an inactive GameObject is a no-op in Unity.
+            OnDied      = null;
+            OnDropGold  = null;
+            CurrentTarget   = null;
+            AttackCooldown  = 0f;
+            _currentHP      = _baseMaxHP;
+            maxHP           = _baseMaxHP;
+            _warnedNoTarget  = false;
+            _warnedNoNavMesh = false;
+
             transform.position = position;
-            _currentHP = _baseMaxHP;
-            maxHP = _baseMaxHP;
-            AttackCooldown = 0f;
-            CurrentTarget = null;
-            Agent.enabled = true;
-            // Clear all OnDied subscribers except the pool's own handler (pool re-adds its own in CreateAndStore).
-            OnDied = null;
-            OnDropGold = null;
-            gameObject.SetActive(true);
+            gameObject.SetActive(true);   // ← activate first
+            Agent.enabled = true;         // ← then enable agent (now GameObject is active)
+            Agent.Warp(position);         // ← snap agent to NavMesh surface at this position
         }
     }
 }

@@ -1,6 +1,7 @@
 using UnityEngine;
 using Duskborn.Core;
 using Duskborn.Gameplay.Enemies;
+using Duskborn.Gameplay.Loot;
 using Duskborn.Gameplay.Player;
 
 namespace Duskborn.UI
@@ -50,6 +51,7 @@ namespace Duskborn.UI
             string gstate  = state  != null ? state.CurrentState.ToString()         : "—";
             int    alive   = waveManager != null ? waveManager.AliveEnemyCount      : 0;
             int    pending = waveManager != null ? waveManager.RemainingEvents       : 0;
+            int    gold    = GoldManager.Instance != null ? GoldManager.Instance.Gold : 0;
 
             // Per-player HP
             var players = PlayerRegistry.All;
@@ -57,6 +59,7 @@ namespace Duskborn.UI
             sb.AppendLine($"Phase:   {phase}  (Night {night})");
             sb.AppendLine($"Timer:   {timer}");
             sb.AppendLine($"State:   {gstate}");
+            sb.AppendLine($"Gold:    {gold}");
             sb.AppendLine($"Enemies: {alive} alive  |  {pending} queued");
             sb.AppendLine("─────────────────");
             if (players.Count == 0)

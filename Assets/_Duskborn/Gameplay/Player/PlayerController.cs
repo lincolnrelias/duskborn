@@ -1,71 +1,76 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using Duskborn.Gameplay.Player;
 
 namespace Duskborn.Gameplay.Player
 {
-    /// <summary>
-    /// Handles player movement and camera follow. Input via Unity Input System.
-    /// Combat input routed to PlayerCombat (added in Phase 2).
-    /// </summary>
     [RequireComponent(typeof(CharacterController))]
     [RequireComponent(typeof(PlayerStats))]
     public class PlayerController : MonoBehaviour
     {
         [Header("Camera")]
-        [SerializeField] private float cameraDistance  = 8f;
-        [SerializeField] private float cameraHeight    = 10f;
-        [SerializeField] private float cameraSmoothing = 8f;
-        [SerializeField] private float cameraLookOffset = 1f; // height above player to look at
+        [SerializeField] private float cameraDistance   = 8f;
+        [SerializeField] private float cameraHeight     = 10f;
+        [SerializeField] private float cameraSmoothing  = 8f;
+        [SerializeField] private float cameraLookOffset = 1f;
+        [SerializeField] private float cameraSensitivity = 3f;
 
         [Header("Movement")]
         [SerializeField] private float gravityMultiplier = 2f;
-        [SerializeField] private float rotationSpeed = 720f; // deg/s
+        [SerializeField] private float rotationSpeed     = 720f;
 
         private CharacterController _cc;
-        private PlayerStats _stats;
-        private Camera _mainCam;
+        private PlayerStats         _stats;
+        private Camera              _mainCam;
 
         private Vector2 _moveInput;
         private Vector3 _velocity;
-        private bool _inputEnabled = true;
+        private float   _cameraYaw;
+        private bool    _inputEnabled = true;
 
         public bool IsMoving => _moveInput.sqrMagnitude > 0.01f;
 
         private void Awake()
         {
-            _cc = GetComponent<CharacterController>();
-            _stats = GetComponent<PlayerStats>();
+            _cc      = GetComponent<CharacterController>();
+            _stats   = GetComponent<PlayerStats>();
             _mainCam = Camera.main;
+
+            // Start camera behind the player
+            _cameraYaw = transform.eulerAngles.y;
         }
 
-        // Called by Unity Input System PlayerInput component
         public void OnMove(InputValue value) => _moveInput = value.Get<Vector2>();
 
         private void Update()
         {
             if (!_inputEnabled || !_stats.IsAlive) return;
+            HandleCameraRotation();
             HandleMovement();
             HandleGravity();
         }
 
         private void LateUpdate() => FollowCamera();
 
+        // -------------------------------------------------------------------------
+
+        private void HandleCameraRotation()
+        {
+            if (Input.GetMouseButton(1))
+                _cameraYaw += Input.GetAxis("Mouse X") * cameraSensitivity;
+        }
+
         private void HandleMovement()
         {
             if (_moveInput.sqrMagnitude < 0.01f) return;
 
-            // Camera-relative movement
             Vector3 camForward = Vector3.ProjectOnPlane(_mainCam.transform.forward, Vector3.up).normalized;
-            Vector3 camRight = Vector3.ProjectOnPlane(_mainCam.transform.right, Vector3.up).normalized;
-            Vector3 moveDir = (camForward * _moveInput.y + camRight * _moveInput.x).normalized;
+            Vector3 camRight   = Vector3.ProjectOnPlane(_mainCam.transform.right,   Vector3.up).normalized;
+            Vector3 moveDir    = (camForward * _moveInput.y + camRight * _moveInput.x).normalized;
 
             _cc.Move(moveDir * (_stats.MoveSpeed * Time.deltaTime));
 
-            // Rotate to face movement direction
-            Quaternion targetRot = Quaternion.LookRotation(moveDir);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot,
-                rotationSpeed * Time.deltaTime);
+            transform.rotation = Quaternion.RotateTowards(
+                transform.rotation, Quaternion.LookRotation(moveDir), rotationSpeed * Time.deltaTime);
         }
 
         private void HandleGravity()
@@ -81,8 +86,11 @@ namespace Duskborn.Gameplay.Player
         private void FollowCamera()
         {
             if (_mainCam == null) return;
-            // Fixed-angle isometric offset — no feedback loop.
-            Vector3 desired = transform.position + new Vector3(0f, cameraHeight, -cameraDistance);
+
+            // Rotate the offset around the player by _cameraYaw, then add height.
+            Vector3 offset  = Quaternion.Euler(0f, _cameraYaw, 0f) * new Vector3(0f, 0f, -cameraDistance);
+            Vector3 desired = transform.position + offset + Vector3.up * cameraHeight;
+
             _mainCam.transform.position = Vector3.Lerp(
                 _mainCam.transform.position, desired, cameraSmoothing * Time.deltaTime);
             _mainCam.transform.LookAt(transform.position + Vector3.up * cameraLookOffset);

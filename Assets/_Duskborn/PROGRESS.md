@@ -1,5 +1,5 @@
 # Duskborn — Development Progress Tracker
-> Last updated: 2026-04-28 (session 4)
+> Last updated: 2026-04-28 (session 5)
 > Version: 0.1-dev
 > Engine: Unity 6 (URP 17.0.4) · FishNet · FishySteamworks · Steamworks.NET
 
@@ -66,26 +66,27 @@
 > Status: [~] IN PROGRESS
 
 ### 1.1 Player Controller
-- [x] `PlayerController.cs` — WASD movement, third-person camera
-- [x] `PlayerStats.cs` — HP, damage, speed, multiplier system; registers with PlayerRegistry; death triggers GameOver check
-- [x] `PlayerRegistry.cs` — static cache of alive players; FindNearest + FindMostIsolated
-- [ ] Animation states: Idle, Walk, Run, Attack, Hit, Die (need Animator + clips)
-- [ ] Placeholder mesh + prefab assembled in Unity
-- [ ] Health bar HUD (placeholder)
+- [x] `PlayerController.cs` — WASD movement; right-click drag orbit camera (fixed-angle, no feedback loop)
+- [x] `PlayerStats.cs` — HP, damage, speed, attackSpeed; multiplier system; PlayerRegistry auto-register; death → GameOver
+- [x] `PlayerRegistry.cs` — static cache; FindNearest + FindMostIsolated; Clear() removed from Bootstrapper (was wiping OnEnable registrations)
+- [ ] Animation states: Idle, Walk, Run, Attack, Hit, Die
+- [x] Player prefab assembled in Unity (CharacterController + PlayerInput + components)
 
 ### 1.2 Day/Night Cycle
 - [x] `DayNightCycle.cs` — singleton, Night# (1–7), Phase, timer, lighting transition
 - [x] Events: `OnDayStart`, `OnNightStart`, `OnNightEnd`
-- [x] Night 7: safety timer suspended (boss fight runs until boss dies or all die)
+- [x] Night 7: safety timer suspended (`BeginBossNight` — fight runs until boss dies or all die)
+- [x] `ForceEndCurrentPhase()` — skips current phase regardless of type (used by debug F1)
+- [x] Night does NOT end early when all enemies die — runs full timer (design decision)
 - [ ] Countdown timer UI (center-top during Day)
 - [ ] Directional Light + skybox Gradient wired in Unity Inspector
 
 ### 1.3 Basic Enemy — Swarmer
-- [x] `EnemyBase.cs` — HP (non-compounding scaling), PlayerRegistry targeting, melee attack, pool-safe reset
-- [x] `EnemyPool.cs` — Queue pool; clears event subs on reset; exposes aggregate OnAnyEnemyDied
+- [x] `EnemyBase.cs` — HP (non-compounding scaling), PlayerRegistry targeting, melee attack, pool-safe reset; fixed SetActive/Agent.enabled order; Agent.Warp on spawn; GoldManager.AddGold on death
+- [x] `EnemyPool.cs` — Queue pool; clears event subs on reset; exposes aggregate OnAnyEnemyDied; Initialize() for runtime construction
 - [x] `Swarmer.cs` — subclass of EnemyBase
 - [x] `EnemyType.cs` — enum (Swarmer/Runner/Spitter/Brute/Elite)
-- [ ] Swarmer prefab assembled in Unity (NavMeshAgent + placeholder mesh)
+- [x] Swarmer prefab assembled in Unity (NavMeshAgent + Enemy layer + EnemyBase on root)
 
 ### 1.4 Wave Spawner — Budget + Timeline System
 - [x] `EnemySpawnPool.cs` (SO) — named set of {EnemyType, Cost, Weight} entries; pools are pure data
@@ -97,17 +98,23 @@
 - [x] `EnemyPool.cs` — supports both Inspector config and runtime Initialize(prefab, size)
 - [x] `SpawnPerimeter.cs` — retired (radius-based annulus in WaveManager replaces it)
 - [x] `WaveDefinition.cs` — retired (empty stub, GUID preserved)
-- [ ] `EnemyPrefabRegistry` asset created in Unity (assign prefabs per EnemyType)
-- [ ] `EnemySpawnPool` assets created (e.g. "Basic Melee", "Ranged Threats")
-- [ ] `NightDefinition` assets created (Night 1–6) with budgets and pool assignments
-- [ ] WaveManager: assign registry + night definitions in Inspector; tune radius values
+- [x] `EnemyPrefabRegistry` asset created + Swarmer prefab assigned
+- [x] `EnemySpawnPool` asset created (Night 1 basic pool)
+- [x] `NightDefinition` asset created for Night 1
+- [x] WaveManager configured in scene (registry, definitions, spawn radius)
+- [x] Alive count bug fixed: pool subscription moved to BuildPools (once per pool, not per spawn); HandleEnemyDied guards with _waveActive
+- [ ] NightDefinitions for Nights 2–6 (deferred — need more enemy types first)
 
 ### 1.5 Win / Lose Conditions
 - [x] `GameStateManager.cs` — GameOver / Win / Running states
-- [x] `GameBootstrapper.cs` — starts GameStateManager + DayNightCycle on scene load
-- [x] GameOver auto-triggers: PlayerStats.HandleDeath checks PlayerRegistry.AliveCount == 0
-- [ ] Win trigger: stub boss for Night 7 (calls GameStateManager.TriggerWin on death)
+- [x] `GameBootstrapper.cs` — starts GameStateManager + DayNightCycle + resets GoldManager on load
+- [x] GameOver auto-triggers: PlayerStats.HandleDeath → PlayerRegistry.AliveCount == 0
+- [ ] Win trigger: stub boss for Night 7
 - [ ] End screen (placeholder)
+
+### 1.6 Debug & HUD (placeholder — replaces Phase 10 UI until polish pass)
+- [x] `GameDebugController.cs` — F1 skip day, F2 end night, F3 damage player, F4 print timeline
+- [x] `GameHUD.cs` — OnGUI overlay: phase, night, timer, state, gold, enemies alive/queued, per-player HP
 
 ---
 
@@ -115,47 +122,42 @@
 > Goal: 3 playable classes with abilities, passives, and status effects.
 > Status: [~] IN PROGRESS
 
-### 2.0 Basic Combat (first pass — verify before continuing)
-- [x] `PlayerCombat.cs` — OnAttack callback, cooldown, OverlapSphere, crit roll
-- [ ] Enemy layer created + assigned in Inspector
-- [ ] PlayerCombat added to player prefab + enemyLayer wired
-- [ ] Verified: left-click hits enemies, enemies die, night ends naturally
+### 2.0 Basic Combat ✅ VERIFIED
+- [x] `PlayerCombat.cs` — left-click OverlapSphere, cooldown from AttackSpeed, crit roll, GetComponentInParent for child colliders
+- [x] Input: Input.GetMouseButtonDown(0) primary + OnAttack(InputValue) Send Messages fallback
+- [x] Enemy layer set + assigned; player prefab has PlayerCombat + enemyLayer wired
+- [x] Gold accumulates on kill (GoldManager), counter visible in HUD
 
 ### 2.1 Class Architecture
-- [ ] `ClassDefinition.cs` (ScriptableObject) — name, base stats, passive, ability data
-- [ ] `PlayerClass.cs` — holds ClassDefinition, applies stats on Start
-- [ ] Class selection in Lobby UI
-- [ ] Class synced to all clients before run start
+- [x] `ClassDefinition.cs` (ScriptableObject) — name, base stats (HP/speed/damage/attackSpeed)
+- [x] `PlayerClass.cs` — reads ClassDefinition, calls SetBaseStats on Start
+- [x] `ClassAbility.cs` — abstract base: ModifyDamage, OnAttackCompleted, OnAttackMissed, TryUseAbility
+- [x] `PlayerCombat.cs` — calls ClassAbility hooks; Q key triggers active ability
+- [ ] ClassDefinition assets created in Unity (Warrior / Ranger / Mage SO assets)
+- [ ] Class selection in Lobby UI (Phase 9+)
 
-### 2.2 Warrior
-- [ ] Melee hitbox (180° arc, short range)
-- [ ] Passive: consecutive hit stack (+8% per hit, max 3×, reset on miss/target switch)
-- [ ] Cleave: 180° arc, all enemies in front, short cooldown
-- [ ] Swing VFX + hit flash
+### 2.2 Warrior ✅ VERIFIED
+- [x] Passive: consecutive hit stack (+8% per hit, max 3×, resets on miss or target switch)
+- [x] Cleave (Q): 180° arc OverlapSphere, hits all enemies in front, 4s cooldown
+- [x] `WarriorClass.cs`
+- [x] enemyLayer assigned; stack behavior verified in play
 
-### 2.3 Ranger
-- [ ] Projectile system (pooled arrow prefabs)
-- [ ] Passive: first shot on new target = guaranteed crit; 2s movement → +10% atk speed
-- [ ] Rain of Arrows: brief channel → wide arc volley
+### 2.3 Ranger — SKELETON
+- [x] `RangerClass.cs` — first-shot crit passive wired; Rain of Arrows stubbed
+- [ ] Projectile system (deferred — post items/crafting)
+- [ ] Movement speed passive (deferred)
 
-### 2.4 Mage
-- [ ] Mana resource + ManaBar HUD
-- [ ] Spell attack (mana cost)
-- [ ] Passive: kill → restore mana; crit → random status (Burn/Freeze/Shock)
-- [ ] Arcane Burst: short-range AoE explosion
+### 2.4 Mage — SKELETON
+- [x] `MageClass.cs` — Arcane Burst stubbed
+- [ ] Mana resource (deferred — post items/crafting)
+- [ ] Spell system (deferred)
 
 ### 2.5 Status Effects
-- [ ] `StatusEffectSystem.cs` — component on all damageable entities
-- [ ] Burn: DoT, spreads if stacked
-- [ ] Freeze: immobilize, shatters on next hit
-- [ ] Shock: reduces armor/resistance
-- [ ] Slow: reduces NavMesh agent speed
-- [ ] Stun: disables agent + attack briefly
+- [ ] Deferred — post items/crafting
 
 ### 2.6 Combat Math
-- [ ] Damage formula (base × weapon tier × modifiers × crit)
-- [ ] Crit system (base 0%, boosted by items/skills; 1.5× multiplier)
-- [ ] Floating damage numbers (pixel art style)
+- [ ] Floating damage numbers (deferred)
+- [ ] Hit flash VFX (deferred)
 
 ---
 

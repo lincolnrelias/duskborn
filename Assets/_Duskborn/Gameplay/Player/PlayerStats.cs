@@ -42,11 +42,12 @@ namespace Duskborn.Gameplay.Player
         private void OnEnable()  => PlayerRegistry.Register(this);
         private void OnDisable() => PlayerRegistry.Unregister(this);
 
-        public void SetBaseStats(float maxHP, float moveSpeed, float damage)
+        public void SetBaseStats(float maxHP, float moveSpeed, float damage, float attackSpeed = 1f)
         {
             baseMaxHP = maxHP;
             baseMoveSpeed = moveSpeed;
             baseDamage = damage;
+            baseAttackSpeed = attackSpeed;
             CurrentHP = MaxHP;
         }
 

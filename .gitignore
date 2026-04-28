@@ -1,0 +1,75 @@
+# ===========================
+# Unity generated directories
+# ===========================
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+MemoryCaptures/
+Recordings/
+
+# ===========================
+# Auto-generated project files
+# (Unity regenerates these on open)
+# ===========================
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# ===========================
+# Unity cache files
+# ===========================
+crashlytics-build.properties
+ExportedObj/
+.consulo/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+
+# ===========================
+# OS generated files
+# ===========================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ===========================
+# IDE directories
+# ===========================
+.idea/
+.vscode/
+*.code-workspace
+[Rr]ider/
+
+# ===========================
+# Package Manager lock
+# (keep manifest.json, ignore lock for cleaner diffs)
+# ===========================
+# Packages/packages-lock.json  ← intentionally tracked so installs are reproducible
+
+# ===========================
+# NOTE: .meta files MUST be tracked.
+# Unity uses them for asset GUIDs — removing them breaks all scene/prefab references.
+# ===========================

@@ -5,24 +5,41 @@ using UnityEngine;
 namespace Duskborn.Gameplay.Enemies
 {
     /// <summary>
-    /// Generic enemy pool. One pool per enemy type, managed by WaveManager.
-    /// ResetEnemy clears all OnDied subscribers; the pool re-adds its own handler after reset.
+    /// Generic enemy pool. Created at runtime by WaveManager via AddComponent + Initialize —
+    /// no prefab field or Awake pre-fill needed when constructed this way.
+    /// Can still be placed as a scene component and configured via Inspector if desired.
     /// </summary>
     public class EnemyPool : MonoBehaviour
     {
         [SerializeField] private EnemyBase prefab;
         [SerializeField] private int initialSize = 20;
 
-        private readonly Queue<EnemyBase> _pool = new Queue<EnemyBase>();
-        private readonly List<EnemyBase> _active = new List<EnemyBase>();
+        private readonly Queue<EnemyBase> _pool   = new();
+        private readonly List<EnemyBase>  _active = new();
 
-        // Callers can subscribe here to be notified when any enemy from this pool dies.
+        private bool _initialized;
+
         public event Action<EnemyBase> OnAnyEnemyDied;
 
+        // Called by Inspector-configured pools (prefab + size set in Editor).
         private void Awake()
         {
-            for (int i = 0; i < initialSize; i++)
-                Create();
+            if (prefab != null && !_initialized)
+                Fill(initialSize);
+        }
+
+        // Called by WaveManager when constructing pools at runtime via AddComponent.
+        public void Initialize(EnemyBase enemyPrefab, int size)
+        {
+            prefab       = enemyPrefab;
+            initialSize  = size;
+            _initialized = true;
+            Fill(size);
+        }
+
+        private void Fill(int count)
+        {
+            for (int i = 0; i < count; i++) Create();
         }
 
         private EnemyBase Create()
@@ -38,9 +55,8 @@ namespace Duskborn.Gameplay.Enemies
             if (_pool.Count == 0) Create();
             EnemyBase e = _pool.Dequeue();
 
-            // ResetEnemy nulls all event subscribers; re-add pool's handler cleanly.
-            e.ResetEnemy(position);
-            e.OnDied += HandleEnemyDied;
+            e.ResetEnemy(position);          // nulls all prior event subscribers
+            e.OnDied += HandleEnemyDied;     // re-add pool's handler
 
             e.ApplyPlayerCountScaling(playerCount);
             _active.Add(e);
@@ -59,9 +75,9 @@ namespace Duskborn.Gameplay.Enemies
             foreach (var e in new List<EnemyBase>(_active))
             {
                 e.gameObject.SetActive(false);
-                _active.Remove(e);
                 _pool.Enqueue(e);
             }
+            _active.Clear();
         }
 
         public int ActiveCount => _active.Count;

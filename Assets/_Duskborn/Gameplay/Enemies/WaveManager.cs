@@ -1,60 +1,49 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Duskborn.Core;
-using Duskborn.Gameplay.World;
 
 namespace Duskborn.Gameplay.Enemies
 {
     /// <summary>
-    /// Generates and observes a SpawnTimeline each night.
-    /// Spawns enemies when elapsed night time crosses their scheduled timestamp.
+    /// Generates a SpawnTimeline each night and fires spawns as time passes.
+    /// Pools are built at Awake from EnemyPrefabRegistry — no pool scene objects required.
+    /// Spawn positions are random points in an annulus (min/max radius) around a center.
     /// </summary>
     public class WaveManager : MonoBehaviour
     {
-        [Header("Night Definitions (index 0 = Night 1, length = 6)")]
-        [SerializeField] private NightDefinition[] nightDefinitions;
+        [Header("Data")]
+        [SerializeField] private EnemyPrefabRegistry enemyRegistry;
+        [SerializeField] private NightDefinition[]   nightDefinitions; // index 0 = Night 1, len = 6
 
-        [Header("Enemy Pools — one per EnemyType, same order as EnemyType enum")]
-        [SerializeField] private EnemyPool swarmerPool;
-        [SerializeField] private EnemyPool runnerPool;
-        [SerializeField] private EnemyPool spitterPool;
-        [SerializeField] private EnemyPool brutePool;
-        [SerializeField] private EnemyPool elitePool;
+        [Header("Spawn Radius")]
+        [SerializeField] private Transform spawnCenter;       // defaults to world origin if null
+        [SerializeField] private float     spawnRadiusMin = 30f;
+        [SerializeField] private float     spawnRadiusMax = 50f;
 
-        [Header("Spawn")]
-        [SerializeField] private SpawnPerimeter spawnPerimeter;
-
-        [Header("Night Duration (seconds) — passed to TimelineGenerator")]
+        [Header("Night Duration (seconds)")]
         [SerializeField] private float nightDuration = 120f;
 
-        private Dictionary<EnemyType, EnemyPool> _pools;
+        // Runtime pools — built from registry, not assigned in Inspector
+        private readonly Dictionary<EnemyType, EnemyPool> _pools = new();
 
         // Active timeline state
         private SpawnTimeline _activeTimeline;
-        private int  _nextEventIndex;
+        private int   _nextEventIndex;
         private float _elapsedNightTime;
         private int   _aliveCount;
         private bool  _waveActive;
         private int   _currentPlayerCount;
 
-        // Read-only access for debug / UI
-        public SpawnTimeline ActiveTimeline => _activeTimeline;
-        public int AliveEnemyCount => _aliveCount;
-        public int RemainingEvents => _activeTimeline == null
-            ? 0 : _activeTimeline.TotalEnemies - _nextEventIndex;
+        public SpawnTimeline ActiveTimeline   => _activeTimeline;
+        public int           AliveEnemyCount  => _aliveCount;
+        public int           RemainingEvents  => _activeTimeline == null
+                                                 ? 0 : _activeTimeline.TotalEnemies - _nextEventIndex;
 
         // -------------------------------------------------------------------------
 
         private void Awake()
         {
-            _pools = new Dictionary<EnemyType, EnemyPool>
-            {
-                { EnemyType.Swarmer, swarmerPool },
-                { EnemyType.Runner,  runnerPool  },
-                { EnemyType.Spitter, spitterPool },
-                { EnemyType.Brute,   brutePool   },
-                { EnemyType.Elite,   elitePool   },
-            };
+            BuildPools();
         }
 
         private void Start()
@@ -68,6 +57,40 @@ namespace Duskborn.Gameplay.Enemies
             if (DayNightCycle.Instance == null) return;
             DayNightCycle.Instance.OnNightStart -= OnNightStart;
             DayNightCycle.Instance.OnNightEnd   -= OnNightEnd;
+        }
+
+        // -------------------------------------------------------------------------
+
+        private void BuildPools()
+        {
+            if (enemyRegistry == null)
+            {
+                Debug.LogError("[WaveManager] No EnemyPrefabRegistry assigned.");
+                return;
+            }
+
+            foreach (var entry in enemyRegistry.Entries)
+            {
+                if (entry.Prefab == null) continue;
+
+                var poolGO  = new GameObject($"Pool_{entry.Type}");
+                poolGO.transform.SetParent(transform);
+                var pool = poolGO.AddComponent<EnemyPool>();
+                pool.Initialize(entry.Prefab, entry.InitialPoolSize);
+                _pools[entry.Type] = pool;
+            }
+        }
+
+        private Vector3 GetSpawnPosition()
+        {
+            SeededRNG rng    = GameSession.Instance?.RNG;
+            Vector3   center = spawnCenter != null ? spawnCenter.position : Vector3.zero;
+
+            float angle  = rng != null ? rng.Range(0f, 360f)                       : Random.Range(0f, 360f);
+            float radius = rng != null ? rng.Range(spawnRadiusMin, spawnRadiusMax)  : Random.Range(spawnRadiusMin, spawnRadiusMax);
+            float rad    = angle * Mathf.Deg2Rad;
+
+            return center + new Vector3(Mathf.Cos(rad) * radius, 0f, Mathf.Sin(rad) * radius);
         }
 
         // -------------------------------------------------------------------------
@@ -89,7 +112,7 @@ namespace Duskborn.Gameplay.Enemies
             Debug.Log($"[WaveManager] {_activeTimeline}");
         }
 
-        private void OnNightEnd(int nightNumber)
+        private void OnNightEnd(int _)
         {
             _waveActive = false;
             UnsubscribeAllPools();
@@ -104,7 +127,6 @@ namespace Duskborn.Gameplay.Enemies
 
             _elapsedNightTime += Time.deltaTime;
 
-            // Fire all events whose timestamp has been reached.
             while (_nextEventIndex < _activeTimeline.Events.Count &&
                    _activeTimeline.Events[_nextEventIndex].Timestamp <= _elapsedNightTime)
             {
@@ -121,12 +143,8 @@ namespace Duskborn.Gameplay.Enemies
                 return;
             }
 
-            Vector3 pos = spawnPerimeter != null
-                ? spawnPerimeter.GetRandomSpawnPoint(GameSession.Instance?.RNG)
-                : Vector3.zero;
-
-            EnemyBase enemy = pool.Spawn(pos, _currentPlayerCount);
             pool.OnAnyEnemyDied += HandleEnemyDied;
+            pool.Spawn(GetSpawnPosition(), _currentPlayerCount);
             _aliveCount++;
         }
 
@@ -134,10 +152,10 @@ namespace Duskborn.Gameplay.Enemies
         {
             _aliveCount--;
 
-            bool allEventsDispatched = _nextEventIndex >= _activeTimeline.TotalEnemies;
-            if (_waveActive && allEventsDispatched && _aliveCount <= 0)
+            bool timelineExhausted = _nextEventIndex >= (_activeTimeline?.TotalEnemies ?? 0);
+            if (_waveActive && timelineExhausted && _aliveCount <= 0)
             {
-                Debug.Log("[WaveManager] All enemies dead and timeline exhausted — ending night.");
+                Debug.Log("[WaveManager] All enemies dead — ending night early.");
                 UnsubscribeAllPools();
                 DayNightCycle.Instance?.ForceEndNight();
             }
@@ -147,8 +165,7 @@ namespace Duskborn.Gameplay.Enemies
 
         private void DespawnAll()
         {
-            foreach (var pool in _pools.Values)
-                pool?.DespawnAll();
+            foreach (var pool in _pools.Values) pool?.DespawnAll();
             _aliveCount = 0;
         }
 
@@ -156,6 +173,15 @@ namespace Duskborn.Gameplay.Enemies
         {
             foreach (var pool in _pools.Values)
                 if (pool != null) pool.OnAnyEnemyDied -= HandleEnemyDied;
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+            Vector3 center = spawnCenter != null ? spawnCenter.position : Vector3.zero;
+            Gizmos.color = new Color(1f, 0.4f, 0f, 0.3f);
+            Gizmos.DrawWireSphere(center, spawnRadiusMin);
+            Gizmos.color = new Color(1f, 0.4f, 0f, 0.8f);
+            Gizmos.DrawWireSphere(center, spawnRadiusMax);
         }
     }
 }

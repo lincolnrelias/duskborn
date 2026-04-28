@@ -1,5 +1,5 @@
 # Duskborn — Development Progress Tracker
-> Last updated: 2026-04-28 (session 3)
+> Last updated: 2026-04-28 (session 4)
 > Version: 0.1-dev
 > Engine: Unity 6 (URP 17.0.4) · FishNet · FishySteamworks · Steamworks.NET
 
@@ -92,12 +92,15 @@
 - [x] `NightDefinition.cs` (SO) — budget per night + which pools are active; replaces WaveDefinition
 - [x] `SpawnEvent.cs` / `SpawnTimeline.cs` — data classes: (timestamp, enemyType) events, sorted list
 - [x] `TimelineGenerator.cs` — static; spends budget, shuffles, distributes with per-slot jitter
-- [x] `WaveManager.cs` — generates timeline on NightStart; observes in Update; spawns by timestamp
-- [x] `SpawnPerimeter.cs` — perimeter spawn points, gizmo visualizer
+- [x] `WaveManager.cs` — registry-driven; builds pools internally; radius-based spawn positions
+- [x] `EnemyPrefabRegistry.cs` (SO) — maps EnemyType → prefab + pool size; single source of truth
+- [x] `EnemyPool.cs` — supports both Inspector config and runtime Initialize(prefab, size)
+- [x] `SpawnPerimeter.cs` — retired (radius-based annulus in WaveManager replaces it)
 - [x] `WaveDefinition.cs` — retired (empty stub, GUID preserved)
-- [ ] EnemySpawnPool assets created in Unity (e.g. "Basic Melee", "Ranged Threats")
-- [ ] NightDefinition assets created (Night 1–6) with budgets and pool assignments
-- [ ] Pool GameObjects (EnemyPool MonoBehaviours) assigned in WaveManager Inspector
+- [ ] `EnemyPrefabRegistry` asset created in Unity (assign prefabs per EnemyType)
+- [ ] `EnemySpawnPool` assets created (e.g. "Basic Melee", "Ranged Threats")
+- [ ] `NightDefinition` assets created (Night 1–6) with budgets and pool assignments
+- [ ] WaveManager: assign registry + night definitions in Inspector; tune radius values
 
 ### 1.5 Win / Lose Conditions
 - [x] `GameStateManager.cs` — GameOver / Win / Running states
@@ -350,6 +353,14 @@
 | FishNet | — | Installed (confirmed) |
 | FishySteamworks | — | MISSING — install after FishNet |
 | Steamworks.NET | — | MISSING — install after FishySteamworks |
+
+## Files Written (Session 4 — 2026-04-28, pool + spawn cleanup)
+| File | Change |
+|------|--------|
+| `Gameplay/Enemies/EnemyPrefabRegistry.cs` | NEW — SO mapping EnemyType → prefab + pool size |
+| `Gameplay/Enemies/WaveManager.cs` | Removed 5 pool fields; builds pools from registry; radius-based spawn |
+| `Gameplay/Enemies/EnemyPool.cs` | Added Initialize(prefab, size) for runtime construction |
+| `Gameplay/World/SpawnPerimeter.cs` | Retired — replaced by min/max radius annulus in WaveManager |
 
 ## Files Written (Session 3 — 2026-04-28, wave system redesign)
 | File | Change |

@@ -23,6 +23,7 @@ Recordings/
 *.user
 *.userprefs
 *.pidb
+*.meta
 *.booproj
 *.svd
 *.pdb

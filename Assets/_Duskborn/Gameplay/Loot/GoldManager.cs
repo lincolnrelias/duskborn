@@ -12,7 +12,12 @@ namespace Duskborn.Gameplay.Loot
 
         public int Gold { get; private set; }
 
-        public event Action<int> OnGoldChanged; // current total
+        [SerializeField, Range(1f, 200f)] private float chestPriceEscalationPercent = 5f;
+
+        // -1 = no chest opened yet; subsequent opens compound from the last paid integer price.
+        private int _currentChestCost = -1;
+
+        public event Action<int> OnGoldChanged;
 
         private void Awake()
         {
@@ -22,7 +27,8 @@ namespace Duskborn.Gameplay.Loot
 
         public void ResetGold()
         {
-            Gold = 0;
+            Gold              = 0;
+            _currentChestCost = -1;
             OnGoldChanged?.Invoke(Gold);
         }
 
@@ -40,5 +46,14 @@ namespace Duskborn.Gameplay.Loot
             OnGoldChanged?.Invoke(Gold);
             return true;
         }
+
+        // First call uses the chest's own base cost; every subsequent call compounds
+        // from the last rounded integer price, so rounding error never resets.
+        public int GetChestCost(int baseCost) =>
+            _currentChestCost < 0 ? baseCost : _currentChestCost;
+
+        // Call with the cost that was actually paid; next price compounds from that integer.
+        public void OnChestOpened(int paidCost) =>
+            _currentChestCost = Mathf.CeilToInt(paidCost * (1f + chestPriceEscalationPercent / 100f));
     }
 }

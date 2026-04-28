@@ -162,26 +162,30 @@
 ---
 
 ## Phase 3 — Loot, Economy & Crafting
-> Status: [ ] NOT STARTED
+> Status: [~] IN PROGRESS
 
 ### 3.1 Gold System
-- [ ] `GoldManager.cs` — shared pool, host-authoritative
-- [ ] Gold drop: enemy death → spawn pickup collectable
-- [ ] Gold pickup: player overlap → add to pool
-- [ ] Gold counter HUD
-- [ ] Gold resets to 0 on run start
+- [x] `GoldManager.cs` — shared pool; AddGold/TrySpend/ResetGold/OnGoldChanged; host-authoritative in Phase 9
+- [x] Gold awarded directly on enemy death (EnemyBase → GoldManager.AddGold)
+- [x] Gold counter HUD
+- [x] Gold resets to 0 on run start (GameBootstrapper)
+- [ ] Gold drop: world pickup collectable (deferred — direct award sufficient for now)
 
 ### 3.2 Item System
-- [ ] `ItemDefinition.cs` (ScriptableObject) — name, rarity, icon, effect type, values
-- [ ] Rarity enum: Common, Uncommon, Rare, Legendary, Cursed
-- [ ] `PlayerInventory.cs` — list of held items (passive stacking)
-- [ ] `ItemEffectApplier.cs` — reads inventory, applies stat multipliers / triggers
+- [x] `ItemDefinition.cs` (ScriptableObject) — name, rarity, effect type, effect value
+- [x] `ItemRarity` enum: Common, Uncommon, Rare, Legendary, Cursed
+- [x] `ItemEffectType` enum: BonusDamage, BonusHP, BonusMoveSpeed, BonusAttackSpeed, BonusCritChance, DamageReduction
+- [x] `PlayerInventory.cs` — List<ItemDefinition>; AddItem(); ApplyAll() resets + re-applies all multipliers to PlayerStats
+- [x] Item count shown in HUD
+- [ ] ItemDefinition SO assets created in Unity (manual setup step)
+- [ ] `PlayerInventory` added to player prefab (manual setup step)
 
 ### 3.3 Chest System
-- [ ] `Chest.cs` — interactable, gold cost, tier (Basic/Advanced/Legendary)
-- [ ] Rarity roll on open (weighted by chest tier)
-- [ ] Chest UI: gold cost, confirm/cancel
-- [ ] Chest placed by WorldGenerator (Phase 4)
+- [x] `Chest.cs` — E to interact (proximity trigger), gold cost, flat-random loot table, one-use, disables on open
+- [ ] Chest prefab built in Unity (mesh + SphereCollider IsTrigger + Chest component)
+- [ ] Placed in scene for verification
+- [ ] Rarity-weighted rolls per chest tier (deferred)
+- [ ] Chest UI: cost prompt (deferred)
 
 ### 3.4 Resource Gathering
 - [ ] `ResourceNode.cs` — Wood/Stone/Fiber/Iron, HP, drops on hit
@@ -361,6 +365,16 @@
 | FishNet | — | Installed (confirmed) |
 | FishySteamworks | — | MISSING — install after FishNet |
 | Steamworks.NET | — | MISSING — install after FishySteamworks |
+
+## Files Written (Session 6 — 2026-04-28, items + chest system)
+| File | Change |
+|------|--------|
+| `Gameplay/Loot/ItemDefinition.cs` | NEW — SO: ItemRarity/ItemEffectType enums + EffectValue |
+| `Gameplay/Loot/LootTable.cs` | NEW — SO: ItemDefinition[] array; assigned to Chest |
+| `Gameplay/Loot/PlayerInventory.cs` | NEW — holds items, ApplyAll() writes stat multipliers |
+| `Gameplay/Loot/Chest.cs` | NEW — data + TryOpen(PlayerInventory); no trigger, no input |
+| `Gameplay/Player/PlayerInteractor.cs` | NEW — player-side SphereCollider trigger; closest-chest link; E to open |
+| `UI/GameHUD.cs` | Added Items count line + PlayerInventory cache in Start |
 
 ## Files Written (Session 4 — 2026-04-28, pool + spawn cleanup)
 | File | Change |

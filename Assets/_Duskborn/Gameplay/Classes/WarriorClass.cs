@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Duskborn.Core;
 using Duskborn.Gameplay.Enemies;
 
 namespace Duskborn.Gameplay.Classes
@@ -73,6 +74,7 @@ namespace Duskborn.Gameplay.Classes
             }
 
             _cleaveCooldownRemaining = cleaveCooldown;
+            HitboxDebugger.Flash(transform.position, cleaveRange, new Color(1f, 0.6f, 0f));
 
             Collider[] hits = Physics.OverlapSphere(transform.position, cleaveRange, enemyLayer);
             int count = 0;

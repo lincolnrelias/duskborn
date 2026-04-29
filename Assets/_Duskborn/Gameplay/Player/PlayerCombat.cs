@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Duskborn.Core;
 using Duskborn.Gameplay.Classes;
 using Duskborn.Gameplay.Enemies;
 
@@ -47,6 +48,7 @@ namespace Duskborn.Gameplay.Player
             _cooldown = 1f / Mathf.Max(_stats.AttackSpeed, 0.01f);
 
             Vector3    origin = transform.position + transform.forward * (attackRange * 0.5f);
+            HitboxDebugger.Flash(origin, attackRange, Color.red);
             Collider[] cols   = Physics.OverlapSphere(origin, attackRange, enemyLayer);
 
             var hitEnemies = new List<EnemyBase>();
@@ -85,8 +87,9 @@ namespace Duskborn.Gameplay.Player
 
         // ─────────────────────────────────────────────────────────────────────
 
-        private void OnDrawGizmosSelected()
+        private void OnDrawGizmos()
         {
+            if (!HitboxDebugger.IsEnabled) return;
             Gizmos.color = new Color(1f, 0f, 0f, 0.3f);
             Gizmos.DrawWireSphere(
                 transform.position + transform.forward * (attackRange * 0.5f), attackRange);

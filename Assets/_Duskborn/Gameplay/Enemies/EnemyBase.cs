@@ -100,6 +100,7 @@ namespace Duskborn.Gameplay.Enemies
         protected virtual void PerformAttack()
         {
             if (CurrentTarget == null) return;
+            HitboxDebugger.Flash(transform.position, attackRange, Color.cyan);
             CurrentTarget.GetComponent<PlayerStats>()?.TakeDamage(attackDamage);
         }
 

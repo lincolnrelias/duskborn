@@ -1,36 +1,40 @@
 using System;
+using FishNet.Object;
+using FishNet.Object.Synchronizing;
 using UnityEngine;
 
 namespace Duskborn.Core
 {
     public enum DayPhase { Day, Night }
 
-    /// <summary>
-    /// Drives the 7-night day/night loop. Host-authoritative (network sync added in Phase 9).
-    /// Fires events that Wave, World, and UI systems subscribe to.
-    /// </summary>
-    public class DayNightCycle : MonoBehaviour
+    public class DayNightCycle : NetworkBehaviour
     {
         public static DayNightCycle Instance { get; private set; }
 
         [Header("Timing")]
-        [SerializeField] private float dayDuration = 180f;   // seconds — TBD (GDD open question #1)
-        [SerializeField] private float nightDuration = 120f; // seconds — ends early if all enemies die
+        [SerializeField] private float dayDuration   = 180f;
+        [SerializeField] private float nightDuration = 120f;
 
         [Header("Lighting")]
-        [SerializeField] private Light directionalLight;
-        [SerializeField] private Gradient dayNightLightColor;
+        [SerializeField] private Light          directionalLight;
+        [SerializeField] private Gradient       dayNightLightColor;
         [SerializeField] private AnimationCurve dayNightIntensity;
 
-        public DayPhase Phase { get; private set; } = DayPhase.Day;
-        public int CurrentNight { get; private set; } = 0; // 0 = before Night 1
-        public float PhaseTimeRemaining { get; private set; }
-        public float PhaseDuration => Phase == DayPhase.Day ? dayDuration : nightDuration;
-        public float PhaseProgress => 1f - (PhaseTimeRemaining / PhaseDuration); // 0→1
+        private readonly SyncVar<float> _timeRemaining = new();
+        private readonly SyncVar<int>   _nightSync     = new();
+        private readonly SyncVar<bool>  _isDaySync     = new(true);
 
-        public event Action OnDayStart;
-        public event Action<int> OnNightStart;  // int = night number
-        public event Action<int> OnNightEnd;    // int = night number
+        public DayPhase Phase             => _isDaySync.Value ? DayPhase.Day : DayPhase.Night;
+        public int      CurrentNight      => _nightSync.Value;
+        public float    PhaseTimeRemaining => _timeRemaining.Value;
+        public float    PhaseDuration      => _isDaySync.Value ? dayDuration : nightDuration;
+        public float    PhaseProgress      => PhaseDuration > 0f
+                                              ? 1f - (_timeRemaining.Value / PhaseDuration)
+                                              : 1f;
+
+        public event Action          OnDayStart;
+        public event Action<int>     OnNightStart;
+        public event Action<int>     OnNightEnd;
 
         private bool _running;
         private const int TotalNights = 7;
@@ -41,23 +45,30 @@ namespace Duskborn.Core
             Instance = this;
         }
 
+        public override void OnStartServer()
+        {
+            base.OnStartServer();
+            StartCycle();
+        }
+
         public void StartCycle()
         {
             _running = true;
-            CurrentNight = 0;
+            _nightSync.Value = 0;
             BeginDay();
         }
 
         private void Update()
         {
-            if (!_running) return;
-
-            PhaseTimeRemaining -= Time.deltaTime;
             UpdateLighting();
 
-            if (PhaseTimeRemaining <= 0f)
+            if (!_running || !IsServerStarted) return;
+
+            _timeRemaining.Value -= Time.deltaTime;
+
+            if (_timeRemaining.Value <= 0f)
             {
-                if (Phase == DayPhase.Day)
+                if (_isDaySync.Value)
                     BeginNight();
                 else
                     EndNight();
@@ -66,33 +77,35 @@ namespace Duskborn.Core
 
         private void BeginDay()
         {
-            Phase = DayPhase.Day;
-            PhaseTimeRemaining = dayDuration;
-            OnDayStart?.Invoke();
-            Debug.Log($"[DayNightCycle] Day {CurrentNight + 1} begins. ({dayDuration}s)");
+            _isDaySync.Value     = true;
+            _timeRemaining.Value = dayDuration;
+            BroadcastDayStartRpc();
+            Debug.Log($"[DayNightCycle] Day {_nightSync.Value + 1} begins. ({dayDuration}s)");
         }
 
         private void BeginNight()
         {
-            CurrentNight++;
-            if (CurrentNight >= TotalNights)
+            _nightSync.Value += 1;
+
+            if (_nightSync.Value >= TotalNights)
             {
                 BeginBossNight();
                 return;
             }
-            Phase = DayPhase.Night;
-            PhaseTimeRemaining = nightDuration;
-            OnNightStart?.Invoke(CurrentNight);
-            Debug.Log($"[DayNightCycle] Night {CurrentNight} begins.");
+
+            _isDaySync.Value     = false;
+            _timeRemaining.Value = nightDuration;
+            BroadcastNightStartRpc(_nightSync.Value);
+            Debug.Log($"[DayNightCycle] Night {_nightSync.Value} begins.");
         }
 
         private void EndNight()
         {
-            OnNightEnd?.Invoke(CurrentNight);
+            BroadcastNightEndRpc(_nightSync.Value);
             GameStateManager.Instance?.RegisterNightSurvived();
-            Debug.Log($"[DayNightCycle] Night {CurrentNight} ends.");
+            Debug.Log($"[DayNightCycle] Night {_nightSync.Value} ends.");
 
-            if (CurrentNight >= TotalNights)
+            if (_nightSync.Value >= TotalNights)
             {
                 _running = false;
                 return;
@@ -103,28 +116,37 @@ namespace Duskborn.Core
 
         private void BeginBossNight()
         {
-            // Night 7: no safety timer — fight continues until boss dies or all players die.
-            // WaveManager will start the boss fight via OnNightStart. Timer is suspended.
-            Phase = DayPhase.Night;
-            PhaseTimeRemaining = float.MaxValue;
-            OnNightStart?.Invoke(CurrentNight);
+            _isDaySync.Value     = false;
+            _timeRemaining.Value = float.MaxValue;
+            BroadcastNightStartRpc(_nightSync.Value);
             Debug.Log("[DayNightCycle] Night 7 — Boss fight begins. Timer suspended.");
         }
 
-        // Called by WaveManager when all enemies die before the timer.
+        // ── ObserversRpcs fire events on all clients (RunLocally = true includes the server) ──
+
+        [ObserversRpc(RunLocally = true)]
+        private void BroadcastDayStartRpc() => OnDayStart?.Invoke();
+
+        [ObserversRpc(RunLocally = true)]
+        private void BroadcastNightStartRpc(int nightNumber) => OnNightStart?.Invoke(nightNumber);
+
+        [ObserversRpc(RunLocally = true)]
+        private void BroadcastNightEndRpc(int nightNumber) => OnNightEnd?.Invoke(nightNumber);
+
+        // ── Debug / editor helpers ──
+
         public void ForceEndNight()
         {
-            if (Phase == DayPhase.Night)
-                PhaseTimeRemaining = 0f;
+            if (!_isDaySync.Value)
+                _timeRemaining.Value = 0f;
         }
 
-        // Debug / editor only — forces the current phase to end immediately regardless of type.
-        public void ForceEndCurrentPhase() => PhaseTimeRemaining = 0f;
+        public void ForceEndCurrentPhase() => _timeRemaining.Value = 0f;
 
         private void UpdateLighting()
         {
             if (directionalLight == null) return;
-            directionalLight.color = dayNightLightColor.Evaluate(PhaseProgress);
+            directionalLight.color     = dayNightLightColor.Evaluate(PhaseProgress);
             directionalLight.intensity = dayNightIntensity.Evaluate(PhaseProgress);
         }
     }

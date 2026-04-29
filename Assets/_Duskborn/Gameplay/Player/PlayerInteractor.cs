@@ -1,11 +1,12 @@
 using System.Collections.Generic;
+using FishNet.Object;
 using UnityEngine;
 using Duskborn.Gameplay.Loot;
 
 namespace Duskborn.Gameplay.Player
 {
     [RequireComponent(typeof(PlayerInventory))]
-    public class PlayerInteractor : MonoBehaviour
+    public class PlayerInteractor : NetworkBehaviour
     {
         private readonly HashSet<Chest> _chestsInRange = new();
         private Chest           _linked;
@@ -16,6 +17,8 @@ namespace Duskborn.Gameplay.Player
 
         private void Update()
         {
+            if (!IsOwner) return;
+
             RefreshLinked();
 
             if (_linked != _prevLinked)
@@ -26,7 +29,14 @@ namespace Duskborn.Gameplay.Player
             }
 
             if (_linked != null && Input.GetKeyDown(KeyCode.E))
-                _linked.TryOpen(_inventory);
+                RequestOpenChestRpc(_linked.GetComponent<NetworkObject>());
+        }
+
+        [ServerRpc]
+        private void RequestOpenChestRpc(NetworkObject chestNob)
+        {
+            var chest = chestNob.GetComponent<Chest>();
+            chest?.ServerOpen(Owner, GetComponent<PlayerInventory>());
         }
 
         private void RefreshLinked()
@@ -45,12 +55,14 @@ namespace Duskborn.Gameplay.Player
 
         private void OnTriggerEnter(Collider other)
         {
+            if (!IsOwner) return;
             var chest = other.GetComponentInParent<Chest>();
             if (chest != null) _chestsInRange.Add(chest);
         }
 
         private void OnTriggerExit(Collider other)
         {
+            if (!IsOwner) return;
             var chest = other.GetComponentInParent<Chest>();
             if (chest != null) _chestsInRange.Remove(chest);
         }

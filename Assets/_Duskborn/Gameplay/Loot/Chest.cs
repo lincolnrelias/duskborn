@@ -1,10 +1,14 @@
+using FishNet.Connection;
+using FishNet.Object;
+using FishNet.Object.Synchronizing;
 using TMPro;
 using UnityEngine;
 using Duskborn.Core;
+using Duskborn.Gameplay.Player;
 
 namespace Duskborn.Gameplay.Loot
 {
-    public class Chest : MonoBehaviour
+    public class Chest : NetworkBehaviour
     {
         [SerializeField] private int         goldCost  = 50;
         [SerializeField] private LootTable   lootTable;
@@ -14,7 +18,9 @@ namespace Duskborn.Gameplay.Loot
         [SerializeField] private string   outlineLayerName = "GreenOutline";
         [SerializeField] private Renderer outlineRenderer;
 
-        public bool IsOpen   { get; private set; }
+        private readonly SyncVar<bool> _isOpenSync = new();
+
+        public bool IsOpen   => _isOpenSync.Value;
         public int  GoldCost => goldCost;
 
         private uint _outlineMask;
@@ -32,6 +38,13 @@ namespace Duskborn.Gameplay.Loot
                 _baseMask    = outlineRenderer.renderingLayerMask & ~_outlineMask;
                 outlineRenderer.renderingLayerMask = _baseMask;
             }
+
+            _isOpenSync.OnChange += OnIsOpenChanged;
+        }
+
+        private void OnIsOpenChanged(bool prev, bool next, bool asServer)
+        {
+            if (next) gameObject.SetActive(false);
         }
 
         public void SetOutline(bool show)
@@ -54,36 +67,47 @@ namespace Duskborn.Gameplay.Loot
                 priceLabel.transform.rotation = Camera.main.transform.rotation;
         }
 
-        public bool TryOpen(PlayerInventory inventory)
+        // Called server-side by PlayerInteractor's ServerRpc.
+        public void ServerOpen(NetworkConnection requester, PlayerInventory inventory)
         {
-            if (IsOpen) return false;
+            if (!IsServerStarted) return;
+            if (_isOpenSync.Value) return;
 
             if (lootTable == null || lootTable.Items == null || lootTable.Items.Length == 0)
             {
                 Debug.LogWarning($"[Chest] {name} has no loot table assigned.");
-                return false;
+                return;
             }
 
             int cost = GoldManager.Instance != null
                 ? GoldManager.Instance.GetChestCost(goldCost)
                 : goldCost;
 
-            if (!GoldManager.Instance.TrySpend(cost))
+            if (GoldManager.Instance == null || !GoldManager.Instance.TrySpend(cost))
             {
-                Debug.Log($"[Chest] Not enough gold (need {cost}, have {GoldManager.Instance.Gold}).");
-                return false;
+                Debug.Log($"[Chest] Not enough gold (need {cost}).");
+                return;
             }
 
             int index = GameSession.Instance != null
                 ? GameSession.Instance.RNG.Range(0, lootTable.Items.Length)
                 : Random.Range(0, lootTable.Items.Length);
 
+            // Apply item on the server so server-side stat multipliers are updated.
             inventory.AddItem(lootTable.Items[index]);
-            GoldManager.Instance.OnChestOpened(cost);
 
-            IsOpen = true;
-            gameObject.SetActive(false);
-            return true;
+            GoldManager.Instance.OnChestOpened(cost);
+            _isOpenSync.Value = true; // disables chest on all clients via SyncVar hook
+
+            // Tell the owning client to also add the item so their local inventory/display is correct.
+            DeliverItemRpc(requester, inventory.GetComponent<NetworkObject>(), index);
+        }
+
+        [TargetRpc]
+        private void DeliverItemRpc(NetworkConnection conn, NetworkObject playerNob, int itemIndex)
+        {
+            if (lootTable == null || itemIndex >= lootTable.Items.Length) return;
+            playerNob.GetComponent<PlayerInventory>()?.AddItem(lootTable.Items[itemIndex]);
         }
     }
 }

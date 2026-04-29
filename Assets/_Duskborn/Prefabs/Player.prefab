@@ -85,6 +85,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a60c50788e230ed43b7f594a776dd3a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _componentIndexCache: 0
+  _addedNetworkObject: {fileID: 5780092933335364822}
+  _networkObjectCache: {fileID: 5780092933335364822}
   baseMaxHP: 100
   baseMoveSpeed: 5
   baseDamage: 10
@@ -107,9 +110,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8636abb46bcc78f4ab3aed823ed3034c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 1
   _addedNetworkObject: {fileID: 5780092933335364822}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 5780092933335364822}
   cameraDistance: 8
   cameraHeight: 6
   cameraSmoothing: 5
@@ -235,9 +238,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 791e21e8f0cc9114d8180fb82bf4e63d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 2
   _addedNetworkObject: {fileID: 5780092933335364822}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 5780092933335364822}
   attackRange: 2
   enemyLayer:
     serializedVersion: 2
@@ -299,6 +302,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e021cce33ed8194bac0cc7be4ff8272, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _componentIndexCache: 3
+  _addedNetworkObject: {fileID: 5780092933335364822}
+  _networkObjectCache: {fileID: 5780092933335364822}
 --- !u!135 &8885962453019979203
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -350,7 +356,12 @@ MonoBehaviour:
   <ComponentIndex>k__BackingField: 0
   <PredictedSpawn>k__BackingField: {fileID: 0}
   <PredictedOwner>k__BackingField: {fileID: 0}
-  NetworkBehaviours: []
+  NetworkBehaviours:
+  - {fileID: 4731265692595606875}
+  - {fileID: 4158613078139982803}
+  - {fileID: 3923650547242843623}
+  - {fileID: 5151783337402195587}
+  - {fileID: 8514665050153253299}
   InitializedParentNetworkBehaviour: {fileID: 0}
   InitializedNestedNetworkObjects: []
   RuntimeParentNetworkBehaviour: {fileID: 0}
@@ -361,7 +372,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: 0
+  _initializedTimestamp: -8584241112327447709
   _localLevelOfDetailCalculationType: 0
   _useLevelOfDetail: 0
   _useRootLevelOfDetail: 1
@@ -380,15 +391,15 @@ MonoBehaviour:
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 65535
+  <PrefabId>k__BackingField: 9
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 10244112857693816879
   SceneId: 0
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
-    Rotation: {x: 0, y: 0, z: 0, w: 0}
-    Scale: {x: 0, y: 0, z: 0}
-    IsValid: 0
+    Rotation: {x: 0, y: 0, z: 0, w: 1}
+    Scale: {x: 1, y: 1, z: 1}
+    IsValid: 1
 --- !u!114 &8514665050153253299
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -401,9 +412,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 4
   _addedNetworkObject: {fileID: 5780092933335364822}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 5780092933335364822}
   _componentConfiguration: 0
   _synchronizeParent: 0
   _packing:

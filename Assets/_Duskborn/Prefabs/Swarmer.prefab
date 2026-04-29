@@ -10,9 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 4259125139516699870}
   - component: {fileID: 7961379526991708471}
+  - component: {fileID: 831787424973878352}
   - component: {fileID: 8879936825036243314}
   - component: {fileID: 8418387417599686208}
-  - component: {fileID: 5926816162091234638}
   m_Layer: 6
   m_Name: Swarmer
   m_TagString: Untagged
@@ -59,6 +59,33 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 1, z: 0}
+--- !u!54 &831787424973878352
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 521240751461943244}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!195 &8879936825036243314
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -99,24 +126,8 @@ MonoBehaviour:
   attackInterval: 1
   goldDropMin: 1
   goldDropMax: 3
---- !u!114 &5926816162091234638
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 521240751461943244}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 44961aac4a627354188924dd5f3f1c97, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHP: 30
-  attackDamage: 8
-  attackRange: 1.5
-  attackInterval: 1
-  goldDropMin: 1
-  goldDropMax: 3
+  outlineLayerName: EnemyOutline
+  outlineRenderer: {fileID: 3072354615414746197}
 --- !u!1 &6983391869983735717
 GameObject:
   m_ObjectHideFlags: 0

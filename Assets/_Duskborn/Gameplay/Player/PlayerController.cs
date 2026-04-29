@@ -1,3 +1,4 @@
+using FishNet.Object;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -5,7 +6,7 @@ namespace Duskborn.Gameplay.Player
 {
     [RequireComponent(typeof(CharacterController))]
     [RequireComponent(typeof(PlayerStats))]
-    public class PlayerController : MonoBehaviour
+    public class PlayerController : NetworkBehaviour
     {
         [Header("Camera")]
         [SerializeField] private float cameraDistance   = 8f;
@@ -39,17 +40,26 @@ namespace Duskborn.Gameplay.Player
             _cameraYaw = transform.eulerAngles.y;
         }
 
-        public void OnMove(InputValue value) => _moveInput = value.Get<Vector2>();
+        public void OnMove(InputValue value)
+        {
+            if (!IsOwner) return;
+            _moveInput = value.Get<Vector2>();
+        }
 
         private void Update()
         {
+            if (!IsOwner) return;
             if (!_inputEnabled || !_stats.IsAlive) return;
             HandleCameraRotation();
             HandleMovement();
             HandleGravity();
         }
 
-        private void LateUpdate() => FollowCamera();
+        private void LateUpdate()
+        {
+            if (!IsOwner) return;
+            FollowCamera();
+        }
 
         // -------------------------------------------------------------------------
 

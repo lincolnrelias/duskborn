@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using FishNet.Object;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Duskborn.Core;
@@ -9,7 +10,7 @@ using Duskborn.Gameplay.Loot;
 namespace Duskborn.Gameplay.Player
 {
     [RequireComponent(typeof(PlayerStats))]
-    public class PlayerCombat : MonoBehaviour
+    public class PlayerCombat : NetworkBehaviour
     {
         [Header("Attack")]
         [SerializeField] private float              attackRange   = 2f;
@@ -77,6 +78,7 @@ namespace Duskborn.Gameplay.Player
 
         private void Update()
         {
+            if (!IsOwner) return;
             if (_cooldown > 0f) _cooldown -= Time.deltaTime;
 
             RefreshLinkedNode();

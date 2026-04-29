@@ -20,13 +20,15 @@ namespace Duskborn.Gameplay.Player
 
         private const float CritMultiplier = 1.5f;
 
-        private readonly HashSet<ResourceNode> _nodesInRange = new();
+        private readonly HashSet<EnemyBase>    _enemiesInRange = new();
+        private readonly HashSet<ResourceNode> _nodesInRange   = new();
         private ResourceNode _linkedNode;
         private ResourceNode _prevLinkedNode;
 
         private PlayerStats       _stats;
         private ClassAbility      _classAbility;
         private ResourceInventory _resourceInventory;
+        private SphereCollider    _attackCollider;
         private float             _cooldown;
 
         private void Awake()
@@ -34,6 +36,7 @@ namespace Duskborn.Gameplay.Player
             _stats             = GetComponent<PlayerStats>();
             _classAbility      = GetComponent<ClassAbility>();
             _resourceInventory = GetComponent<ResourceInventory>();
+            _attackCollider    = attackTrigger != null ? attackTrigger.GetComponent<SphereCollider>() : null;
         }
 
         private void OnEnable()
@@ -45,19 +48,29 @@ namespace Duskborn.Gameplay.Player
 
         private void OnDisable()
         {
-            if (attackTrigger == null) return;
-            attackTrigger.OnEnter -= HandleTriggerEnter;
-            attackTrigger.OnExit  -= HandleTriggerExit;
+            if (attackTrigger != null)
+            {
+                attackTrigger.OnEnter -= HandleTriggerEnter;
+                attackTrigger.OnExit  -= HandleTriggerExit;
+            }
+            foreach (var e in _enemiesInRange) e?.SetOutline(false);
+            _enemiesInRange.Clear();
         }
 
         private void HandleTriggerEnter(Collider other)
         {
+            var enemy = other.GetComponentInParent<EnemyBase>();
+            if (enemy != null) { _enemiesInRange.Add(enemy); enemy.SetOutline(true); return; }
+
             var node = other.GetComponentInParent<ResourceNode>();
             if (node != null) _nodesInRange.Add(node);
         }
 
         private void HandleTriggerExit(Collider other)
         {
+            var enemy = other.GetComponentInParent<EnemyBase>();
+            if (enemy != null) { _enemiesInRange.Remove(enemy); enemy.SetOutline(false); return; }
+
             var node = other.GetComponentInParent<ResourceNode>();
             if (node != null) _nodesInRange.Remove(node);
         }
@@ -88,9 +101,16 @@ namespace Duskborn.Gameplay.Player
 
             _cooldown = 1f / Mathf.Max(_stats.AttackSpeed, 0.01f);
 
-            Vector3    origin = transform.position + transform.forward * (attackRange * 0.5f);
-            HitboxDebugger.Flash(origin, attackRange, Color.red);
-            Collider[] cols   = Physics.OverlapSphere(origin, attackRange, enemyLayer);
+            Vector3 origin = transform.position + transform.forward * (attackRange * 0.5f);
+
+            if (_attackCollider != null)
+            {
+                Vector3 worldCenter = attackTrigger.transform.TransformPoint(_attackCollider.center);
+                float   worldRadius = _attackCollider.radius * attackTrigger.transform.lossyScale.x;
+                HitboxDebugger.Flash(worldCenter, worldRadius, Color.red);
+            }
+
+            Collider[] cols = Physics.OverlapSphere(origin, attackRange, enemyLayer);
 
             var hitEnemies = new List<EnemyBase>();
 
@@ -144,9 +164,11 @@ namespace Duskborn.Gameplay.Player
         private void OnDrawGizmos()
         {
             if (!HitboxDebugger.IsEnabled) return;
+            if (_attackCollider == null) return;
             Gizmos.color = new Color(1f, 0f, 0f, 0.3f);
-            Gizmos.DrawWireSphere(
-                transform.position + transform.forward * (attackRange * 0.5f), attackRange);
+            Vector3 worldCenter = attackTrigger.transform.TransformPoint(_attackCollider.center);
+            float   worldRadius = _attackCollider.radius * attackTrigger.transform.lossyScale.x;
+            Gizmos.DrawWireSphere(worldCenter, worldRadius);
         }
     }
 }

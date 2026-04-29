@@ -8,7 +8,7 @@ using Duskborn.Gameplay.Player;
 namespace Duskborn.Gameplay.Enemies
 {
     [RequireComponent(typeof(NavMeshAgent))]
-    public class EnemyBase : MonoBehaviour
+    public abstract class EnemyBase : MonoBehaviour
     {
         [Header("Stats")]
         [SerializeField] protected float maxHP          = 30f;
@@ -18,12 +18,18 @@ namespace Duskborn.Gameplay.Enemies
         [SerializeField] protected int   goldDropMin    = 1;
         [SerializeField] protected int   goldDropMax    = 3;
 
+        [Header("Outline")]
+        [SerializeField] private string   outlineLayerName = "RedOutline";
+        [SerializeField] private Renderer outlineRenderer;
+
         protected NavMeshAgent Agent;
         protected Transform    CurrentTarget;
         protected float        AttackCooldown;
 
         private float _baseMaxHP;
         private float _currentHP;
+        private uint  _outlineMask;
+        private uint  _baseMask;
 
         // One-shot diagnostics — logged once per spawn, not every frame.
         private bool _warnedNoTarget;
@@ -40,6 +46,23 @@ namespace Duskborn.Gameplay.Enemies
             Agent      = GetComponent<NavMeshAgent>();
             _baseMaxHP = maxHP;
             _currentHP = _baseMaxHP;
+
+            if (outlineRenderer == null)
+                outlineRenderer = GetComponentInChildren<Renderer>();
+
+            if (outlineRenderer != null)
+            {
+                int layerIndex = RenderingLayerMask.NameToRenderingLayer(outlineLayerName);
+                _outlineMask = layerIndex >= 0 ? (uint)(1 << layerIndex) : 0u;
+                _baseMask    = outlineRenderer.renderingLayerMask & ~_outlineMask;
+                outlineRenderer.renderingLayerMask = _baseMask;
+            }
+        }
+
+        public void SetOutline(bool show)
+        {
+            if (outlineRenderer == null) return;
+            outlineRenderer.renderingLayerMask = show ? _baseMask | _outlineMask : _baseMask;
         }
 
         protected virtual void Update()
@@ -135,10 +158,9 @@ namespace Duskborn.Gameplay.Enemies
 
         public virtual void ResetEnemy(Vector3 position)
         {
-            // SetActive(true) FIRST so component enables run, then re-enable the agent.
-            // Enabling Agent on an inactive GameObject is a no-op in Unity.
             OnDied      = null;
             OnDropGold  = null;
+            SetOutline(false);
             CurrentTarget   = null;
             AttackCooldown  = 0f;
             _currentHP      = _baseMaxHP;

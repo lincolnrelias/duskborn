@@ -23,7 +23,6 @@ Recordings/
 *.user
 *.userprefs
 *.pidb
-*.meta
 *.booproj
 *.svd
 *.pdb
@@ -69,6 +68,13 @@ desktop.ini
 # (keep manifest.json, ignore lock for cleaner diffs)
 # ===========================
 # Packages/packages-lock.json  ← intentionally tracked so installs are reproducible
+
+# ===========================
+# Third-party assets
+# (imported from Asset Store / package manager — not source-controlled)
+# ===========================
+Assets/ThirdPartyAssets/
+Assets/ThirdPartyAssets.meta
 
 # ===========================
 # NOTE: .meta files MUST be tracked.

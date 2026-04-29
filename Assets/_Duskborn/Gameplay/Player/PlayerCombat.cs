@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 using Duskborn.Core;
 using Duskborn.Gameplay.Classes;
 using Duskborn.Gameplay.Enemies;
+using Duskborn.Gameplay.Loot;
 
 namespace Duskborn.Gameplay.Player
 {
@@ -11,32 +12,72 @@ namespace Duskborn.Gameplay.Player
     public class PlayerCombat : MonoBehaviour
     {
         [Header("Attack")]
-        [SerializeField] private float     attackRange = 2f;
-        [SerializeField] private LayerMask enemyLayer;
+        [SerializeField] private float              attackRange   = 2f;
+        [SerializeField] private LayerMask          enemyLayer;
+        [SerializeField] private AttackRangeTrigger attackTrigger;
 
         public LayerMask EnemyLayer => enemyLayer;
 
         private const float CritMultiplier = 1.5f;
 
-        private PlayerStats  _stats;
-        private ClassAbility _classAbility;
-        private float        _cooldown;
+        private readonly HashSet<ResourceNode> _nodesInRange = new();
+        private ResourceNode _linkedNode;
+        private ResourceNode _prevLinkedNode;
+
+        private PlayerStats       _stats;
+        private ClassAbility      _classAbility;
+        private ResourceInventory _resourceInventory;
+        private float             _cooldown;
 
         private void Awake()
         {
-            _stats        = GetComponent<PlayerStats>();
-            _classAbility = GetComponent<ClassAbility>(); // null if no class component added
+            _stats             = GetComponent<PlayerStats>();
+            _classAbility      = GetComponent<ClassAbility>();
+            _resourceInventory = GetComponent<ResourceInventory>();
+        }
+
+        private void OnEnable()
+        {
+            if (attackTrigger == null) return;
+            attackTrigger.OnEnter += HandleTriggerEnter;
+            attackTrigger.OnExit  += HandleTriggerExit;
+        }
+
+        private void OnDisable()
+        {
+            if (attackTrigger == null) return;
+            attackTrigger.OnEnter -= HandleTriggerEnter;
+            attackTrigger.OnExit  -= HandleTriggerExit;
+        }
+
+        private void HandleTriggerEnter(Collider other)
+        {
+            var node = other.GetComponentInParent<ResourceNode>();
+            if (node != null) _nodesInRange.Add(node);
+        }
+
+        private void HandleTriggerExit(Collider other)
+        {
+            var node = other.GetComponentInParent<ResourceNode>();
+            if (node != null) _nodesInRange.Remove(node);
         }
 
         private void Update()
         {
             if (_cooldown > 0f) _cooldown -= Time.deltaTime;
 
+            RefreshLinkedNode();
+            if (_linkedNode != _prevLinkedNode)
+            {
+                _prevLinkedNode?.SetOutline(false);
+                _linkedNode?.SetOutline(true);
+                _prevLinkedNode = _linkedNode;
+            }
+
             if (Input.GetMouseButtonDown(0)) TryAttack();
             if (Input.GetKeyDown(KeyCode.Q))  TryAbility();
         }
 
-        // Also called by PlayerInput Send Messages when configured.
         public void OnAttack(InputValue _) => TryAttack();
 
         // ── Basic Attack ──────────────────────────────────────────────────────
@@ -58,10 +99,9 @@ namespace Duskborn.Gameplay.Player
                 var enemy = col.GetComponentInParent<EnemyBase>();
                 if (enemy == null || !enemy.IsAlive) continue;
 
-                bool  isCrit   = Random.value < _stats.CritChance;
-                float damage   = _stats.Damage * (isCrit ? CritMultiplier : 1f);
+                bool  isCrit = Random.value < _stats.CritChance;
+                float damage = _stats.Damage * (isCrit ? CritMultiplier : 1f);
 
-                // Let the active class modify damage (e.g. Warrior passive stack).
                 if (_classAbility != null)
                     damage = _classAbility.ModifyDamage(damage, enemy);
 
@@ -75,6 +115,8 @@ namespace Duskborn.Gameplay.Player
                 _classAbility?.OnAttackCompleted(hitEnemies);
             else
                 _classAbility?.OnAttackMissed();
+
+            _linkedNode?.Hit(_resourceInventory);
         }
 
         // ── Class Ability (Q) ─────────────────────────────────────────────────
@@ -86,6 +128,18 @@ namespace Duskborn.Gameplay.Player
         }
 
         // ─────────────────────────────────────────────────────────────────────
+
+        private void RefreshLinkedNode()
+        {
+            _linkedNode = null;
+            float best = float.MaxValue;
+            foreach (var node in _nodesInRange)
+            {
+                if (node == null || !node.gameObject.activeSelf) continue;
+                float sq = (node.transform.position - transform.position).sqrMagnitude;
+                if (sq < best) { best = sq; _linkedNode = node; }
+            }
+        }
 
         private void OnDrawGizmos()
         {

@@ -188,10 +188,13 @@
 - [ ] Chest UI: cost prompt (deferred)
 
 ### 3.4 Resource Gathering
-- [ ] `ResourceNode.cs` — Wood/Stone/Fiber/Iron, HP, drops on hit
-- [ ] Player interaction: swing animation → node HP decrements → drop
-- [ ] `ResourceInventory.cs` — per-player counts
-- [ ] Resource HUD widget
+- [x] `ResourceType.cs` — enum: Wood, Stone, Fiber, Iron
+- [x] `ResourceType.cs` — enum: Wood, Stone, Fiber, Iron
+- [x] `ResourceNode.cs` — HP (hit count), drops on depletion via SeededRNG; GreenOutline rendering layer support
+- [x] `ResourceInventory.cs` — per-player Dictionary<ResourceType,int>; Add/TrySpend/GetCount
+- [x] `AttackRangeTrigger.cs` — child-object event forwarder; SphereCollider (IsTrigger) defines melee range
+- [x] `PlayerCombat.cs` — subscribes to AttackRangeTrigger; tracks nodes in range; outline on closest; hits on left-click
+- [x] Resource HUD widget — Wood/Stone/Fiber/Iron counts in GameHUD
 
 ### 3.5 Workbench & Crafting
 - [ ] `Workbench.cs` — interactable, opens crafting panel
@@ -365,6 +368,17 @@
 | FishNet | — | Installed (confirmed) |
 | FishySteamworks | — | MISSING — install after FishNet |
 | Steamworks.NET | — | MISSING — install after FishySteamworks |
+
+## Files Written (Session 7 — 2026-04-29, resource gathering)
+| File | Change |
+|------|--------|
+| `Gameplay/Loot/ResourceType.cs` | NEW — enum: Wood, Stone, Fiber, Iron |
+| `Gameplay/Loot/ResourceInventory.cs` | NEW — per-player resource counts; Add/TrySpend/GetCount |
+| `Gameplay/Loot/ResourceNode.cs` | NEW — world object; hit-count HP, SeededRNG drop, GreenOutline support |
+| `Gameplay/Player/AttackRangeTrigger.cs` | NEW — child-object trigger forwarder; drives node detection + outline |
+| `Gameplay/Player/PlayerCombat.cs` | AttackRangeTrigger ref; node set tracking; outline on closest; hit on attack |
+| `Gameplay/Player/PlayerInteractor.cs` | Reverted to chests-only (resource detection moved to PlayerCombat) |
+| `UI/GameHUD.cs` | Added ResourceInventory cache; Wood/Stone/Fiber/Iron lines in HUD |
 
 ## Files Written (Session 6 — 2026-04-28, items + chest system)
 | File | Change |

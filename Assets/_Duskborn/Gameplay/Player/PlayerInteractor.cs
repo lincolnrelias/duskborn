@@ -4,8 +4,6 @@ using Duskborn.Gameplay.Loot;
 
 namespace Duskborn.Gameplay.Player
 {
-    // Attach to the player alongside a SphereCollider (IsTrigger = true).
-    // Detects nearby chests, stays linked to the closest one, opens it on E.
     [RequireComponent(typeof(PlayerInventory))]
     public class PlayerInteractor : MonoBehaviour
     {

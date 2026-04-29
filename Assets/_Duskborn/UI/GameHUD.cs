@@ -14,12 +14,17 @@ namespace Duskborn.UI
     {
         [SerializeField] private WaveManager waveManager;
 
-        private PlayerInventory _inventory;
+        private PlayerInventory   _inventory;
+        private ResourceInventory _resources;
         private GUIStyle _boxStyle;
         private GUIStyle _labelStyle;
         private bool _stylesReady;
 
-        private void Start() => _inventory = FindFirstObjectByType<PlayerInventory>();
+        private void Start()
+        {
+            _inventory = FindFirstObjectByType<PlayerInventory>();
+            _resources = FindFirstObjectByType<ResourceInventory>();
+        }
 
         private void BuildStyles()
         {
@@ -64,6 +69,13 @@ namespace Duskborn.UI
             sb.AppendLine($"State:   {gstate}");
             sb.AppendLine($"Gold:    {gold}");
             sb.AppendLine($"Items:   {(_inventory != null ? _inventory.Items.Count : 0)}");
+            if (_resources != null)
+            {
+                sb.AppendLine($"Wood:    {_resources.GetCount(ResourceType.Wood)}");
+                sb.AppendLine($"Stone:   {_resources.GetCount(ResourceType.Stone)}");
+                sb.AppendLine($"Fiber:   {_resources.GetCount(ResourceType.Fiber)}");
+                sb.AppendLine($"Iron:    {_resources.GetCount(ResourceType.Iron)}");
+            }
             sb.AppendLine($"Enemies: {alive} alive  |  {pending} queued");
             sb.AppendLine("─────────────────");
             if (players.Count == 0)

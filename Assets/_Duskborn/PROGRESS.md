@@ -1,5 +1,5 @@
 # Duskborn — Development Progress Tracker
-> Last updated: 2026-04-28 (session 5)
+> Last updated: 2026-04-29 (session 8)
 > Version: 0.1-dev
 > Engine: Unity 6 (URP 17.0.4) · FishNet · FishySteamworks · Steamworks.NET
 
@@ -189,12 +189,12 @@
 
 ### 3.4 Resource Gathering
 - [x] `ResourceType.cs` — enum: Wood, Stone, Fiber, Iron
-- [x] `ResourceType.cs` — enum: Wood, Stone, Fiber, Iron
-- [x] `ResourceNode.cs` — HP (hit count), drops on depletion via SeededRNG; GreenOutline rendering layer support
-- [x] `ResourceInventory.cs` — per-player Dictionary<ResourceType,int>; Add/TrySpend/GetCount
+- [x] `ResourceNode.cs` — NetworkBehaviour; server-only hit tracking; `Despawn()` on depletion; GreenOutline support
+- [x] `ResourceInventory.cs` — per-player Dictionary<ResourceType,int>; Add/TrySpend/GetCount (local only — no sync needed)
 - [x] `AttackRangeTrigger.cs` — child-object event forwarder; SphereCollider (IsTrigger) defines melee range
-- [x] `PlayerCombat.cs` — subscribes to AttackRangeTrigger; tracks nodes in range; outline on closest; hits on left-click
-- [x] Resource HUD widget — Wood/Stone/Fiber/Iron counts in GameHUD
+- [x] `PlayerCombat.cs` — `RequestNodeHitRpc` [ServerRpc] validates hit + Despawn; `RpcReceiveResources` [TargetRpc] credits owner
+- [x] Resource HUD widget — lazy IsOwner lookup; Wood/Stone/Fiber/Iron counts for local player only
+- [ ] ResourceNode prefabs: add NetworkObject component to each node in scene (manual Unity step)
 
 ### 3.5 Workbench & Crafting
 - [ ] `Workbench.cs` — interactable, opens crafting panel
@@ -368,6 +368,13 @@
 | FishNet | — | Installed (confirmed) |
 | FishySteamworks | — | MISSING — install after FishNet |
 | Steamworks.NET | — | MISSING — install after FishySteamworks |
+
+## Files Written (Session 8 — 2026-04-29, resource gathering multiplayer sync)
+| File | Change |
+|------|--------|
+| `Gameplay/Loot/ResourceNode.cs` | Extends NetworkBehaviour; `ServerHit()` server-only; removed local `Hit()`; `Despawn()` driven by caller |
+| `Gameplay/Player/PlayerCombat.cs` | `RequestNodeHitRpc` [ServerRpc] + `RpcReceiveResources` [TargetRpc]; removed local node hit |
+| `UI/GameHUD.cs` | `TryCacheLocalPlayer()` lazy IsOwner lookup replaces `FindFirstObjectByType` (fixes multi-client HUD) |
 
 ## Files Written (Session 7 — 2026-04-29, resource gathering)
 | File | Change |

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using FishNet.Connection;
 using FishNet.Object;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -118,8 +119,8 @@ namespace Duskborn.Gameplay.Player
                 HitboxDebugger.Flash(worldCenter, worldRadius, Color.red);
             }
 
-            // Resource node hit is local (resource sync is a future pass).
-            _linkedNode?.Hit(_resourceInventory);
+            if (_linkedNode != null)
+                RequestNodeHitRpc(_linkedNode.NetworkObject);
 
             RequestAttackRpc();
         }
@@ -167,6 +168,28 @@ namespace Duskborn.Gameplay.Player
         private void RequestAbilityRpc()
         {
             _classAbility?.TryUseAbility();
+        }
+
+        // ── Resource Node ─────────────────────────────────────────────────────
+
+        [ServerRpc]
+        private void RequestNodeHitRpc(NetworkObject nodeObj)
+        {
+            if (nodeObj == null) return;
+            var node = nodeObj.GetComponent<ResourceNode>();
+            if (node == null) return;
+
+            if (node.ServerHit(out ResourceType type, out int amount))
+            {
+                RpcReceiveResources(Owner, type, amount);
+                nodeObj.Despawn();
+            }
+        }
+
+        [TargetRpc]
+        private void RpcReceiveResources(NetworkConnection conn, ResourceType type, int amount)
+        {
+            _resourceInventory?.Add(type, amount);
         }
 
         // ─────────────────────────────────────────────────────────────────────

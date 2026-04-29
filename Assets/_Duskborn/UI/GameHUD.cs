@@ -20,10 +20,17 @@ namespace Duskborn.UI
         private GUIStyle _labelStyle;
         private bool _stylesReady;
 
-        private void Start()
+        // Deferred — players may not be spawned yet at Start.
+        private void TryCacheLocalPlayer()
         {
-            _inventory = FindFirstObjectByType<PlayerInventory>();
-            _resources = FindFirstObjectByType<ResourceInventory>();
+            if (_inventory != null && _resources != null) return;
+            foreach (var combat in FindObjectsByType<PlayerCombat>(FindObjectsSortMode.None))
+            {
+                if (!combat.IsOwner) continue;
+                _inventory ??= combat.GetComponent<PlayerInventory>();
+                _resources ??= combat.GetComponent<ResourceInventory>();
+                break;
+            }
         }
 
         private void BuildStyles()
@@ -48,6 +55,7 @@ namespace Duskborn.UI
 
         private void OnGUI()
         {
+            TryCacheLocalPlayer();
             if (!_stylesReady) BuildStyles();
 
             var cycle = DayNightCycle.Instance;

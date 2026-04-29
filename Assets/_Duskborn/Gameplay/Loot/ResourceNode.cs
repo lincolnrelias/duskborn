@@ -1,9 +1,10 @@
+using FishNet.Object;
 using UnityEngine;
 using Duskborn.Core;
 
 namespace Duskborn.Gameplay.Loot
 {
-    public class ResourceNode : MonoBehaviour
+    public class ResourceNode : NetworkBehaviour
     {
         [SerializeField] private ResourceType type;
         [SerializeField] private int          hitsToBreak = 3;
@@ -14,14 +15,12 @@ namespace Duskborn.Gameplay.Loot
         [SerializeField] private string   outlineLayerName = "GreenOutline";
         [SerializeField] private Renderer outlineRenderer;
 
-        private int  _hitsRemaining;
+        private int  _hitsRemaining; // server-only
         private uint _outlineMask;
         private uint _baseMask;
 
         private void Awake()
         {
-            _hitsRemaining = hitsToBreak;
-
             if (outlineRenderer == null)
                 outlineRenderer = GetComponentInChildren<Renderer>();
 
@@ -34,28 +33,36 @@ namespace Duskborn.Gameplay.Loot
             }
         }
 
+        public override void OnStartServer()
+        {
+            base.OnStartServer();
+            _hitsRemaining = hitsToBreak;
+        }
+
         public void SetOutline(bool show)
         {
             if (outlineRenderer == null) return;
             outlineRenderer.renderingLayerMask = show ? _baseMask | _outlineMask : _baseMask;
         }
 
-        public void Hit(ResourceInventory inventory)
+        /// Server-only. Returns true when the final hit depletes the node and populates drop values.
+        /// Caller is responsible for Despawn()-ing this NetworkObject after awarding resources.
+        public bool ServerHit(out ResourceType outType, out int outAmount)
         {
-            if (_hitsRemaining <= 0 || inventory == null) return;
+            outType   = type;
+            outAmount = 0;
+
+            if (_hitsRemaining <= 0) return false;
 
             _hitsRemaining--;
-            Debug.Log($"[ResourceNode] {name} hit — {_hitsRemaining} hits remaining");
+            Debug.Log($"[ResourceNode] {name} hit — {_hitsRemaining}/{hitsToBreak} remaining");
 
-            if (_hitsRemaining <= 0)
-            {
-                int amount = GameSession.Instance != null
-                    ? GameSession.Instance.RNG.Range(dropMin, dropMax + 1)
-                    : Random.Range(dropMin, dropMax + 1);
+            if (_hitsRemaining > 0) return false;
 
-                inventory.Add(type, amount);
-                gameObject.SetActive(false);
-            }
+            outAmount = GameSession.Instance != null
+                ? GameSession.Instance.RNG.Range(dropMin, dropMax + 1)
+                : Random.Range(dropMin, dropMax + 1);
+            return true;
         }
     }
 }

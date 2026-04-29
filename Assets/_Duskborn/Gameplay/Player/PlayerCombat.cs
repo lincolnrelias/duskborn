@@ -60,6 +60,8 @@ namespace Duskborn.Gameplay.Player
 
         private void HandleTriggerEnter(Collider other)
         {
+            if (!IsOwner) return;
+
             var enemy = other.GetComponentInParent<EnemyBase>();
             if (enemy != null) { _enemiesInRange.Add(enemy); enemy.SetOutline(true); return; }
 
@@ -69,6 +71,8 @@ namespace Duskborn.Gameplay.Player
 
         private void HandleTriggerExit(Collider other)
         {
+            if (!IsOwner) return;
+
             var enemy = other.GetComponentInParent<EnemyBase>();
             if (enemy != null) { _enemiesInRange.Remove(enemy); enemy.SetOutline(false); return; }
 
@@ -93,18 +97,20 @@ namespace Duskborn.Gameplay.Player
             if (Input.GetKeyDown(KeyCode.Q))  TryAbility();
         }
 
-        public void OnAttack(InputValue _) => TryAttack();
+        public void OnAttack(InputValue _)
+        {
+            if (!IsOwner) return;
+            TryAttack();
+        }
 
         // ── Basic Attack ──────────────────────────────────────────────────────
 
         private void TryAttack()
         {
             if (!_stats.IsAlive || _cooldown > 0f) return;
-
             _cooldown = 1f / Mathf.Max(_stats.AttackSpeed, 0.01f);
 
-            Vector3 origin = transform.position + transform.forward * (attackRange * 0.5f);
-
+            // Local hitbox flash for the owner.
             if (_attackCollider != null)
             {
                 Vector3 worldCenter = attackTrigger.transform.TransformPoint(_attackCollider.center);
@@ -112,7 +118,17 @@ namespace Duskborn.Gameplay.Player
                 HitboxDebugger.Flash(worldCenter, worldRadius, Color.red);
             }
 
-            Collider[] cols = Physics.OverlapSphere(origin, attackRange, enemyLayer);
+            // Resource node hit is local (resource sync is a future pass).
+            _linkedNode?.Hit(_resourceInventory);
+
+            RequestAttackRpc();
+        }
+
+        [ServerRpc]
+        private void RequestAttackRpc()
+        {
+            Vector3    origin = transform.position + transform.forward * (attackRange * 0.5f);
+            Collider[] cols   = Physics.OverlapSphere(origin, attackRange, enemyLayer);
 
             var hitEnemies = new List<EnemyBase>();
 
@@ -137,8 +153,6 @@ namespace Duskborn.Gameplay.Player
                 _classAbility?.OnAttackCompleted(hitEnemies);
             else
                 _classAbility?.OnAttackMissed();
-
-            _linkedNode?.Hit(_resourceInventory);
         }
 
         // ── Class Ability (Q) ─────────────────────────────────────────────────
@@ -146,6 +160,12 @@ namespace Duskborn.Gameplay.Player
         private void TryAbility()
         {
             if (!_stats.IsAlive) return;
+            RequestAbilityRpc();
+        }
+
+        [ServerRpc]
+        private void RequestAbilityRpc()
+        {
             _classAbility?.TryUseAbility();
         }
 

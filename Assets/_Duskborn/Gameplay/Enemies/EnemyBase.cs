@@ -1,4 +1,7 @@
 using System;
+using FishNet;
+using FishNet.Object;
+using FishNet.Object.Synchronizing;
 using UnityEngine;
 using UnityEngine.AI;
 using Duskborn.Core;
@@ -8,7 +11,7 @@ using Duskborn.Gameplay.Player;
 namespace Duskborn.Gameplay.Enemies
 {
     [RequireComponent(typeof(NavMeshAgent))]
-    public abstract class EnemyBase : MonoBehaviour
+    public abstract class EnemyBase : NetworkBehaviour
     {
         [Header("Stats")]
         [SerializeField] protected float maxHP          = 30f;
@@ -27,16 +30,16 @@ namespace Duskborn.Gameplay.Enemies
         protected float        AttackCooldown;
 
         private float _baseMaxHP;
-        private float _currentHP;
         private uint  _outlineMask;
         private uint  _baseMask;
 
-        // One-shot diagnostics — logged once per spawn, not every frame.
         private bool _warnedNoTarget;
         private bool _warnedNoNavMesh;
 
-        public float CurrentHP => _currentHP;
-        public bool  IsAlive   => _currentHP > 0f;
+        private readonly SyncVar<float> _currentHP = new();
+
+        public float CurrentHP => _currentHP.Value;
+        public bool  IsAlive   => _currentHP.Value > 0f;
 
         public event Action<EnemyBase> OnDied;
         public event Action<int>       OnDropGold;
@@ -45,7 +48,7 @@ namespace Duskborn.Gameplay.Enemies
         {
             Agent      = GetComponent<NavMeshAgent>();
             _baseMaxHP = maxHP;
-            _currentHP = _baseMaxHP;
+            _currentHP.Value = _baseMaxHP;
 
             if (outlineRenderer == null)
                 outlineRenderer = GetComponentInChildren<Renderer>();
@@ -59,6 +62,14 @@ namespace Duskborn.Gameplay.Enemies
             }
         }
 
+        public override void OnStartServer()
+        {
+            base.OnStartServer();
+            // Snap the NavMeshAgent to the NavMesh surface at the spawn position.
+            if (Agent != null && Agent.isActiveAndEnabled)
+                Agent.Warp(transform.position);
+        }
+
         public void SetOutline(bool show)
         {
             if (outlineRenderer == null) return;
@@ -67,6 +78,7 @@ namespace Duskborn.Gameplay.Enemies
 
         protected virtual void Update()
         {
+            if (!IsServerStarted || !IsSpawned) return;
             if (!IsAlive) return;
 
             AcquireTarget();
@@ -75,8 +87,7 @@ namespace Duskborn.Gameplay.Enemies
             {
                 if (!_warnedNoTarget)
                 {
-                    Debug.LogWarning($"[{name}] No target found — PlayerRegistry may be empty. " +
-                                     "Check that PlayerStats is on the player and the player is active.");
+                    Debug.LogWarning($"[{name}] No target found — PlayerRegistry may be empty.");
                     _warnedNoTarget = true;
                 }
                 return;
@@ -86,8 +97,7 @@ namespace Duskborn.Gameplay.Enemies
             {
                 if (!_warnedNoNavMesh)
                 {
-                    Debug.LogWarning($"[{name}] NavMeshAgent is not on a NavMesh. " +
-                                     "Bake the NavMesh: Window > AI > Navigation > Bake.");
+                    Debug.LogWarning($"[{name}] NavMeshAgent is not on a NavMesh.");
                     _warnedNoNavMesh = true;
                 }
                 return;
@@ -129,16 +139,17 @@ namespace Duskborn.Gameplay.Enemies
 
         public virtual void TakeDamage(float amount)
         {
+            if (!IsServerStarted) return;
             if (!IsAlive) return;
-            _currentHP = Mathf.Max(0f, _currentHP - amount);
-            if (_currentHP <= 0f) Die();
+            _currentHP.Value = Mathf.Max(0f, _currentHP.Value - amount);
+            if (_currentHP.Value <= 0f) Die();
         }
 
         public void ApplyPlayerCountScaling(int playerCount)
         {
             float scaled = _baseMaxHP * (1f + (playerCount - 1) * 0.25f);
-            maxHP      = scaled;
-            _currentHP = scaled;
+            maxHP            = scaled;
+            _currentHP.Value = scaled;
         }
 
         protected virtual void Die()
@@ -153,25 +164,23 @@ namespace Duskborn.Gameplay.Enemies
             GoldManager.Instance?.AddGold(goldAmount);
             OnDropGold?.Invoke(goldAmount);
             OnDied?.Invoke(this);
-            gameObject.SetActive(false);
+
+            InstanceFinder.ServerManager.Despawn(NetworkObject, DespawnType.Destroy);
         }
 
+        // Still called by pooling paths that pre-existed networking; no longer the primary spawn init.
         public virtual void ResetEnemy(Vector3 position)
         {
-            OnDied      = null;
-            OnDropGold  = null;
+            OnDied           = null;
+            OnDropGold       = null;
             SetOutline(false);
-            CurrentTarget   = null;
-            AttackCooldown  = 0f;
-            _currentHP      = _baseMaxHP;
-            maxHP           = _baseMaxHP;
+            CurrentTarget    = null;
+            AttackCooldown   = 0f;
+            _currentHP.Value = _baseMaxHP;
+            maxHP            = _baseMaxHP;
             _warnedNoTarget  = false;
             _warnedNoNavMesh = false;
-
             transform.position = position;
-            gameObject.SetActive(true);   // ← activate first
-            Agent.enabled = true;         // ← then enable agent (now GameObject is active)
-            Agent.Warp(position);         // ← snap agent to NavMesh surface at this position
         }
     }
 }

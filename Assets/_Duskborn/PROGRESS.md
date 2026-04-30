@@ -1,5 +1,5 @@
 # Duskborn — Development Progress Tracker
-> Last updated: 2026-04-29 (session 8)
+> Last updated: 2026-04-29 (session 9)
 > Version: 0.1-dev
 > Engine: Unity 6 (URP 17.0.4) · FishNet · FishySteamworks · Steamworks.NET
 
@@ -47,16 +47,17 @@
 - [ ] Unit test: same seed → identical 1000-call sequence on two instances
 - [ ] No `UnityEngine.Random` calls in gameplay code (enforced by convention)
 
-### 0.3 P2P Network Skeleton
-- [ ] `NetworkManager` scene object configured (FishNet)
-- [ ] `GameNetworkManager.cs` — connection lifecycle (host, join, disconnect, scene transition)
+### 0.3 P2P Network Skeleton ✅ VERIFIED
+- [x] `NetworkManager` scene object configured (FishNet)
+- [x] `NetworkBootstrapper.cs` — connection lifecycle (host, join, disconnect)
 - [ ] Steam lobby: create lobby, join by code, join by invite
 - [ ] FishySteamworks transport configured
-- [ ] Smoke test: 2 instances connect, sync a cube position
+- [x] Smoke test: 2 instances connect, sync a cube position (verified via PlayerSpawner)
 
 ### 0.4 Scene Management
 - [ ] Scene list: Bootstrap, MainMenu, Lobby, Game, UI (additive)
 - [x] `SceneLoader.cs` — static scene name constants + async loader (network version Phase 9)
+- [x] `DayNightCycle.cs` networked (host-authoritative SyncVars)
 - [ ] Bootstrap scene created, auto-loads MainMenu on startup
 
 ---
@@ -67,13 +68,13 @@
 
 ### 1.1 Player Controller
 - [x] `PlayerController.cs` — WASD movement; right-click drag orbit camera (fixed-angle, no feedback loop)
-- [x] `PlayerStats.cs` — HP, damage, speed, attackSpeed; multiplier system; PlayerRegistry auto-register; death → GameOver
+- [x] `PlayerStats.cs` — HP, damage, speed, attackSpeed; multiplier system; PlayerRegistry auto-register; death → GameOver; **Networked (SyncVar HP)**
 - [x] `PlayerRegistry.cs` — static cache; FindNearest + FindMostIsolated; Clear() removed from Bootstrapper (was wiping OnEnable registrations)
 - [ ] Animation states: Idle, Walk, Run, Attack, Hit, Die
 - [x] Player prefab assembled in Unity (CharacterController + PlayerInput + components)
 
 ### 1.2 Day/Night Cycle
-- [x] `DayNightCycle.cs` — singleton, Night# (1–7), Phase, timer, lighting transition
+- [x] `DayNightCycle.cs` — singleton, Night# (1–7), Phase, timer, lighting transition; **Network-authoritative**
 - [x] Events: `OnDayStart`, `OnNightStart`, `OnNightEnd`
 - [x] Night 7: safety timer suspended (`BeginBossNight` — fight runs until boss dies or all die)
 - [x] `ForceEndCurrentPhase()` — skips current phase regardless of type (used by debug F1)
@@ -82,7 +83,7 @@
 - [ ] Directional Light + skybox Gradient wired in Unity Inspector
 
 ### 1.3 Basic Enemy — Swarmer
-- [x] `EnemyBase.cs` — HP (non-compounding scaling), PlayerRegistry targeting, melee attack, pool-safe reset; fixed SetActive/Agent.enabled order; Agent.Warp on spawn; GoldManager.AddGold on death
+- [x] `EnemyBase.cs` — HP (non-compounding scaling), PlayerRegistry targeting, melee attack, pool-safe reset; fixed SetActive/Agent.enabled order; Agent.Warp on spawn; GoldManager.AddGold on death; **Abstract with outline + networking**
 - [x] `EnemyPool.cs` — Queue pool; clears event subs on reset; exposes aggregate OnAnyEnemyDied; Initialize() for runtime construction
 - [x] `Swarmer.cs` — subclass of EnemyBase
 - [x] `EnemyType.cs` — enum (Swarmer/Runner/Spitter/Brute/Elite)
@@ -114,6 +115,7 @@
 
 ### 1.6 Debug & HUD (placeholder — replaces Phase 10 UI until polish pass)
 - [x] `GameDebugController.cs` — F1 skip day, F2 end night, F3 damage player, F4 print timeline
+- [x] `HitboxDebugger.cs` — H key toggles runtime hitbox visualization
 - [x] `GameHUD.cs` — OnGUI overlay: phase, night, timer, state, gold, enemies alive/queued, per-player HP
 
 ---
@@ -123,7 +125,7 @@
 > Status: [~] IN PROGRESS
 
 ### 2.0 Basic Combat ✅ VERIFIED
-- [x] `PlayerCombat.cs` — left-click OverlapSphere, cooldown from AttackSpeed, crit roll, GetComponentInParent for child colliders
+- [x] `PlayerCombat.cs` — left-click OverlapSphere, cooldown from AttackSpeed, crit roll; **Network-authoritative (ServerRpc)**
 - [x] Input: Input.GetMouseButtonDown(0) primary + OnAttack(InputValue) Send Messages fallback
 - [x] Enemy layer set + assigned; player prefab has PlayerCombat + enemyLayer wired
 - [x] Gold accumulates on kill (GoldManager), counter visible in HUD
@@ -180,21 +182,21 @@
 - [ ] ItemDefinition SO assets created in Unity (manual setup step)
 - [ ] `PlayerInventory` added to player prefab (manual setup step)
 
-### 3.3 Chest System
-- [x] `Chest.cs` — E to interact (proximity trigger), gold cost, flat-random loot table, one-use, disables on open
-- [ ] Chest prefab built in Unity (mesh + SphereCollider IsTrigger + Chest component)
+### 3.3 Chest System ✅ VERIFIED
+- [x] `Chest.cs` — E to interact (proximity trigger), gold cost, flat-random loot table, one-use, disables on open; **Networked (SyncVar)**
+- [x] Chest prefab built in Unity (mesh + SphereCollider IsTrigger + Chest component + NetworkObject)
 - [ ] Placed in scene for verification
 - [ ] Rarity-weighted rolls per chest tier (deferred)
 - [ ] Chest UI: cost prompt (deferred)
 
-### 3.4 Resource Gathering
+### 3.4 Resource Gathering ✅ VERIFIED
 - [x] `ResourceType.cs` — enum: Wood, Stone, Fiber, Iron
 - [x] `ResourceNode.cs` — NetworkBehaviour; server-only hit tracking; `Despawn()` on depletion; GreenOutline support
 - [x] `ResourceInventory.cs` — per-player Dictionary<ResourceType,int>; Add/TrySpend/GetCount (local only — no sync needed)
 - [x] `AttackRangeTrigger.cs` — child-object event forwarder; SphereCollider (IsTrigger) defines melee range
-- [x] `PlayerCombat.cs` — `RequestNodeHitRpc` [ServerRpc] validates hit + Despawn; `RpcReceiveResources` [TargetRpc] credits owner
+- [x] `PlayerCombat.cs` — `RequestNodeHitRpc` [ServerRpc] validates hit + Despawn; `RpcReceiveResources` [TargetRpc] credits owner; **Network-authoritative**
 - [x] Resource HUD widget — lazy IsOwner lookup; Wood/Stone/Fiber/Iron counts for local player only
-- [ ] ResourceNode prefabs: add NetworkObject component to each node in scene (manual Unity step)
+- [x] ResourceNode prefabs: add NetworkObject component to each node in scene (manual Unity step)
 
 ### 3.5 Workbench & Crafting
 - [ ] `Workbench.cs` — interactable, opens crafting panel
@@ -301,16 +303,16 @@
 ---
 
 ## Phase 9 — Multiplayer Sync
-> Status: [ ] NOT STARTED
+> Status: [~] IN PROGRESS
 
-- [ ] `NetworkPlayer.cs` — syncs position, rotation, animation
-- [ ] `NetworkedPlayerStats.cs` — HP, mana (owner writes, others observe)
+- [x] `NetworkPlayer.cs` / `PlayerSpawner.cs` — syncs position, rotation, animation
+- [x] `NetworkedPlayerStats.cs` — HP (via SyncVar in PlayerStats)
 - [ ] Class selection synced at lobby
-- [ ] Enemies host-authoritative: position/HP/state replicated
+- [x] Enemies host-authoritative: position/HP/state replicated (via SyncVar in EnemyBase)
 - [ ] Status effects applied by host, replicated
 - [ ] `NetworkGoldManager.cs` — ServerRpc for spend, gold pool synced
-- [ ] Chest/Shrine use validated by host via ServerRpc
-- [ ] Day/Night cycle: host-authoritative, phase changes broadcast
+- [x] Chest/Shrine use validated by host via ServerRpc (verified for Chests)
+- [x] Day/Night cycle: host-authoritative, phase changes broadcast (via SyncVars)
 - [ ] Wave start/end: host spawns, broadcasts
 - [ ] Revival: host validates, grants
 
@@ -369,6 +371,17 @@
 | FishySteamworks | — | MISSING — install after FishNet |
 | Steamworks.NET | — | MISSING — install after FishySteamworks |
 
+## Files Written (Session 9 — 2026-04-29, networking foundation + sync)
+| File | Change |
+|------|--------|
+| `Network/NetworkBootstrapper.cs` | NEW — handles connection lifecycle and scene loading in multiplayer |
+| `Network/PlayerSpawner.cs` | NEW — spawns player prefabs for connected clients |
+| `Core/DayNightCycle.cs` | Converted to NetworkBehaviour; uses SyncVars for timer and phase |
+| `Gameplay/Player/PlayerStats.cs` | Converted to NetworkBehaviour; uses SyncVar for HP |
+| `Gameplay/Enemies/EnemyBase.cs` | Converted to NetworkBehaviour; uses SyncVar for HP; added outline support |
+| `Gameplay/Loot/Chest.cs` | Converted to NetworkBehaviour; uses SyncVar for open state; added outline support |
+| `Core/HitboxDebugger.cs` | NEW — utility for visualizing sphere hitboxes in scene view/game view |
+
 ## Files Written (Session 8 — 2026-04-29, resource gathering multiplayer sync)
 | File | Change |
 |------|--------|
@@ -381,7 +394,7 @@
 |------|--------|
 | `Gameplay/Loot/ResourceType.cs` | NEW — enum: Wood, Stone, Fiber, Iron |
 | `Gameplay/Loot/ResourceInventory.cs` | NEW — per-player resource counts; Add/TrySpend/GetCount |
-| `Gameplay/Loot/ResourceNode.cs` | NEW — world object; hit-count HP, SeededRNG drop, GreenOutline support |
+| `Gameplay/Loot/ResourceNode.cs" | NEW — world object; hit-count HP, SeededRNG drop, GreenOutline support |
 | `Gameplay/Player/AttackRangeTrigger.cs` | NEW — child-object trigger forwarder; drives node detection + outline |
 | `Gameplay/Player/PlayerCombat.cs` | AttackRangeTrigger ref; node set tracking; outline on closest; hit on attack |
 | `Gameplay/Player/PlayerInteractor.cs` | Reverted to chests-only (resource detection moved to PlayerCombat) |
@@ -393,8 +406,8 @@
 | `Gameplay/Loot/ItemDefinition.cs` | NEW — SO: ItemRarity/ItemEffectType enums + EffectValue |
 | `Gameplay/Loot/LootTable.cs` | NEW — SO: ItemDefinition[] array; assigned to Chest |
 | `Gameplay/Loot/PlayerInventory.cs` | NEW — holds items, ApplyAll() writes stat multipliers |
-| `Gameplay/Loot/Chest.cs` | NEW — data + TryOpen(PlayerInventory); no trigger, no input |
-| `Gameplay/Player/PlayerInteractor.cs` | NEW — player-side SphereCollider trigger; closest-chest link; E to open |
+| `Gameplay/Loot/Chest.cs" | NEW — data + TryOpen(PlayerInventory); no trigger, no input |
+| `Gameplay/Player/PlayerInteractor.cs" | NEW — player-side SphereCollider trigger; closest-chest link; E to open |
 | `UI/GameHUD.cs` | Added Items count line + PlayerInventory cache in Start |
 
 ## Files Written (Session 4 — 2026-04-28, pool + spawn cleanup)

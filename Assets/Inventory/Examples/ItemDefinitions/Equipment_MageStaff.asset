@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de9dceb77e1d882449d1b2f1cfd2580b, type: 3}
+  m_Name: Equipment_MageStaff
+  m_EditorClassIdentifier: Assembly-CSharp::InventorySystem.Data.EquipmentDefinition
+  id: eq_mage_staff
+  displayName: Mage Staff
+  description: Focus tool for magical damage and utility.
+  icon: {fileID: 2800000, guid: b8a79a4592022ce4f81ab3f1375e43f9, type: 3}
+  powerScore: 16

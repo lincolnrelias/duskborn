@@ -1,4 +1,5 @@
 using FishNet.Object;
+using InventorySystem.Data;
 using UnityEngine;
 using Duskborn.Core;
 
@@ -6,10 +7,10 @@ namespace Duskborn.Gameplay.Loot
 {
     public class ResourceNode : NetworkBehaviour
     {
-        [SerializeField] private ResourceType type;
-        [SerializeField] private int          hitsToBreak = 3;
-        [SerializeField] private int          dropMin     = 1;
-        [SerializeField] private int          dropMax     = 3;
+        [SerializeField] private MaterialDefinition resourceDef;
+        [SerializeField] private int hitsToBreak = 3;
+        [SerializeField] private int dropMin     = 1;
+        [SerializeField] private int dropMax     = 3;
 
         [Header("Outline")]
         [SerializeField] private string   outlineLayerName = "GreenOutline";
@@ -45,12 +46,14 @@ namespace Duskborn.Gameplay.Loot
             outlineRenderer.renderingLayerMask = show ? _baseMask | _outlineMask : _baseMask;
         }
 
-        /// Server-only. Returns true when the final hit depletes the node and populates drop values.
+        /// <summary>
+        /// Server-only. Returns true on the final hit and populates resourceId + amount.
         /// Caller is responsible for Despawn()-ing this NetworkObject after awarding resources.
-        public bool ServerHit(out ResourceType outType, out int outAmount)
+        /// </summary>
+        public bool ServerHit(out string resourceId, out int amount)
         {
-            outType   = type;
-            outAmount = 0;
+            resourceId = resourceDef != null ? resourceDef.Id : string.Empty;
+            amount     = 0;
 
             if (_hitsRemaining <= 0) return false;
 
@@ -59,7 +62,7 @@ namespace Duskborn.Gameplay.Loot
 
             if (_hitsRemaining > 0) return false;
 
-            outAmount = GameSession.Instance != null
+            amount = GameSession.Instance != null
                 ? GameSession.Instance.RNG.Range(dropMin, dropMax + 1)
                 : Random.Range(dropMin, dropMax + 1);
             return true;

@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de9dceb77e1d882449d1b2f1cfd2580b, type: 3}
+  m_Name: Equipment_HuntersBow
+  m_EditorClassIdentifier: Assembly-CSharp::InventorySystem.Data.EquipmentDefinition
+  id: eq_hunters_bow
+  displayName: Hunter's Bow
+  description: Lightweight ranged weapon with balanced power.
+  icon: {fileID: 2800000, guid: c56b55f8622d5db41a014ddd812b7caa, type: 3}
+  powerScore: 12

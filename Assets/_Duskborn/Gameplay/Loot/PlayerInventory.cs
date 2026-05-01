@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Duskborn.Gameplay.Player;
@@ -7,6 +8,8 @@ namespace Duskborn.Gameplay.Loot
     [RequireComponent(typeof(PlayerStats))]
     public class PlayerInventory : MonoBehaviour
     {
+        public event Action<ItemDefinition> ItemAdded;
+
         public IReadOnlyList<ItemDefinition> Items => _items;
 
         private readonly List<ItemDefinition> _items = new();
@@ -18,6 +21,7 @@ namespace Duskborn.Gameplay.Loot
         {
             _items.Add(item);
             ApplyAll();
+            ItemAdded?.Invoke(item);
             Debug.Log($"[Inventory] Picked up: {item.ItemName} ({item.Rarity}) — {item.EffectType} +{item.EffectValue}");
         }
 

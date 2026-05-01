@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de9dceb77e1d882449d1b2f1cfd2580b, type: 3}
+  m_Name: Equipment_IronShield
+  m_EditorClassIdentifier: Assembly-CSharp::InventorySystem.Data.EquipmentDefinition
+  id: eq_iron_shield
+  displayName: Iron Shield
+  description: Defensive shield with reliable durability.
+  icon: {fileID: 2800000, guid: 107e0db2df7a0444a846f0a248cf1efd, type: 3}
+  powerScore: 11

@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de9dceb77e1d882449d1b2f1cfd2580b, type: 3}
+  m_Name: Equipment_LeatherArmor
+  m_EditorClassIdentifier: Assembly-CSharp::InventorySystem.Data.EquipmentDefinition
+  id: eq_leather_armor
+  displayName: Leather Armor
+  description: Early-game defensive armor piece.
+  icon: {fileID: 2800000, guid: c2c3cda9454020340aa664d64b4f7c46, type: 3}
+  powerScore: 9

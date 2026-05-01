@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de9dceb77e1d882449d1b2f1cfd2580b, type: 3}
+  m_Name: Equipment_SteelSword
+  m_EditorClassIdentifier: Assembly-CSharp::InventorySystem.Data.EquipmentDefinition
+  id: eq_steel_sword
+  displayName: Steel Sword
+  description: Standard melee weapon used in starter builds.
+  icon: {fileID: 2800000, guid: 218cdd862a63d314e88ebe9deb950cc4, type: 3}
+  powerScore: 14

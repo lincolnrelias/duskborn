@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using Duskborn.Core;
 using Duskborn.Gameplay.Enemies;
@@ -79,10 +80,8 @@ namespace Duskborn.UI
             sb.AppendLine($"Items:   {(_inventory != null ? _inventory.Items.Count : 0)}");
             if (_resources != null)
             {
-                sb.AppendLine($"Wood:    {_resources.GetCount(ResourceType.Wood)}");
-                sb.AppendLine($"Stone:   {_resources.GetCount(ResourceType.Stone)}");
-                sb.AppendLine($"Fiber:   {_resources.GetCount(ResourceType.Fiber)}");
-                sb.AppendLine($"Iron:    {_resources.GetCount(ResourceType.Iron)}");
+                foreach (KeyValuePair<string, int> kv in _resources.Counts)
+                    if (kv.Value > 0) sb.AppendLine($"{kv.Key}: {kv.Value}");
             }
             sb.AppendLine($"Enemies: {alive} alive  |  {pending} queued");
             sb.AppendLine("─────────────────");

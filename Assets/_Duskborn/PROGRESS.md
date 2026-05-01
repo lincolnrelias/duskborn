@@ -177,10 +177,13 @@
 - [x] `ItemDefinition.cs` (ScriptableObject) — name, rarity, effect type, effect value
 - [x] `ItemRarity` enum: Common, Uncommon, Rare, Legendary, Cursed
 - [x] `ItemEffectType` enum: BonusDamage, BonusHP, BonusMoveSpeed, BonusAttackSpeed, BonusCritChance, DamageReduction
-- [x] `PlayerInventory.cs` — List<ItemDefinition>; AddItem(); ApplyAll() resets + re-applies all multipliers to PlayerStats
+- [x] `PlayerInventory.cs` — List<ItemDefinition>; AddItem(); ApplyAll() resets + re-applies all multipliers to PlayerStats; fires `ItemAdded` event
+- [x] `DuskbornInventoryItem.cs` — wraps ItemDefinition as IInventoryItem (EquipmentItem subclass) for the UI system
+- [x] `InventoryUIManager.cs` — bridges PlayerInventory → InventoryInstaller; I key open/close
 - [x] Item count shown in HUD
 - [ ] ItemDefinition SO assets created in Unity (manual setup step)
 - [ ] `PlayerInventory` added to player prefab (manual setup step)
+- [ ] InventoryUIManager wired in scene: assign InventoryInstaller + inventoryRoot (manual setup step)
 
 ### 3.3 Chest System ✅ VERIFIED
 - [x] `Chest.cs` — E to interact (proximity trigger), gold cost, flat-random loot table, one-use, disables on open; **Networked (SyncVar)**

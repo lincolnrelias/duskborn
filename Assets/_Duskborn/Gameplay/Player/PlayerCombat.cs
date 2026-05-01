@@ -179,17 +179,17 @@ namespace Duskborn.Gameplay.Player
             var node = nodeObj.GetComponent<ResourceNode>();
             if (node == null) return;
 
-            if (node.ServerHit(out ResourceType type, out int amount))
+            if (node.ServerHit(out string resourceId, out int amount))
             {
-                RpcReceiveResources(Owner, type, amount);
+                RpcReceiveResources(Owner, resourceId, amount);
                 nodeObj.Despawn();
             }
         }
 
         [TargetRpc]
-        private void RpcReceiveResources(NetworkConnection conn, ResourceType type, int amount)
+        private void RpcReceiveResources(NetworkConnection conn, string resourceId, int amount)
         {
-            _resourceInventory?.Add(type, amount);
+            _resourceInventory?.Add(resourceId, amount);
         }
 
         // ─────────────────────────────────────────────────────────────────────

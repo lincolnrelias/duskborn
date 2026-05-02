@@ -68,7 +68,7 @@ namespace Duskborn.Gameplay.Loot
         }
 
         // Called server-side by PlayerInteractor's ServerRpc.
-        public void ServerOpen(NetworkConnection requester, PlayerInventory inventory)
+        public void ServerOpen(NetworkConnection requester, PlayerBuffContainer inventory)
         {
             if (!IsServerStarted) return;
             if (_isOpenSync.Value) return;
@@ -94,7 +94,7 @@ namespace Duskborn.Gameplay.Loot
                 : Random.Range(0, lootTable.Items.Length);
 
             // Apply item on the server so server-side stat multipliers are updated.
-            inventory.AddItem(lootTable.Items[index]);
+            inventory.AddBuff(lootTable.Items[index]);
 
             GoldManager.Instance.OnChestOpened(cost);
             _isOpenSync.Value = true; // disables chest on all clients via SyncVar hook
@@ -107,7 +107,7 @@ namespace Duskborn.Gameplay.Loot
         private void DeliverItemRpc(NetworkConnection conn, NetworkObject playerNob, int itemIndex)
         {
             if (lootTable == null || itemIndex >= lootTable.Items.Length) return;
-            playerNob.GetComponent<PlayerInventory>()?.AddItem(lootTable.Items[itemIndex]);
+            playerNob.GetComponent<PlayerBuffContainer>()?.AddBuff(lootTable.Items[itemIndex]);
         }
     }
 }

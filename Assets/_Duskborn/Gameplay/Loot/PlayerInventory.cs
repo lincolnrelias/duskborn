@@ -6,36 +6,35 @@ using Duskborn.Gameplay.Player;
 namespace Duskborn.Gameplay.Loot
 {
     [RequireComponent(typeof(PlayerStats))]
-    public class PlayerInventory : MonoBehaviour
+    public class PlayerBuffContainer : MonoBehaviour
     {
-        public event Action<ItemDefinition> ItemAdded;
+        public event Action<ItemDefinition> BuffAdded;
 
-        public IReadOnlyList<ItemDefinition> Items => _items;
+        public IReadOnlyList<ItemDefinition> Buffs => _buffs;
 
-        private readonly List<ItemDefinition> _items = new();
+        private readonly List<ItemDefinition> _buffs = new();
         private PlayerStats _stats;
 
         private void Awake() => _stats = GetComponent<PlayerStats>();
 
-        public void AddItem(ItemDefinition item)
+        public void AddBuff(ItemDefinition item)
         {
-            _items.Add(item);
+            _buffs.Add(item);
             ApplyAll();
-            ItemAdded?.Invoke(item);
-            Debug.Log($"[Inventory] Picked up: {item.ItemName} ({item.Rarity}) — {item.EffectType} +{item.EffectValue}");
+            BuffAdded?.Invoke(item);
+            Debug.Log($"[Buffs] Collected: {item.ItemName} ({item.Rarity}) — {item.EffectType} +{item.EffectValue}");
         }
 
         private void ApplyAll()
         {
-            // Reset all item-driven multipliers before re-applying the full list.
-            _stats.DamageMultiplier          = 1f;
-            _stats.HPMultiplier              = 1f;
-            _stats.MoveSpeedMultiplier       = 1f;
-            _stats.AttackSpeedMultiplier     = 1f;
-            _stats.CritChanceBonus           = 0f;
-            _stats.IncomingDamageMultiplier  = 1f;
+            _stats.DamageMultiplier         = 1f;
+            _stats.HPMultiplier             = 1f;
+            _stats.MoveSpeedMultiplier      = 1f;
+            _stats.AttackSpeedMultiplier    = 1f;
+            _stats.CritChanceBonus          = 0f;
+            _stats.IncomingDamageMultiplier = 1f;
 
-            foreach (var item in _items)
+            foreach (var item in _buffs)
             {
                 switch (item.EffectType)
                 {

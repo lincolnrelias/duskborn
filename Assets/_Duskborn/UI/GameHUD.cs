@@ -15,7 +15,7 @@ namespace Duskborn.UI
     {
         [SerializeField] private WaveManager waveManager;
 
-        private PlayerInventory   _inventory;
+        private PlayerBuffContainer   _inventory;
         private ResourceInventory _resources;
         private GUIStyle _boxStyle;
         private GUIStyle _labelStyle;
@@ -28,7 +28,7 @@ namespace Duskborn.UI
             foreach (var combat in FindObjectsByType<PlayerCombat>(FindObjectsSortMode.None))
             {
                 if (!combat.IsOwner) continue;
-                _inventory ??= combat.GetComponent<PlayerInventory>();
+                _inventory ??= combat.GetComponent<PlayerBuffContainer>();
                 _resources ??= combat.GetComponent<ResourceInventory>();
                 break;
             }
@@ -77,7 +77,7 @@ namespace Duskborn.UI
             sb.AppendLine($"Timer:   {timer}");
             sb.AppendLine($"State:   {gstate}");
             sb.AppendLine($"Gold:    {gold}");
-            sb.AppendLine($"Items:   {(_inventory != null ? _inventory.Items.Count : 0)}");
+            sb.AppendLine($"Buffs:   {(_inventory != null ? _inventory.Buffs.Count : 0)}");
             if (_resources != null)
             {
                 foreach (KeyValuePair<string, int> kv in _resources.Counts)

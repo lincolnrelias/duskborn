@@ -64,6 +64,16 @@ desktop.ini
 [Rr]ider/
 
 # ===========================
+# Claude Code
+# ===========================
+.claude/settings.local.json
+
+# ===========================
+# Unity crash / replay logs
+# ===========================
+replay_pid*.log
+
+# ===========================
 # Package Manager lock
 # (keep manifest.json, ignore lock for cleaner diffs)
 # ===========================

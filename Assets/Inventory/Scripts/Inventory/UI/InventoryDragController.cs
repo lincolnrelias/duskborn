@@ -177,9 +177,12 @@ namespace InventorySystem.UI
                 _sourceSlot.IconImage.color = Color.white;
             }
 
-            _dragIcon.enabled = false;
-            _dragIcon.sprite = null;
-            _dragIcon.gameObject.SetActive(false);
+            if (_dragIcon != null)
+            {
+                _dragIcon.enabled = false;
+                _dragIcon.sprite = null;
+                _dragIcon.gameObject.SetActive(false);
+            }
             _sourceSlot = null;
             _sourceSlotIndex = -1;
             _isPressing = false;

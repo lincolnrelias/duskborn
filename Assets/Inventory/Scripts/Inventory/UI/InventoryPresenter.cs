@@ -106,6 +106,7 @@ namespace InventorySystem.UI
             }
 
             slot.SetIcon(hasIconTexture ? resolvedTexture : null, GetFallbackToken(item));
+            slot.SetStackCount(vm.StackSize);
         }
 
         private static string GetFallbackToken(IInventoryItem item)

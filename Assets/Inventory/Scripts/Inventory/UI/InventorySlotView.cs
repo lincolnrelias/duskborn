@@ -8,9 +8,10 @@ namespace InventorySystem.UI
 {
     public sealed class InventorySlotView : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
     {
-        [SerializeField] private Image iconImage;
-        [SerializeField] private TextMeshProUGUI fallbackLabel;
-        [SerializeField] private Image borderImage;
+        [SerializeField] private Image              iconImage;
+        [SerializeField] private TextMeshProUGUI   fallbackLabel;
+        [SerializeField] private Image              borderImage;
+        [SerializeField] private TextMeshProUGUI   stackCountLabel;
 
         private Sprite _dragGhostSprite;
 
@@ -28,11 +29,21 @@ namespace InventorySystem.UI
             RectTransform = transform as RectTransform;
         }
 
-        public void BindReferences(Image icon, TextMeshProUGUI fallback, Image border)
+        public void BindReferences(Image icon, TextMeshProUGUI fallback, Image border, TextMeshProUGUI stackCount = null)
         {
-            iconImage = icon;
-            fallbackLabel = fallback;
-            borderImage = border;
+            iconImage       = icon;
+            fallbackLabel   = fallback;
+            borderImage     = border;
+            stackCountLabel = stackCount;
+        }
+
+        public void SetStackCount(int count)
+        {
+            if (stackCountLabel == null) return;
+            stackCountLabel.gameObject.SetActive(count > 0);
+            stackCountLabel.enabled = count > 0;
+            if (count > 0)
+                stackCountLabel.text = count.ToString();
         }
 
         public void SetBorderColor(Color color)
@@ -93,8 +104,12 @@ namespace InventorySystem.UI
             }
 
             if (fallbackLabel != null)
-            {
                 fallbackLabel.text = string.Empty;
+
+            if (stackCountLabel != null)
+            {
+                stackCountLabel.gameObject.SetActive(false);
+                stackCountLabel.enabled = false;
             }
         }
 

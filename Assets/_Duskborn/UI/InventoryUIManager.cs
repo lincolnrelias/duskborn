@@ -17,8 +17,9 @@ namespace Duskborn.UI
         [SerializeField] private GameObject inventoryRoot;
         [SerializeField] private MaterialDefinition[] resourceDefinitions;
 
-        private PlayerInventory   _playerInventory;
         private ResourceInventory _resourceInventory;
+        private PlayerInteractor  _playerInteractor;
+        private bool              _dropEventSubscribed;
 
         private readonly Dictionary<string, MaterialDefinition> _defById      = new();
         private readonly Dictionary<string, int>                _resourceSlot = new();
@@ -35,8 +36,6 @@ namespace Duskborn.UI
                     _defById[def.Id] = def;
                 }
             }
-
-            Debug.Log($"[InventoryUI] Awake — installer={(installer != null ? installer.name : "NULL")}, InstallerReady={InstallerReady}, defs={_defById.Count}");
         }
 
         private void Start()
@@ -49,8 +48,6 @@ namespace Duskborn.UI
                         installer.RegisterIcon(def.Id, def.Icon);
                 }
             }
-
-            Debug.Log($"[InventoryUI] Start — InstallerReady={InstallerReady}");
 
             if (inventoryRoot != null)
                 inventoryRoot.SetActive(false);
@@ -66,30 +63,19 @@ namespace Duskborn.UI
 
         private void OnDestroy()
         {
-            if (_playerInventory != null)
-                _playerInventory.ItemAdded -= OnItemAdded;
             if (_resourceInventory != null)
                 _resourceInventory.ResourceChanged -= OnResourceChanged;
+            if (_dropEventSubscribed && installer != null)
+                installer.OnItemDroppedOutside -= OnItemDroppedOutside;
         }
 
         private void TryCacheLocalPlayer()
         {
-            if (_playerInventory != null && _resourceInventory != null) return;
+            if (_resourceInventory != null && _playerInteractor != null) return;
 
             foreach (var combat in FindObjectsByType<PlayerCombat>(FindObjectsSortMode.None))
             {
                 if (!combat.IsOwner) continue;
-
-                if (_playerInventory == null)
-                {
-                    var inv = combat.GetComponent<PlayerInventory>();
-                    if (inv != null)
-                    {
-                        _playerInventory = inv;
-                        _playerInventory.ItemAdded += OnItemAdded;
-                        Debug.Log($"[InventoryUI] Subscribed to PlayerInventory on {combat.name}");
-                    }
-                }
 
                 if (_resourceInventory == null)
                 {
@@ -98,11 +84,20 @@ namespace Duskborn.UI
                     {
                         _resourceInventory = res;
                         _resourceInventory.ResourceChanged += OnResourceChanged;
-                        Debug.Log($"[InventoryUI] Subscribed to ResourceInventory on {combat.name}");
                     }
                     else
                     {
-                        Debug.LogWarning($"[InventoryUI] PlayerCombat '{combat.name}' has no ResourceInventory component");
+                        Debug.LogWarning($"[InventoryUI] No ResourceInventory on {combat.name}");
+                    }
+                }
+
+                if (_playerInteractor == null)
+                {
+                    _playerInteractor = combat.GetComponent<PlayerInteractor>();
+                    if (_playerInteractor != null && !_dropEventSubscribed && installer != null)
+                    {
+                        installer.OnItemDroppedOutside += OnItemDroppedOutside;
+                        _dropEventSubscribed = true;
                     }
                 }
 
@@ -110,16 +105,17 @@ namespace Duskborn.UI
             }
         }
 
-        private void OnItemAdded(ItemDefinition def)
+        private void OnItemDroppedOutside(IInventoryItem item)
         {
-            if (!InstallerReady) return;
-            installer.Inventory.TryAddItem(new DuskbornInventoryItem(def), out _);
+            if (item is not MaterialItem mat || _playerInteractor == null || _resourceInventory == null) return;
+            int count = _resourceInventory.GetCount(mat.Id);
+            if (count <= 0) return;
+            _resourceInventory.TrySpend(mat.Id, count);
+            _playerInteractor.DropResource(mat.Id, count);
         }
 
         private void OnResourceChanged(string resourceId, int newTotal)
         {
-            Debug.Log($"[InventoryUI] OnResourceChanged: '{resourceId}' x{newTotal} | InstallerReady={InstallerReady}");
-
             if (!InstallerReady) return;
 
             if (_resourceSlot.TryGetValue(resourceId, out int oldSlot))
@@ -134,10 +130,8 @@ namespace Duskborn.UI
             string displayName = def != null ? def.DisplayName : resourceId;
             string iconId      = def?.Icon != null ? def.Icon.name : string.Empty;
 
-            var item = new MaterialItem(resourceId, displayName, $"x{newTotal}", iconId, "resource");
-            bool placed = installer.Inventory.TryAddItem(item, out int newSlot);
-            Debug.Log($"[InventoryUI] TryAddItem '{resourceId}': placed={placed}, slot={newSlot}, totalSlots={installer.Service.Grid.SlotCount}");
-            if (placed)
+            var newItem = new MaterialItem(resourceId, displayName, string.Empty, iconId, "resource", newTotal);
+            if (installer.Inventory.TryAddItem(newItem, out int newSlot))
                 _resourceSlot[resourceId] = newSlot;
         }
 
@@ -146,20 +140,14 @@ namespace Duskborn.UI
             if (inventoryRoot == null) return;
             bool willShow = !inventoryRoot.activeSelf;
             inventoryRoot.SetActive(willShow);
-            Debug.Log($"[InventoryUI] Toggle show={willShow} InstallerReady={InstallerReady} resInv={(_resourceInventory != null ? "set" : "NULL")}");
             if (willShow)
                 SyncResources();
         }
 
         private void SyncResources()
         {
-            if (!InstallerReady || _resourceInventory == null)
-            {
-                Debug.LogWarning($"[InventoryUI] SyncResources bailed — InstallerReady={InstallerReady}, resInv={(_resourceInventory != null ? "set" : "NULL")}");
-                return;
-            }
+            if (!InstallerReady || _resourceInventory == null) return;
 
-            Debug.Log($"[InventoryUI] SyncResources — {_resourceInventory.Counts.Count} resource types");
             foreach (var kv in _resourceSlot)
                 installer.Inventory.RemoveItem(kv.Value);
             _resourceSlot.Clear();

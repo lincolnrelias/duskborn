@@ -16,6 +16,8 @@ namespace InventorySystem.UI
         private readonly Canvas _canvas;
         private readonly Image _dragIcon;
         private readonly float _holdThreshold;
+        private readonly RectTransform _panelBoundsRect;
+        private readonly Action<IInventoryItem> _onDroppedOutside;
 
         private bool _isPressing;
         private bool _isDragging;
@@ -28,13 +30,17 @@ namespace InventorySystem.UI
             InventoryPresenter presenter,
             Canvas canvas,
             Image dragIcon,
-            float holdThreshold)
+            float holdThreshold,
+            RectTransform panelBoundsRect = null,
+            Action<IInventoryItem> onDroppedOutside = null)
         {
             _service = service ?? throw new ArgumentNullException(nameof(service));
             _presenter = presenter ?? throw new ArgumentNullException(nameof(presenter));
             _canvas = canvas ?? throw new ArgumentNullException(nameof(canvas));
             _dragIcon = dragIcon ?? throw new ArgumentNullException(nameof(dragIcon));
             _holdThreshold = Mathf.Max(0f, holdThreshold);
+            _panelBoundsRect = panelBoundsRect;
+            _onDroppedOutside = onDroppedOutside;
             _dragIcon.raycastTarget = false;
             _dragIcon.gameObject.SetActive(false);
         }
@@ -156,6 +162,16 @@ namespace InventorySystem.UI
 
             if (!TryGetSlotAt(pointerPanelPos, out var targetSlotIndex) || targetSlotIndex == _sourceSlotIndex)
             {
+                if (_panelBoundsRect != null && _onDroppedOutside != null &&
+                    !RectTransformUtility.RectangleContainsScreenPoint(_panelBoundsRect, pointerPanelPos, _canvas.worldCamera))
+                {
+                    var droppedItem = _service.GetItem(_sourceSlotIndex);
+                    if (droppedItem != null)
+                    {
+                        _service.RemoveItem(_sourceSlotIndex);
+                        _onDroppedOutside.Invoke(droppedItem);
+                    }
+                }
                 return;
             }
 

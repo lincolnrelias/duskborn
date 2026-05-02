@@ -9,6 +9,7 @@ namespace InventorySystem.Data
         [SerializeField] private string displayName;
         [SerializeField] [TextArea] private string description;
         [SerializeField] private Texture2D icon;
+        [SerializeField] public GameObject dropPrefab;
 
         public string Id => id;
         public string DisplayName => displayName;

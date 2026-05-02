@@ -43,6 +43,9 @@ namespace InventorySystem.Bootstrap
 
         public InventoryService Service => _service;
         public IInventory Inventory => _service;
+        public IReadOnlyList<InventorySlotView> SlotViews => _presenter?.SlotElements;
+
+        public event Action<IInventoryItem> OnItemDroppedOutside;
 
 #if UNITY_EDITOR
         [ContextMenu("Populate Slots")]
@@ -95,7 +98,9 @@ namespace InventorySystem.Bootstrap
                 _presenter,
                 canvas,
                 dragIcon,
-                gridController.HoldThresholdSeconds);
+                gridController.HoldThresholdSeconds,
+                gridRoot,
+                item => OnItemDroppedOutside?.Invoke(item));
 
             _tooltipController = new InventoryTooltipController(
                 _service,
@@ -169,9 +174,10 @@ namespace InventorySystem.Bootstrap
             }
         }
 
-        private ItemViewModel BuildViewModel(IInventoryItem item)
+        private static ItemViewModel BuildViewModel(IInventoryItem item)
         {
-            return new ItemViewModel(item.DisplayName, item.Description, item.IconId);
+            int stackSize = item is IStackable s ? s.StackSize : 0;
+            return new ItemViewModel(item.DisplayName, item.Description, item.IconId, stackSize);
         }
 
         private string BuildTooltip(IInventoryItem item)

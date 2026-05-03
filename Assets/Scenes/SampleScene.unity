@@ -2611,7 +2611,7 @@ MonoBehaviour:
   m_ChildAlignment: 4
   m_StartCorner: 0
   m_StartAxis: 0
-  m_CellSize: {x: 55, y: 55}
+  m_CellSize: {x: 65, y: 65}
   m_Spacing: {x: 0, y: 0}
   m_Constraint: 1
   m_ConstraintCount: 8
@@ -2637,10 +2637,10 @@ RectTransform:
   - {fileID: 73159331}
   m_Father: {fileID: 1304203861}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -198}
-  m_SizeDelta: {x: 500, y: 65}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: -233}
+  m_SizeDelta: {x: -512, y: -505}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1001 &620322735
 PrefabInstance:
@@ -3939,6 +3939,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -166.10123
       objectReference: {fileID: 0}
+    - target: {fileID: 914798695250080923, guid: 60d348f92921d1f4b91443639a953a9d, type: 3}
+      propertyPath: m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1118542985471169598, guid: 60d348f92921d1f4b91443639a953a9d, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
@@ -3989,11 +3993,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1399428848531789434, guid: 60d348f92921d1f4b91443639a953a9d, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 131
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 1399428848531789434, guid: 60d348f92921d1f4b91443639a953a9d, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -49
+      value: -142
       objectReference: {fileID: 0}
     - target: {fileID: 1399428848531789434, guid: 60d348f92921d1f4b91443639a953a9d, type: 3}
       propertyPath: m_LocalPosition.z
@@ -4266,6 +4270,22 @@ PrefabInstance:
     - target: {fileID: 3446581111850902128, guid: 60d348f92921d1f4b91443639a953a9d, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: -216.10123
+      objectReference: {fileID: 0}
+    - target: {fileID: 4360746602669318107, guid: 60d348f92921d1f4b91443639a953a9d, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: -350
+      objectReference: {fileID: 0}
+    - target: {fileID: 4360746602669318107, guid: 60d348f92921d1f4b91443639a953a9d, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: -50
+      objectReference: {fileID: 0}
+    - target: {fileID: 4360746602669318107, guid: 60d348f92921d1f4b91443639a953a9d, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4360746602669318107, guid: 60d348f92921d1f4b91443639a953a9d, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 4548575377296103942, guid: 60d348f92921d1f4b91443639a953a9d, type: 3}
       propertyPath: m_AnchorMax.y
@@ -5605,7 +5625,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_TargetDisplay: 0
 --- !u!224 &1304203861
 RectTransform:
@@ -7382,7 +7402,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.UI.InventoryUIManager
   installer: {fileID: 1870906752}
   inventoryRoot: {fileID: 964676543}
-  actionBarInstaller: {fileID: 0}
+  actionBarInstaller: {fileID: 1304203857}
   resourceDefinitions:
   - {fileID: 11400000, guid: aa66a337d0db20b48a0fa1a898784f0e, type: 2}
   - {fileID: 11400000, guid: 1a517227434bc244ea2f70fd56b7c1b2, type: 2}

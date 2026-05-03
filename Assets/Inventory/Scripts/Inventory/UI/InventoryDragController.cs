@@ -43,6 +43,10 @@ namespace InventorySystem.UI
             _onDroppedOutside = onDroppedOutside;
             _dragIcon.raycastTarget = false;
             _dragIcon.gameObject.SetActive(false);
+
+            var rt = _dragIcon.rectTransform;
+            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
         }
 
         public void Dispose()
@@ -138,18 +142,19 @@ namespace InventorySystem.UI
             MoveDragIcon(pointerPanelPos);
         }
 
-        private void MoveDragIcon(Vector2 pointerPanelPos)
+        private void MoveDragIcon(Vector2 pointerScreenPos)
         {
+            var dragRect = _dragIcon.rectTransform;
+            var parentRect = dragRect.parent as RectTransform;
+            if (parentRect == null) return;
+
             if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                    _canvas.transform as RectTransform,
-                    pointerPanelPos,
+                    parentRect,
+                    pointerScreenPos,
                     _canvas.worldCamera,
                     out var local))
-            {
                 return;
-            }
 
-            var dragRect = _dragIcon.rectTransform;
             dragRect.anchoredPosition = local;
         }
 

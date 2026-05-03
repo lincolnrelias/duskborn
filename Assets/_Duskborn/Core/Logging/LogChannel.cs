@@ -18,6 +18,7 @@ namespace Duskborn
         Loot             = 13,
         DebugController  = 14,
         HitboxDebugger   = 15,
+    ActionBar        = 16,
     }
 
     [System.Flags]
@@ -40,6 +41,7 @@ namespace Duskborn
         Loot             = 1 << 13,
         DebugController  = 1 << 14,
         HitboxDebugger   = 1 << 15,
-        All              = ~0,
+    ActionBar        = 1 << 16,
+    All              = ~0,
     }
 }

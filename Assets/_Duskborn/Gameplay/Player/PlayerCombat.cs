@@ -4,6 +4,7 @@ using FishNet.Object;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Duskborn.Core;
+using Duskborn.Gameplay.ActionBar;
 using Duskborn.Gameplay.Classes;
 using Duskborn.Gameplay.Enemies;
 using Duskborn.Gameplay.Loot;
@@ -17,6 +18,7 @@ namespace Duskborn.Gameplay.Player
         [SerializeField] private float              attackRange   = 2f;
         [SerializeField] private LayerMask          enemyLayer;
         [SerializeField] private AttackRangeTrigger attackTrigger;
+        private ActionBarInstaller actionBarInstaller;
 
         public LayerMask EnemyLayer => enemyLayer;
 
@@ -39,6 +41,18 @@ namespace Duskborn.Gameplay.Player
             _classAbility      = GetComponent<ClassAbility>();
             _resourceInventory = GetComponent<ResourceInventory>();
             _attackCollider    = attackTrigger != null ? attackTrigger.GetComponent<SphereCollider>() : null;
+        }
+
+        public override void OnStartClient()
+        {
+            base.OnStartClient();
+            if (!IsOwner) return;
+
+            if (actionBarInstaller == null)
+                actionBarInstaller = FindAnyObjectByType<ActionBarInstaller>();
+
+            if (actionBarInstaller == null)
+                DuskLog.Warn(LogChannel.ActionBar, "PlayerCombat: no ActionBarInstaller found in scene.");
         }
 
         private void OnEnable()
@@ -94,24 +108,78 @@ namespace Duskborn.Gameplay.Player
                 _prevLinkedNode = _linkedNode;
             }
 
-            if (Input.GetMouseButtonDown(0)) TryAttack();
-            if (Input.GetKeyDown(KeyCode.Q))  TryAbility();
+            if (Input.GetKeyDown(KeyCode.Q)) TryAbility();
+
+            float scroll = Mouse.current?.scroll.ReadValue().y ?? 0f;
+            if (scroll > 0f) actionBarInstaller?.Service.SelectPrevious();
+            else if (scroll < 0f) actionBarInstaller?.Service.SelectNext();
+
+            var kb = Keyboard.current;
+            if (kb != null)
+                for (int i = 0; i < 8; i++)
+                    if (kb[(Key)(Key.Digit1 + i)].wasPressedThisFrame)
+                        { actionBarInstaller?.Service.SelectSlot(i); break; }
         }
+
+        // ── Primary Action (LMB) ─────────────────────────────────────────────
 
         public void OnAttack(InputValue _)
         {
             if (!IsOwner) return;
-            TryAttack();
+            TryPrimaryAction();
         }
 
-        // ── Basic Attack ──────────────────────────────────────────────────────
+        private void TryPrimaryAction()
+        {
+            if (!_stats.IsAlive || _cooldown > 0f) return;
+
+            var item = actionBarInstaller?.Service.GetSelectedItem();
+            if (item is ILeftClickAction action)
+            {
+                _cooldown = 1f / Mathf.Max(_stats.AttackSpeed, 0.01f);
+                action.OnLeftClick(BuildContext());
+            }
+            else
+            {
+                TryAttack();
+            }
+        }
+
+        // ── Secondary Action (RMB) ───────────────────────────────────────────
+
+        public void OnUseSecondary(InputValue _)
+        {
+            if (!IsOwner) return;
+            TrySecondaryAction();
+        }
+
+        private void TrySecondaryAction()
+        {
+            if (!_stats.IsAlive) return;
+            var item = actionBarInstaller?.Service.GetSelectedItem();
+            (item as IRightClickAction)?.OnRightClick(BuildContext());
+        }
+
+        // ── Slot Navigation ──────────────────────────────────────────────────
+
+        public void OnPrevious(InputValue _)
+        {
+            if (!IsOwner) return;
+            actionBarInstaller?.Service.SelectPrevious();
+        }
+
+        public void OnNext(InputValue _)
+        {
+            if (!IsOwner) return;
+            actionBarInstaller?.Service.SelectNext();
+        }
+
+        // ── Basic Attack (punch / fallback) ──────────────────────────────────
 
         private void TryAttack()
         {
-            if (!_stats.IsAlive || _cooldown > 0f) return;
             _cooldown = 1f / Mathf.Max(_stats.AttackSpeed, 0.01f);
 
-            // Local hitbox flash for the owner.
             if (_attackCollider != null)
             {
                 Vector3 worldCenter = attackTrigger.transform.TransformPoint(_attackCollider.center);
@@ -170,6 +238,30 @@ namespace Duskborn.Gameplay.Player
             _classAbility?.TryUseAbility();
         }
 
+        // ── Item Consume ──────────────────────────────────────────────────────
+
+        public void RequestConsumeItem(int slotIndex, float healAmount)
+        {
+            if (!IsOwner) return;
+            RequestConsumeItemRpc(slotIndex, healAmount);
+        }
+
+        [ServerRpc]
+        private void RequestConsumeItemRpc(int slotIndex, float healAmount)
+        {
+            if (!_stats.IsAlive) return;
+            _stats.Heal(healAmount);
+            DuskLog.Log(LogChannel.ActionBar, $"Consumed item in slot {slotIndex} for {healAmount:F1} HP.");
+            RpcConfirmConsume(Owner, slotIndex);
+        }
+
+        [TargetRpc]
+        private void RpcConfirmConsume(NetworkConnection conn, int slotIndex)
+        {
+            actionBarInstaller?.Service.Service.RemoveItem(slotIndex);
+            DuskLog.Log(LogChannel.ActionBar, $"Item consumed from slot {slotIndex}.");
+        }
+
         // ── Resource Node ─────────────────────────────────────────────────────
 
         [ServerRpc]
@@ -193,6 +285,12 @@ namespace Duskborn.Gameplay.Player
         }
 
         // ─────────────────────────────────────────────────────────────────────
+
+        private ActionContext BuildContext()
+        {
+            var bar = actionBarInstaller?.Service;
+            return new ActionContext(this, _stats, bar, bar?.SelectedIndex ?? 0);
+        }
 
         private void RefreshLinkedNode()
         {

@@ -45,7 +45,7 @@ namespace InventorySystem.Bootstrap
         public IInventory Inventory => _service;
         public IReadOnlyList<InventorySlotView> SlotViews => _presenter?.SlotElements;
 
-        public event Action<IInventoryItem> OnItemDroppedOutside;
+        public event Action<IInventoryItem, int> OnItemDroppedOutside;
 
 #if UNITY_EDITOR
         [ContextMenu("Populate Slots")]
@@ -100,7 +100,7 @@ namespace InventorySystem.Bootstrap
                 dragIcon,
                 gridController.HoldThresholdSeconds,
                 gridRoot,
-                item => OnItemDroppedOutside?.Invoke(item));
+                (item, srcSlot) => OnItemDroppedOutside?.Invoke(item, srcSlot));
 
             _tooltipController = new InventoryTooltipController(
                 _service,

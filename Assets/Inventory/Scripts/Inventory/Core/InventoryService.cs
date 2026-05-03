@@ -58,6 +58,17 @@ namespace InventorySystem.Core
             return false;
         }
 
+        public bool TryPlaceItemAt(int index, IInventoryItem item)
+        {
+            if (!IsValidIndex(index) || item == null || !_slots[index].IsEmpty || !CanPlaceAt(index, item))
+                return false;
+
+            _slots[index].SetItem(item);
+            ItemAdded?.Invoke(new ItemAddedEvent(index, item));
+            InventoryChanged?.Invoke();
+            return true;
+        }
+
         public bool TryMoveItem(int fromIndex, int toIndex)
         {
             if (!IsValidOccupiedSource(fromIndex) || !IsValidIndex(toIndex) || fromIndex == toIndex)

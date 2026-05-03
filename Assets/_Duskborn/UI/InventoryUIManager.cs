@@ -136,12 +136,24 @@ namespace Duskborn.UI
 
         // Called when an item is dragged out of the main inventory and released with no valid target.
         // The drag controller has already removed it from the inventory service.
-        private void OnInventoryItemDroppedOutside(IInventoryItem item)
+        private void OnInventoryItemDroppedOutside(IInventoryItem item, int sourceSlot)
         {
             if (_hoveredActionBarSlot >= 0 && actionBarInstaller != null)
             {
-                actionBarInstaller.Service.Service.TryAddItem(item, out _);
-                DuskLog.Log(LogChannel.ActionBar, $"Transferred '{item.DisplayName}' from inventory to action bar.");
+                var abService = actionBarInstaller.Service.Service;
+                var displaced = abService.GetItem(_hoveredActionBarSlot);
+                if (displaced != null)
+                {
+                    abService.RemoveItem(_hoveredActionBarSlot);
+                    abService.TryPlaceItemAt(_hoveredActionBarSlot, item);
+                    installer.Service.TryPlaceItemAt(sourceSlot, displaced);
+                    DuskLog.Log(LogChannel.ActionBar, $"Swapped '{item.DisplayName}' (inventory→action bar slot {_hoveredActionBarSlot}) with '{displaced.DisplayName}'.");
+                }
+                else
+                {
+                    abService.TryPlaceItemAt(_hoveredActionBarSlot, item);
+                    DuskLog.Log(LogChannel.ActionBar, $"Moved '{item.DisplayName}' from inventory to action bar slot {_hoveredActionBarSlot}.");
+                }
                 return;
             }
 
@@ -150,12 +162,23 @@ namespace Duskborn.UI
 
         // Called when an item is dragged out of the action bar and released with no valid target.
         // The drag controller has already removed it from the action bar service.
-        private void OnActionBarItemDroppedOutside(IInventoryItem item)
+        private void OnActionBarItemDroppedOutside(IInventoryItem item, int sourceSlot)
         {
             if (_hoveredInventorySlot >= 0 && InstallerReady)
             {
-                installer.Inventory.TryAddItem(item, out _);
-                DuskLog.Log(LogChannel.ActionBar, $"Transferred '{item.DisplayName}' from action bar to inventory.");
+                var displaced = installer.Service.GetItem(_hoveredInventorySlot);
+                if (displaced != null)
+                {
+                    installer.Service.RemoveItem(_hoveredInventorySlot);
+                    installer.Service.TryPlaceItemAt(_hoveredInventorySlot, item);
+                    actionBarInstaller.Service.Service.TryPlaceItemAt(sourceSlot, displaced);
+                    DuskLog.Log(LogChannel.ActionBar, $"Swapped '{item.DisplayName}' (action bar→inventory slot {_hoveredInventorySlot}) with '{displaced.DisplayName}'.");
+                }
+                else
+                {
+                    installer.Service.TryPlaceItemAt(_hoveredInventorySlot, item);
+                    DuskLog.Log(LogChannel.ActionBar, $"Moved '{item.DisplayName}' from action bar to inventory slot {_hoveredInventorySlot}.");
+                }
                 return;
             }
             // Item is discarded if not dropped over a valid slot.

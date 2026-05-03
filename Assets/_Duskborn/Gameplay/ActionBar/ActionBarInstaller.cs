@@ -31,7 +31,7 @@ namespace Duskborn.Gameplay.ActionBar
         public ActionBarService                   Service    => _service;
         public IReadOnlyList<InventorySlotView>   SlotViews  => _presenter?.SlotElements;
 
-        public event Action<IInventoryItem> OnItemDroppedOutside;
+        public event Action<IInventoryItem, int> OnItemDroppedOutside;
 
         private void Awake()
         {
@@ -60,7 +60,7 @@ namespace Duskborn.Gameplay.ActionBar
                 dragIcon,
                 gridController.HoldThresholdSeconds,
                 actionBarRoot,
-                item => OnItemDroppedOutside?.Invoke(item));
+                (item, srcSlot) => OnItemDroppedOutside?.Invoke(item, srcSlot));
 
             _service.SelectedSlotChanged += RefreshSelectionHighlight;
             RefreshSelectionHighlight(_service.SelectedIndex);

@@ -17,7 +17,7 @@ namespace InventorySystem.UI
         private readonly Image _dragIcon;
         private readonly float _holdThreshold;
         private readonly RectTransform _panelBoundsRect;
-        private readonly Action<IInventoryItem> _onDroppedOutside;
+        private readonly Action<IInventoryItem, int> _onDroppedOutside;
 
         private bool _isPressing;
         private bool _isDragging;
@@ -32,7 +32,7 @@ namespace InventorySystem.UI
             Image dragIcon,
             float holdThreshold,
             RectTransform panelBoundsRect = null,
-            Action<IInventoryItem> onDroppedOutside = null)
+            Action<IInventoryItem, int> onDroppedOutside = null)
         {
             _service = service ?? throw new ArgumentNullException(nameof(service));
             _presenter = presenter ?? throw new ArgumentNullException(nameof(presenter));
@@ -174,7 +174,7 @@ namespace InventorySystem.UI
                     if (droppedItem != null)
                     {
                         _service.RemoveItem(_sourceSlotIndex);
-                        _onDroppedOutside.Invoke(droppedItem);
+                        _onDroppedOutside.Invoke(droppedItem, _sourceSlotIndex);
                     }
                 }
                 return;

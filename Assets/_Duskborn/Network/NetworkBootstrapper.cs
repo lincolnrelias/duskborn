@@ -23,13 +23,13 @@ namespace Duskborn.Network
 
             if (isHost)
             {
-                Debug.Log("[Network] This instance is HOST");
+                DuskLog.Log(LogChannel.Network, "This instance is HOST");
                 InstanceFinder.ServerManager.StartConnection(port);
                 InstanceFinder.ClientManager.StartConnection("localhost", port);
             }
             else
             {
-                Debug.Log("[Network] This instance is CLIENT");
+                DuskLog.Log(LogChannel.Network, "This instance is CLIENT");
                 InstanceFinder.ClientManager.StartConnection("localhost", port);
             }
         }

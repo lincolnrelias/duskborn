@@ -82,7 +82,7 @@ namespace Duskborn.Gameplay.Player
             var prefab = WorldDropRegistry.Instance?.GetDropPrefab(resourceId);
             if (prefab == null)
             {
-                Debug.LogWarning($"[PlayerInteractor] No drop prefab for '{resourceId}' in WorldDropRegistry.");
+                DuskLog.Warn(LogChannel.PlayerInteractor, $"No drop prefab for '{resourceId}' in WorldDropRegistry.");
                 return;
             }
 

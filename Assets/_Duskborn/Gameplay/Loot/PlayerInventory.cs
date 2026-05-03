@@ -22,7 +22,7 @@ namespace Duskborn.Gameplay.Loot
             _buffs.Add(item);
             ApplyAll();
             BuffAdded?.Invoke(item);
-            Debug.Log($"[Buffs] Collected: {item.ItemName} ({item.Rarity}) — {item.EffectType} +{item.EffectValue}");
+            DuskLog.Log(LogChannel.Inventory, $"Collected: {item.ItemName} ({item.Rarity}) — {item.EffectType} +{item.EffectValue}");
         }
 
         private void ApplyAll()

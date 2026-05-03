@@ -52,7 +52,7 @@ namespace Duskborn.Core
             if (!IsServerStarted) return;
             if (CurrentState != GameState.Running) return;
             SetState(GameState.GameOver);
-            Debug.Log($"[GameStateManager] Game Over — survived {NightsSurvived} nights.");
+            DuskLog.Log(LogChannel.GameState, $"Game Over — survived {NightsSurvived} nights.");
         }
 
         public void TriggerWin()
@@ -60,7 +60,7 @@ namespace Duskborn.Core
             if (!IsServerStarted) return;
             if (CurrentState != GameState.Running) return;
             SetState(GameState.Win);
-            Debug.Log("[GameStateManager] Run complete — boss defeated!");
+            DuskLog.Log(LogChannel.GameState, "Run complete — boss defeated!");
         }
 
         private void SetState(GameState state) => _stateSync.Value = state;

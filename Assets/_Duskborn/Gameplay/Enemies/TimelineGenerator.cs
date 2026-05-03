@@ -33,7 +33,7 @@ namespace Duskborn.Gameplay.Enemies
             var allEntries = MergeEntries(def.Pools);
             if (allEntries.Count == 0)
             {
-                Debug.LogWarning($"[TimelineGenerator] Night {def.NightNumber} has no valid pool entries.");
+                DuskLog.Warn(LogChannel.Wave, $"Night {def.NightNumber} has no valid pool entries.");
                 return new SpawnTimeline(new List<SpawnEvent>(), 0f, def.NightNumber);
             }
 
@@ -47,8 +47,8 @@ namespace Duskborn.Gameplay.Enemies
             // Step 4: Distribute across nightDuration with jitter.
             var events = DistributeAcrossNight(shuffled, nightDuration, rng);
 
-            Debug.Log($"[TimelineGenerator] Night {def.NightNumber}: {events.Count} enemies, " +
-                      $"{spent:F0}/{budget:F0} budget spent.");
+            DuskLog.Log(LogChannel.Wave, $"Night {def.NightNumber}: {events.Count} enemies, " +
+                        $"{spent:F0}/{budget:F0} budget spent.");
 
             return new SpawnTimeline(events, spent, def.NightNumber);
         }

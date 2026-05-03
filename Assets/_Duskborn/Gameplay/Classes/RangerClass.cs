@@ -38,7 +38,7 @@ namespace Duskborn.Gameplay.Classes
 
         public override void TryUseAbility()
         {
-            Debug.Log("[Ranger] Rain of Arrows — not yet implemented.");
+            DuskLog.Log(LogChannel.Ranger, "Rain of Arrows — not yet implemented.");
         }
     }
 }

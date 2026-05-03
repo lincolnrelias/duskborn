@@ -87,7 +87,7 @@ namespace Duskborn.UI
                     }
                     else
                     {
-                        Debug.LogWarning($"[InventoryUI] No ResourceInventory on {combat.name}");
+                        DuskLog.Warn(LogChannel.Inventory, $"No ResourceInventory on {combat.name}");
                     }
                 }
 

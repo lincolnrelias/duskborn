@@ -87,7 +87,7 @@ namespace Duskborn.Gameplay.Enemies
             {
                 if (!_warnedNoTarget)
                 {
-                    Debug.LogWarning($"[{name}] No target found — PlayerRegistry may be empty.");
+                    DuskLog.Warn(LogChannel.Enemy, $"{name}: No target found — PlayerRegistry may be empty.");
                     _warnedNoTarget = true;
                 }
                 return;
@@ -97,7 +97,7 @@ namespace Duskborn.Gameplay.Enemies
             {
                 if (!_warnedNoNavMesh)
                 {
-                    Debug.LogWarning($"[{name}] NavMeshAgent is not on a NavMesh.");
+                    DuskLog.Warn(LogChannel.Enemy, $"{name}: NavMeshAgent is not on a NavMesh.");
                     _warnedNoNavMesh = true;
                 }
                 return;

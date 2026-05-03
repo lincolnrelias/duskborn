@@ -75,7 +75,7 @@ namespace Duskborn.Gameplay.Loot
 
             if (lootTable == null || lootTable.Items == null || lootTable.Items.Length == 0)
             {
-                Debug.LogWarning($"[Chest] {name} has no loot table assigned.");
+                DuskLog.Warn(LogChannel.Loot, $"{name} has no loot table assigned.");
                 return;
             }
 
@@ -85,7 +85,7 @@ namespace Duskborn.Gameplay.Loot
 
             if (GoldManager.Instance == null || !GoldManager.Instance.TrySpend(cost))
             {
-                Debug.Log($"[Chest] Not enough gold (need {cost}).");
+                DuskLog.Log(LogChannel.Loot, $"Not enough gold (need {cost}).");
                 return;
             }
 

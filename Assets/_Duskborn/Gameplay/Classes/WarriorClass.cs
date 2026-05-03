@@ -69,7 +69,7 @@ namespace Duskborn.Gameplay.Classes
         {
             if (_cleaveCooldownRemaining > 0f)
             {
-                Debug.Log($"[Warrior] Cleave on cooldown ({_cleaveCooldownRemaining:F1}s)");
+                DuskLog.Log(LogChannel.Warrior, $"Cleave on cooldown ({_cleaveCooldownRemaining:F1}s)");
                 return;
             }
 
@@ -93,7 +93,7 @@ namespace Duskborn.Gameplay.Classes
                 count++;
             }
 
-            Debug.Log($"[Warrior] Cleave hit {count} enemies.");
+            DuskLog.Log(LogChannel.Warrior, $"Cleave hit {count} enemies.");
         }
     }
 }

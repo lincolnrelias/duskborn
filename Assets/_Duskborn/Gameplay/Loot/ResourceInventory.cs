@@ -21,7 +21,7 @@ namespace Duskborn.Gameplay.Loot
         public void Add(string resourceId, int amount)
         {
             _counts[resourceId] = GetCount(resourceId) + amount;
-            Debug.Log($"[Resources] +{amount} {resourceId}  (total: {_counts[resourceId]})");
+            DuskLog.Log(LogChannel.Inventory, $"+{amount} {resourceId}  (total: {_counts[resourceId]})");
             ResourceChanged?.Invoke(resourceId, _counts[resourceId]);
         }
 

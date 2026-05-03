@@ -147,7 +147,7 @@ namespace Duskborn.Gameplay.Player
                 enemy.TakeDamage(damage);
                 hitEnemies.Add(enemy);
 
-                Debug.Log($"[Combat] Hit {col.name} — {damage:F1}{(isCrit ? " CRIT" : "")}");
+                DuskLog.Log(LogChannel.Combat, $"Hit {col.name} — {damage:F1}{(isCrit ? " CRIT" : "")}");
             }
 
             if (hitEnemies.Count > 0)

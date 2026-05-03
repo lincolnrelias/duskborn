@@ -27,10 +27,10 @@ namespace Duskborn.Core
             var cycle = DayNightCycle.Instance;
             if (cycle == null || cycle.Phase != DayPhase.Day)
             {
-                Debug.Log("[Debug] Not in day phase.");
+                DuskLog.Log(LogChannel.DebugController, "Not in day phase.");
                 return;
             }
-            Debug.Log("[Debug] F1 — Skipping day.");
+            DuskLog.Log(LogChannel.DebugController, "F1 — Skipping day.");
             cycle.ForceEndCurrentPhase();
         }
 
@@ -39,31 +39,31 @@ namespace Duskborn.Core
             var cycle = DayNightCycle.Instance;
             if (cycle == null || cycle.Phase != DayPhase.Night)
             {
-                Debug.Log("[Debug] Not in night phase.");
+                DuskLog.Log(LogChannel.DebugController, "Not in night phase.");
                 return;
             }
-            Debug.Log("[Debug] F2 — Forcing night end.");
+            DuskLog.Log(LogChannel.DebugController, "F2 — Forcing night end.");
             cycle.ForceEndNight();
         }
 
         private void DamageAllPlayers(float amount)
         {
-            Debug.Log($"[Debug] F3 — Dealing {amount} damage to all players.");
+            DuskLog.Log(LogChannel.DebugController, $"F3 — Dealing {amount} damage to all players.");
             foreach (var p in Duskborn.Gameplay.Player.PlayerRegistry.All)
                 p.TakeDamage(amount);
         }
 
         private void PrintTimeline()
         {
-            if (waveManager == null) { Debug.Log("[Debug] No WaveManager assigned."); return; }
+            if (waveManager == null) { DuskLog.Log(LogChannel.DebugController, "No WaveManager assigned."); return; }
             var tl = waveManager.ActiveTimeline;
-            if (tl == null) { Debug.Log("[Debug] No active timeline."); return; }
+            if (tl == null) { DuskLog.Log(LogChannel.DebugController, "No active timeline."); return; }
 
             var sb = new System.Text.StringBuilder();
-            sb.AppendLine($"[Debug] {tl}");
+            sb.AppendLine($"{tl}");
             foreach (var evt in tl.Events)
                 sb.AppendLine($"  {evt}");
-            Debug.Log(sb.ToString());
+            DuskLog.Log(LogChannel.DebugController, sb.ToString());
         }
     }
 }

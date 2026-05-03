@@ -12,7 +12,7 @@ namespace Duskborn.Gameplay.Classes
         {
             if (definition == null)
             {
-                Debug.LogWarning("[PlayerClass] No ClassDefinition assigned.");
+                DuskLog.Warn(LogChannel.PlayerClass, "No ClassDefinition assigned.");
                 return;
             }
 
@@ -22,7 +22,7 @@ namespace Duskborn.Gameplay.Classes
                 definition.Damage,
                 definition.AttackSpeed);
 
-            Debug.Log($"[PlayerClass] Applied: {definition.ClassName}");
+            DuskLog.Log(LogChannel.PlayerClass, $"Applied: {definition.ClassName}");
         }
     }
 }

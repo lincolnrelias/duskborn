@@ -5,7 +5,15 @@
       "Bash(git remote *)",
       "Bash(git add *)",
       "Bash(git push *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\linco\\\\Mugg\\\\Assets\\\\_Duskborn\\\\Gameplay\\\\Loot\\\\ResourceType.cs\" -Force)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\linco\\\\Mugg\\\\Assets\\\\_Duskborn\\\\Gameplay\\\\Loot\\\\ResourceType.cs.meta\" -ErrorAction SilentlyContinue -Force)",
+      "Bash(Write-Output \"done\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\linco\\\\Mugg\\\\Assets\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(Get-ChildItem -Path \"Assets\" -Recurse -Filter \"*.cs\" -File)",
+      "Bash(Measure-Object)",
+      "Bash(Select-Object -ExpandProperty Count)"
     ]
   }
 }

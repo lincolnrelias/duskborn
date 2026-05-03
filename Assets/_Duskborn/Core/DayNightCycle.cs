@@ -80,7 +80,7 @@ namespace Duskborn.Core
             _isDaySync.Value     = true;
             _timeRemaining.Value = dayDuration;
             BroadcastDayStartRpc();
-            Debug.Log($"[DayNightCycle] Day {_nightSync.Value + 1} begins. ({dayDuration}s)");
+            DuskLog.Log(LogChannel.DayNightCycle, $"Day {_nightSync.Value + 1} begins. ({dayDuration}s)");
         }
 
         private void BeginNight()
@@ -96,14 +96,14 @@ namespace Duskborn.Core
             _isDaySync.Value     = false;
             _timeRemaining.Value = nightDuration;
             BroadcastNightStartRpc(_nightSync.Value);
-            Debug.Log($"[DayNightCycle] Night {_nightSync.Value} begins.");
+            DuskLog.Log(LogChannel.DayNightCycle, $"Night {_nightSync.Value} begins.");
         }
 
         private void EndNight()
         {
             BroadcastNightEndRpc(_nightSync.Value);
             GameStateManager.Instance?.RegisterNightSurvived();
-            Debug.Log($"[DayNightCycle] Night {_nightSync.Value} ends.");
+            DuskLog.Log(LogChannel.DayNightCycle, $"Night {_nightSync.Value} ends.");
 
             if (_nightSync.Value >= TotalNights)
             {
@@ -119,7 +119,7 @@ namespace Duskborn.Core
             _isDaySync.Value     = false;
             _timeRemaining.Value = float.MaxValue;
             BroadcastNightStartRpc(_nightSync.Value);
-            Debug.Log("[DayNightCycle] Night 7 — Boss fight begins. Timer suspended.");
+            DuskLog.Log(LogChannel.DayNightCycle, "Night 7 — Boss fight begins. Timer suspended.");
         }
 
         // ── ObserversRpcs fire events on all clients (RunLocally = true includes the server) ──

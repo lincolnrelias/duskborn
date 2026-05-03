@@ -29,7 +29,7 @@ namespace Duskborn.Core
         {
             Seed = seed;
             RNG = new SeededRNG(seed);
-            Debug.Log($"[GameSession] Seed initialized: {seed}");
+            DuskLog.Log(LogChannel.GameSession, $"Seed initialized: {seed}");
         }
 
         // Host calls this; clients receive seed via network and also call this.

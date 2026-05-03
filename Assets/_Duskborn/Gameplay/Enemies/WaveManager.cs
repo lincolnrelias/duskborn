@@ -55,7 +55,7 @@ namespace Duskborn.Gameplay.Enemies
         {
             if (enemyRegistry == null)
             {
-                Debug.LogError("[WaveManager] No EnemyPrefabRegistry assigned.");
+                DuskLog.Error(LogChannel.Wave, "No EnemyPrefabRegistry assigned.");
                 return;
             }
 
@@ -99,7 +99,7 @@ namespace Duskborn.Gameplay.Enemies
             _aliveCount       = 0;
             _waveActive       = true;
 
-            Debug.Log($"[WaveManager] {_activeTimeline}");
+            DuskLog.Log(LogChannel.Wave, $"{_activeTimeline}");
         }
 
         private void OnNightEnd(int _)
@@ -128,7 +128,7 @@ namespace Duskborn.Gameplay.Enemies
         {
             if (!_pools.TryGetValue(evt.EnemyType, out EnemyPool pool) || pool == null)
             {
-                Debug.LogWarning($"[WaveManager] No pool for {evt.EnemyType}.");
+                DuskLog.Warn(LogChannel.Wave, $"No pool for {evt.EnemyType}.");
                 return;
             }
 

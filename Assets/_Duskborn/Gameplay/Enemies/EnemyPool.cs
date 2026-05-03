@@ -35,7 +35,7 @@ namespace Duskborn.Gameplay.Enemies
         {
             if (_prefab == null)
             {
-                Debug.LogError("[EnemyPool] No prefab set. Call Initialize first.");
+                DuskLog.Error(LogChannel.Enemy, "No prefab set. Call Initialize first.");
                 return null;
             }
 

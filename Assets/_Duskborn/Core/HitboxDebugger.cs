@@ -55,7 +55,7 @@ namespace Duskborn.Core
             if (Input.GetKeyDown(toggleKey))
             {
                 _enabled = !_enabled;
-                Debug.Log($"[HitboxDebugger] {(_enabled ? "ON" : "OFF")}  ({toggleKey} to toggle)");
+                DuskLog.Log(LogChannel.HitboxDebugger, $"{(_enabled ? "ON" : "OFF")}  ({toggleKey} to toggle)");
                 if (!_enabled) ReturnAll();
             }
 

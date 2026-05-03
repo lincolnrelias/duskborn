@@ -15,7 +15,7 @@ namespace Duskborn.Gameplay.Classes
     {
         public override void TryUseAbility()
         {
-            Debug.Log("[Mage] Arcane Burst — not yet implemented.");
+            DuskLog.Log(LogChannel.Mage, "Arcane Burst — not yet implemented.");
         }
     }
 }

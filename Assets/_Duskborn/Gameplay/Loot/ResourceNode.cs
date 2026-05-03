@@ -58,7 +58,7 @@ namespace Duskborn.Gameplay.Loot
             if (_hitsRemaining <= 0) return false;
 
             _hitsRemaining--;
-            Debug.Log($"[ResourceNode] {name} hit — {_hitsRemaining}/{hitsToBreak} remaining");
+            DuskLog.Log(LogChannel.Loot, $"{name} hit — {_hitsRemaining}/{hitsToBreak} remaining");
 
             if (_hitsRemaining > 0) return false;
 

@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using Duskborn.Core;
 using Duskborn.Gameplay.Enemies;
+using Duskborn.Gameplay.Equipment;
 using Duskborn.Gameplay.Loot;
 using Duskborn.Gameplay.Player;
 
@@ -15,21 +17,33 @@ namespace Duskborn.UI
     {
         [SerializeField] private WaveManager waveManager;
 
-        private PlayerBuffContainer   _inventory;
-        private ResourceInventory _resources;
+        private PlayerBuffContainer      _inventory;
+        private ResourceInventory        _resources;
+        private PlayerStats              _stats;
+        private PlayerEquipmentContainer _equipment;
+
         private GUIStyle _boxStyle;
         private GUIStyle _labelStyle;
-        private bool _stylesReady;
+        private bool     _stylesReady;
+        private bool     _showStats;
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.C))
+                _showStats = !_showStats;
+        }
 
         // Deferred — players may not be spawned yet at Start.
         private void TryCacheLocalPlayer()
         {
-            if (_inventory != null && _resources != null) return;
+            if (_inventory != null && _resources != null && _stats != null) return;
             foreach (var combat in FindObjectsByType<PlayerCombat>(FindObjectsSortMode.None))
             {
                 if (!combat.IsOwner) continue;
-                _inventory ??= combat.GetComponent<PlayerBuffContainer>();
-                _resources ??= combat.GetComponent<ResourceInventory>();
+                _inventory  ??= combat.GetComponent<PlayerBuffContainer>();
+                _resources  ??= combat.GetComponent<ResourceInventory>();
+                _stats      ??= combat.GetComponent<PlayerStats>();
+                _equipment  ??= combat.GetComponent<PlayerEquipmentContainer>();
                 break;
             }
         }
@@ -59,6 +73,14 @@ namespace Duskborn.UI
             TryCacheLocalPlayer();
             if (!_stylesReady) BuildStyles();
 
+            DrawMainHUD();
+
+            if (_showStats && _stats != null)
+                DrawStatPanel();
+        }
+
+        private void DrawMainHUD()
+        {
             var cycle = DayNightCycle.Instance;
             var state = GameStateManager.Instance;
 
@@ -70,9 +92,8 @@ namespace Duskborn.UI
             int    pending = waveManager != null ? waveManager.RemainingEvents       : 0;
             int    gold    = GoldManager.Instance != null ? GoldManager.Instance.Gold : 0;
 
-            // Per-player HP
             var players = PlayerRegistry.All;
-            var sb = new System.Text.StringBuilder();
+            var sb = new StringBuilder();
             sb.AppendLine($"Phase:   {phase}  (Night {night})");
             sb.AppendLine($"Timer:   {timer}");
             sb.AppendLine($"State:   {gstate}");
@@ -94,11 +115,49 @@ namespace Duskborn.UI
             sb.AppendLine("─────────────────");
             sb.AppendLine("F1 Skip day  F2 End night");
             sb.AppendLine("F3 Damage    F4 Print timeline");
+            sb.AppendLine("C  Toggle stats");
 
-            float w = 260f, h = 200f;
+            float w = 260f, h = 220f;
             GUI.Box(new Rect(10, 10, w, h), GUIContent.none, _boxStyle);
             GUI.Label(new Rect(18, 14, w - 8, h - 4), sb.ToString(), _labelStyle);
         }
+
+        private void DrawStatPanel()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("── Player Stats ─────────");
+            sb.AppendLine($"HP:          {_stats.CurrentHP:F0} / {_stats.MaxHP:F0}");
+            sb.AppendLine($"Damage:      {_stats.Damage:F1}");
+            sb.AppendLine($"Move Speed:  {_stats.MoveSpeed:F2}");
+            sb.AppendLine($"Atk Speed:   {_stats.AttackSpeed:F2}");
+            sb.AppendLine($"Crit:        {_stats.CritChance * 100f:F0}%");
+            sb.AppendLine($"Dmg Reduc:   {(1f - _stats.IncomingDamageMultiplier) * 100f:F0}%");
+            sb.AppendLine("─────────────────────────");
+            sb.AppendLine("Equipped");
+
+            var slots = System.Enum.GetValues(typeof(EquipmentSlot));
+            foreach (EquipmentSlot slot in slots)
+            {
+                var gear = _equipment != null ? _equipment.GetEquipped(slot) : null;
+                string slotName  = FormatSlotName(slot);
+                string itemLabel = gear != null ? gear.DisplayName : "—";
+                sb.AppendLine($"{slotName,-10} {itemLabel}");
+            }
+
+            const float w = 240f, h = 400f;
+            float x = Screen.width  - w - 10f;
+            float y = Screen.height - h - 10f;
+
+            GUI.Box(new Rect(x, y, w, h), GUIContent.none, _boxStyle);
+            GUI.Label(new Rect(x + 8f, y + 4f, w - 16f, h - 8f), sb.ToString(), _labelStyle);
+        }
+
+        private static string FormatSlotName(EquipmentSlot slot) => slot switch
+        {
+            EquipmentSlot.Ring1 => "Ring 1",
+            EquipmentSlot.Ring2 => "Ring 2",
+            _                   => slot.ToString(),
+        };
 
         private static Texture2D MakeTex(int width, int height, Color col)
         {

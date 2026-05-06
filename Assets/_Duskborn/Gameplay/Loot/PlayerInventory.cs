@@ -10,6 +10,9 @@ namespace Duskborn.Gameplay.Loot
     {
         public event Action<ItemDefinition> BuffAdded;
 
+        private Action _gearContributor;
+        public void RegisterGearContributor(Action contributor) => _gearContributor = contributor;
+
         public IReadOnlyList<ItemDefinition> Buffs => _buffs;
 
         private readonly List<ItemDefinition> _buffs = new();
@@ -25,7 +28,7 @@ namespace Duskborn.Gameplay.Loot
             DuskLog.Log(LogChannel.Inventory, $"Collected: {item.ItemName} ({item.Rarity}) — {item.EffectType} +{item.EffectValue}");
         }
 
-        private void ApplyAll()
+        public void ApplyAll()
         {
             _stats.DamageMultiplier         = 1f;
             _stats.HPMultiplier             = 1f;
@@ -33,6 +36,9 @@ namespace Duskborn.Gameplay.Loot
             _stats.AttackSpeedMultiplier    = 1f;
             _stats.CritChanceBonus          = 0f;
             _stats.IncomingDamageMultiplier = 1f;
+
+            // Gear first — buffs apply on top.
+            _gearContributor?.Invoke();
 
             foreach (var item in _buffs)
             {

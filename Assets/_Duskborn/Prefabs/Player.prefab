@@ -52,6 +52,7 @@ GameObject:
   - component: {fileID: 8975055612759417406}
   - component: {fileID: 5151783337402195587}
   - component: {fileID: 6522369960841906041}
+  - component: {fileID: 2395037130880916355}
   - component: {fileID: 5780092933335364822}
   - component: {fileID: 8514665050153253299}
   m_Layer: 0
@@ -195,6 +196,8 @@ MonoBehaviour:
   cameraSensitivity: 3
   gravityMultiplier: 2
   rotationSpeed: 720
+  accelTime: 0.15
+  decelTime: 0.08
   _animator: {fileID: 8116265279598197991}
 --- !u!114 &7734906760495636806
 MonoBehaviour:
@@ -320,6 +323,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 163317c4c779e6a46967411b6391fe5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &2395037130880916355
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7498212195385448204}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9bd029926fbeca640a156f8f9fab0647, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.PlayerEquipmentContainer
+  startingGear:
+  - {fileID: 11400000, guid: 0c259ec123fc52c438ea0d7b4d973984, type: 2}
+  - {fileID: 11400000, guid: 539327bb6de7a734ab459818fc02c96f, type: 2}
+  - {fileID: 11400000, guid: 2ef60dda97873e4428f91174061c52f0, type: 2}
+  - {fileID: 11400000, guid: c5f1fc34a5fc23f45bc0c04272f2478d, type: 2}
+  - {fileID: 11400000, guid: 5ba1162c89e3e58468289460fafef260, type: 2}
 --- !u!114 &5780092933335364822
 MonoBehaviour:
   m_ObjectHideFlags: 0

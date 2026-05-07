@@ -9,7 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7d789e7a2a45b4c4bb655f808d0c2818, type: 3}
-  m_Name: LoggerSettings
-  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.LoggerSettings
-  enabledChannels: 0
+  m_Script: {fileID: 11500000, guid: 552534900ef8941439a7e044bba8274b, type: 3}
+  m_Name: class_ranged
+  m_EditorClassIdentifier: 
+  ClassName: Ranged
+  MaxHP: 100
+  MoveSpeed: 7
+  Damage: 13
+  AttackSpeed: 1.5

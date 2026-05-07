@@ -13,6 +13,9 @@ namespace Duskborn.Gameplay.Loot
         private Action _gearContributor;
         public void RegisterGearContributor(Action contributor) => _gearContributor = contributor;
 
+        private Action _weaponContributor;
+        public void RegisterWeaponContributor(Action contributor) => _weaponContributor = contributor;
+
         public IReadOnlyList<ItemDefinition> Buffs => _buffs;
 
         private readonly List<ItemDefinition> _buffs = new();
@@ -37,8 +40,9 @@ namespace Duskborn.Gameplay.Loot
             _stats.CritChanceBonus          = 0f;
             _stats.IncomingDamageMultiplier = 1f;
 
-            // Gear first — buffs apply on top.
+            // Gear → active weapon → buffs.
             _gearContributor?.Invoke();
+            _weaponContributor?.Invoke();
 
             foreach (var item in _buffs)
             {

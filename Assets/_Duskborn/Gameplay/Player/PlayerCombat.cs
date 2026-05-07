@@ -193,6 +193,42 @@ namespace Duskborn.Gameplay.Player
             RequestAttackRpc();
         }
 
+        // Called by WeaponItem.OnLeftClick — cooldown already set by TryPrimaryAction.
+        public void TriggerAttack()
+        {
+            if (_linkedNode != null) RequestNodeHitRpc(_linkedNode.NetworkObject);
+            RequestAttackRpc();
+        }
+
+        // Called by WeaponItem.OnRightClick — 2× damage, 2× cooldown.
+        public void TriggerHeavyAttack()
+        {
+            if (!_stats.IsAlive || _cooldown > 0f) return;
+            _cooldown = 2f / Mathf.Max(_stats.AttackSpeed, 0.01f);
+            RequestHeavyAttackRpc();
+        }
+
+        [ServerRpc]
+        private void RequestHeavyAttackRpc()
+        {
+            Vector3    origin = transform.position + transform.forward * (attackRange * 0.5f);
+            Collider[] cols   = Physics.OverlapSphere(origin, attackRange, enemyLayer);
+            var hitEnemies = new List<EnemyBase>();
+            foreach (var col in cols)
+            {
+                var enemy = col.GetComponentInParent<EnemyBase>();
+                if (enemy == null || !enemy.IsAlive) continue;
+                bool  isCrit  = Random.value < _stats.CritChance;
+                float damage  = _stats.Damage * 2f * (isCrit ? CritMultiplier : 1f);
+                if (_classAbility != null) damage = _classAbility.ModifyDamage(damage, enemy);
+                enemy.TakeDamage(damage);
+                hitEnemies.Add(enemy);
+                DuskLog.Log(LogChannel.Combat, $"Heavy hit {col.name} — {damage:F1}{(isCrit ? " CRIT" : "")}");
+            }
+            if (hitEnemies.Count > 0) _classAbility?.OnAttackCompleted(hitEnemies);
+            else _classAbility?.OnAttackMissed();
+        }
+
         [ServerRpc]
         private void RequestAttackRpc()
         {

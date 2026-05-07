@@ -8,7 +8,8 @@ namespace Duskborn.Editor
 {
     public static class GearAssetCreator
     {
-        private const string OutputFolder = "Assets/_Duskborn/ScriptableObjects/Gear";
+        private const string OutputFolder       = "Assets/_Duskborn/ScriptableObjects/Gear";
+        private const string WeaponOutputFolder = "Assets/_Duskborn/ScriptableObjects/Weapons";
 
         [MenuItem("Duskborn/Create Test Gear Assets")]
         public static void CreateAll()
@@ -33,6 +34,45 @@ namespace Duskborn.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             Debug.Log("[GearAssetCreator] Test gear assets created at " + OutputFolder);
+        }
+
+        [MenuItem("Duskborn/Create Stone Axe Asset")]
+        public static void CreateStoneAxe()
+        {
+            if (!AssetDatabase.IsValidFolder("Assets/_Duskborn/ScriptableObjects"))
+                AssetDatabase.CreateFolder("Assets/_Duskborn", "ScriptableObjects");
+            if (!AssetDatabase.IsValidFolder(WeaponOutputFolder))
+                AssetDatabase.CreateFolder("Assets/_Duskborn/ScriptableObjects", "Weapons");
+
+            string path = $"{WeaponOutputFolder}/stone_axe.asset";
+            if (AssetDatabase.LoadAssetAtPath<WeaponDefinition>(path) != null)
+            {
+                Debug.Log("[GearAssetCreator] stone_axe.asset already exists — skipped.");
+                return;
+            }
+
+            var bonuses = new[] { Bonus(StatType.Damage, 0.15f), Bonus(StatType.AttackSpeed, 0.05f) };
+            var asset   = ScriptableObject.CreateInstance<WeaponDefinition>();
+            var so      = new SerializedObject(asset);
+
+            so.FindProperty("id").stringValue          = "stone_axe";
+            so.FindProperty("displayName").stringValue = "Stone Axe";
+            so.FindProperty("description").stringValue = BuildDescription(bonuses);
+
+            var bonusesProp = so.FindProperty("bonuses");
+            bonusesProp.arraySize = bonuses.Length;
+            for (int i = 0; i < bonuses.Length; i++)
+            {
+                var elem = bonusesProp.GetArrayElementAtIndex(i);
+                elem.FindPropertyRelative("Type").enumValueIndex = (int)bonuses[i].Type;
+                elem.FindPropertyRelative("Value").floatValue    = bonuses[i].Value;
+            }
+
+            so.ApplyModifiedPropertiesWithoutUndo();
+            AssetDatabase.CreateAsset(asset, path);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Debug.Log("[GearAssetCreator] Stone Axe asset created at " + path);
         }
 
         private static void EnsureFolder()

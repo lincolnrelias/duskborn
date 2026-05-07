@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 246cd6b673e021a47849a992f2ab04ec, type: 3}
+  m_Name: stone_axe
+  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.WeaponDefinition
+  id: stone_axe
+  displayName: Stone Axe
+  description: 'Damage: +15%  AttackSpeed: +5%'
+  icon: {fileID: 2800000, guid: f00953ca56fd7d84e93625f0a86482fc, type: 3}
+  dropPrefab: {fileID: 0}
+  prefab: {fileID: 4757211534840990446, guid: 0761d24af9de94747a949c3acd122201, type: 3}
+  bonuses:
+  - Type: 1
+    Value: 0.15
+  - Type: 3
+    Value: 0.05

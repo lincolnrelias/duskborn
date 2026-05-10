@@ -1,3 +1,4 @@
+using Duskborn.Gameplay.Equipment;
 using Duskborn.Gameplay.Player;
 
 namespace Duskborn.Gameplay.ActionBar
@@ -14,17 +15,20 @@ namespace Duskborn.Gameplay.ActionBar
 
     public readonly struct ActionContext
     {
-        public readonly PlayerCombat     Combat;
-        public readonly PlayerStats      Stats;
-        public readonly ActionBarService ActionBar;
-        public readonly int              SlotIndex;
+        public readonly PlayerCombat       Combat;
+        public readonly PlayerStats        Stats;
+        public readonly ActionBarService   ActionBar;
+        public readonly int                SlotIndex;
+        public readonly WeaponActionPlayer WeaponAnimator;
 
-        public ActionContext(PlayerCombat combat, PlayerStats stats, ActionBarService actionBar, int slotIndex)
+        public ActionContext(PlayerCombat combat, PlayerStats stats, ActionBarService actionBar,
+                             int slotIndex, WeaponActionPlayer weaponAnimator = null)
         {
-            Combat    = combat;
-            Stats     = stats;
-            ActionBar = actionBar;
-            SlotIndex = slotIndex;
+            Combat         = combat;
+            Stats          = stats;
+            ActionBar      = actionBar;
+            SlotIndex      = slotIndex;
+            WeaponAnimator = weaponAnimator;
         }
     }
 }

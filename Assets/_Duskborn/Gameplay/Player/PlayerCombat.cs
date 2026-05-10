@@ -7,6 +7,7 @@ using Duskborn.Core;
 using Duskborn.Gameplay.ActionBar;
 using Duskborn.Gameplay.Classes;
 using Duskborn.Gameplay.Enemies;
+using Duskborn.Gameplay.Equipment;
 using Duskborn.Gameplay.Loot;
 
 namespace Duskborn.Gameplay.Player
@@ -29,18 +30,20 @@ namespace Duskborn.Gameplay.Player
         private ResourceNode _linkedNode;
         private ResourceNode _prevLinkedNode;
 
-        private PlayerStats       _stats;
-        private ClassAbility      _classAbility;
-        private ResourceInventory _resourceInventory;
-        private SphereCollider    _attackCollider;
-        private float             _cooldown;
+        private PlayerStats        _stats;
+        private ClassAbility       _classAbility;
+        private ResourceInventory  _resourceInventory;
+        private WeaponActionPlayer _weaponActionPlayer;
+        private SphereCollider     _attackCollider;
+        private float              _cooldown;
 
         private void Awake()
         {
-            _stats             = GetComponent<PlayerStats>();
-            _classAbility      = GetComponent<ClassAbility>();
-            _resourceInventory = GetComponent<ResourceInventory>();
-            _attackCollider    = attackTrigger != null ? attackTrigger.GetComponent<SphereCollider>() : null;
+            _stats              = GetComponent<PlayerStats>();
+            _classAbility       = GetComponent<ClassAbility>();
+            _resourceInventory  = GetComponent<ResourceInventory>();
+            _weaponActionPlayer = GetComponent<WeaponActionPlayer>();
+            _attackCollider     = attackTrigger != null ? attackTrigger.GetComponent<SphereCollider>() : null;
         }
 
         public override void OnStartClient()
@@ -325,7 +328,7 @@ namespace Duskborn.Gameplay.Player
         private ActionContext BuildContext()
         {
             var bar = actionBarInstaller?.Service;
-            return new ActionContext(this, _stats, bar, bar?.SelectedIndex ?? 0);
+            return new ActionContext(this, _stats, bar, bar?.SelectedIndex ?? 0, _weaponActionPlayer);
         }
 
         private void RefreshLinkedNode()

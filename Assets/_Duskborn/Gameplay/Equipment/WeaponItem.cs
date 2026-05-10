@@ -2,33 +2,51 @@ using System;
 using System.Collections.Generic;
 using InventorySystem.Core;
 using Duskborn.Gameplay.ActionBar;
+using Duskborn.Core;
 using UnityEngine;
 
 namespace Duskborn.Gameplay.Equipment
 {
     /// <summary>
-    /// Base runtime weapon item. Sits in the action bar; stats apply only while selected.
-    /// Subclass and override OnLeftClick / OnRightClick for custom weapon behaviour.
+    /// Runtime weapon item. Sits in the action bar; stats apply only while selected.
+    /// Click actions route through WeaponActionPlayer, which plays the animation clip
+    /// and fires WeaponBehaviour events at the normalised times defined on WeaponActionData.
     /// </summary>
     public class WeaponItem : InventoryItemBase, ILeftClickAction, IRightClickAction
     {
-        public IReadOnlyList<StatBonus> Bonuses { get; }
-        public GameObject               Prefab  { get; }
+        public IReadOnlyList<StatBonus> Bonuses   { get; }
+        public GameObject               Prefab    { get; }
+        public WeaponBehaviour          Behaviour { get; }
+        public WeaponActionData[]       Actions   { get; }
 
         public override InventoryItemKind Kind => InventoryItemKind.Equipment;
 
         public WeaponItem(string id, string displayName, string description,
-                          string iconId, IReadOnlyList<StatBonus> bonuses, GameObject prefab)
+                          string iconId, IReadOnlyList<StatBonus> bonuses,
+                          GameObject prefab, WeaponBehaviour behaviour,
+                          WeaponActionData[] actions)
             : base(id, displayName, description, iconId)
         {
-            Bonuses = bonuses ?? Array.Empty<StatBonus>();
-            Prefab  = prefab;
+            Bonuses   = bonuses  ?? Array.Empty<StatBonus>();
+            Prefab    = prefab;
+            Behaviour = behaviour;
+            Actions   = actions  ?? Array.Empty<WeaponActionData>();
         }
 
-        // Standard melee swing. Cooldown is already set by PlayerCombat before this fires.
-        public virtual void OnLeftClick(ActionContext ctx) => ctx.Combat.TriggerAttack();
+        public virtual void OnLeftClick(ActionContext ctx)
+        {
+            if (ctx.WeaponAnimator != null)
+                ctx.WeaponAnimator.PlayAction(0, this, ctx);
+            else
+                DuskLog.Warn(LogChannel.ActionBar, $"'{DisplayName}': no WeaponActionPlayer on player.");
+        }
 
-        // Heavy overhead strike — 2× damage, 2× cooldown.
-        public virtual void OnRightClick(ActionContext ctx) => ctx.Combat.TriggerHeavyAttack();
+        public virtual void OnRightClick(ActionContext ctx)
+        {
+            if (ctx.WeaponAnimator != null)
+                ctx.WeaponAnimator.PlayAction(1, this, ctx);
+            else
+                DuskLog.Warn(LogChannel.ActionBar, $"'{DisplayName}': no WeaponActionPlayer on player.");
+        }
     }
 }

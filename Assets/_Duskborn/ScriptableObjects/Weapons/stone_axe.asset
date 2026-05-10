@@ -25,7 +25,9 @@ MonoBehaviour:
     Value: 0.05
   behaviour: {fileID: 11400000, guid: c5a595ad70d17be40826423d131de2dd, type: 2}
   actions:
-  - Clip: {fileID: 7400000, guid: f9808de8e12794d468604280ad76ca36, type: 3}
+  - Clips:
+    - {fileID: 7400000, guid: 3558db8e6c045c3418d8e7593f8a88de, type: 3}
+    - {fileID: 7400000, guid: f9808de8e12794d468604280ad76ca36, type: 3}
     Events:
     - Type: 0
       NormalizedTime: 0.347

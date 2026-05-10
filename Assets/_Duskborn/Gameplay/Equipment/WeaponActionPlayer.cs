@@ -27,6 +27,7 @@ namespace Duskborn.Gameplay.Equipment
 
         private WeaponItem         _activeWeapon;
         private WeaponActionData   _activeData;
+        private AnimationClip      _activeClip;
         private ActionContext      _activeCtx;
         private int                _activeActionIndex;
         private WeaponActionEvent[] _sortedEvents;
@@ -85,7 +86,8 @@ namespace Duskborn.Gameplay.Equipment
                 ? weapon.Actions[actionIndex]
                 : null;
 
-            if (data?.Clip == null)
+            var clip = data?.PickClip();
+            if (clip == null)
             {
                 DuskLog.Warn(LogChannel.ActionBar,
                     $"WeaponActionPlayer: no clip for '{weapon?.DisplayName}' action {actionIndex}.");
@@ -96,6 +98,7 @@ namespace Duskborn.Gameplay.Equipment
 
             _activeWeapon      = weapon;
             _activeData        = data;
+            _activeClip        = clip;
             _activeCtx         = ctx;
             _activeActionIndex = actionIndex;
             _eventCursor       = 0;
@@ -108,11 +111,11 @@ namespace Duskborn.Gameplay.Equipment
                 : Array.Empty<WeaponActionEvent>();
             Array.Sort(_sortedEvents, (a, b) => a.NormalizedTime.CompareTo(b.NormalizedTime));
 
-            _clipPlayable = AnimationClipPlayable.Create(_graph, data.Clip);
+            _clipPlayable = AnimationClipPlayable.Create(_graph, clip);
             _layerMixer.ConnectInput(1, _clipPlayable, 0, 0f);
 
             DuskLog.Log(LogChannel.ActionBar,
-                $"Weapon action [{actionIndex}] '{data.Clip.name}' on '{weapon.DisplayName}'.");
+                $"Weapon action [{actionIndex}] '{clip.name}' on '{weapon.DisplayName}'.");
         }
 
         private void StopCurrentAction()
@@ -130,7 +133,7 @@ namespace Duskborn.Gameplay.Equipment
         {
             if (!_isPlaying) return;
 
-            float clipLength = _activeData.Clip.length;
+            float clipLength = _activeClip.length;
             float normalized = clipLength > 0f ? (float)(_clipPlayable.GetTime() / clipLength) : 1f;
 
             // Smooth blend in at start, blend out at end.

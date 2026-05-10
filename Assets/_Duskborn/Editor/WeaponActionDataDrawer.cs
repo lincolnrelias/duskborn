@@ -12,20 +12,23 @@ namespace Duskborn.Editor
         private const float DragRadius = 7f;
 
         // Only one marker drag active at a time across all drawers.
-        private static string s_DragPath  = null;
-        private static int    s_DragIdx   = -1;
+        private static string s_DragPath = null;
+        private static int    s_DragIdx  = -1;
 
         public override float GetPropertyHeight(SerializedProperty prop, GUIContent label)
         {
             float lh  = EditorGUIUtility.singleLineHeight;
             float pad = EditorGUIUtility.standardVerticalSpacing;
+            var clips  = prop.FindPropertyRelative("Clips");
             var events = prop.FindPropertyRelative("Events");
-            int  n     = events?.arraySize ?? 0;
+            int  nc    = clips?.arraySize  ?? 0;
+            int  ne    = events?.arraySize ?? 0;
 
-            return (lh + pad)           // Clip
-                 + (TimelineH + pad)    // timeline
-                 + (lh + pad)           // Events header row
-                 + n * (lh + pad);      // per-event row
+            return (lh + pad)            // Clips header row
+                 + nc * (lh + pad)       // per-clip row
+                 + (TimelineH + pad)     // timeline
+                 + (lh + pad)            // Events header row
+                 + ne * (lh + pad);      // per-event row
         }
 
         public override void OnGUI(Rect pos, SerializedProperty prop, GUIContent label)
@@ -35,12 +38,29 @@ namespace Duskborn.Editor
 
             EditorGUI.BeginProperty(pos, label, prop);
 
-            var clipProp   = prop.FindPropertyRelative("Clip");
+            var clipsProp  = prop.FindPropertyRelative("Clips");
             var eventsProp = prop.FindPropertyRelative("Events");
 
-            // ── Clip ──────────────────────────────────────────────────────────
-            var r = Row(ref pos, lh, pad);
-            EditorGUI.PropertyField(r, clipProp);
+            // ── Clips header: label + array-size field ────────────────────────
+            var r  = Row(ref pos, lh, pad);
+            float lw = EditorGUIUtility.labelWidth;
+            EditorGUI.LabelField(new Rect(r.x, r.y, lw, r.height), "Clips");
+
+            EditorGUI.BeginChangeCheck();
+            int newClipSize = EditorGUI.IntField(new Rect(r.x + lw, r.y, 40, r.height),
+                                                  clipsProp.arraySize);
+            if (EditorGUI.EndChangeCheck() && newClipSize >= 0)
+                clipsProp.arraySize = newClipSize;
+
+            // ── Per-clip rows ─────────────────────────────────────────────────
+            for (int i = 0; i < clipsProp.arraySize; i++)
+            {
+                r = Row(ref pos, lh, pad);
+                var clipElement = clipsProp.GetArrayElementAtIndex(i);
+                EditorGUI.LabelField(new Rect(r.x, r.y, 20f, r.height), i.ToString());
+                EditorGUI.PropertyField(new Rect(r.x + 20f, r.y, r.width - 20f, r.height),
+                                         clipElement, GUIContent.none);
+            }
 
             // ── Timeline ──────────────────────────────────────────────────────
             var barRect = Row(ref pos, TimelineH, pad);
@@ -48,14 +68,13 @@ namespace Duskborn.Editor
 
             // ── Events header: label + array-size field ───────────────────────
             r = Row(ref pos, lh, pad);
-            float lw = EditorGUIUtility.labelWidth;
             EditorGUI.LabelField(new Rect(r.x, r.y, lw, r.height), "Events");
 
             EditorGUI.BeginChangeCheck();
-            int newSize = EditorGUI.IntField(new Rect(r.x + lw, r.y, 40, r.height),
-                                              eventsProp.arraySize);
-            if (EditorGUI.EndChangeCheck() && newSize >= 0)
-                eventsProp.arraySize = newSize;
+            int newEventSize = EditorGUI.IntField(new Rect(r.x + lw, r.y, 40, r.height),
+                                                   eventsProp.arraySize);
+            if (EditorGUI.EndChangeCheck() && newEventSize >= 0)
+                eventsProp.arraySize = newEventSize;
 
             // ── Per-event rows ────────────────────────────────────────────────
             for (int i = 0; i < eventsProp.arraySize; i++)
@@ -74,14 +93,10 @@ namespace Duskborn.Editor
 
         private void DrawTimeline(Rect bar, SerializedProperty events, string path)
         {
-            // Background
             EditorGUI.DrawRect(bar, new Color(0.13f, 0.13f, 0.13f));
-
-            // Centre rule
             EditorGUI.DrawRect(new Rect(bar.x, bar.y + bar.height * 0.5f, bar.width, 1f),
                                 new Color(0.3f, 0.3f, 0.3f));
 
-            // 0 / 1 labels
             var mini = new GUIStyle(EditorStyles.miniLabel) { alignment = TextAnchor.MiddleCenter };
             GUI.Label(new Rect(bar.x, bar.yMax - 13, 14, 13), "0", mini);
             GUI.Label(new Rect(bar.xMax - 14, bar.yMax - 13, 14, 13), "1", mini);
@@ -89,7 +104,6 @@ namespace Duskborn.Editor
             if (events == null) return;
             int count = events.arraySize;
 
-            // Draw HitboxOpen → HitboxClose windows as tinted region first.
             float openAt = -1f;
             for (int i = 0; i < count; i++)
             {
@@ -98,9 +112,7 @@ namespace Duskborn.Editor
                 float t  = ep.FindPropertyRelative("NormalizedTime").floatValue;
 
                 if (type == WeaponEventType.HitboxOpen)
-                {
                     openAt = t;
-                }
                 else if (type == WeaponEventType.HitboxClose && openAt >= 0f)
                 {
                     float x1 = bar.x + openAt * bar.width;
@@ -111,7 +123,6 @@ namespace Duskborn.Editor
                 }
             }
 
-            // Draw markers and handle drag.
             Event ev        = Event.current;
             bool  isDragger = s_DragPath == path;
 
@@ -125,12 +136,9 @@ namespace Duskborn.Editor
                 float mx     = bar.x + t * bar.width;
                 Color col    = MarkerColor(type);
 
-                // Marker line
                 EditorGUI.DrawRect(new Rect(mx - 1f, bar.y, 2f, bar.height), col);
-                // Marker diamond
                 EditorGUI.DrawRect(new Rect(mx - 4f, bar.y + bar.height * 0.5f - 4f, 8f, 8f), col);
 
-                // Start drag on click near this marker.
                 if (ev.type == EventType.MouseDown && bar.Contains(ev.mousePosition))
                 {
                     if (Mathf.Abs(ev.mousePosition.x - mx) < DragRadius)
@@ -142,7 +150,6 @@ namespace Duskborn.Editor
                 }
             }
 
-            // Apply drag to the currently dragged marker.
             if (isDragger && s_DragIdx >= 0 && s_DragIdx < count)
             {
                 if (ev.type == EventType.MouseDrag)

@@ -31,3 +31,5 @@ MonoBehaviour:
     Events:
     - Type: 0
       NormalizedTime: 0.347
+  skills:
+  - {fileID: 11400000, guid: d57cb9290c0fd0b4ea77e6fd29e1bd3c, type: 2}

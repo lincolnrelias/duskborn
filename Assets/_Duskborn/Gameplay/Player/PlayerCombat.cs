@@ -8,6 +8,7 @@ using Duskborn.Gameplay.ActionBar;
 using Duskborn.Gameplay.Classes;
 using Duskborn.Gameplay.Enemies;
 using Duskborn.Gameplay.Equipment;
+using Duskborn.Gameplay.Hotkeys;
 using Duskborn.Gameplay.Loot;
 
 namespace Duskborn.Gameplay.Player
@@ -19,6 +20,7 @@ namespace Duskborn.Gameplay.Player
         [SerializeField] private float              attackRange   = 2f;
         [SerializeField] private LayerMask          enemyLayer;
         [SerializeField] private AttackRangeTrigger attackTrigger;
+        [SerializeField] private HotkeyMap          hotkeyMap;
         private ActionBarInstaller actionBarInstaller;
 
         public LayerMask EnemyLayer => enemyLayer;
@@ -36,6 +38,7 @@ namespace Duskborn.Gameplay.Player
         private WeaponActionPlayer _weaponActionPlayer;
         private SphereCollider     _attackCollider;
         private float              _cooldown;
+        private float[]            _skillCooldowns = new float[3];
 
         private void Awake()
         {
@@ -103,6 +106,9 @@ namespace Duskborn.Gameplay.Player
             if (!IsOwner) return;
             if (_cooldown > 0f) _cooldown -= Time.deltaTime;
 
+            for (int i = 0; i < 3; i++)
+                if (_skillCooldowns[i] > 0f) _skillCooldowns[i] -= Time.deltaTime;
+
             RefreshLinkedNode();
             if (_linkedNode != _prevLinkedNode)
             {
@@ -111,7 +117,13 @@ namespace Duskborn.Gameplay.Player
                 _prevLinkedNode = _linkedNode;
             }
 
-            if (Input.GetKeyDown(KeyCode.Q)) TryAbility();
+            if (hotkeyMap != null)
+            {
+                var weapon = actionBarInstaller?.Service.GetSelectedItem() as WeaponItem;
+                if (weapon != null)
+                    for (int i = 0; i < 3; i++)
+                        TryWeaponSkill(weapon, i);
+            }
 
             float scroll = Mouse.current?.scroll.ReadValue().y ?? 0f;
             if (scroll > 0f) actionBarInstaller?.Service.SelectPrevious();
@@ -122,6 +134,26 @@ namespace Duskborn.Gameplay.Player
                 for (int i = 0; i < 8; i++)
                     if (kb[(Key)(Key.Digit1 + i)].wasPressedThisFrame)
                         { actionBarInstaller?.Service.SelectSlot(i); break; }
+        }
+
+        private static readonly string[] SkillActionIds =
+        {
+            HotkeyMap.Skill1,
+            HotkeyMap.Skill2,
+            HotkeyMap.Skill3,
+        };
+
+        private void TryWeaponSkill(WeaponItem weapon, int index)
+        {
+            if (!hotkeyMap.WasPressedThisFrame(SkillActionIds[index])) return;
+            if (index >= weapon.Skills.Count || weapon.Skills[index] == null) return;
+            if (_skillCooldowns[index] > 0f)
+            {
+                DuskLog.Log(LogChannel.Combat, $"Skill {index} on cooldown ({_skillCooldowns[index]:F1}s).");
+                return;
+            }
+            _skillCooldowns[index] = weapon.Skills[index].cooldown;
+            weapon.Skills[index].Use(BuildContext());
         }
 
         // ── Primary Action (LMB) ─────────────────────────────────────────────
@@ -211,6 +243,42 @@ namespace Duskborn.Gameplay.Player
             RequestHeavyAttackRpc();
         }
 
+        // Called by CleaveSkill (and any future arc-type skills).
+        public void TriggerCleave(float range, float arcDegrees, float damageMultiplier)
+        {
+            if (!_stats.IsAlive) return;
+            RequestCleaveRpc(range, arcDegrees, damageMultiplier);
+        }
+
+        [ServerRpc]
+        private void RequestCleaveRpc(float range, float arcDegrees, float damageMultiplier)
+        {
+            HitboxDebugger.Flash(transform.position, range, new Color(1f, 0.6f, 0f));
+
+            float      cosHalfArc = Mathf.Cos(arcDegrees * 0.5f * Mathf.Deg2Rad);
+            Collider[] cols       = Physics.OverlapSphere(transform.position, range, enemyLayer);
+            var        hitEnemies = new List<EnemyBase>();
+
+            foreach (var col in cols)
+            {
+                Vector3 toEnemy = (col.transform.position - transform.position).normalized;
+                if (Vector3.Dot(transform.forward, toEnemy) < cosHalfArc) continue;
+
+                var enemy = col.GetComponentInParent<EnemyBase>();
+                if (enemy == null || !enemy.IsAlive) continue;
+
+                bool  isCrit = Random.value < _stats.CritChance;
+                float damage = _stats.Damage * damageMultiplier * (isCrit ? CritMultiplier : 1f);
+                if (_classAbility != null) damage = _classAbility.ModifyDamage(damage, enemy);
+                enemy.TakeDamage(damage);
+                hitEnemies.Add(enemy);
+                DuskLog.Log(LogChannel.Combat, $"Cleave hit {col.name} — {damage:F1}{(isCrit ? " CRIT" : "")}");
+            }
+
+            if (hitEnemies.Count > 0) _classAbility?.OnAttackCompleted(hitEnemies);
+            else                       _classAbility?.OnAttackMissed();
+        }
+
         [ServerRpc]
         private void RequestHeavyAttackRpc()
         {
@@ -261,20 +329,6 @@ namespace Duskborn.Gameplay.Player
                 _classAbility?.OnAttackCompleted(hitEnemies);
             else
                 _classAbility?.OnAttackMissed();
-        }
-
-        // ── Class Ability (Q) ─────────────────────────────────────────────────
-
-        private void TryAbility()
-        {
-            if (!_stats.IsAlive) return;
-            RequestAbilityRpc();
-        }
-
-        [ServerRpc]
-        private void RequestAbilityRpc()
-        {
-            _classAbility?.TryUseAbility();
         }
 
         // ── Item Consume ──────────────────────────────────────────────────────

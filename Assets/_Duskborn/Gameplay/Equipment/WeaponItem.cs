@@ -14,23 +14,25 @@ namespace Duskborn.Gameplay.Equipment
     /// </summary>
     public class WeaponItem : InventoryItemBase, ILeftClickAction, IRightClickAction
     {
-        public IReadOnlyList<StatBonus> Bonuses   { get; }
-        public GameObject               Prefab    { get; }
-        public WeaponBehaviour          Behaviour { get; }
-        public WeaponActionData[]       Actions   { get; }
+        public IReadOnlyList<StatBonus>   Bonuses   { get; }
+        public GameObject                 Prefab    { get; }
+        public WeaponBehaviour            Behaviour { get; }
+        public WeaponActionData[]         Actions   { get; }
+        public IReadOnlyList<WeaponSkill> Skills    { get; }
 
         public override InventoryItemKind Kind => InventoryItemKind.Equipment;
 
         public WeaponItem(string id, string displayName, string description,
                           string iconId, IReadOnlyList<StatBonus> bonuses,
                           GameObject prefab, WeaponBehaviour behaviour,
-                          WeaponActionData[] actions)
+                          WeaponActionData[] actions, WeaponSkill[] skills = null)
             : base(id, displayName, description, iconId)
         {
-            Bonuses   = bonuses  ?? Array.Empty<StatBonus>();
+            Bonuses   = bonuses ?? Array.Empty<StatBonus>();
             Prefab    = prefab;
             Behaviour = behaviour;
-            Actions   = actions  ?? Array.Empty<WeaponActionData>();
+            Actions   = actions ?? Array.Empty<WeaponActionData>();
+            Skills    = skills  ?? Array.Empty<WeaponSkill>();
         }
 
         public virtual void OnLeftClick(ActionContext ctx)

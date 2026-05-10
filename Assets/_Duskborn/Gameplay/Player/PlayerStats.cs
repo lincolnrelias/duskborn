@@ -3,15 +3,19 @@ using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using UnityEngine;
 using Duskborn.Core;
+using Duskborn.Gameplay.Classes;
 
 namespace Duskborn.Gameplay.Player
 {
     public class PlayerStats : NetworkBehaviour
     {
-        [Header("Base Stats")]
-        [SerializeField] private float baseMaxHP      = 100f;
-        [SerializeField] private float baseMoveSpeed  = 5f;
-        [SerializeField] private float baseDamage     = 10f;
+        [Header("Class")]
+        [SerializeField] private ClassDefinition classDefinition;
+
+        [Header("Base Stats (overridden by Class Definition if assigned)")]
+        [SerializeField] private float baseMaxHP       = 100f;
+        [SerializeField] private float baseMoveSpeed   = 5f;
+        [SerializeField] private float baseDamage      = 10f;
         [SerializeField] private float baseAttackSpeed = 1f;
 
         [HideInInspector] public float HPMultiplier             = 1f;
@@ -37,6 +41,14 @@ namespace Duskborn.Gameplay.Player
 
         private void Awake()
         {
+            if (classDefinition != null)
+            {
+                baseMaxHP       = classDefinition.MaxHP;
+                baseMoveSpeed   = classDefinition.MoveSpeed;
+                baseDamage      = classDefinition.Damage;
+                baseAttackSpeed = classDefinition.AttackSpeed;
+                DuskLog.Log(LogChannel.PlayerClass, $"Applied: {classDefinition.ClassName}");
+            }
             _currentHP.Value = MaxHP;
             _currentHP.OnChange += OnCurrentHPSync;
         }

@@ -1,7 +1,10 @@
+using System;
 using System.Collections.Generic;
 using FishNet;
 using FishNet.Object;
 using UnityEngine;
+using Duskborn.Core;
+using Duskborn.Gameplay.Hotkeys;
 using Duskborn.Gameplay.Loot;
 
 namespace Duskborn.Gameplay.Player
@@ -10,8 +13,8 @@ namespace Duskborn.Gameplay.Player
     public class PlayerInteractor : NetworkBehaviour
     {
         [SerializeField] private Transform dropSpawnPoint;
-        [SerializeField] private float     pickupRange   = 2f;
-        [SerializeField] private float     dropScatter   = 0.4f;
+        [SerializeField] private float     pickupRange = 2f;
+        [SerializeField] private float     dropScatter = 0.4f;
 
         private readonly HashSet<Chest> _chestsInRange = new();
         private readonly Collider[]     _overlapBuffer = new Collider[16];
@@ -21,6 +24,28 @@ namespace Duskborn.Gameplay.Player
         private WorldItemPickup _linkedPickup;
         private WorldItemPickup _prevLinkedPickup;
         private WorldItemPickup _pendingCollect;
+
+        private Action _onInteract;
+
+        public override void OnStartClient()
+        {
+            base.OnStartClient();
+            if (!IsOwner) return;
+
+            _onInteract = TryOpenLinkedChest;
+            var hk = HotkeyManager.Instance;
+            if (hk != null)
+                hk.Register(HotkeyManager.Interact, _onInteract);
+            else
+                DuskLog.Warn(LogChannel.PlayerInteractor, "PlayerInteractor: HotkeyManager not found in scene.");
+        }
+
+        public override void OnStopClient()
+        {
+            base.OnStopClient();
+            if (!IsOwner) return;
+            HotkeyManager.Instance?.Unregister(HotkeyManager.Interact, _onInteract);
+        }
 
         private void Update()
         {
@@ -43,9 +68,6 @@ namespace Duskborn.Gameplay.Player
                 _prevLinkedPickup = _linkedPickup;
             }
 
-            if (Input.GetKeyDown(KeyCode.E) && _linked != null)
-                RequestOpenChestRpc(_linked.GetComponent<NetworkObject>());
-
             if (_linkedPickup != null && _linkedPickup.IsCollectible && _linkedPickup != _pendingCollect)
             {
                 _pendingCollect = _linkedPickup;
@@ -54,6 +76,12 @@ namespace Duskborn.Gameplay.Player
 
             if (_linkedPickup == null)
                 _pendingCollect = null;
+        }
+
+        private void TryOpenLinkedChest()
+        {
+            if (_linked != null)
+                RequestOpenChestRpc(_linked.GetComponent<NetworkObject>());
         }
 
         public void DropResource(string resourceId, int amount)
@@ -77,8 +105,6 @@ namespace Duskborn.Gameplay.Player
         [ServerRpc]
         private void RequestDropResourceRpc(string resourceId, int amount)
         {
-            // ResourceInventory state is client-authoritative (populated only via TargetRpc).
-            // Client already validated and spent before sending this RPC; just spawn the pickup.
             var prefab = WorldDropRegistry.Instance?.GetDropPrefab(resourceId);
             if (prefab == null)
             {
@@ -86,7 +112,7 @@ namespace Duskborn.Gameplay.Player
                 return;
             }
 
-            Vector2 disc = Random.insideUnitCircle * dropScatter;
+            Vector2 disc = UnityEngine.Random.insideUnitCircle * dropScatter;
             Vector3 pos  = ResolveDropPosition() + new Vector3(disc.x, 0f, disc.y);
             var go = Instantiate(prefab, pos, Quaternion.identity);
             InstanceFinder.ServerManager.Spawn(go);

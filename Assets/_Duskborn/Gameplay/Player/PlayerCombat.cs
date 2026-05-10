@@ -20,7 +20,6 @@ namespace Duskborn.Gameplay.Player
         [SerializeField] private float              attackRange   = 2f;
         [SerializeField] private LayerMask          enemyLayer;
         [SerializeField] private AttackRangeTrigger attackTrigger;
-        [SerializeField] private HotkeyMap          hotkeyMap;
         private ActionBarInstaller actionBarInstaller;
 
         public LayerMask EnemyLayer => enemyLayer;
@@ -38,7 +37,12 @@ namespace Duskborn.Gameplay.Player
         private WeaponActionPlayer _weaponActionPlayer;
         private SphereCollider     _attackCollider;
         private float              _cooldown;
-        private float[]            _skillCooldowns = new float[3];
+        private readonly float[]   _skillCooldowns = new float[3];
+
+        // Cached delegates for stable Register/Unregister.
+        private System.Action _onSkill0;
+        private System.Action _onSkill1;
+        private System.Action _onSkill2;
 
         private void Awake()
         {
@@ -47,6 +51,10 @@ namespace Duskborn.Gameplay.Player
             _resourceInventory  = GetComponent<ResourceInventory>();
             _weaponActionPlayer = GetComponent<WeaponActionPlayer>();
             _attackCollider     = attackTrigger != null ? attackTrigger.GetComponent<SphereCollider>() : null;
+
+            _onSkill0 = () => TryWeaponSkill(0);
+            _onSkill1 = () => TryWeaponSkill(1);
+            _onSkill2 = () => TryWeaponSkill(2);
         }
 
         public override void OnStartClient()
@@ -59,6 +67,27 @@ namespace Duskborn.Gameplay.Player
 
             if (actionBarInstaller == null)
                 DuskLog.Warn(LogChannel.ActionBar, "PlayerCombat: no ActionBarInstaller found in scene.");
+
+            var hk = HotkeyManager.Instance;
+            if (hk != null)
+            {
+                hk.Register(HotkeyManager.Skill1, _onSkill0);
+                hk.Register(HotkeyManager.Skill2, _onSkill1);
+                hk.Register(HotkeyManager.Skill3, _onSkill2);
+            }
+            else
+                DuskLog.Warn(LogChannel.ActionBar, "PlayerCombat: HotkeyManager not found in scene.");
+        }
+
+        public override void OnStopClient()
+        {
+            base.OnStopClient();
+            if (!IsOwner) return;
+            var hk = HotkeyManager.Instance;
+            if (hk == null) return;
+            hk.Unregister(HotkeyManager.Skill1, _onSkill0);
+            hk.Unregister(HotkeyManager.Skill2, _onSkill1);
+            hk.Unregister(HotkeyManager.Skill3, _onSkill2);
         }
 
         private void OnEnable()
@@ -117,14 +146,6 @@ namespace Duskborn.Gameplay.Player
                 _prevLinkedNode = _linkedNode;
             }
 
-            if (hotkeyMap != null)
-            {
-                var weapon = actionBarInstaller?.Service.GetSelectedItem() as WeaponItem;
-                if (weapon != null)
-                    for (int i = 0; i < 3; i++)
-                        TryWeaponSkill(weapon, i);
-            }
-
             float scroll = Mouse.current?.scroll.ReadValue().y ?? 0f;
             if (scroll > 0f) actionBarInstaller?.Service.SelectPrevious();
             else if (scroll < 0f) actionBarInstaller?.Service.SelectNext();
@@ -136,17 +157,11 @@ namespace Duskborn.Gameplay.Player
                         { actionBarInstaller?.Service.SelectSlot(i); break; }
         }
 
-        private static readonly string[] SkillActionIds =
+        private void TryWeaponSkill(int index)
         {
-            HotkeyMap.Skill1,
-            HotkeyMap.Skill2,
-            HotkeyMap.Skill3,
-        };
-
-        private void TryWeaponSkill(WeaponItem weapon, int index)
-        {
-            if (!hotkeyMap.WasPressedThisFrame(SkillActionIds[index])) return;
-            if (index >= weapon.Skills.Count || weapon.Skills[index] == null) return;
+            if (!IsOwner || !_stats.IsAlive) return;
+            var weapon = actionBarInstaller?.Service.GetSelectedItem() as WeaponItem;
+            if (weapon == null || index >= weapon.Skills.Count || weapon.Skills[index] == null) return;
             if (_skillCooldowns[index] > 0f)
             {
                 DuskLog.Log(LogChannel.Combat, $"Skill {index} on cooldown ({_skillCooldowns[index]:F1}s).");
@@ -243,7 +258,7 @@ namespace Duskborn.Gameplay.Player
             RequestHeavyAttackRpc();
         }
 
-        // Called by CleaveSkill (and any future arc-type skills).
+        // Called by CleaveSkill.
         public void TriggerCleave(float range, float arcDegrees, float damageMultiplier)
         {
             if (!_stats.IsAlive) return;
@@ -305,30 +320,20 @@ namespace Duskborn.Gameplay.Player
         {
             Vector3    origin = transform.position + transform.forward * (attackRange * 0.5f);
             Collider[] cols   = Physics.OverlapSphere(origin, attackRange, enemyLayer);
-
             var hitEnemies = new List<EnemyBase>();
-
             foreach (var col in cols)
             {
                 var enemy = col.GetComponentInParent<EnemyBase>();
                 if (enemy == null || !enemy.IsAlive) continue;
-
                 bool  isCrit = Random.value < _stats.CritChance;
                 float damage = _stats.Damage * (isCrit ? CritMultiplier : 1f);
-
-                if (_classAbility != null)
-                    damage = _classAbility.ModifyDamage(damage, enemy);
-
+                if (_classAbility != null) damage = _classAbility.ModifyDamage(damage, enemy);
                 enemy.TakeDamage(damage);
                 hitEnemies.Add(enemy);
-
                 DuskLog.Log(LogChannel.Combat, $"Hit {col.name} — {damage:F1}{(isCrit ? " CRIT" : "")}");
             }
-
-            if (hitEnemies.Count > 0)
-                _classAbility?.OnAttackCompleted(hitEnemies);
-            else
-                _classAbility?.OnAttackMissed();
+            if (hitEnemies.Count > 0) _classAbility?.OnAttackCompleted(hitEnemies);
+            else                       _classAbility?.OnAttackMissed();
         }
 
         // ── Item Consume ──────────────────────────────────────────────────────
@@ -363,7 +368,6 @@ namespace Duskborn.Gameplay.Player
             if (nodeObj == null) return;
             var node = nodeObj.GetComponent<ResourceNode>();
             if (node == null) return;
-
             if (node.ServerHit(out string resourceId, out int amount))
             {
                 RpcReceiveResources(Owner, resourceId, amount);

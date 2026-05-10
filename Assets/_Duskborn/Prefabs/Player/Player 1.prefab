@@ -78,7 +78,6 @@ GameObject:
   - component: {fileID: 4158613078139982803}
   - component: {fileID: 7734906760495636806}
   - component: {fileID: 3923650547242843623}
-  - component: {fileID: 2492020308096156282}
   - component: {fileID: 9161354323839120177}
   - component: {fileID: 8975055612759417406}
   - component: {fileID: 5151783337402195587}
@@ -197,6 +196,7 @@ MonoBehaviour:
   _componentIndexCache: 0
   _addedNetworkObject: {fileID: 5780092933335364822}
   _networkObjectCache: {fileID: 5780092933335364822}
+  classDefinition: {fileID: 11400000, guid: 807f7c53315ea72409a6502b4ccc6f96, type: 2}
   baseMaxHP: 100
   baseMoveSpeed: 5
   baseDamage: 10
@@ -282,19 +282,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   attackTrigger: {fileID: 5823240394021676181}
---- !u!114 &2492020308096156282
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7498212195385448204}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a8c7a246522035547972ecb8c52e8cce, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  definition: {fileID: 11400000, guid: 807f7c53315ea72409a6502b4ccc6f96, type: 2}
 --- !u!114 &9161354323839120177
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -309,11 +296,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stackBonus: 0.08
   maxStacks: 3
-  cleaveRange: 3
-  cleaveCooldown: 4
-  enemyLayer:
-    serializedVersion: 2
-    m_Bits: 64
 --- !u!114 &8975055612759417406
 MonoBehaviour:
   m_ObjectHideFlags: 0

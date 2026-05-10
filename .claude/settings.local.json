@@ -39,7 +39,8 @@
       "Bash(mv C:/Users/linco/Mugg/Assets/_Duskborn/ScriptableObjects/__TRACKED_VAR__.asset C:/Users/linco/Mugg/Assets/_Duskborn/ScriptableObjects/Classes/__TRACKED_VAR__.asset)",
       "Bash(mv C:/Users/linco/Mugg/Assets/_Duskborn/ScriptableObjects/__TRACKED_VAR__.asset.meta C:/Users/linco/Mugg/Assets/_Duskborn/ScriptableObjects/Classes/__TRACKED_VAR__.asset.meta)",
       "Bash(mv C:/Users/linco/Mugg/Assets/_Duskborn/ScriptableObjects/__TRACKED_VAR__.asset C:/Users/linco/Mugg/Assets/_Duskborn/ScriptableObjects/Items/__TRACKED_VAR__.asset)",
-      "Bash(mv C:/Users/linco/Mugg/Assets/_Duskborn/ScriptableObjects/__TRACKED_VAR__.asset.meta C:/Users/linco/Mugg/Assets/_Duskborn/ScriptableObjects/Items/__TRACKED_VAR__.asset.meta)"
+      "Bash(mv C:/Users/linco/Mugg/Assets/_Duskborn/ScriptableObjects/__TRACKED_VAR__.asset.meta C:/Users/linco/Mugg/Assets/_Duskborn/ScriptableObjects/Items/__TRACKED_VAR__.asset.meta)",
+      "Bash(Get-ChildItem *)"
     ]
   }
 }

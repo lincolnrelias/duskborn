@@ -85,6 +85,8 @@ replay_pid*.log
 # ===========================
 Assets/ThirdPartyAssets/
 Assets/ThirdPartyAssets.meta
+Assets/Blink/
+Assets/Blink.meta
 
 # ===========================
 # NOTE: .meta files MUST be tracked.

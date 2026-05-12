@@ -6,6 +6,7 @@ namespace Duskborn.Gameplay.Equipment
     [Serializable]
     public class WeaponActionData
     {
+        public float               BaseSpeed          = 1f;
         public bool                PreserveLocomotion = true;
         public AnimationClip[]     Clips;
         public WeaponActionEvent[] Events;

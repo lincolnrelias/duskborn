@@ -26,7 +26,8 @@ namespace Duskborn.Editor
 
             return (lh + pad)            // Clips header row
                  + nc * (lh + pad)       // per-clip row
-                 + (lh + pad)            // Use Mask toggle
+                 + (lh + pad)            // Speed slider
+                 + (lh + pad)            // Preserve Locomotion toggle
                  + (TimelineH + pad)     // timeline
                  + (lh + pad)            // Events header row
                  + ne * (lh + pad);      // per-event row
@@ -42,6 +43,7 @@ namespace Duskborn.Editor
             var clipsProp   = prop.FindPropertyRelative("Clips");
             var eventsProp  = prop.FindPropertyRelative("Events");
             var useMaskProp = prop.FindPropertyRelative("PreserveLocomotion");
+            var speedProp   = prop.FindPropertyRelative("BaseSpeed");
 
             // ── Clips header: label + array-size field ────────────────────────
             var r  = Row(ref pos, lh, pad);
@@ -64,7 +66,12 @@ namespace Duskborn.Editor
                                          clipElement, GUIContent.none);
             }
 
-            // ── Use Mask toggle ───────────────────────────────────────────────
+            // ── Speed slider ──────────────────────────────────────────────────
+            r = Row(ref pos, lh, pad);
+            EditorGUI.Slider(r, speedProp, 0.1f, 3f,
+                new GUIContent("Speed", "Base playback speed. 1 = authored speed. Scaled by RuntimeSpeedMultiplier at runtime."));
+
+            // ── Preserve Locomotion toggle ────────────────────────────────────
             r = Row(ref pos, lh, pad);
             useMaskProp.boolValue = EditorGUI.ToggleLeft(r,
                 new GUIContent("Preserve Locomotion / No Root Motion",

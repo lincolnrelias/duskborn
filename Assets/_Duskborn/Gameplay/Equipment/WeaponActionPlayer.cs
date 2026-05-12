@@ -41,6 +41,21 @@ namespace Duskborn.Gameplay.Equipment
         private float              _blendWeight;
         private bool               _isPlaying;
         private bool               _skillFired;
+        private float              _runtimeSpeedMultiplier = 1f;
+
+        public event Action<float> OnSpeedChanged;
+
+        public float RuntimeSpeedMultiplier
+        {
+            get => _runtimeSpeedMultiplier;
+            set
+            {
+                _runtimeSpeedMultiplier = value;
+                if (_isPlaying && _clipPlayable.IsValid())
+                    _clipPlayable.SetSpeed(_activeData.BaseSpeed * value);
+                OnSpeedChanged?.Invoke(_activeData != null ? _activeData.BaseSpeed * value : value);
+            }
+        }
 
         private void Start()
         {
@@ -125,6 +140,7 @@ namespace Duskborn.Gameplay.Equipment
 
             ApplyMask(data.PreserveLocomotion);
             _clipPlayable = AnimationClipPlayable.Create(_graph, clip);
+            _clipPlayable.SetSpeed(data.BaseSpeed * _runtimeSpeedMultiplier);
             _layerMixer.ConnectInput(1, _clipPlayable, 0, 0f);
 
             DuskLog.Log(LogChannel.ActionBar,
@@ -192,6 +208,7 @@ namespace Duskborn.Gameplay.Equipment
 
             ApplyMask(data.PreserveLocomotion);
             _clipPlayable = AnimationClipPlayable.Create(_graph, clip);
+            _clipPlayable.SetSpeed(data.BaseSpeed * _runtimeSpeedMultiplier);
             _layerMixer.ConnectInput(1, _clipPlayable, 0, 0f);
 
             DuskLog.Log(LogChannel.ActionBar, $"Skill anim '{clip.name}' for '{skill.name}'.");

@@ -26,6 +26,7 @@ namespace Duskborn.Editor
 
             return (lh + pad)            // Clips header row
                  + nc * (lh + pad)       // per-clip row
+                 + (lh + pad)            // Use Mask toggle
                  + (TimelineH + pad)     // timeline
                  + (lh + pad)            // Events header row
                  + ne * (lh + pad);      // per-event row
@@ -38,8 +39,9 @@ namespace Duskborn.Editor
 
             EditorGUI.BeginProperty(pos, label, prop);
 
-            var clipsProp  = prop.FindPropertyRelative("Clips");
-            var eventsProp = prop.FindPropertyRelative("Events");
+            var clipsProp   = prop.FindPropertyRelative("Clips");
+            var eventsProp  = prop.FindPropertyRelative("Events");
+            var useMaskProp = prop.FindPropertyRelative("PreserveLocomotion");
 
             // ── Clips header: label + array-size field ────────────────────────
             var r  = Row(ref pos, lh, pad);
@@ -61,6 +63,13 @@ namespace Duskborn.Editor
                 EditorGUI.PropertyField(new Rect(r.x + 20f, r.y, r.width - 20f, r.height),
                                          clipElement, GUIContent.none);
             }
+
+            // ── Use Mask toggle ───────────────────────────────────────────────
+            r = Row(ref pos, lh, pad);
+            useMaskProp.boolValue = EditorGUI.ToggleLeft(r,
+                new GUIContent("Preserve Locomotion / No Root Motion",
+                    "ON: upper-body mask, locomotion drives legs and movement.\nOFF: full-body override, animation drives movement via root motion."),
+                useMaskProp.boolValue);
 
             // ── Timeline ──────────────────────────────────────────────────────
             var barRect = Row(ref pos, TimelineH, pad);

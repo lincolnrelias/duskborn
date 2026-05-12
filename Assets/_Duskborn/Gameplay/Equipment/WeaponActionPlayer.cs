@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using Duskborn.Core;
 using Duskborn.Gameplay.ActionBar;
+using Duskborn.Gameplay.Player;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Playables;
@@ -24,8 +26,12 @@ namespace Duskborn.Gameplay.Equipment
         private AnimatorControllerPlayable  _controllerPlayable;
         private AnimationLayerMixerPlayable _layerMixer;
         private AnimationClipPlayable       _clipPlayable;
+        private AvatarMask                  _fullBodyMask;
+        private bool                        _originalRootMotion;
+        private PlayerController            _playerController;
 
         private WeaponItem         _activeWeapon;
+        private WeaponSkill        _activeSkill;
         private WeaponActionData   _activeData;
         private AnimationClip      _activeClip;
         private ActionContext      _activeCtx;
@@ -34,6 +40,7 @@ namespace Duskborn.Gameplay.Equipment
         private int                _eventCursor;
         private float              _blendWeight;
         private bool               _isPlaying;
+        private bool               _skillFired;
 
         private void Start()
         {
@@ -64,8 +71,13 @@ namespace Duskborn.Gameplay.Equipment
             _layerMixer = AnimationLayerMixerPlayable.Create(_graph, 2);
             _layerMixer.ConnectInput(0, _controllerPlayable, 0, 1f);
             _layerMixer.SetLayerAdditive(1, false);
-            if (upperBodyMask != null)
-                _layerMixer.SetLayerMaskFromAvatarMask(1, upperBodyMask);
+
+            _fullBodyMask = new AvatarMask();
+            for (int i = 0; i < (int)AvatarMaskBodyPart.LastBodyPart; i++)
+                _fullBodyMask.SetHumanoidBodyPartActive((AvatarMaskBodyPart)i, true);
+
+            _originalRootMotion = animator.applyRootMotion;
+            _playerController   = GetComponent<PlayerController>();
 
             var output = AnimationPlayableOutput.Create(_graph, "WeaponAnimation", animator);
             output.SetSourcePlayable(_layerMixer);
@@ -111,6 +123,7 @@ namespace Duskborn.Gameplay.Equipment
                 : Array.Empty<WeaponActionEvent>();
             Array.Sort(_sortedEvents, (a, b) => a.NormalizedTime.CompareTo(b.NormalizedTime));
 
+            ApplyMask(data.PreserveLocomotion);
             _clipPlayable = AnimationClipPlayable.Create(_graph, clip);
             _layerMixer.ConnectInput(1, _clipPlayable, 0, 0f);
 
@@ -118,15 +131,70 @@ namespace Duskborn.Gameplay.Equipment
                 $"Weapon action [{actionIndex}] '{clip.name}' on '{weapon.DisplayName}'.");
         }
 
+        private void ApplyMask(bool preserveLocomotion)
+        {
+            var mask = (preserveLocomotion && upperBodyMask != null) ? upperBodyMask : _fullBodyMask;
+            _layerMixer.SetLayerMaskFromAvatarMask(1, mask);
+            animator.applyRootMotion = !preserveLocomotion;
+            if (!preserveLocomotion)
+                _playerController?.SetInputEnabled(false);
+        }
+
         private void StopCurrentAction()
         {
             if (!_isPlaying) return;
             _isPlaying   = false;
             _blendWeight = 0f;
+            _activeSkill = null;
+            _skillFired  = false;
+            animator.applyRootMotion = _originalRootMotion;
+            _playerController?.SetInputEnabled(true);
             _layerMixer.SetInputWeight(1, 0f);
             if (_layerMixer.GetInput(1).IsValid()) _layerMixer.DisconnectInput(1);
             if (_clipPlayable.IsValid()) _clipPlayable.Destroy();
             _clipPlayable = default;
+        }
+
+        public void PlaySkillAction(WeaponSkill skill, ActionContext ctx)
+        {
+            if (!_graph.IsValid())
+            {
+                DuskLog.Warn(LogChannel.ActionBar, "WeaponActionPlayer: graph not ready.");
+                skill.Use(ctx);
+                return;
+            }
+
+            var data = skill?.animation;
+            var clip = data?.PickClip();
+            if (clip == null)
+            {
+                skill?.Use(ctx);
+                return;
+            }
+
+            StopCurrentAction();
+
+            _activeSkill       = skill;
+            _activeWeapon      = null;
+            _activeData        = data;
+            _activeClip        = clip;
+            _activeCtx         = ctx;
+            _activeActionIndex = -1;
+            _eventCursor       = 0;
+            _blendWeight       = 0f;
+            _isPlaying         = true;
+            _skillFired        = false;
+
+            _sortedEvents = data.Events != null
+                ? (WeaponActionEvent[])data.Events.Clone()
+                : Array.Empty<WeaponActionEvent>();
+            Array.Sort(_sortedEvents, (a, b) => a.NormalizedTime.CompareTo(b.NormalizedTime));
+
+            ApplyMask(data.PreserveLocomotion);
+            _clipPlayable = AnimationClipPlayable.Create(_graph, clip);
+            _layerMixer.ConnectInput(1, _clipPlayable, 0, 0f);
+
+            DuskLog.Log(LogChannel.ActionBar, $"Skill anim '{clip.name}' for '{skill.name}'.");
         }
 
         private void Update()
@@ -149,12 +217,25 @@ namespace Duskborn.Gameplay.Equipment
             _layerMixer.SetInputWeight(1, _blendWeight);
 
             // Fire events whose threshold has been crossed this frame.
-            while (_eventCursor < _sortedEvents.Length &&
-                   normalized >= _sortedEvents[_eventCursor].NormalizedTime)
+            if (_activeSkill != null)
             {
-                _activeWeapon.Behaviour?.OnActionEvent(
-                    _sortedEvents[_eventCursor].Type, _activeActionIndex, _activeCtx);
-                _eventCursor++;
+                // Skill: Use() fires once at the first event threshold (or immediately if none).
+                if (!_skillFired)
+                {
+                    bool ready = _sortedEvents.Length == 0 ||
+                                 normalized >= _sortedEvents[0].NormalizedTime;
+                    if (ready) { _activeSkill.Use(_activeCtx); _skillFired = true; }
+                }
+            }
+            else
+            {
+                while (_eventCursor < _sortedEvents.Length &&
+                       normalized >= _sortedEvents[_eventCursor].NormalizedTime)
+                {
+                    _activeWeapon?.Behaviour?.OnActionEvent(
+                        _sortedEvents[_eventCursor].Type, _activeActionIndex, _activeCtx);
+                    _eventCursor++;
+                }
             }
 
             if (normalized >= 1f) StopCurrentAction();

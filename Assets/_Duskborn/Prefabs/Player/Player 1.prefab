@@ -622,9 +622,21 @@ PrefabInstance:
       value: SoldierHandgun
       objectReference: {fileID: 0}
     - target: {fileID: 8964299387525519730, guid: 9426ea18b85b4944aa8de3d5cc785184, type: 3}
+      propertyPath: m_Avatar
+      value: 
+      objectReference: {fileID: 9000000, guid: b82ef9d9ddd27e142b74f3586059c87f, type: 3}
+    - target: {fileID: 8964299387525519730, guid: 9426ea18b85b4944aa8de3d5cc785184, type: 3}
       propertyPath: m_Controller
       value: 
       objectReference: {fileID: 9100000, guid: 6072b81e310eaec41aa744500abd36cf, type: 2}
+    - target: {fileID: 8964299387525519730, guid: 9426ea18b85b4944aa8de3d5cc785184, type: 3}
+      propertyPath: m_CullingMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8964299387525519730, guid: 9426ea18b85b4944aa8de3d5cc785184, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 3607634595041722848, guid: 9426ea18b85b4944aa8de3d5cc785184, type: 3}

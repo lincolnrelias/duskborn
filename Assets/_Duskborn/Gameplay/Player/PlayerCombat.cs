@@ -168,7 +168,11 @@ namespace Duskborn.Gameplay.Player
                 return;
             }
             _skillCooldowns[index] = weapon.Skills[index].cooldown;
-            weapon.Skills[index].Use(BuildContext());
+            var skill = weapon.Skills[index];
+            if (_weaponActionPlayer != null)
+                _weaponActionPlayer.PlaySkillAction(skill, BuildContext());
+            else
+                skill.Use(BuildContext());
         }
 
         // ── Primary Action (LMB) ─────────────────────────────────────────────

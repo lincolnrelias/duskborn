@@ -13,6 +13,13 @@ MonoBehaviour:
   m_Name: cleave_skill
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.CleaveSkill
   cooldown: 5
+  animation:
+    PreserveLocomotion: 0
+    Clips:
+    - {fileID: 7400000, guid: c9a2ed53d56d62740be43c06c115f8d0, type: 3}
+    Events:
+    - Type: 0
+      NormalizedTime: 0.347
   range: 3
   arcDegrees: 180
   damageMultiplier: 1

@@ -5,9 +5,10 @@ namespace Duskborn.Gameplay.Equipment
 {
     public abstract class WeaponSkill : ScriptableObject
     {
-        [SerializeField] public float            cooldown  = 5f;
-        [SerializeField] public float            range     = 2f;
+        [SerializeField] public float            cooldown          = 5f;
+        [SerializeField] public float            range             = 2f;
         [SerializeField] public WeaponActionData animation;
+        [SerializeField] public AudioClip        hitAudioOverride; // null = use weapon profile tag lookup
 
         public virtual bool CanUse(CombatContext ctx)
         {

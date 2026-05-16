@@ -3,6 +3,7 @@ using FishNet.Connection;
 using FishNet.Object;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Duskborn.Audio;
 using Duskborn.Core;
 using Duskborn.Gameplay;
 using Duskborn.Gameplay.ActionBar;
@@ -37,6 +38,7 @@ namespace Duskborn.Gameplay.Player
         private ClassAbility       _classAbility;
         private ResourceInventory  _resourceInventory;
         private WeaponActionPlayer _weaponActionPlayer;
+        private WeaponHitNotifier  _hitNotifier;
         private SphereCollider     _attackCollider;
         private float              _cooldown;
         private readonly float[]   _skillCooldowns = new float[3];
@@ -55,6 +57,7 @@ namespace Duskborn.Gameplay.Player
             _classAbility       = GetComponent<ClassAbility>();
             _resourceInventory  = GetComponent<ResourceInventory>();
             _weaponActionPlayer = GetComponent<WeaponActionPlayer>();
+            _hitNotifier        = GetComponent<WeaponHitNotifier>();
             _attackCollider     = attackTrigger != null ? attackTrigger.GetComponent<SphereCollider>() : null;
 
             if (_weaponActionPlayer != null)
@@ -326,8 +329,8 @@ namespace Duskborn.Gameplay.Player
                 DuskLog.Log(LogChannel.Combat, $"Cleave hit {col.name} — {damage:F1}{(isCrit ? " CRIT" : "")}");
             }
 
-            if (hitEnemies.Count > 0) _classAbility?.OnAttackCompleted(hitEnemies);
-            else                       _classAbility?.OnAttackMissed();
+            if (hitEnemies.Count > 0) { _classAbility?.OnAttackCompleted(hitEnemies); RpcOnHitAudio(Owner, hitEnemies[0].tag); }
+            else                         _classAbility?.OnAttackMissed();
         }
 
         [ServerRpc]
@@ -347,7 +350,7 @@ namespace Duskborn.Gameplay.Player
                 hitEnemies.Add(enemy);
                 DuskLog.Log(LogChannel.Combat, $"Heavy hit {col.name} — {damage:F1}{(isCrit ? " CRIT" : "")}");
             }
-            if (hitEnemies.Count > 0) _classAbility?.OnAttackCompleted(hitEnemies);
+            if (hitEnemies.Count > 0) { _classAbility?.OnAttackCompleted(hitEnemies); RpcOnHitAudio(Owner, hitEnemies[0].tag); }
             else _classAbility?.OnAttackMissed();
         }
 
@@ -368,8 +371,15 @@ namespace Duskborn.Gameplay.Player
                 hitEnemies.Add(enemy);
                 DuskLog.Log(LogChannel.Combat, $"Hit {col.name} — {damage:F1}{(isCrit ? " CRIT" : "")}");
             }
-            if (hitEnemies.Count > 0) _classAbility?.OnAttackCompleted(hitEnemies);
-            else                       _classAbility?.OnAttackMissed();
+            if (hitEnemies.Count > 0) { _classAbility?.OnAttackCompleted(hitEnemies); RpcOnHitAudio(Owner, hitEnemies[0].tag); }
+            else                         _classAbility?.OnAttackMissed();
+        }
+
+        [TargetRpc]
+        private void RpcOnHitAudio(NetworkConnection conn, string tag)
+        {
+            DuskLog.Log(LogChannel.Audio, $"RpcOnHitAudio: tag='{tag}'.");
+            _hitNotifier?.Raise(new WeaponHitNotifier.HitData(tag, 0));
         }
 
         // ── Item Consume ──────────────────────────────────────────────────────
@@ -403,10 +413,15 @@ namespace Duskborn.Gameplay.Player
         {
             if (nodeObj == null) return;
             var node = nodeObj.GetComponent<ResourceNode>();
-            if (node == null) return;
-            if (node.ServerHit(out string resourceId, out int amount))
+            if (node == null || !node.IsAlive) return;
+
+            node.TakeDamage(_stats.Damage);
+            RpcOnHitAudio(Owner, nodeObj.gameObject.tag);
+
+            if (!node.IsAlive)
             {
-                RpcReceiveResources(Owner, resourceId, amount);
+                if (node.TryGetDrops(out string resourceId, out int amount))
+                    RpcReceiveResources(Owner, resourceId, amount);
                 nodeObj.Despawn();
             }
         }

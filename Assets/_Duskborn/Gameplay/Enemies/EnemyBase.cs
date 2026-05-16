@@ -14,7 +14,7 @@ using Duskborn.Gameplay.Player;
 namespace Duskborn.Gameplay.Enemies
 {
     [RequireComponent(typeof(NavMeshAgent))]
-    public abstract class EnemyBase : NetworkBehaviour, ICombatEntity
+    public abstract class EnemyBase : NetworkBehaviour, ICombatEntity, IDamageable
     {
         public Transform Transform => transform;
         [Header("Stats")]

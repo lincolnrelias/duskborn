@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Duskborn.Audio;
 using Duskborn.Core;
 using Duskborn.Gameplay;
 using Duskborn.Gameplay.Player;
@@ -42,8 +43,13 @@ namespace Duskborn.Gameplay.Equipment
         private bool               _isPlaying;
         private bool               _skillFired;
         private float              _runtimeSpeedMultiplier = 1f;
+        private WeaponHitNotifier  _hitNotifier;
 
-        public bool IsPlaying => _isPlaying;
+        public bool              IsPlaying     => _isPlaying;
+        public WeaponItem        CurrentWeapon => _activeWeapon;
+        public WeaponSkill       CurrentSkill  => _activeSkill;
+        public WeaponHitNotifier HitNotifier   =>
+            _hitNotifier != null ? _hitNotifier : (_hitNotifier = GetComponent<WeaponHitNotifier>());
 
         public event Action         OnActionComplete;
         public event Action<float>  OnSpeedChanged;
@@ -60,8 +66,11 @@ namespace Duskborn.Gameplay.Equipment
             }
         }
 
+        private WeaponAudioPlayer _audioPlayer;
+
         private void Start()
         {
+            _audioPlayer = GetComponent<WeaponAudioPlayer>();
             if (animator == null)
             {
                 DuskLog.Warn(LogChannel.ActionBar, "WeaponActionPlayer: Animator reference not set.");
@@ -140,6 +149,9 @@ namespace Duskborn.Gameplay.Equipment
                 ? (WeaponActionEvent[])data.Events.Clone()
                 : Array.Empty<WeaponActionEvent>();
             Array.Sort(_sortedEvents, (a, b) => a.NormalizedTime.CompareTo(b.NormalizedTime));
+
+            DuskLog.Log(LogChannel.Audio, $"PlayAction [{actionIndex}]: firing swing audio. audioPlayer={(object)_audioPlayer ?? "null"} profile={weapon?.AudioProfile?.name ?? "null"}.");
+            _audioPlayer?.PlaySwing(weapon?.AudioProfile);
 
             ApplyMask(data.PreserveLocomotion);
             _clipPlayable = AnimationClipPlayable.Create(_graph, clip);

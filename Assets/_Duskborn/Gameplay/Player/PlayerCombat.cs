@@ -4,6 +4,7 @@ using FishNet.Object;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Duskborn.Core;
+using Duskborn.Gameplay;
 using Duskborn.Gameplay.ActionBar;
 using Duskborn.Gameplay.Classes;
 using Duskborn.Gameplay.Enemies;
@@ -14,8 +15,9 @@ using Duskborn.Gameplay.Loot;
 namespace Duskborn.Gameplay.Player
 {
     [RequireComponent(typeof(PlayerStats))]
-    public class PlayerCombat : NetworkBehaviour
+    public class PlayerCombat : NetworkBehaviour, ICombatEntity
     {
+        public Transform Transform => transform;
         [Header("Attack")]
         [SerializeField] private float              attackRange   = 2f;
         [SerializeField] private LayerMask          enemyLayer;
@@ -24,7 +26,6 @@ namespace Duskborn.Gameplay.Player
 
         public LayerMask EnemyLayer => enemyLayer;
 
-        private const float CritMultiplier = 1.5f;
 
         private readonly HashSet<EnemyBase>    _enemiesInRange = new();
         private readonly HashSet<ResourceNode> _nodesInRange   = new();
@@ -157,9 +158,12 @@ namespace Duskborn.Gameplay.Player
                         { actionBarInstaller?.Service.SelectSlot(i); break; }
         }
 
+        private bool IsActionLocked => _weaponActionPlayer != null && _weaponActionPlayer.IsPlaying;
+
         private void TryWeaponSkill(int index)
         {
             if (!IsOwner || !_stats.IsAlive) return;
+            if (IsActionLocked) return;
             var weapon = actionBarInstaller?.Service.GetSelectedItem() as WeaponItem;
             if (weapon == null || index >= weapon.Skills.Count || weapon.Skills[index] == null) return;
             if (_skillCooldowns[index] > 0f)
@@ -186,6 +190,7 @@ namespace Duskborn.Gameplay.Player
         private void TryPrimaryAction()
         {
             if (!_stats.IsAlive || _cooldown > 0f) return;
+            if (IsActionLocked) return;
 
             var item = actionBarInstaller?.Service.GetSelectedItem();
             if (item is ILeftClickAction action)
@@ -210,6 +215,7 @@ namespace Duskborn.Gameplay.Player
         private void TrySecondaryAction()
         {
             if (!_stats.IsAlive) return;
+            if (IsActionLocked) return;
             var item = actionBarInstaller?.Service.GetSelectedItem();
             (item as IRightClickAction)?.OnRightClick(BuildContext());
         }
@@ -247,23 +253,22 @@ namespace Duskborn.Gameplay.Player
             RequestAttackRpc();
         }
 
-        // Called by WeaponItem.OnLeftClick — cooldown already set by TryPrimaryAction.
-        public void TriggerAttack()
+        // ICombatEntity — fired by MeleeWeaponBehaviour at HitboxOpen.
+        public void ExecuteBasicMelee()
         {
             if (_linkedNode != null) RequestNodeHitRpc(_linkedNode.NetworkObject);
             RequestAttackRpc();
         }
 
-        // Called by WeaponItem.OnRightClick — 2× damage, 2× cooldown.
-        public void TriggerHeavyAttack()
+        public void ExecuteHeavyMelee()
         {
             if (!_stats.IsAlive || _cooldown > 0f) return;
             _cooldown = 2f / Mathf.Max(_stats.AttackSpeed, 0.01f);
             RequestHeavyAttackRpc();
         }
 
-        // Called by CleaveSkill.
-        public void TriggerCleave(float range, float arcDegrees, float damageMultiplier)
+        // Called by CleaveSkill via ICombatEntity.
+        public void ExecuteCleave(float range, float arcDegrees, float damageMultiplier)
         {
             if (!_stats.IsAlive) return;
             RequestCleaveRpc(range, arcDegrees, damageMultiplier);
@@ -287,7 +292,7 @@ namespace Duskborn.Gameplay.Player
                 if (enemy == null || !enemy.IsAlive) continue;
 
                 bool  isCrit = Random.value < _stats.CritChance;
-                float damage = _stats.Damage * damageMultiplier * (isCrit ? CritMultiplier : 1f);
+                float damage = _stats.Damage * damageMultiplier * (isCrit ? _stats.CritMultiplier : 1f);
                 if (_classAbility != null) damage = _classAbility.ModifyDamage(damage, enemy);
                 enemy.TakeDamage(damage);
                 hitEnemies.Add(enemy);
@@ -309,7 +314,7 @@ namespace Duskborn.Gameplay.Player
                 var enemy = col.GetComponentInParent<EnemyBase>();
                 if (enemy == null || !enemy.IsAlive) continue;
                 bool  isCrit  = Random.value < _stats.CritChance;
-                float damage  = _stats.Damage * 2f * (isCrit ? CritMultiplier : 1f);
+                float damage  = _stats.Damage * 2f * (isCrit ? _stats.CritMultiplier : 1f);
                 if (_classAbility != null) damage = _classAbility.ModifyDamage(damage, enemy);
                 enemy.TakeDamage(damage);
                 hitEnemies.Add(enemy);
@@ -330,7 +335,7 @@ namespace Duskborn.Gameplay.Player
                 var enemy = col.GetComponentInParent<EnemyBase>();
                 if (enemy == null || !enemy.IsAlive) continue;
                 bool  isCrit = Random.value < _stats.CritChance;
-                float damage = _stats.Damage * (isCrit ? CritMultiplier : 1f);
+                float damage = _stats.Damage * (isCrit ? _stats.CritMultiplier : 1f);
                 if (_classAbility != null) damage = _classAbility.ModifyDamage(damage, enemy);
                 enemy.TakeDamage(damage);
                 hitEnemies.Add(enemy);
@@ -387,10 +392,10 @@ namespace Duskborn.Gameplay.Player
 
         // ─────────────────────────────────────────────────────────────────────
 
-        private ActionContext BuildContext()
+        private CombatContext BuildContext()
         {
             var bar = actionBarInstaller?.Service;
-            return new ActionContext(this, _stats, bar, bar?.SelectedIndex ?? 0, _weaponActionPlayer);
+            return new CombatContext(this, _stats, bar, bar?.SelectedIndex ?? 0, _weaponActionPlayer);
         }
 
         private void RefreshLinkedNode()

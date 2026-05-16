@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Duskborn.Core;
-using Duskborn.Gameplay.ActionBar;
+using Duskborn.Gameplay;
 using Duskborn.Gameplay.Player;
 using UnityEngine;
 using UnityEngine.Animations;
@@ -34,7 +34,7 @@ namespace Duskborn.Gameplay.Equipment
         private WeaponSkill        _activeSkill;
         private WeaponActionData   _activeData;
         private AnimationClip      _activeClip;
-        private ActionContext      _activeCtx;
+        private CombatContext      _activeCtx;
         private int                _activeActionIndex;
         private WeaponActionEvent[] _sortedEvents;
         private int                _eventCursor;
@@ -42,6 +42,8 @@ namespace Duskborn.Gameplay.Equipment
         private bool               _isPlaying;
         private bool               _skillFired;
         private float              _runtimeSpeedMultiplier = 1f;
+
+        public bool IsPlaying => _isPlaying;
 
         public event Action<float> OnSpeedChanged;
 
@@ -101,7 +103,7 @@ namespace Duskborn.Gameplay.Equipment
         }
 
         // Called by WeaponItem.OnLeftClick / OnRightClick.
-        public void PlayAction(int actionIndex, WeaponItem weapon, ActionContext ctx)
+        public void PlayAction(int actionIndex, WeaponItem weapon, CombatContext ctx)
         {
             if (!_graph.IsValid())
             {
@@ -171,7 +173,7 @@ namespace Duskborn.Gameplay.Equipment
             _clipPlayable = default;
         }
 
-        public void PlaySkillAction(WeaponSkill skill, ActionContext ctx)
+        public void PlaySkillAction(WeaponSkill skill, CombatContext ctx)
         {
             if (!_graph.IsValid())
             {

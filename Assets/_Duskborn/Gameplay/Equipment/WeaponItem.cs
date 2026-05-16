@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using InventorySystem.Core;
+using Duskborn.Gameplay;
 using Duskborn.Gameplay.ActionBar;
 using Duskborn.Core;
 using UnityEngine;
@@ -35,7 +36,7 @@ namespace Duskborn.Gameplay.Equipment
             Skills    = skills  ?? Array.Empty<WeaponSkill>();
         }
 
-        public virtual void OnLeftClick(ActionContext ctx)
+        public virtual void OnLeftClick(CombatContext ctx)
         {
             if (ctx.WeaponAnimator != null)
                 ctx.WeaponAnimator.PlayAction(0, this, ctx);
@@ -43,7 +44,7 @@ namespace Duskborn.Gameplay.Equipment
                 DuskLog.Warn(LogChannel.ActionBar, $"'{DisplayName}': no WeaponActionPlayer on player.");
         }
 
-        public virtual void OnRightClick(ActionContext ctx)
+        public virtual void OnRightClick(CombatContext ctx)
         {
             if (ctx.WeaponAnimator != null)
                 ctx.WeaponAnimator.PlayAction(1, this, ctx);

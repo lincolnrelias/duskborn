@@ -1,3 +1,4 @@
+using Duskborn.Gameplay;
 using Duskborn.Gameplay.ActionBar;
 using InventorySystem.Core;
 
@@ -15,7 +16,7 @@ namespace Duskborn.Gameplay.Items
             HealAmount = healAmount;
         }
 
-        public void OnRightClick(ActionContext ctx)
+        public void OnRightClick(CombatContext ctx)
             => ctx.Combat.RequestConsumeItem(ctx.SlotIndex, HealAmount);
     }
 }

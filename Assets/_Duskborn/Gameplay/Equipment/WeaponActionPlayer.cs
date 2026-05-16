@@ -45,7 +45,8 @@ namespace Duskborn.Gameplay.Equipment
 
         public bool IsPlaying => _isPlaying;
 
-        public event Action<float> OnSpeedChanged;
+        public event Action         OnActionComplete;
+        public event Action<float>  OnSpeedChanged;
 
         public float RuntimeSpeedMultiplier
         {
@@ -171,6 +172,7 @@ namespace Duskborn.Gameplay.Equipment
             if (_layerMixer.GetInput(1).IsValid()) _layerMixer.DisconnectInput(1);
             if (_clipPlayable.IsValid()) _clipPlayable.Destroy();
             _clipPlayable = default;
+            OnActionComplete?.Invoke();
         }
 
         public void PlaySkillAction(WeaponSkill skill, CombatContext ctx)

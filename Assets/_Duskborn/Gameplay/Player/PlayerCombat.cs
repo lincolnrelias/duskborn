@@ -22,6 +22,7 @@ namespace Duskborn.Gameplay.Player
         [SerializeField] private float              attackRange   = 2f;
         [SerializeField] private LayerMask          enemyLayer;
         [SerializeField] private AttackRangeTrigger attackTrigger;
+        [SerializeField] private float              inputBufferWindow = 0.3f;
         private ActionBarInstaller actionBarInstaller;
 
         public LayerMask EnemyLayer => enemyLayer;
@@ -40,6 +41,9 @@ namespace Duskborn.Gameplay.Player
         private float              _cooldown;
         private readonly float[]   _skillCooldowns = new float[3];
 
+        private System.Action _bufferedAction;
+        private float         _bufferExpiry;
+
         // Cached delegates for stable Register/Unregister.
         private System.Action _onSkill0;
         private System.Action _onSkill1;
@@ -53,9 +57,32 @@ namespace Duskborn.Gameplay.Player
             _weaponActionPlayer = GetComponent<WeaponActionPlayer>();
             _attackCollider     = attackTrigger != null ? attackTrigger.GetComponent<SphereCollider>() : null;
 
+            if (_weaponActionPlayer != null)
+                _weaponActionPlayer.OnActionComplete += FlushBuffer;
+
             _onSkill0 = () => TryWeaponSkill(0);
             _onSkill1 = () => TryWeaponSkill(1);
             _onSkill2 = () => TryWeaponSkill(2);
+        }
+
+        private void OnDestroy()
+        {
+            if (_weaponActionPlayer != null)
+                _weaponActionPlayer.OnActionComplete -= FlushBuffer;
+        }
+
+        private void BufferAction(System.Action action)
+        {
+            _bufferedAction = action;
+            _bufferExpiry   = Time.time + inputBufferWindow;
+        }
+
+        private void FlushBuffer()
+        {
+            if (_bufferedAction == null || Time.time > _bufferExpiry) { _bufferedAction = null; return; }
+            var action = _bufferedAction;
+            _bufferedAction = null;
+            action();
         }
 
         public override void OnStartClient()
@@ -163,7 +190,7 @@ namespace Duskborn.Gameplay.Player
         private void TryWeaponSkill(int index)
         {
             if (!IsOwner || !_stats.IsAlive) return;
-            if (IsActionLocked) return;
+            if (IsActionLocked) { BufferAction(() => TryWeaponSkill(index)); return; }
             var weapon = actionBarInstaller?.Service.GetSelectedItem() as WeaponItem;
             if (weapon == null || index >= weapon.Skills.Count || weapon.Skills[index] == null) return;
             if (_skillCooldowns[index] > 0f)
@@ -190,7 +217,7 @@ namespace Duskborn.Gameplay.Player
         private void TryPrimaryAction()
         {
             if (!_stats.IsAlive || _cooldown > 0f) return;
-            if (IsActionLocked) return;
+            if (IsActionLocked) { BufferAction(TryPrimaryAction); return; }
 
             var item = actionBarInstaller?.Service.GetSelectedItem();
             if (item is ILeftClickAction action)
@@ -215,7 +242,7 @@ namespace Duskborn.Gameplay.Player
         private void TrySecondaryAction()
         {
             if (!_stats.IsAlive) return;
-            if (IsActionLocked) return;
+            if (IsActionLocked) { BufferAction(TrySecondaryAction); return; }
             var item = actionBarInstaller?.Service.GetSelectedItem();
             (item as IRightClickAction)?.OnRightClick(BuildContext());
         }

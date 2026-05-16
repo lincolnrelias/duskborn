@@ -3,6 +3,7 @@ using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using UnityEngine;
 using Duskborn.Core;
+using Duskborn.Gameplay;
 using Duskborn.Gameplay.Classes;
 
 namespace Duskborn.Gameplay.Player
@@ -12,41 +13,42 @@ namespace Duskborn.Gameplay.Player
         [Header("Class")]
         [SerializeField] private ClassDefinition classDefinition;
 
-        [Header("Base Stats (overridden by Class Definition if assigned)")]
-        [SerializeField] private float baseMaxHP       = 100f;
-        [SerializeField] private float baseMoveSpeed   = 5f;
-        [SerializeField] private float baseDamage      = 10f;
-        [SerializeField] private float baseAttackSpeed = 1f;
+        [Header("Stats")]
+        [SerializeField] private EntityStats _entity = new();
 
-        [HideInInspector] public float HPMultiplier             = 1f;
-        [HideInInspector] public float DamageMultiplier         = 1f;
-        [HideInInspector] public float MoveSpeedMultiplier      = 1f;
-        [HideInInspector] public float AttackSpeedMultiplier    = 1f;
-        [HideInInspector] public float CritChanceBonus          = 0f;
-        [HideInInspector] public float IncomingDamageMultiplier = 1f;
+        // ── Computed stats ────────────────────────────────────────────────────
+        public float MaxHP          => _entity.MaxHP;
+        public float MoveSpeed      => _entity.MoveSpeed;
+        public float Damage         => _entity.Damage;
+        public float AttackSpeed    => _entity.AttackSpeed;
+        public float CritChance     => _entity.CritChance;
+        public float CritMultiplier => _entity.CritMultiplier;
 
-        public float MaxHP       => baseMaxHP * HPMultiplier;
-        public float MoveSpeed   => baseMoveSpeed * MoveSpeedMultiplier;
-        public float Damage      => baseDamage * DamageMultiplier;
-        public float AttackSpeed => baseAttackSpeed * AttackSpeedMultiplier;
-        public float CritChance  => Mathf.Clamp01(CritChanceBonus);
+        // ── Runtime multipliers — forwarded so all callers compile unchanged ──
+        public float HPMultiplier             { get => _entity.HPMultiplier;             set => _entity.HPMultiplier = value; }
+        public float DamageMultiplier         { get => _entity.DamageMultiplier;         set => _entity.DamageMultiplier = value; }
+        public float MoveSpeedMultiplier      { get => _entity.MoveSpeedMultiplier;      set => _entity.MoveSpeedMultiplier = value; }
+        public float AttackSpeedMultiplier    { get => _entity.AttackSpeedMultiplier;    set => _entity.AttackSpeedMultiplier = value; }
+        public float CritChanceBonus          { get => _entity.CritChanceBonus;          set => _entity.CritChanceBonus = value; }
+        public float IncomingDamageMultiplier { get => _entity.IncomingDamageMultiplier; set => _entity.IncomingDamageMultiplier = value; }
 
+        // ── HP (networked) ────────────────────────────────────────────────────
         private readonly SyncVar<float> _currentHP = new();
 
         public float CurrentHP => _currentHP.Value;
         public bool  IsAlive   => _currentHP.Value > 0f;
 
         public event Action<float, float> OnHPChanged; // (current, max)
-        public event Action OnDied;
+        public event Action               OnDied;
 
         private void Awake()
         {
             if (classDefinition != null)
             {
-                baseMaxHP       = classDefinition.MaxHP;
-                baseMoveSpeed   = classDefinition.MoveSpeed;
-                baseDamage      = classDefinition.Damage;
-                baseAttackSpeed = classDefinition.AttackSpeed;
+                _entity.maxHP       = classDefinition.MaxHP;
+                _entity.moveSpeed   = classDefinition.MoveSpeed;
+                _entity.damage      = classDefinition.Damage;
+                _entity.attackSpeed = classDefinition.AttackSpeed;
                 DuskLog.Log(LogChannel.PlayerClass, $"Applied: {classDefinition.ClassName}");
             }
             _currentHP.Value = MaxHP;
@@ -63,10 +65,10 @@ namespace Duskborn.Gameplay.Player
 
         public void SetBaseStats(float maxHP, float moveSpeed, float damage, float attackSpeed = 1f)
         {
-            baseMaxHP      = maxHP;
-            baseMoveSpeed  = moveSpeed;
-            baseDamage     = damage;
-            baseAttackSpeed = attackSpeed;
+            _entity.maxHP       = maxHP;
+            _entity.moveSpeed   = moveSpeed;
+            _entity.damage      = damage;
+            _entity.attackSpeed = attackSpeed;
             if (IsServerStarted)
                 _currentHP.Value = MaxHP;
         }

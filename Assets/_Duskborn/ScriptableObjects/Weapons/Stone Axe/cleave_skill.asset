@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.CleaveSkill
   cooldown: 5
   animation:
+    BaseSpeed: 1.7
     PreserveLocomotion: 0
     Clips:
     - {fileID: 7400000, guid: c9a2ed53d56d62740be43c06c115f8d0, type: 3}

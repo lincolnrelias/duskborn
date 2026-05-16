@@ -25,11 +25,14 @@ MonoBehaviour:
     Value: 0.05
   behaviour: {fileID: 11400000, guid: c5a595ad70d17be40826423d131de2dd, type: 2}
   actions:
-  - Clips:
+  - BaseSpeed: 1
+    PreserveLocomotion: 1
+    Clips:
     - {fileID: 7400000, guid: 3558db8e6c045c3418d8e7593f8a88de, type: 3}
     - {fileID: 7400000, guid: f9808de8e12794d468604280ad76ca36, type: 3}
     Events:
     - Type: 0
-      NormalizedTime: 0.347
+      NormalizedTime: 0.25
   skills:
   - {fileID: 11400000, guid: d57cb9290c0fd0b4ea77e6fd29e1bd3c, type: 2}
+  audioProfile: {fileID: 11400000, guid: 658caad55867c5d41829bba0cc8ead5b, type: 2}

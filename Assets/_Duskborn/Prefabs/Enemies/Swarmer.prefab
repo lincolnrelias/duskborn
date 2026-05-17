@@ -151,7 +151,7 @@ MonoBehaviour:
   holdPoint: {fileID: 6238249836595862156}
   goldDropMin: 1
   goldDropMax: 3
-  deathDelay: 1.5
+  deathDelay: 10
   _animator: {fileID: 7111733941174250581}
   outlineLayerName: EnemyOutline
   outlineRenderers: []
@@ -259,7 +259,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584226553367469735
+  _initializedTimestamp: -8584226552284819533
 --- !u!114 &6069308860891105275
 MonoBehaviour:
   m_ObjectHideFlags: 0

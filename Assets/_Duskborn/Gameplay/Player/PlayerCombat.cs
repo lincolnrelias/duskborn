@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Duskborn.Audio;
 using Duskborn.Core;
+using Duskborn.Effects;
 using Duskborn.Gameplay;
 using Duskborn.Gameplay.ActionBar;
 using Duskborn.Gameplay.Classes;
@@ -312,6 +313,7 @@ namespace Duskborn.Gameplay.Player
             float      cosHalfArc = Mathf.Cos(arcDegrees * 0.5f * Mathf.Deg2Rad);
             Collider[] cols       = Physics.OverlapSphere(transform.position, range, enemyLayer);
             var        hitEnemies = new List<EnemyBase>();
+            Collider   firstHitCol = null;
 
             foreach (var col in cols)
             {
@@ -326,11 +328,17 @@ namespace Duskborn.Gameplay.Player
                 if (_classAbility != null) damage = _classAbility.ModifyDamage(damage, enemy);
                 enemy.TakeDamage(damage);
                 hitEnemies.Add(enemy);
+                if (firstHitCol == null) firstHitCol = col;
                 DuskLog.Log(LogChannel.Combat, $"Cleave hit {col.name} — {damage:F1}{(isCrit ? " CRIT" : "")}");
             }
 
-            if (hitEnemies.Count > 0) { _classAbility?.OnAttackCompleted(hitEnemies); RpcOnHitAudio(Owner, hitEnemies[0].tag); }
-            else                         _classAbility?.OnAttackMissed();
+            if (hitEnemies.Count > 0)
+            {
+                _classAbility?.OnAttackCompleted(hitEnemies);
+                RpcOnHitAudio(Owner, hitEnemies[0].tag);
+                RpcOnHitEffect(hitEnemies[0].tag, firstHitCol.ClosestPoint(transform.position));
+            }
+            else _classAbility?.OnAttackMissed();
         }
 
         [ServerRpc]
@@ -339,6 +347,7 @@ namespace Duskborn.Gameplay.Player
             Vector3    origin = transform.position + transform.forward * (attackRange * 0.5f);
             Collider[] cols   = Physics.OverlapSphere(origin, attackRange, enemyLayer);
             var hitEnemies = new List<EnemyBase>();
+            Collider firstHitCol = null;
             foreach (var col in cols)
             {
                 var enemy = col.GetComponentInParent<EnemyBase>();
@@ -348,9 +357,15 @@ namespace Duskborn.Gameplay.Player
                 if (_classAbility != null) damage = _classAbility.ModifyDamage(damage, enemy);
                 enemy.TakeDamage(damage);
                 hitEnemies.Add(enemy);
+                if (firstHitCol == null) firstHitCol = col;
                 DuskLog.Log(LogChannel.Combat, $"Heavy hit {col.name} — {damage:F1}{(isCrit ? " CRIT" : "")}");
             }
-            if (hitEnemies.Count > 0) { _classAbility?.OnAttackCompleted(hitEnemies); RpcOnHitAudio(Owner, hitEnemies[0].tag); }
+            if (hitEnemies.Count > 0)
+            {
+                _classAbility?.OnAttackCompleted(hitEnemies);
+                RpcOnHitAudio(Owner, hitEnemies[0].tag);
+                RpcOnHitEffect(hitEnemies[0].tag, firstHitCol.ClosestPoint(origin));
+            }
             else _classAbility?.OnAttackMissed();
         }
 
@@ -360,6 +375,7 @@ namespace Duskborn.Gameplay.Player
             Vector3    origin = transform.position + transform.forward * (attackRange * 0.5f);
             Collider[] cols   = Physics.OverlapSphere(origin, attackRange, enemyLayer);
             var hitEnemies = new List<EnemyBase>();
+            Collider firstHitCol = null;
             foreach (var col in cols)
             {
                 var enemy = col.GetComponentInParent<EnemyBase>();
@@ -369,10 +385,16 @@ namespace Duskborn.Gameplay.Player
                 if (_classAbility != null) damage = _classAbility.ModifyDamage(damage, enemy);
                 enemy.TakeDamage(damage);
                 hitEnemies.Add(enemy);
+                if (firstHitCol == null) firstHitCol = col;
                 DuskLog.Log(LogChannel.Combat, $"Hit {col.name} — {damage:F1}{(isCrit ? " CRIT" : "")}");
             }
-            if (hitEnemies.Count > 0) { _classAbility?.OnAttackCompleted(hitEnemies); RpcOnHitAudio(Owner, hitEnemies[0].tag); }
-            else                         _classAbility?.OnAttackMissed();
+            if (hitEnemies.Count > 0)
+            {
+                _classAbility?.OnAttackCompleted(hitEnemies);
+                RpcOnHitAudio(Owner, hitEnemies[0].tag);
+                RpcOnHitEffect(hitEnemies[0].tag, firstHitCol.ClosestPoint(origin));
+            }
+            else _classAbility?.OnAttackMissed();
         }
 
         [TargetRpc]
@@ -380,6 +402,12 @@ namespace Duskborn.Gameplay.Player
         {
             DuskLog.Log(LogChannel.Audio, $"RpcOnHitAudio: tag='{tag}'.");
             _hitNotifier?.Raise(new WeaponHitNotifier.HitData(tag, 0));
+        }
+
+        [ObserversRpc]
+        private void RpcOnHitEffect(string tag, Vector3 position)
+        {
+            GetComponent<WeaponEffectPlayer>()?.SpawnHitEffect(tag, position);
         }
 
         // ── Item Consume ──────────────────────────────────────────────────────
@@ -417,6 +445,7 @@ namespace Duskborn.Gameplay.Player
 
             node.TakeDamage(_stats.Damage);
             RpcOnHitAudio(Owner, nodeObj.gameObject.tag);
+            RpcOnHitEffect(nodeObj.gameObject.tag, nodeObj.transform.position);
 
             if (!node.IsAlive)
             {

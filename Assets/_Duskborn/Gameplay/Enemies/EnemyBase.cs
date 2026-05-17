@@ -270,6 +270,7 @@ namespace Duskborn.Gameplay.Enemies
 
         protected virtual void Die()
         {
+            SetOutline(false);
             Agent.enabled = false;
 
             SeededRNG rng  = GameSession.Instance?.RNG;

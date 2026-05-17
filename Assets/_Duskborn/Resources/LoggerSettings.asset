@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d789e7a2a45b4c4bb655f808d0c2818, type: 3}
   m_Name: LoggerSettings
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.LoggerSettings
-  enabledChannels: 131072
+  enabledChannels: 262144

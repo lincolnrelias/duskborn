@@ -36,3 +36,4 @@ MonoBehaviour:
   skills:
   - {fileID: 11400000, guid: d57cb9290c0fd0b4ea77e6fd29e1bd3c, type: 2}
   audioProfile: {fileID: 11400000, guid: 658caad55867c5d41829bba0cc8ead5b, type: 2}
+  effectProfile: {fileID: 11400000, guid: 4365837daea7cab4ebadeab220765a1c, type: 2}

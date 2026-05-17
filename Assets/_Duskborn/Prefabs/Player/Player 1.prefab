@@ -90,6 +90,7 @@ GameObject:
   - component: {fileID: -4999466269220733512}
   - component: {fileID: 8369684736023879674}
   - component: {fileID: 1470526056991240466}
+  - component: {fileID: -6865175293612143611}
   m_Layer: 8
   m_Name: Player 1
   m_TagString: Player
@@ -437,7 +438,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584226552667834017
+  _initializedTimestamp: -8584225818517266752
 --- !u!114 &8514665050153253299
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -620,6 +621,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5a3c8bbc3c7dbb43a477738436cb93e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Audio.WeaponHitNotifier
+--- !u!114 &-6865175293612143611
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7498212195385448204}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f513e8b81a48504d9a7e19f414e41d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Effects.WeaponEffectPlayer
 --- !u!1 &8615774888580447804
 GameObject:
   m_ObjectHideFlags: 0

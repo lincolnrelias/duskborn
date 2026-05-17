@@ -1,3 +1,4 @@
+using Duskborn.Effects;
 using Duskborn.Gameplay;
 using UnityEngine;
 
@@ -8,7 +9,9 @@ namespace Duskborn.Gameplay.Equipment
         [SerializeField] public float            cooldown          = 5f;
         [SerializeField] public float            range             = 2f;
         [SerializeField] public WeaponActionData animation;
-        [SerializeField] public AudioClip        hitAudioOverride; // null = use weapon profile tag lookup
+        [SerializeField] public AudioClip          hitAudioOverride;  // null = use weapon profile tag lookup
+        [SerializeField] public GameObject        hitEffectOverride; // null = use skill/weapon effect profile
+        [SerializeField] public WeaponEffectProfile effectProfile;   // null = fall through to weapon profile
 
         public virtual bool CanUse(CombatContext ctx)
         {

@@ -20,6 +20,7 @@ namespace Duskborn
         HitboxDebugger   = 15,
         ActionBar        = 16,
         Audio            = 17,
+        Effects          = 18,
     }
 
     [System.Flags]
@@ -44,6 +45,7 @@ namespace Duskborn
         HitboxDebugger   = 1 << 15,
         ActionBar        = 1 << 16,
         Audio            = 1 << 17,
+        Effects          = 1 << 18,
         All              = ~0,
     }
 }

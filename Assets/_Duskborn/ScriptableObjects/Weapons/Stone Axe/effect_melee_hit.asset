@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff533842b4d2e1342906a38ffa08b025, type: 3}
+  m_Name: effect_melee_hit
+  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Effects.WeaponEffectProfile
+  surfaces:
+  - tag: Tree
+    prefab: {fileID: 7567436153231433018, guid: 597856cc906c66545b379b6f0386d17a, type: 3}
+  - tag: Enemy
+    prefab: {fileID: 7567436153231433018, guid: 32bd72bbc03a260479710c632c07ae1d, type: 3}

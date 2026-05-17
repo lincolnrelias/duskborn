@@ -227,7 +227,6 @@ namespace Duskborn.Gameplay.Enemies
         // ── ICombatEntity ─────────────────────────────────────────────────────
 
         public void ExecuteBasicMelee() => PerformBasicMelee();
-        public void ExecuteHeavyMelee() => PerformBasicMelee();
 
         public void ExecuteCleave(float range, float arcDegrees, float damageMultiplier)
         {

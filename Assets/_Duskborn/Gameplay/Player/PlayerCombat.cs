@@ -291,13 +291,6 @@ namespace Duskborn.Gameplay.Player
             RequestAttackRpc();
         }
 
-        public void ExecuteHeavyMelee()
-        {
-            if (!_stats.IsAlive || _cooldown > 0f) return;
-            _cooldown = 2f / Mathf.Max(_stats.AttackSpeed, 0.01f);
-            RequestHeavyAttackRpc();
-        }
-
         // Called by CleaveSkill via ICombatEntity.
         public void ExecuteCleave(float range, float arcDegrees, float damageMultiplier)
         {
@@ -337,34 +330,6 @@ namespace Duskborn.Gameplay.Player
                 _classAbility?.OnAttackCompleted(hitEnemies);
                 RpcOnHitAudio(Owner, hitEnemies[0].tag);
                 RpcOnHitEffect(hitEnemies[0].tag, firstHitCol.ClosestPoint(transform.position));
-            }
-            else _classAbility?.OnAttackMissed();
-        }
-
-        [ServerRpc]
-        private void RequestHeavyAttackRpc()
-        {
-            Vector3    origin = transform.position + transform.forward * (attackRange * 0.5f);
-            Collider[] cols   = Physics.OverlapSphere(origin, attackRange, enemyLayer);
-            var hitEnemies = new List<EnemyBase>();
-            Collider firstHitCol = null;
-            foreach (var col in cols)
-            {
-                var enemy = col.GetComponentInParent<EnemyBase>();
-                if (enemy == null || !enemy.IsAlive) continue;
-                bool  isCrit  = Random.value < _stats.CritChance;
-                float damage  = _stats.Damage * 2f * (isCrit ? _stats.CritMultiplier : 1f);
-                if (_classAbility != null) damage = _classAbility.ModifyDamage(damage, enemy);
-                enemy.TakeDamage(damage);
-                hitEnemies.Add(enemy);
-                if (firstHitCol == null) firstHitCol = col;
-                DuskLog.Log(LogChannel.Combat, $"Heavy hit {col.name} — {damage:F1}{(isCrit ? " CRIT" : "")}");
-            }
-            if (hitEnemies.Count > 0)
-            {
-                _classAbility?.OnAttackCompleted(hitEnemies);
-                RpcOnHitAudio(Owner, hitEnemies[0].tag);
-                RpcOnHitEffect(hitEnemies[0].tag, firstHitCol.ClosestPoint(origin));
             }
             else _classAbility?.OnAttackMissed();
         }

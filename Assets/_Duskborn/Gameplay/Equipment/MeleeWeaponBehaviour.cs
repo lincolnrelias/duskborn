@@ -11,7 +11,6 @@ namespace Duskborn.Gameplay.Equipment
             if (type != WeaponEventType.HitboxOpen) return;
 
             if (actionIndex == 0) ctx.Caster.ExecuteBasicMelee();
-            if (actionIndex == 1) ctx.Caster.ExecuteHeavyMelee();
         }
     }
 }

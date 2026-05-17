@@ -6,7 +6,6 @@ namespace Duskborn.Gameplay
     {
         Transform Transform { get; }
         void ExecuteBasicMelee();
-        void ExecuteHeavyMelee();
         void ExecuteCleave(float range, float arcDegrees, float damageMultiplier);
     }
 }

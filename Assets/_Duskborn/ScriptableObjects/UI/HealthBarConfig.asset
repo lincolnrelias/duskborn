@@ -23,4 +23,4 @@ MonoBehaviour:
   ghostDrainSpeed: 1.5
   fadeDelay: 3.5
   fadeDuration: 0.6
-  yOffset: 2.2
+  yOffset: 0.2

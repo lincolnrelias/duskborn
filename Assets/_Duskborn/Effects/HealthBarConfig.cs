@@ -23,6 +23,7 @@ namespace Duskborn.Effects
         public float fadeDuration    = 0.6f;
 
         [Header("Layout")]
-        public float yOffset = 2.2f;  // world units above entity pivot
+        [Tooltip("Gap in world units between the top of the entity's mesh bounds and the bottom edge of the bar.")]
+        public float yOffset = 0.1f;
     }
 }

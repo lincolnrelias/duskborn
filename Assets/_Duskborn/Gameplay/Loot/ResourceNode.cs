@@ -35,6 +35,7 @@ namespace Duskborn.Gameplay.Loot
 
         private void Awake()
         {
+            _currentHP.Value    = maxHP;
             _currentHP.OnChange += OnHPChanged;
 
             if (outlineRenderer == null)

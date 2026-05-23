@@ -25,7 +25,7 @@ namespace Duskborn.Effects
         {
             _canvasGroup = GetComponent<CanvasGroup>();
 
-            transform.localPosition = Vector3.up * config.yOffset;
+            PositionAboveMesh();
 
             _provider = GetComponentInParent<IHealthProvider>();
             if (_provider == null)
@@ -50,6 +50,58 @@ namespace Duskborn.Effects
             _canvasGroup.alpha = 0f;
 
             _provider.OnHealthChanged += HandleHealthChanged;
+        }
+
+        private void PositionAboveMesh()
+        {
+            if (transform.parent == null) return;
+
+            float meshTopWorld = float.NegativeInfinity;
+
+            // Renderer.bounds: pose-aware for SkinnedMeshRenderer; valid for active MeshRenderers.
+            foreach (var r in transform.parent.GetComponentsInChildren<Renderer>())
+                meshTopWorld = Mathf.Max(meshTopWorld, r.bounds.max.y);
+
+            // MeshFilter.sharedMesh: explicit corner transform — reliable before the first render.
+            foreach (var mf in transform.parent.GetComponentsInChildren<MeshFilter>())
+                AccumulateMeshTop(mf, ref meshTopWorld);
+
+            // Collider.bounds: primitive colliders (CapsuleCollider, BoxCollider, etc.) are
+            // computed geometrically by Unity and are valid immediately — covers Unity built-in
+            // meshes (cylinder, cube, sphere) that may not have been rendered yet.
+            foreach (var col in transform.parent.GetComponentsInChildren<Collider>())
+                meshTopWorld = Mathf.Max(meshTopWorld, col.bounds.max.y);
+
+            if (meshTopWorld == float.NegativeInfinity)
+                meshTopWorld = transform.parent.position.y;
+
+            // InverseTransformPoint converts world Y to the entity's LOCAL space correctly,
+            // handling any scale on the entity (unlike plain subtraction which assumes scale=1).
+            float localY = transform.parent.InverseTransformPoint(
+                new Vector3(transform.parent.position.x, meshTopWorld, transform.parent.position.z)).y;
+
+            var   rt            = GetComponent<RectTransform>();
+            float barHalfHeight = rt != null ? rt.sizeDelta.y * 0.5f : 0f;
+
+            // localY = mesh top in local space. Add gap + half bar height so the bottom
+            // edge of the canvas lands at meshTop + yOffset, not the centre.
+            transform.localPosition = new Vector3(0f, localY + config.yOffset + barHalfHeight, 0f);
+        }
+
+        private static void AccumulateMeshTop(MeshFilter mf, ref float maxWorldY)
+        {
+            if (mf.sharedMesh == null) return;
+            Bounds    b = mf.sharedMesh.bounds;
+            Transform t = mf.transform;
+            for (int xi = 0; xi < 2; xi++)
+            for (int yi = 0; yi < 2; yi++)
+            for (int zi = 0; zi < 2; zi++)
+            {
+                float lx = xi == 0 ? b.min.x : b.max.x;
+                float ly = yi == 0 ? b.min.y : b.max.y;
+                float lz = zi == 0 ? b.min.z : b.max.z;
+                maxWorldY = Mathf.Max(maxWorldY, t.TransformPoint(lx, ly, lz).y);
+            }
         }
 
         private void OnDestroy()

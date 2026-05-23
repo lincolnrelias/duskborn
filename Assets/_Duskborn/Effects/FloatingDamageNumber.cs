@@ -15,70 +15,62 @@ namespace Duskborn.Effects
 
         public void Play(Vector3 worldPos, float amount, bool isCrit, DamageNumberConfig config)
         {
-            _config              = config;
-            transform.position   = worldPos;
-            transform.localScale = Vector3.one;
+            _config            = config;
+            transform.position = worldPos + Vector3.up * config.spawnHeightOffset;
 
-            _label.text     = Mathf.CeilToInt(amount).ToString();
+            _label.text      = Mathf.CeilToInt(amount).ToString();
             _label.fontSize  = isCrit ? config.critFontSize   : config.normalFontSize;
             _label.color     = isCrit ? config.critColor      : config.normalColor;
+            _label.fontStyle = FontStyles.Bold;
+            _label.outlineColor = config.outlineColor;
+            _label.outlineWidth = config.outlineWidth;
+
+            // Crits spawn big and snap down (WHAM); normals pop in from small.
+            transform.localScale = Vector3.one * (isCrit ? config.critPopStartScale : 0.5f);
 
             gameObject.SetActive(true);
 
             if (_anim != null) StopCoroutine(_anim);
-            _anim = StartCoroutine(isCrit ? AnimateCrit() : AnimateNormal());
+            _anim = StartCoroutine(Animate(isCrit));
         }
 
-        private IEnumerator AnimateNormal()
+        private IEnumerator Animate(bool isCrit)
         {
-            Vector3 start   = transform.position;
-            Vector3 end     = start + Vector3.up * _config.floatHeight;
+            Vector3 origin  = transform.position;
+            float   height  = _config.floatHeight * (isCrit ? 1.2f : 1f);
+            // Pick a drift direction once; numbers arc outward as they rise.
+            float   drift   = Random.Range(-_config.driftAmount, _config.driftAmount);
+            float   popEnd  = _config.critPopTime;
             float   elapsed = 0f;
 
-            while (elapsed < _config.duration)
-            {
-                elapsed += Time.deltaTime;
-                float t = elapsed / _config.duration;
-                transform.position = Vector3.Lerp(start, end, t);
-
-                const float fadeStart = 0.6f;
-                float alpha = t < fadeStart ? 1f : 1f - (t - fadeStart) / (1f - fadeStart);
-                var c = _label.color;
-                _label.color = new Color(c.r, c.g, c.b, alpha);
-
-                yield return null;
-            }
-
-            ReturnToPool();
-        }
-
-        private IEnumerator AnimateCrit()
-        {
-            Vector3 start     = transform.position;
-            Vector3 end       = start + Vector3.up * _config.floatHeight;
-            float   elapsed   = 0f;
-            float   punchEnd  = _config.critPunchTime;
-            float   settleEnd = punchEnd * 2f;
+            Color baseColor    = _label.color;
+            Color outlineBase  = _config.outlineColor;
+            float popStart     = isCrit ? _config.critPopStartScale : 0.5f;
 
             while (elapsed < _config.duration)
             {
                 elapsed += Time.deltaTime;
-                float t = elapsed / _config.duration;
-                transform.position = Vector3.Lerp(start, end, t);
+                float t = Mathf.Clamp01(elapsed / _config.duration);
 
-                float scale;
-                if (elapsed < punchEnd)
-                    scale = Mathf.Lerp(1f, _config.critPunchScale, elapsed / punchEnd);
-                else if (elapsed < settleEnd)
-                    scale = Mathf.Lerp(_config.critPunchScale, 1f, (elapsed - punchEnd) / punchEnd);
-                else
-                    scale = 1f;
-                transform.localScale = Vector3.one * scale;
+                // Ease-out vertical: quadratic deceleration (fast start, gentle coast).
+                float easedY = height * (1f - (1f - t) * (1f - t));
 
-                const float fadeStart = 0.6f;
-                float alpha = t < fadeStart ? 1f : 1f - (t - fadeStart) / (1f - fadeStart);
-                var c = _label.color;
-                _label.color = new Color(c.r, c.g, c.b, alpha);
+                // Horizontal arc: drift accumulates over lifetime.
+                float easedX = drift * t;
+
+                transform.position = origin + new Vector3(easedX, easedY, 0f);
+
+                // Pop-in / snap: scale from startScale to 1.0 over popEnd seconds.
+                transform.localScale = Vector3.one *
+                    (elapsed < popEnd ? Mathf.LerpUnclamped(popStart, 1f, elapsed / popEnd) : 1f);
+
+                // Fade: opaque until fadeStartFraction, then linear out.
+                float alpha = t < _config.fadeStartFraction
+                    ? 1f
+                    : 1f - (t - _config.fadeStartFraction) / (1f - _config.fadeStartFraction);
+
+                _label.color        = new Color(baseColor.r,   baseColor.g,   baseColor.b,   alpha);
+                _label.outlineColor = new Color(outlineBase.r, outlineBase.g, outlineBase.b, alpha);
 
                 yield return null;
             }

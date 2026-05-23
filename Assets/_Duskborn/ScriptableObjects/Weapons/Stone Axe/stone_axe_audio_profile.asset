@@ -19,7 +19,7 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 9af62a927c7cc5a4fb40b5808e97ec59, type: 3}
   - tag: Enemy
     clips:
-    - {fileID: 8300000, guid: 5e5a4d5bc6187fb41b5271bee452d365, type: 3}
+    - {fileID: 8300000, guid: 9af62a927c7cc5a4fb40b5808e97ec59, type: 3}
   - tag: Player
     clips:
     - {fileID: 8300000, guid: 5e5a4d5bc6187fb41b5271bee452d365, type: 3}

@@ -167,13 +167,13 @@ namespace Duskborn.Gameplay.Enemies
                 return;
             }
 
-            TryUseSkill();
+            float dist      = Vector3.Distance(transform.position, CurrentTarget.position);
+            bool  skillUsed = TryUseSkill();
 
-            float dist = Vector3.Distance(transform.position, CurrentTarget.position);
             if (dist <= attackRange)
             {
                 Agent.ResetPath();
-                TryBasicMelee();
+                if (!skillUsed) TryBasicMelee();
             }
             else
             {
@@ -238,6 +238,7 @@ namespace Duskborn.Gameplay.Enemies
             HitboxDebugger.Flash(transform.position, range, new Color(0f, 1f, 0.5f));
             float cosHalfArc = Mathf.Cos(arcDegrees * 0.5f * Mathf.Deg2Rad);
             var   cols       = Physics.OverlapSphere(transform.position, range, playerLayer);
+            var   hitPlayers = new System.Collections.Generic.HashSet<PlayerStats>();
 
             foreach (var col in cols)
             {
@@ -245,7 +246,7 @@ namespace Duskborn.Gameplay.Enemies
                 if (Vector3.Dot(transform.forward, toTarget) < cosHalfArc) continue;
 
                 var ps = col.GetComponentInParent<PlayerStats>();
-                if (ps == null || !ps.IsAlive) continue;
+                if (ps == null || !ps.IsAlive || !hitPlayers.Add(ps)) continue;
 
                 bool  isCrit = UnityEngine.Random.value < CritChance;
                 float dmg    = Damage * damageMultiplier * (isCrit ? CritMultiplier : 1f);

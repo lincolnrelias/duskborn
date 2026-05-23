@@ -133,9 +133,10 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 2002914817134659099}
   _networkObjectCache: {fileID: 0}
   resourceDef: {fileID: 11400000, guid: aa66a337d0db20b48a0fa1a898784f0e, type: 2}
-  hitsToBreak: 3
+  maxHP: 30
   dropMin: 1
   dropMax: 3
+  _damageNumberConfig: {fileID: 11400000, guid: eb5a6de148f00fa47adfa4984d057943, type: 2}
   outlineLayerName: ResourceOutline
   outlineRenderer: {fileID: 0}
 --- !u!54 &3664897843973142297

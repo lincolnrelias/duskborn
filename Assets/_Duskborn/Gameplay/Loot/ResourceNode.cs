@@ -2,6 +2,7 @@ using FishNet.Object;
 using InventorySystem.Data;
 using UnityEngine;
 using Duskborn.Core;
+using Duskborn.Effects;
 using Duskborn.Gameplay;
 
 namespace Duskborn.Gameplay.Loot
@@ -12,6 +13,9 @@ namespace Duskborn.Gameplay.Loot
         [SerializeField] private float maxHP    = 30f;
         [SerializeField] private int   dropMin  = 1;
         [SerializeField] private int   dropMax  = 3;
+
+        [Header("Damage Numbers")]
+        [SerializeField] private DamageNumberConfig _damageNumberConfig;
 
         [Header("Outline")]
         [SerializeField] private string   outlineLayerName = "GreenOutline";
@@ -47,8 +51,13 @@ namespace Duskborn.Gameplay.Loot
         {
             if (!IsServerStarted || !IsAlive) return;
             _currentHP = Mathf.Max(0f, _currentHP - amount);
+            RpcShowDamageNumber(transform.position, amount, isCrit);
             DuskLog.Log(LogChannel.Loot, $"{name}: -{amount:F1} HP → {_currentHP:F1}/{maxHP}");
         }
+
+        [ObserversRpc(RunLocally = true)]
+        private void RpcShowDamageNumber(Vector3 pos, float amount, bool isCrit)
+            => DamageNumberPool.Instance?.Get(pos, amount, isCrit, _damageNumberConfig);
 
         public bool TryGetDrops(out string resourceId, out int amount)
         {

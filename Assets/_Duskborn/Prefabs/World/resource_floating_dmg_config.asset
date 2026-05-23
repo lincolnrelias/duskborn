@@ -12,12 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e59353e2e6eb7f4a9ed99daae86d85a, type: 3}
   m_Name: resource_floating_dmg_config
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Effects.DamageNumberConfig
-  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  normalColor: {r: 1, g: 0.89905673, b: 0.1745283, a: 1}
   normalFontSize: 4
   critColor: {r: 1, g: 0.6, b: 0, a: 1}
   critFontSize: 6
+  outlineColor: {r: 0, g: 0, b: 0, a: 1}
+  outlineWidth: 0.25
   floatHeight: 2
   duration: 1.2
   horizontalSpread: 0.4
-  critPunchScale: 1.4
-  critPunchTime: 0.08
+  driftAmount: 0.2
+  spawnHeightOffset: 1.5
+  fadeStartFraction: 0.55
+  critPopStartScale: 1.5
+  critPopTime: 0.1

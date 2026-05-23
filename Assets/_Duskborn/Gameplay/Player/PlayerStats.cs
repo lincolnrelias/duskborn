@@ -9,7 +9,7 @@ using Duskborn.Gameplay.Classes;
 
 namespace Duskborn.Gameplay.Player
 {
-    public class PlayerStats : NetworkBehaviour, IDamageable
+    public class PlayerStats : NetworkBehaviour, IDamageable, IHealthProvider
     {
         [Header("Class")]
         [SerializeField] private ClassDefinition classDefinition;
@@ -42,7 +42,8 @@ namespace Duskborn.Gameplay.Player
         public float CurrentHP => _currentHP.Value;
         public bool  IsAlive   => _currentHP.Value > 0f;
 
-        public event Action<float, float> OnHPChanged; // (current, max)
+        public event Action<float, float> OnHealthChanged; // (current, max) — IHealthProvider
+        public event Action<float, float> OnHPChanged;     // (current, max) — legacy, kept for compatibility
         public event Action               OnDied;
 
         private void Awake()
@@ -62,6 +63,7 @@ namespace Duskborn.Gameplay.Player
         private void OnCurrentHPSync(float prev, float next, bool asServer)
         {
             OnHPChanged?.Invoke(next, MaxHP);
+            OnHealthChanged?.Invoke(next, MaxHP);
         }
 
         private void OnEnable()  => PlayerRegistry.Register(this);

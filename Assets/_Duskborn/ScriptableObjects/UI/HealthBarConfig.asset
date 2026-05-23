@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8cbdf0ac35fbc84ea87265c60711004, type: 3}
+  m_Name: HealthBarConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Effects.HealthBarConfig
+  fullColor: {r: 0.12, g: 0.78, b: 0.12, a: 1}
+  midColor: {r: 1, g: 0.82, b: 0, a: 1}
+  lowColor: {r: 0.82, g: 0.1, b: 0.1, a: 1}
+  bgColor: {r: 0, g: 0, b: 0, a: 0.75}
+  ghostColor: {r: 1, g: 1, b: 1, a: 0.45}
+  midThreshold: 0.5
+  lowThreshold: 0.25
+  drainSpeed: 10
+  ghostDrainSpeed: 1.5
+  fadeDelay: 3.5
+  fadeDuration: 0.6
+  yOffset: 2.2

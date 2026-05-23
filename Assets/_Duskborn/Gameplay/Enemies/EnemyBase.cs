@@ -15,7 +15,7 @@ using Duskborn.Gameplay.Player;
 namespace Duskborn.Gameplay.Enemies
 {
     [RequireComponent(typeof(NavMeshAgent))]
-    public abstract class EnemyBase : NetworkBehaviour, ICombatEntity, IDamageable
+    public abstract class EnemyBase : NetworkBehaviour, ICombatEntity, IDamageable, IHealthProvider
     {
         public Transform Transform => transform;
         [Header("Stats")]
@@ -87,8 +87,9 @@ namespace Duskborn.Gameplay.Enemies
         public float CurrentHP => _currentHP.Value;
         public bool  IsAlive   => _currentHP.Value > 0f;
 
-        public event Action<EnemyBase> OnDied;
-        public event Action<int>       OnDropGold;
+        public event Action<float, float> OnHealthChanged;
+        public event Action<EnemyBase>   OnDied;
+        public event Action<int>         OnDropGold;
 
         // ── Lifecycle ─────────────────────────────────────────────────────────
 
@@ -273,6 +274,7 @@ namespace Duskborn.Gameplay.Enemies
 
         private void OnHPChanged(float prev, float next, bool asServer)
         {
+            OnHealthChanged?.Invoke(next, MaxHP);
             if (next <= 0f)
                 _animator?.SetBool(HashDead, true);
         }

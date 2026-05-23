@@ -1,4 +1,6 @@
+using System;
 using FishNet.Object;
+using FishNet.Object.Synchronizing;
 using InventorySystem.Data;
 using UnityEngine;
 using Duskborn.Core;
@@ -7,7 +9,7 @@ using Duskborn.Gameplay;
 
 namespace Duskborn.Gameplay.Loot
 {
-    public class ResourceNode : NetworkBehaviour, IDamageable
+    public class ResourceNode : NetworkBehaviour, IDamageable, IHealthProvider
     {
         [SerializeField] private MaterialDefinition resourceDef;
         [SerializeField] private float maxHP    = 30f;
@@ -21,14 +23,20 @@ namespace Duskborn.Gameplay.Loot
         [SerializeField] private string   outlineLayerName = "GreenOutline";
         [SerializeField] private Renderer outlineRenderer;
 
-        private float _currentHP; // server-only
-        private uint  _outlineMask;
-        private uint  _baseMask;
+        private readonly SyncVar<float> _currentHP = new();
+        private uint _outlineMask;
+        private uint _baseMask;
 
-        public bool IsAlive => _currentHP > 0f;
+        public float CurrentHP => _currentHP.Value;
+        public float MaxHP     => maxHP;
+        public bool  IsAlive   => _currentHP.Value > 0f;
+
+        public event Action<float, float> OnHealthChanged;
 
         private void Awake()
         {
+            _currentHP.OnChange += OnHPChanged;
+
             if (outlineRenderer == null)
                 outlineRenderer = GetComponentInChildren<Renderer>();
 
@@ -44,15 +52,20 @@ namespace Duskborn.Gameplay.Loot
         public override void OnStartServer()
         {
             base.OnStartServer();
-            _currentHP = maxHP;
+            _currentHP.Value = maxHP;
+        }
+
+        private void OnHPChanged(float prev, float next, bool asServer)
+        {
+            OnHealthChanged?.Invoke(next, maxHP);
         }
 
         public void TakeDamage(float amount, bool isCrit = false)
         {
             if (!IsServerStarted || !IsAlive) return;
-            _currentHP = Mathf.Max(0f, _currentHP - amount);
+            _currentHP.Value = Mathf.Max(0f, _currentHP.Value - amount);
             RpcShowDamageNumber(transform.position, amount, isCrit);
-            DuskLog.Log(LogChannel.Loot, $"{name}: -{amount:F1} HP → {_currentHP:F1}/{maxHP}");
+            DuskLog.Log(LogChannel.Loot, $"{name}: -{amount:F1} HP → {_currentHP.Value:F1}/{maxHP}");
         }
 
         [ObserversRpc(RunLocally = true)]
@@ -64,7 +77,7 @@ namespace Duskborn.Gameplay.Loot
             resourceId = resourceDef != null ? resourceDef.Id : string.Empty;
             amount     = GameSession.Instance != null
                 ? GameSession.Instance.RNG.Range(dropMin, dropMax + 1)
-                : Random.Range(dropMin, dropMax + 1);
+                : UnityEngine.Random.Range(dropMin, dropMax + 1);
             return !string.IsNullOrEmpty(resourceId);
         }
 

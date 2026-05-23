@@ -6238,6 +6238,7 @@ GameObject:
   - component: {fileID: 1870906752}
   - component: {fileID: 1870906753}
   - component: {fileID: 1870906754}
+  - component: {fileID: 1870906755}
   m_Layer: 0
   m_Name: _Managers
   m_TagString: Untagged
@@ -6569,6 +6570,20 @@ MonoBehaviour:
     key: 114
   - actionId: Interact
     key: 102
+--- !u!114 &1870906755
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1870906736}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d117056940baf914a8c200b6ff173de2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Effects.DamageNumberPool
+  prefab: {fileID: 5249332554169898441, guid: 0260fc26ca58f794297103ac2dd80979, type: 3}
+  initialSize: 5
 --- !u!224 &1876573324 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 790095091216091730, guid: e1a0316d80816c44cb68cbe778dd50e9, type: 3}

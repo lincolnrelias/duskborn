@@ -3,18 +3,22 @@ using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using UnityEngine;
 using Duskborn.Core;
+using Duskborn.Effects;
 using Duskborn.Gameplay;
 using Duskborn.Gameplay.Classes;
 
 namespace Duskborn.Gameplay.Player
 {
-    public class PlayerStats : NetworkBehaviour
+    public class PlayerStats : NetworkBehaviour, IDamageable
     {
         [Header("Class")]
         [SerializeField] private ClassDefinition classDefinition;
 
         [Header("Stats")]
         [SerializeField] private EntityStats _entity = new();
+
+        [Header("Damage Numbers")]
+        [SerializeField] private DamageNumberConfig _damageNumberConfig;
 
         // ── Computed stats ────────────────────────────────────────────────────
         public float MaxHP          => _entity.MaxHP;
@@ -73,14 +77,19 @@ namespace Duskborn.Gameplay.Player
                 _currentHP.Value = MaxHP;
         }
 
-        public void TakeDamage(float amount)
+        public void TakeDamage(float amount, bool isCrit = false)
         {
             if (!IsServerStarted) return;
             if (!IsAlive) return;
             float actual = amount * IncomingDamageMultiplier;
             _currentHP.Value = Mathf.Max(0f, _currentHP.Value - actual);
+            RpcShowDamageNumber(transform.position, actual, isCrit);
             if (_currentHP.Value <= 0f) HandleDeath();
         }
+
+        [ObserversRpc(RunLocally = true)]
+        private void RpcShowDamageNumber(Vector3 pos, float amount, bool isCrit)
+            => DamageNumberPool.Instance?.Get(pos, amount, isCrit, _damageNumberConfig);
 
         public void Heal(float amount)
         {

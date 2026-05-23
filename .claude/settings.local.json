@@ -42,7 +42,24 @@
       "Bash(mv C:/Users/linco/Mugg/Assets/_Duskborn/ScriptableObjects/__TRACKED_VAR__.asset.meta C:/Users/linco/Mugg/Assets/_Duskborn/ScriptableObjects/Items/__TRACKED_VAR__.asset.meta)",
       "Bash(Get-ChildItem *)",
       "Bash(git *)",
-      "PowerShell(git *)"
+      "PowerShell(git *)",
+      "Bash(xargs -I {} basename {})",
+      "Bash(xargs cat)",
+      "Bash(xargs grep -l \"Resources/\\\\|Resources.Load\\\\|Prefabs/\")",
+      "Bash(xargs grep -l \"Singleton\\\\|singleton\\\\|Instance\")",
+      "Bash(xargs grep -l \"CreateAssetMenu\")",
+      "Bash(xargs grep -l \"FishNet.Object\\\\|NetworkBehaviour\")",
+      "Bash(xargs grep -n \"ObserversRpc\")",
+      "Bash(xargs grep -n \"isCrit\\\\|IsCrit\\\\|is_crit\")",
+      "Bash(xargs grep -l \"Camera.main\\\\|BillBoard\\\\|billboard\")",
+      "Bash(xargs grep -n \"using TMPro\\\\|TextMeshPro\\\\|TMP_Text\")",
+      "Bash(xargs grep -n \"Stack<\\\\|Queue<\\\\|List<\")",
+      "Bash(xargs grep -n \"DontDestroyOnLoad\\\\|Instance.*=.*this\")",
+      "Bash(xargs grep -n \"StartCoroutine\\\\|IEnumerator\")",
+      "Bash(xargs grep -l \"ObserversRpc\\\\|RunLocally\")",
+      "Bash(xargs grep -l \"ObserversRpcAttribute\\\\|class ObserversRpc\")",
+      "Bash(xargs grep -n \"using Duskborn\")",
+      "Bash(xargs grep -n \"namespace Duskborn\")"
     ]
   }
 }

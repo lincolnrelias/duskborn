@@ -319,7 +319,7 @@ namespace Duskborn.Gameplay.Player
                 bool  isCrit = Random.value < _stats.CritChance;
                 float damage = _stats.Damage * damageMultiplier * (isCrit ? _stats.CritMultiplier : 1f);
                 if (_classAbility != null) damage = _classAbility.ModifyDamage(damage, enemy);
-                enemy.TakeDamage(damage);
+                enemy.TakeDamage(damage, isCrit);
                 hitEnemies.Add(enemy);
                 if (firstHitCol == null) firstHitCol = col;
                 DuskLog.Log(LogChannel.Combat, $"Cleave hit {col.name} — {damage:F1}{(isCrit ? " CRIT" : "")}");
@@ -348,7 +348,7 @@ namespace Duskborn.Gameplay.Player
                 bool  isCrit = Random.value < _stats.CritChance;
                 float damage = _stats.Damage * (isCrit ? _stats.CritMultiplier : 1f);
                 if (_classAbility != null) damage = _classAbility.ModifyDamage(damage, enemy);
-                enemy.TakeDamage(damage);
+                enemy.TakeDamage(damage, isCrit);
                 hitEnemies.Add(enemy);
                 if (firstHitCol == null) firstHitCol = col;
                 DuskLog.Log(LogChannel.Combat, $"Hit {col.name} — {damage:F1}{(isCrit ? " CRIT" : "")}");

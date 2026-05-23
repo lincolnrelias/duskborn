@@ -214,6 +214,7 @@ MonoBehaviour:
     MoveSpeedMultiplier: 1
     IncomingDamageMultiplier: 1
     CritChanceBonus: 0
+  _damageNumberConfig: {fileID: 11400000, guid: cd1847f5cd817e44189857191bc662e8, type: 2}
 --- !u!114 &4158613078139982803
 MonoBehaviour:
   m_ObjectHideFlags: 0

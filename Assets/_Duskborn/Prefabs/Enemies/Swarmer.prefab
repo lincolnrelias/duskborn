@@ -152,6 +152,7 @@ MonoBehaviour:
   goldDropMin: 1
   goldDropMax: 3
   deathDelay: 10
+  _damageNumberConfig: {fileID: 11400000, guid: 7e24449b719242044a6740c4ba572f7a, type: 2}
   _animator: {fileID: 7111733941174250581}
   outlineLayerName: EnemyOutline
   outlineRenderers: []

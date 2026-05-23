@@ -6,6 +6,7 @@ using FishNet.Object.Synchronizing;
 using UnityEngine;
 using UnityEngine.AI;
 using Duskborn.Core;
+using Duskborn.Effects;
 using Duskborn.Gameplay;
 using Duskborn.Gameplay.Equipment;
 using Duskborn.Gameplay.Loot;
@@ -34,6 +35,9 @@ namespace Duskborn.Gameplay.Enemies
 
         [Header("Death")]
         [SerializeField] private float deathDelay = 1.5f;
+
+        [Header("Damage Numbers")]
+        [SerializeField] private DamageNumberConfig _damageNumberConfig;
 
         [Header("Animation")]
         [SerializeField] private Animator _animator;
@@ -220,7 +224,7 @@ namespace Duskborn.Gameplay.Enemies
             HitboxDebugger.Flash(transform.position, attackRange, Color.cyan);
             bool  isCrit = UnityEngine.Random.value < CritChance;
             float dmg    = Damage * (isCrit ? CritMultiplier : 1f);
-            CurrentTarget.GetComponent<PlayerStats>()?.TakeDamage(dmg);
+            CurrentTarget.GetComponent<PlayerStats>()?.TakeDamage(dmg, isCrit);
             DuskLog.Log(LogChannel.Enemy, $"{name} melee hit for {dmg:F1}{(isCrit ? " CRIT" : "")}");
         }
 
@@ -245,21 +249,26 @@ namespace Duskborn.Gameplay.Enemies
 
                 bool  isCrit = UnityEngine.Random.value < CritChance;
                 float dmg    = Damage * damageMultiplier * (isCrit ? CritMultiplier : 1f);
-                ps.TakeDamage(dmg);
+                ps.TakeDamage(dmg, isCrit);
                 DuskLog.Log(LogChannel.Enemy, $"{name} cleave hit {col.name} for {dmg:F1}{(isCrit ? " CRIT" : "")}");
             }
         }
 
         // ── Damage / death ────────────────────────────────────────────────────
 
-        public virtual void TakeDamage(float amount)
+        public virtual void TakeDamage(float amount, bool isCrit = false)
         {
             if (!IsServerStarted) return;
             if (!IsAlive) return;
             float actual = amount * IncomingDamageMultiplier;
             _currentHP.Value = Mathf.Max(0f, _currentHP.Value - actual);
+            RpcShowDamageNumber(transform.position, actual, isCrit);
             if (_currentHP.Value <= 0f) Die();
         }
+
+        [ObserversRpc(RunLocally = true)]
+        private void RpcShowDamageNumber(Vector3 pos, float amount, bool isCrit)
+            => DamageNumberPool.Instance?.Get(pos, amount, isCrit, _damageNumberConfig);
 
         private void OnHPChanged(float prev, float next, bool asServer)
         {

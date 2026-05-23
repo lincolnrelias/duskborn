@@ -43,7 +43,7 @@ namespace Duskborn.Gameplay.Loot
             _currentHP = maxHP;
         }
 
-        public void TakeDamage(float amount)
+        public void TakeDamage(float amount, bool isCrit = false)
         {
             if (!IsServerStarted || !IsAlive) return;
             _currentHP = Mathf.Max(0f, _currentHP - amount);

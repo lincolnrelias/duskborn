@@ -3,6 +3,6 @@ namespace Duskborn.Gameplay
     public interface IDamageable
     {
         bool IsAlive { get; }
-        void TakeDamage(float amount);
+        void TakeDamage(float amount, bool isCrit = false);
     }
 }

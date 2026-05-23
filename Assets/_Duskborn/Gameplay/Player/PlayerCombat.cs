@@ -145,7 +145,7 @@ namespace Duskborn.Gameplay.Player
             if (!IsOwner) return;
 
             var enemy = other.GetComponentInParent<EnemyBase>();
-            if (enemy != null) { _enemiesInRange.Add(enemy); enemy.SetOutline(true); return; }
+            if (enemy != null) { _enemiesInRange.Add(enemy); if (enemy.IsAlive) enemy.SetOutline(true); return; }
 
             var node = other.GetComponentInParent<ResourceNode>();
             if (node != null) _nodesInRange.Add(node);

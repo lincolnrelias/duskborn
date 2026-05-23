@@ -119,7 +119,7 @@ namespace Duskborn.Effects
                 // Damage: ghost stays at current display level and trails behind.
                 _ghostFill         = _displayFill;
                 _canvasGroup.alpha = 1f;
-                _fadeTimer         = config.fadeDelay;
+                _fadeTimer         = newFill <= 0f ? 0f : config.fadeDelay;
             }
 
             _targetFill = newFill;

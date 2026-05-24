@@ -15,4 +15,5 @@ MonoBehaviour:
   ItemName: Steroids
   Rarity: 0
   EffectType: 3
+  EffectMode: 1
   EffectValue: 0.2

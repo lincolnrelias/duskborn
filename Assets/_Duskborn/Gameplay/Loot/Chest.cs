@@ -106,6 +106,7 @@ namespace Duskborn.Gameplay.Loot
         [TargetRpc]
         private void DeliverItemRpc(NetworkConnection conn, NetworkObject playerNob, int itemIndex)
         {
+            if (IsServerStarted) return; // host already applied in ServerOpen
             if (lootTable == null || itemIndex >= lootTable.Items.Length) return;
             playerNob.GetComponent<PlayerBuffContainer>()?.AddBuff(lootTable.Items[itemIndex]);
         }

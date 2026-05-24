@@ -1,3 +1,4 @@
+using Duskborn.Gameplay.Equipment;
 using UnityEngine;
 
 namespace Duskborn.Gameplay.Loot
@@ -20,7 +21,9 @@ namespace Duskborn.Gameplay.Loot
         public string       ItemName;
         public ItemRarity   Rarity;
         public ItemEffectType EffectType;
-        [Tooltip("Additive value applied to the matching stat multiplier (e.g. 0.2 = +20%).")]
-        public float        EffectValue;
+        // Multiplicative = 0, so existing assets that have no EffectMode field default to Multiplicative.
+        [Tooltip("Additive: flat value added after gear base (e.g. 20 = +20 HP). Multiplicative: compound factor (e.g. 0.2 = ×1.2).")]
+        public BonusMode      EffectMode;
+        public float          EffectValue;
     }
 }

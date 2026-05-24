@@ -131,7 +131,7 @@ namespace Duskborn.UI
             sb.AppendLine($"Move Speed:  {_stats.MoveSpeed:F2}");
             sb.AppendLine($"Atk Speed:   {_stats.AttackSpeed:F2}");
             sb.AppendLine($"Crit:        {_stats.CritChance * 100f:F0}%");
-            sb.AppendLine($"Dmg Reduc:   {(1f - _stats.IncomingDamageMultiplier) * 100f:F0}%");
+            sb.AppendLine($"Dmg Reduc:   {(1f - _stats.EffectiveIncomingDamage) * 100f:F0}%");
             sb.AppendLine("─────────────────────────");
             sb.AppendLine("Equipped");
 

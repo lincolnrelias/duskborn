@@ -14,5 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ItemName: Big A Pill
   Rarity: 0
-  EffectType: 1
-  EffectValue: 15
+  EffectType: 5
+  EffectMode: 1
+  EffectValue: 0.05

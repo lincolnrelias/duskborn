@@ -15,4 +15,5 @@ MonoBehaviour:
   ItemName: Rusty knife
   Rarity: 0
   EffectType: 4
-  EffectValue: 5
+  EffectMode: 1
+  EffectValue: 0.03

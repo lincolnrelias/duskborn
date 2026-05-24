@@ -5,6 +5,7 @@ using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using UnityEngine;
 using UnityEngine.AI;
+using Duskborn.Audio;
 using Duskborn.Core;
 using Duskborn.Effects;
 using Duskborn.Gameplay;
@@ -71,6 +72,7 @@ namespace Duskborn.Gameplay.Enemies
         protected float        MeleeCooldown;
 
         private WeaponActionPlayer _weaponActionPlayer;
+        private WeaponHitNotifier  _hitNotifier;
         private WeaponItem         _weaponItem;
         private GameObject         _weaponInstance;
         private float[]            _skillCooldowns = Array.Empty<float>();
@@ -115,6 +117,7 @@ namespace Duskborn.Gameplay.Enemies
             }
 
             _weaponActionPlayer = GetComponent<WeaponActionPlayer>();
+            _hitNotifier        = GetComponent<WeaponHitNotifier>();
             _skillCooldowns     = new float[weapon?.Skills != null ? weapon.Skills.Length : 0];
             SpawnWeaponVisual();
         }
@@ -227,6 +230,8 @@ namespace Duskborn.Gameplay.Enemies
             float dmg    = Damage * (isCrit ? CritMultiplier : 1f);
             CurrentTarget.GetComponent<PlayerStats>()?.TakeDamage(dmg, isCrit);
             DuskLog.Log(LogChannel.Enemy, $"{name} melee hit for {dmg:F1}{(isCrit ? " CRIT" : "")}");
+            RpcRaiseHitAudio(CurrentTarget.tag);
+            RpcSpawnHitEffect(CurrentTarget.tag, CurrentTarget.position);
         }
 
         // ── ICombatEntity ─────────────────────────────────────────────────────
@@ -239,7 +244,9 @@ namespace Duskborn.Gameplay.Enemies
             HitboxDebugger.Flash(transform.position, range, new Color(0f, 1f, 0.5f));
             float cosHalfArc = Mathf.Cos(arcDegrees * 0.5f * Mathf.Deg2Rad);
             var   cols       = Physics.OverlapSphere(transform.position, range, playerLayer);
-            var   hitPlayers = new System.Collections.Generic.HashSet<PlayerStats>();
+            var     hitPlayers  = new System.Collections.Generic.HashSet<PlayerStats>();
+            string  hitTag      = null;
+            Vector3 hitPosition = Vector3.zero;
 
             foreach (var col in cols)
             {
@@ -252,9 +259,20 @@ namespace Duskborn.Gameplay.Enemies
                 bool  isCrit = UnityEngine.Random.value < CritChance;
                 float dmg    = Damage * damageMultiplier * (isCrit ? CritMultiplier : 1f);
                 ps.TakeDamage(dmg, isCrit);
+                if (hitTag == null) { hitTag = col.tag; hitPosition = ps.transform.position; }
                 DuskLog.Log(LogChannel.Enemy, $"{name} cleave hit {col.name} for {dmg:F1}{(isCrit ? " CRIT" : "")}");
             }
+
+            if (hitTag != null) { RpcRaiseHitAudio(hitTag); RpcSpawnHitEffect(hitTag, hitPosition); }
         }
+
+        [ObserversRpc(RunLocally = true)]
+        private void RpcRaiseHitAudio(string tag)
+            => _hitNotifier?.Raise(new WeaponHitNotifier.HitData(tag, 0));
+
+        [ObserversRpc]
+        private void RpcSpawnHitEffect(string tag, Vector3 position)
+            => GetComponent<WeaponEffectPlayer>()?.SpawnHitEffect(tag, position);
 
         // ── Damage / death ────────────────────────────────────────────────────
 

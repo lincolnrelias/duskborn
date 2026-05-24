@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: -3413405807121627896}
   - component: {fileID: -2351370629229474915}
   - component: {fileID: -8344222926546069752}
+  - component: {fileID: 7509770433554689990}
   m_Layer: 6
   m_Name: Swarmer
   m_TagString: Enemy
@@ -261,7 +262,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584220588041460673
+  _initializedTimestamp: -8584219727826856485
 --- !u!114 &6069308860891105275
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -398,6 +399,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Audio.WeaponAudioPlayer
   audioSource: {fileID: -2351370629229474915}
+--- !u!114 &7509770433554689990
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 521240751461943244}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f513e8b81a48504d9a7e19f414e41d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Effects.WeaponEffectPlayer
 --- !u!1 &8476000493214907407
 GameObject:
   m_ObjectHideFlags: 0

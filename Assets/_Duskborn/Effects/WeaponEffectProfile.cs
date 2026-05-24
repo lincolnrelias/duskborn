@@ -9,6 +9,7 @@ namespace Duskborn.Effects
 
         public GameObject PickEffect(string tag)
         {
+            if (surfaces == null || surfaces.Length == 0) return null;
             GameObject found = null;
             foreach (var e in surfaces)
             {

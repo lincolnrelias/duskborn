@@ -305,8 +305,8 @@ namespace Duskborn.Gameplay.Player
 
             float      cosHalfArc = Mathf.Cos(arcDegrees * 0.5f * Mathf.Deg2Rad);
             Collider[] cols       = Physics.OverlapSphere(transform.position, range, enemyLayer);
-            var        hitEnemies = new List<EnemyBase>();
-            Collider   firstHitCol = null;
+            var     hitEnemies    = new List<EnemyBase>();
+            Vector3 firstHitPos   = Vector3.zero;
 
             foreach (var col in cols)
             {
@@ -320,8 +320,8 @@ namespace Duskborn.Gameplay.Player
                 float damage = _stats.Damage * damageMultiplier * (isCrit ? _stats.CritMultiplier : 1f);
                 if (_classAbility != null) damage = _classAbility.ModifyDamage(damage, enemy);
                 enemy.TakeDamage(damage, isCrit);
+                if (hitEnemies.Count == 0) firstHitPos = enemy.transform.position;
                 hitEnemies.Add(enemy);
-                if (firstHitCol == null) firstHitCol = col;
                 DuskLog.Log(LogChannel.Combat, $"Cleave hit {col.name} — {damage:F1}{(isCrit ? " CRIT" : "")}");
             }
 
@@ -329,7 +329,7 @@ namespace Duskborn.Gameplay.Player
             {
                 _classAbility?.OnAttackCompleted(hitEnemies);
                 RpcOnHitAudio(Owner, hitEnemies[0].tag);
-                RpcOnHitEffect(hitEnemies[0].tag, firstHitCol.ClosestPoint(transform.position));
+                RpcOnHitEffect(hitEnemies[0].tag, firstHitPos);
             }
             else _classAbility?.OnAttackMissed();
         }

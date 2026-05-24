@@ -20,15 +20,13 @@ namespace Duskborn.Effects
                 $"[{name}] SpawnHitEffect tag='{tag}' pos={position} " +
                 $"skill={skill?.name ?? "none"} weapon={weapon?.DisplayName ?? "none"}");
 
-            var prefab = skill?.hitEffectOverride
-                      ?? skill?.effectProfile?.PickEffect(tag)
+            var prefab = skill?.effectProfile?.PickEffect(tag)
                       ?? weapon?.EffectProfile?.PickEffect(tag);
 
             if (prefab == null)
             {
                 DuskLog.Warn(LogChannel.Effects,
                     $"[{name}] no prefab resolved for tag='{tag}' — " +
-                    $"skill.hitEffectOverride={skill?.hitEffectOverride?.name ?? "null"} " +
                     $"skill.effectProfile={skill?.effectProfile?.name ?? "null"} " +
                     $"weapon.effectProfile={weapon?.EffectProfile?.name ?? "null"}");
                 return;

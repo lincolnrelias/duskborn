@@ -17,3 +17,5 @@ MonoBehaviour:
     prefab: {fileID: 7567436153231433018, guid: 597856cc906c66545b379b6f0386d17a, type: 3}
   - tag: Enemy
     prefab: {fileID: 7567436153231433018, guid: 32bd72bbc03a260479710c632c07ae1d, type: 3}
+  - tag: Player
+    prefab: {fileID: 7567436153231433018, guid: 32bd72bbc03a260479710c632c07ae1d, type: 3}

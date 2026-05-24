@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: cleave_skill
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.CleaveSkill
   cooldown: 5
+  range: 3
   animation:
     BaseSpeed: 1.7
     PreserveLocomotion: 0
@@ -21,6 +22,8 @@ MonoBehaviour:
     Events:
     - Type: 0
       NormalizedTime: 0.347
-  range: 3
+  hitAudioOverride: {fileID: 8300000, guid: 9af62a927c7cc5a4fb40b5808e97ec59, type: 3}
+  hitEffectOverride: {fileID: 0}
+  effectProfile: {fileID: 11400000, guid: 4365837daea7cab4ebadeab220765a1c, type: 2}
   arcDegrees: 180
   damageMultiplier: 1

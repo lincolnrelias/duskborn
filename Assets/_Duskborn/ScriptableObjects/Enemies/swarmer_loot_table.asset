@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ebe2682b68c08b54e9b729403d2196d5, type: 3}
+  m_Name: swarmer_loot_table
+  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Loot.DropLootTable
+  entries:
+  - itemDefinition: {fileID: 11400000, guid: 1a517227434bc244ea2f70fd56b7c1b2, type: 2}
+    baseChance: 0.5
+    scalingBonus: -0.36
+    minAmount: 1
+    maxAmount: 5
+  goldMin: 1
+  goldMax: 5
+  rarityScaleRate: 0

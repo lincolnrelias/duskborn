@@ -20,6 +20,7 @@ GameObject:
   - component: {fileID: -2351370629229474915}
   - component: {fileID: -8344222926546069752}
   - component: {fileID: 7509770433554689990}
+  - component: {fileID: 6784754095731365474}
   m_Layer: 6
   m_Name: Swarmer
   m_TagString: Enemy
@@ -145,14 +146,24 @@ MonoBehaviour:
     MoveSpeedMultiplier: 1
     IncomingDamageMultiplier: 1
     CritChanceBonus: 0
+    HPBuffAdditive: 0
+    DamageBuffAdditive: 0
+    MoveSpeedBuffAdditive: 0
+    AttackSpeedBuffAdditive: 0
+    HPBuffFactor: 1
+    DamageBuffFactor: 1
+    MoveSpeedBuffFactor: 1
+    AttackSpeedBuffFactor: 1
+    CritChanceBuffAdditive: 0
+    CritChanceBuffFactor: 1
+    IncomingDamageBuffAdditive: 0
+    IncomingDamageBuffFactor: 1
   attackRange: 2.5
   playerLayer:
     serializedVersion: 2
     m_Bits: 256
   weapon: {fileID: 11400000, guid: 601f53b2da268ec439655f119087feb4, type: 2}
   holdPoint: {fileID: 6238249836595862156}
-  goldDropMin: 1
-  goldDropMax: 3
   deathDelay: 10
   _damageNumberConfig: {fileID: 11400000, guid: cd1847f5cd817e44189857191bc662e8, type: 2}
   _animator: {fileID: 7111733941174250581}
@@ -244,7 +255,7 @@ MonoBehaviour:
     Scale: {x: 1, y: 1, z: 1}
     IsValid: 1
   <IsNested>k__BackingField: 0
-  WasActiveDuringEdit: 0
+  WasActiveDuringEdit: 1
   WasActiveDuringEdit_Set1: 1
   <ComponentIndex>k__BackingField: 0
   <PredictedSpawn>k__BackingField: {fileID: 0}
@@ -411,6 +422,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f513e8b81a48504d9a7e19f414e41d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Effects.WeaponEffectPlayer
+--- !u!114 &6784754095731365474
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 521240751461943244}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19855649ed33cd943a654f7780f6df25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Loot.LootDropper
+  lootTable: {fileID: 11400000, guid: fe1890964da5b2c41b71518715379a15, type: 2}
+  dropOrigin: {fileID: 7111733941166490569}
+  dropOriginUpOffset: 0.5
 --- !u!1 &8476000493214907407
 GameObject:
   m_ObjectHideFlags: 0

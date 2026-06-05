@@ -24,6 +24,9 @@ namespace Duskborn.Gameplay.Player
         private WorldItemPickup _linkedPickup;
         private WorldItemPickup _prevLinkedPickup;
         private WorldItemPickup _pendingCollect;
+        private WorldGoldPickup _linkedGoldPickup;
+        private WorldGoldPickup _prevLinkedGoldPickup;
+        private WorldGoldPickup _pendingGoldCollect;
 
         private Action _onInteract;
 
@@ -52,7 +55,7 @@ namespace Duskborn.Gameplay.Player
             if (!IsOwner) return;
 
             RefreshLinkedChest();
-            RefreshLinkedPickup();
+            RefreshLinkedPickups();
 
             if (_linked != _prevLinked)
             {
@@ -76,6 +79,22 @@ namespace Duskborn.Gameplay.Player
 
             if (_linkedPickup == null)
                 _pendingCollect = null;
+
+            if (_linkedGoldPickup != _prevLinkedGoldPickup)
+            {
+                _prevLinkedGoldPickup?.SetOutline(false);
+                _linkedGoldPickup?.SetOutline(true);
+                _prevLinkedGoldPickup = _linkedGoldPickup;
+            }
+
+            if (_linkedGoldPickup != null && _linkedGoldPickup.IsCollectible && _linkedGoldPickup != _pendingGoldCollect)
+            {
+                _pendingGoldCollect = _linkedGoldPickup;
+                RequestPickupGoldRpc(_linkedGoldPickup.GetComponent<NetworkObject>());
+            }
+
+            if (_linkedGoldPickup == null)
+                _pendingGoldCollect = null;
         }
 
         private void TryOpenLinkedChest()
@@ -100,6 +119,12 @@ namespace Duskborn.Gameplay.Player
         private void RequestPickupResourceRpc(NetworkObject pickupNob)
         {
             pickupNob.GetComponent<WorldItemPickup>()?.ServerCollect(Owner, GetComponent<ResourceInventory>());
+        }
+
+        [ServerRpc]
+        private void RequestPickupGoldRpc(NetworkObject pickupNob)
+        {
+            pickupNob.GetComponent<WorldGoldPickup>()?.ServerCollect(Owner);
         }
 
         [ServerRpc]
@@ -145,17 +170,28 @@ namespace Duskborn.Gameplay.Player
             }
         }
 
-        private void RefreshLinkedPickup()
+        private void RefreshLinkedPickups()
         {
-            _linkedPickup = null;
-            float best  = float.MaxValue;
-            int   count = Physics.OverlapSphereNonAlloc(transform.position, pickupRange, _overlapBuffer);
+            _linkedPickup     = null;
+            _linkedGoldPickup = null;
+            float bestItem = float.MaxValue;
+            float bestGold = float.MaxValue;
+            int   count    = Physics.OverlapSphereNonAlloc(transform.position, pickupRange, _overlapBuffer);
             for (int i = 0; i < count; i++)
             {
-                var pickup = _overlapBuffer[i].GetComponentInParent<WorldItemPickup>();
-                if (pickup == null || !pickup.gameObject.activeSelf) continue;
-                float sq = SqDist(pickup);
-                if (sq < best) { best = sq; _linkedPickup = pickup; }
+                var item = _overlapBuffer[i].GetComponentInParent<WorldItemPickup>();
+                if (item != null && item.gameObject.activeSelf)
+                {
+                    float sq = SqDist(item);
+                    if (sq < bestItem) { bestItem = sq; _linkedPickup = item; }
+                }
+
+                var gold = _overlapBuffer[i].GetComponentInParent<WorldGoldPickup>();
+                if (gold != null && gold.gameObject.activeSelf)
+                {
+                    float sq = SqDist(gold);
+                    if (sq < bestGold) { bestGold = sq; _linkedGoldPickup = gold; }
+                }
             }
         }
 

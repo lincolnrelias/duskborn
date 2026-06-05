@@ -10,7 +10,6 @@ using Duskborn.Core;
 using Duskborn.Effects;
 using Duskborn.Gameplay;
 using Duskborn.Gameplay.Equipment;
-using Duskborn.Gameplay.Loot;
 using Duskborn.Gameplay.Player;
 
 namespace Duskborn.Gameplay.Enemies
@@ -29,10 +28,6 @@ namespace Duskborn.Gameplay.Enemies
         [Header("Weapon")]
         [SerializeField] private WeaponDefinition weapon;
         [SerializeField] private Transform        holdPoint;
-
-        [Header("Loot")]
-        [SerializeField] private int goldDropMin = 1;
-        [SerializeField] private int goldDropMax = 3;
 
         [Header("Death")]
         [SerializeField] private float deathDelay = 1.5f;
@@ -91,7 +86,6 @@ namespace Duskborn.Gameplay.Enemies
 
         public event Action<float, float> OnHealthChanged;
         public event Action<EnemyBase>   OnDied;
-        public event Action<int>         OnDropGold;
 
         // ── Lifecycle ─────────────────────────────────────────────────────────
 
@@ -301,16 +295,7 @@ namespace Duskborn.Gameplay.Enemies
         {
             SetOutline(false);
             Agent.enabled = false;
-
-            SeededRNG rng  = GameSession.Instance?.RNG;
-            int goldAmount = rng != null
-                ? rng.Range(goldDropMin, goldDropMax + 1)
-                : UnityEngine.Random.Range(goldDropMin, goldDropMax + 1);
-
-            GoldManager.Instance?.AddGold(goldAmount);
-            OnDropGold?.Invoke(goldAmount);
             OnDied?.Invoke(this);
-
             StartCoroutine(DespawnAfterDelay());
         }
 
@@ -369,7 +354,6 @@ namespace Duskborn.Gameplay.Enemies
         public virtual void ResetEnemy(Vector3 position)
         {
             OnDied         = null;
-            OnDropGold     = null;
             CurrentTarget  = null;
             MeleeCooldown  = 0f;
             _warnedNoTarget  = false;

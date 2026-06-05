@@ -59,7 +59,10 @@
       "Bash(xargs grep -l \"ObserversRpc\\\\|RunLocally\")",
       "Bash(xargs grep -l \"ObserversRpcAttribute\\\\|class ObserversRpc\")",
       "Bash(xargs grep -n \"using Duskborn\")",
-      "Bash(xargs grep -n \"namespace Duskborn\")"
+      "Bash(xargs grep -n \"namespace Duskborn\")",
+      "Bash(find C:\\\\Users\\\\linco\\\\Mugg\\\\Assets\\\\_Duskborn *)",
+      "Bash(ls C:UserslincoMuggAssets_DuskbornGameplayPlayer *)",
+      "Bash(xargs grep -l \"enum EquipmentSlot\\\\|EquipmentSlot\")"
     ]
   }
 }

@@ -6,14 +6,13 @@ using UnityEngine;
 
 namespace Duskborn.Gameplay.Loot
 {
-    public class WorldItemPickup : NetworkBehaviour
+    public class WorldGoldPickup : NetworkBehaviour
     {
         [SerializeField] private string   outlineLayerName = "GreenOutline";
         [SerializeField] private Renderer outlineRenderer;
 
-        private readonly SyncVar<string> _resourceId   = new();
-        private readonly SyncVar<int>    _amount       = new();
-        private readonly SyncVar<bool>   _collectible  = new();
+        private readonly SyncVar<int>  _amount      = new();
+        private readonly SyncVar<bool> _collectible = new();
         private bool _collected;
 
         public bool IsCollectible => _collectible.Value;
@@ -43,10 +42,9 @@ namespace Duskborn.Gameplay.Loot
 
         private void SetCollectible() => _collectible.Value = true;
 
-        public void ServerInitialize(string resourceId, int amount)
+        public void ServerInitialize(int amount)
         {
-            _resourceId.Value = resourceId;
-            _amount.Value     = amount;
+            _amount.Value = amount;
         }
 
         public void ServerThrow(Vector3 impulse)
@@ -58,26 +56,22 @@ namespace Duskborn.Gameplay.Loot
                 DuskLog.Warn(LogChannel.Loot, $"{name}: ServerThrow called but no Rigidbody found.");
         }
 
-        public void SetOutline(bool show)
-        {
-            if (outlineRenderer == null) return;
-            outlineRenderer.renderingLayerMask = show ? _baseMask | _outlineMask : _baseMask;
-        }
-
-        public void ServerCollect(NetworkConnection requester, ResourceInventory resourceInventory)
+        public void ServerCollect(NetworkConnection requester)
         {
             if (!IsServerStarted || _collected || !_collectible.Value) return;
             _collected = true;
 
-            // ResourceInventory is client-authoritative — deliver only via TargetRpc, never add server-side.
-            DeliverResourceRpc(requester, resourceInventory.GetComponent<NetworkObject>(), _resourceId.Value, _amount.Value);
+            // GoldManager is server-authoritative — no TargetRpc needed.
+            GoldManager.Instance?.AddGold(_amount.Value);
+            DuskLog.Log(LogChannel.Loot, $"WorldGoldPickup: +{_amount.Value}g collected.");
+
             InstanceFinder.ServerManager.Despawn(NetworkObject, DespawnType.Destroy);
         }
 
-        [TargetRpc]
-        private void DeliverResourceRpc(NetworkConnection conn, NetworkObject playerNob, string resourceId, int amount)
+        public void SetOutline(bool show)
         {
-            playerNob.GetComponent<ResourceInventory>()?.Add(resourceId, amount);
+            if (outlineRenderer == null) return;
+            outlineRenderer.renderingLayerMask = show ? _baseMask | _outlineMask : _baseMask;
         }
     }
 }

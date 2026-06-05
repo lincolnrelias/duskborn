@@ -413,17 +413,7 @@ namespace Duskborn.Gameplay.Player
             RpcOnHitEffect(nodeObj.gameObject.tag, nodeObj.transform.position);
 
             if (!node.IsAlive)
-            {
-                if (node.TryGetDrops(out string resourceId, out int amount))
-                    RpcReceiveResources(Owner, resourceId, amount);
                 nodeObj.Despawn();
-            }
-        }
-
-        [TargetRpc]
-        private void RpcReceiveResources(NetworkConnection conn, string resourceId, int amount)
-        {
-            _resourceInventory?.Add(resourceId, amount);
         }
 
         // ─────────────────────────────────────────────────────────────────────

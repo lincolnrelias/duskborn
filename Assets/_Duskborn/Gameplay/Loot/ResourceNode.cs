@@ -32,6 +32,7 @@ namespace Duskborn.Gameplay.Loot
         public bool  IsAlive   => _currentHP.Value > 0f;
 
         public event Action<float, float> OnHealthChanged;
+        public event Action              OnDepleted;
 
         private void Awake()
         {
@@ -67,6 +68,8 @@ namespace Duskborn.Gameplay.Loot
             _currentHP.Value = Mathf.Max(0f, _currentHP.Value - amount);
             RpcShowDamageNumber(transform.position, amount, isCrit);
             DuskLog.Log(LogChannel.Loot, $"{name}: -{amount:F1} HP → {_currentHP.Value:F1}/{maxHP}");
+            if (_currentHP.Value <= 0f)
+                OnDepleted?.Invoke();
         }
 
         [ObserversRpc(RunLocally = true)]

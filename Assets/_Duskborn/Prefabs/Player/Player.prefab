@@ -166,16 +166,32 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 5780092933335364822}
   _networkObjectCache: {fileID: 5780092933335364822}
   classDefinition: {fileID: 0}
-  baseMaxHP: 100
-  baseMoveSpeed: 5
-  baseDamage: 10
-  baseAttackSpeed: 1
-  HPMultiplier: 1
-  DamageMultiplier: 1
-  MoveSpeedMultiplier: 1
-  AttackSpeedMultiplier: 1
-  CritChanceBonus: 0
-  IncomingDamageMultiplier: 1
+  _entity:
+    maxHP: 100
+    damage: 10
+    attackSpeed: 1
+    moveSpeed: 5
+    critChance: 0
+    critMultiplier: 1.5
+    HPMultiplier: 1
+    DamageMultiplier: 1
+    AttackSpeedMultiplier: 1
+    MoveSpeedMultiplier: 1
+    IncomingDamageMultiplier: 1
+    CritChanceBonus: 0
+    HPBuffAdditive: 0
+    DamageBuffAdditive: 0
+    MoveSpeedBuffAdditive: 0
+    AttackSpeedBuffAdditive: 0
+    HPBuffFactor: 1
+    DamageBuffFactor: 1
+    MoveSpeedBuffFactor: 1
+    AttackSpeedBuffFactor: 1
+    CritChanceBuffAdditive: 0
+    CritChanceBuffFactor: 1
+    IncomingDamageBuffAdditive: 0
+    IncomingDamageBuffFactor: 1
+  _damageNumberConfig: {fileID: 0}
 --- !u!114 &4158613078139982803
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -251,6 +267,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   attackTrigger: {fileID: 5823240394021676181}
+  inputBufferWindow: 0.3
 --- !u!114 &9161354323839120177
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -368,7 +385,7 @@ MonoBehaviour:
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 9
+  <PrefabId>k__BackingField: 18
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 17795806438704917896
   SceneId: 0
@@ -399,7 +416,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584241112327447709
+  _initializedTimestamp: -8584209271601482715
 --- !u!114 &8514665050153253299
 MonoBehaviour:
   m_ObjectHideFlags: 0

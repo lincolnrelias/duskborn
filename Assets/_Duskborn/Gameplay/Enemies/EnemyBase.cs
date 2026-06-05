@@ -38,6 +38,10 @@ namespace Duskborn.Gameplay.Enemies
         [Header("Animation")]
         [SerializeField] private Animator _animator;
 
+        private EnemyRagdoll _ragdoll;
+        private Vector3      _deathHitPoint;
+        private Vector3      _deathHitDirection;
+
         [Header("Outline")]
         [SerializeField] private string     outlineLayerName = "RedOutline";
         [SerializeField] private Renderer[] outlineRenderers;
@@ -110,6 +114,7 @@ namespace Duskborn.Gameplay.Enemies
                 outlineRenderers[i].renderingLayerMask = _rendererBaseMasks[i];
             }
 
+            _ragdoll            = GetComponent<EnemyRagdoll>();
             _weaponActionPlayer = GetComponent<WeaponActionPlayer>();
             _hitNotifier        = GetComponent<WeaponHitNotifier>();
             _skillCooldowns     = new float[weapon?.Skills != null ? weapon.Skills.Length : 0];
@@ -270,6 +275,13 @@ namespace Duskborn.Gameplay.Enemies
 
         // ── Damage / death ────────────────────────────────────────────────────
 
+        public void TakeDamage(float amount, bool isCrit, Vector3 hitPoint, Vector3 hitDirection)
+        {
+            _deathHitPoint     = hitPoint;
+            _deathHitDirection = hitDirection.normalized;
+            TakeDamage(amount, isCrit);
+        }
+
         public virtual void TakeDamage(float amount, bool isCrit = false)
         {
             if (!IsServerStarted) return;
@@ -288,7 +300,12 @@ namespace Duskborn.Gameplay.Enemies
         {
             OnHealthChanged?.Invoke(next, MaxHP);
             if (next <= 0f)
-                _animator?.SetBool(HashDead, true);
+            {
+                if (_ragdoll != null)
+                    _ragdoll.EnableRagdoll();
+                else
+                    _animator?.SetBool(HashDead, true);
+            }
         }
 
         protected virtual void Die()
@@ -296,8 +313,13 @@ namespace Duskborn.Gameplay.Enemies
             SetOutline(false);
             Agent.enabled = false;
             OnDied?.Invoke(this);
+            if (_ragdoll != null) RpcApplyRagdollImpulse(_deathHitPoint, _deathHitDirection);
             StartCoroutine(DespawnAfterDelay());
         }
+
+        [ObserversRpc(RunLocally = true)]
+        private void RpcApplyRagdollImpulse(Vector3 hitPoint, Vector3 direction)
+            => _ragdoll?.ApplyImpulse(hitPoint, direction);
 
         private IEnumerator DespawnAfterDelay()
         {
@@ -366,6 +388,7 @@ namespace Duskborn.Gameplay.Enemies
 
             SetOutline(false);
             _animator?.SetBool(HashDead, false);
+            _ragdoll?.DisableRagdoll();
             transform.position = position;
         }
 

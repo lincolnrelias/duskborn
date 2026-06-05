@@ -316,10 +316,12 @@ namespace Duskborn.Gameplay.Player
                 var enemy = col.GetComponentInParent<EnemyBase>();
                 if (enemy == null || !enemy.IsAlive) continue;
 
-                bool  isCrit = Random.value < _stats.CritChance;
-                float damage = _stats.Damage * damageMultiplier * (isCrit ? _stats.CritMultiplier : 1f);
+                bool    isCrit   = Random.value < _stats.CritChance;
+                float   damage   = _stats.Damage * damageMultiplier * (isCrit ? _stats.CritMultiplier : 1f);
                 if (_classAbility != null) damage = _classAbility.ModifyDamage(damage, enemy);
-                enemy.TakeDamage(damage, isCrit);
+                Vector3 hitPoint = col.ClosestPoint(transform.position);
+                Vector3 hitDir   = (enemy.transform.position - transform.position).normalized;
+                enemy.TakeDamage(damage, isCrit, hitPoint, hitDir);
                 if (hitEnemies.Count == 0) firstHitPos = enemy.transform.position;
                 hitEnemies.Add(enemy);
                 DuskLog.Log(LogChannel.Combat, $"Cleave hit {col.name} — {damage:F1}{(isCrit ? " CRIT" : "")}");
@@ -345,10 +347,12 @@ namespace Duskborn.Gameplay.Player
             {
                 var enemy = col.GetComponentInParent<EnemyBase>();
                 if (enemy == null || !enemy.IsAlive) continue;
-                bool  isCrit = Random.value < _stats.CritChance;
-                float damage = _stats.Damage * (isCrit ? _stats.CritMultiplier : 1f);
+                bool  isCrit   = Random.value < _stats.CritChance;
+                float damage   = _stats.Damage * (isCrit ? _stats.CritMultiplier : 1f);
                 if (_classAbility != null) damage = _classAbility.ModifyDamage(damage, enemy);
-                enemy.TakeDamage(damage, isCrit);
+                Vector3 hitPoint = col.ClosestPoint(origin);
+                Vector3 hitDir   = (enemy.transform.position - transform.position).normalized;
+                enemy.TakeDamage(damage, isCrit, hitPoint, hitDir);
                 hitEnemies.Add(enemy);
                 if (firstHitCol == null) firstHitCol = col;
                 DuskLog.Log(LogChannel.Combat, $"Hit {col.name} — {damage:F1}{(isCrit ? " CRIT" : "")}");

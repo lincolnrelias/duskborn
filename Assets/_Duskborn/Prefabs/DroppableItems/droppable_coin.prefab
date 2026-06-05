@@ -83,7 +83,7 @@ MonoBehaviour:
   <PredictedSpawn>k__BackingField: {fileID: 0}
   <PredictedOwner>k__BackingField: {fileID: 0}
   NetworkBehaviours:
-  - {fileID: 0}
+  - {fileID: -5627284406055251348}
   InitializedParentNetworkBehaviour: {fileID: 0}
   InitializedNestedNetworkObjects: []
   RuntimeParentNetworkBehaviour: {fileID: 0}
@@ -94,7 +94,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584209400856542010
+  _initializedTimestamp: -8584209271601482715
 --- !u!54 &4903646720888488186
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -213,9 +213,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0e41bd5a553bb54287f8034d778caff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Loot.WorldGoldPickup
-  _componentIndexCache: 255
+  _componentIndexCache: 0
   _addedNetworkObject: {fileID: 280288482714557162}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 280288482714557162}
   outlineLayerName: GreenOutline
   outlineRenderer: {fileID: 0}
   pickupClip: {fileID: 8300000, guid: c911a3b7361367b4e9e55032777b7701, type: 3}

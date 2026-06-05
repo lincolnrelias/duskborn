@@ -36,7 +36,8 @@ namespace Duskborn.Gameplay.Loot
             SeededRNG rng         = GameSession.Instance?.RNG;
             int       currentNight = DayNightCycle.Instance?.CurrentNight ?? 0;
 
-            var hits = table.Roll(rng, currentNight);
+            var hits  = table.Roll(rng, currentNight);
+            int total = hits.Count + 1; // gold coin occupies the last angle slot
 
             for (int i = 0; i < hits.Count; i++)
             {
@@ -68,11 +69,11 @@ namespace Duskborn.Gameplay.Loot
                 if (pickup != null)
                 {
                     pickup.ServerInitialize(entry.itemDefinition.Id, amount);
-                    pickup.ServerThrow(ComputeThrowDirection(i, hits.Count, rng));
+                    pickup.ServerThrow(ComputeThrowDirection(i, total, rng));
                 }
             }
 
-            SpawnGoldPickup(origin, table.RollGold(rng));
+            SpawnGoldPickup(origin, table.RollGold(rng), hits.Count, total, rng);
 
             DuskLog.Log(LogChannel.Loot,
                 $"LootManager: dropped {hits.Count} item(s) at {origin} (night {currentNight}).");
@@ -103,7 +104,7 @@ namespace Duskborn.Gameplay.Loot
             );
         }
 
-        private void SpawnGoldPickup(Vector3 origin, int amount)
+        private void SpawnGoldPickup(Vector3 origin, int amount, int throwIndex, int throwTotal, SeededRNG rng)
         {
             if (worldGoldPickupPrefab == null)
             {
@@ -126,14 +127,7 @@ namespace Duskborn.Gameplay.Loot
             }
 
             goldPickup.ServerInitialize(amount);
-
-            // Gold coin launches straight up with slight random XZ spread.
-            var throwDir = new Vector3(
-                UnityEngine.Random.Range(-0.5f, 0.5f),
-                throwUpSpeed,
-                UnityEngine.Random.Range(-0.5f, 0.5f)
-            );
-            goldPickup.ServerThrow(throwDir);
+            goldPickup.ServerThrow(ComputeThrowDirection(throwIndex, throwTotal, rng));
         }
 
         // Adjusts a single entry's baseChance at runtime (mutates in-memory ScriptableObject only — not saved to disk).

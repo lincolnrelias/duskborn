@@ -8,8 +8,9 @@ namespace Duskborn.Gameplay.Loot
 {
     public class WorldGoldPickup : NetworkBehaviour
     {
-        [SerializeField] private string   outlineLayerName = "GreenOutline";
-        [SerializeField] private Renderer outlineRenderer;
+        [SerializeField] private string    outlineLayerName = "GreenOutline";
+        [SerializeField] private Renderer  outlineRenderer;
+        [SerializeField] private AudioClip pickupClip;
 
         private readonly SyncVar<int>  _amount      = new();
         private readonly SyncVar<bool> _collectible = new();
@@ -61,11 +62,18 @@ namespace Duskborn.Gameplay.Loot
             if (!IsServerStarted || _collected || !_collectible.Value) return;
             _collected = true;
 
-            // GoldManager is server-authoritative — no TargetRpc needed.
             GoldManager.Instance?.AddGold(_amount.Value);
             DuskLog.Log(LogChannel.Loot, $"WorldGoldPickup: +{_amount.Value}g collected.");
 
+            PlayPickupSoundRpc(requester, transform.position);
             InstanceFinder.ServerManager.Despawn(NetworkObject, DespawnType.Destroy);
+        }
+
+        [TargetRpc]
+        private void PlayPickupSoundRpc(NetworkConnection conn, Vector3 pos)
+        {
+            if (pickupClip != null)
+                AudioSource.PlayClipAtPoint(pickupClip, pos);
         }
 
         public void SetOutline(bool show)

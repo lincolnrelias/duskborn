@@ -8,8 +8,9 @@ namespace Duskborn.Gameplay.Loot
 {
     public class WorldItemPickup : NetworkBehaviour
     {
-        [SerializeField] private string   outlineLayerName = "GreenOutline";
-        [SerializeField] private Renderer outlineRenderer;
+        [SerializeField] private string    outlineLayerName = "GreenOutline";
+        [SerializeField] private Renderer  outlineRenderer;
+        [SerializeField] private AudioClip pickupClip;
 
         private readonly SyncVar<string> _resourceId   = new();
         private readonly SyncVar<int>    _amount       = new();
@@ -84,6 +85,8 @@ namespace Duskborn.Gameplay.Loot
         private void DeliverResourceRpc(NetworkConnection conn, NetworkObject playerNob, string resourceId, int amount)
         {
             playerNob.GetComponent<ResourceInventory>()?.Add(resourceId, amount);
+            if (pickupClip != null)
+                AudioSource.PlayClipAtPoint(pickupClip, playerNob.transform.position);
         }
     }
 }

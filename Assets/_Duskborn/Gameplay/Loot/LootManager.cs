@@ -43,10 +43,17 @@ namespace Duskborn.Gameplay.Loot
                 var entry  = hits[i];
                 var prefab = entry.itemDefinition?.dropPrefab;
 
+                if (string.IsNullOrEmpty(entry.itemDefinition.Id))
+                {
+                    DuskLog.Warn(LogChannel.Loot,
+                        $"LootManager: entry '{entry.itemDefinition.name}' has no id set on its asset — skipping.");
+                    continue;
+                }
+
                 if (prefab == null)
                 {
                     DuskLog.Warn(LogChannel.Loot,
-                        $"LootManager: entry '{entry.itemDefinition?.name}' has no dropPrefab — skipping.");
+                        $"LootManager: entry '{entry.itemDefinition.name}' has no dropPrefab — skipping.");
                     continue;
                 }
 
@@ -109,7 +116,14 @@ namespace Duskborn.Gameplay.Loot
             InstanceFinder.ServerManager.Spawn(go);
 
             var goldPickup = go.GetComponent<WorldGoldPickup>();
-            if (goldPickup == null) return;
+            if (goldPickup == null)
+            {
+                DuskLog.Warn(LogChannel.Loot,
+                    $"LootManager: '{worldGoldPickupPrefab.name}' has no WorldGoldPickup component — swap WorldItemPickup for WorldGoldPickup on that prefab.");
+                InstanceFinder.ServerManager.Despawn(go.GetComponent<NetworkObject>(), DespawnType.Destroy);
+                GoldManager.Instance?.AddGold(amount);
+                return;
+            }
 
             goldPickup.ServerInitialize(amount);
 

@@ -67,6 +67,12 @@ namespace Duskborn.Gameplay.Loot
         public void ServerCollect(NetworkConnection requester, ResourceInventory resourceInventory)
         {
             if (!IsServerStarted || _collected || !_collectible.Value) return;
+            if (string.IsNullOrEmpty(_resourceId.Value))
+            {
+                DuskLog.Warn(LogChannel.Loot, $"{name}: ServerCollect called with null/empty resourceId — item discarded.");
+                InstanceFinder.ServerManager.Despawn(NetworkObject, DespawnType.Destroy);
+                return;
+            }
             _collected = true;
 
             // ResourceInventory is client-authoritative — deliver only via TargetRpc, never add server-side.

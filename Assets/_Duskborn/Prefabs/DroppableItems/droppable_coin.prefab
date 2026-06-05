@@ -11,10 +11,10 @@ GameObject:
   - component: {fileID: 9065789023574355904}
   - component: {fileID: 280288482714557162}
   - component: {fileID: 4903646720888488186}
-  - component: {fileID: 2387556907617259687}
   - component: {fileID: 2745176785061572893}
   - component: {fileID: 3326474339435070506}
   - component: {fileID: 1751701025629654983}
+  - component: {fileID: -5627284406055251348}
   m_Layer: 0
   m_Name: droppable_coin
   m_TagString: Untagged
@@ -83,7 +83,7 @@ MonoBehaviour:
   <PredictedSpawn>k__BackingField: {fileID: 0}
   <PredictedOwner>k__BackingField: {fileID: 0}
   NetworkBehaviours:
-  - {fileID: 2387556907617259687}
+  - {fileID: 0}
   InitializedParentNetworkBehaviour: {fileID: 0}
   InitializedNestedNetworkObjects: []
   RuntimeParentNetworkBehaviour: {fileID: 0}
@@ -94,7 +94,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584209415471334552
+  _initializedTimestamp: -8584209400856542010
 --- !u!54 &4903646720888488186
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -122,23 +122,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &2387556907617259687
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5752967656333843250}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0afc4719357c4fa418edbb48442e7efd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Loot.WorldItemPickup
-  _componentIndexCache: 0
-  _addedNetworkObject: {fileID: 280288482714557162}
-  _networkObjectCache: {fileID: 280288482714557162}
-  outlineLayerName: GreenOutline
-  outlineRenderer: {fileID: 0}
 --- !u!23 &2745176785061572893
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -218,3 +201,20 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 1793265850592575368, guid: 9ed931fc3db08d74996b97dce7de2756, type: 3}
+--- !u!114 &-5627284406055251348
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5752967656333843250}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0e41bd5a553bb54287f8034d778caff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Loot.WorldGoldPickup
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 280288482714557162}
+  _networkObjectCache: {fileID: 0}
+  outlineLayerName: GreenOutline
+  outlineRenderer: {fileID: 0}

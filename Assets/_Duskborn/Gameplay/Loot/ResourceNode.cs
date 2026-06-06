@@ -1,7 +1,6 @@
 using System;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
-using InventorySystem.Data;
 using UnityEngine;
 using Duskborn.Core;
 using Duskborn.Effects;
@@ -11,10 +10,7 @@ namespace Duskborn.Gameplay.Loot
 {
     public class ResourceNode : NetworkBehaviour, IDamageable, IHealthProvider
     {
-        [SerializeField] private MaterialDefinition resourceDef;
-        [SerializeField] private float maxHP    = 30f;
-        [SerializeField] private int   dropMin  = 1;
-        [SerializeField] private int   dropMax  = 3;
+        [SerializeField] private float maxHP = 30f;
 
         [Header("Damage Numbers")]
         [SerializeField] private DamageNumberConfig _damageNumberConfig;
@@ -75,15 +71,6 @@ namespace Duskborn.Gameplay.Loot
         [ObserversRpc(RunLocally = true)]
         private void RpcShowDamageNumber(Vector3 pos, float amount, bool isCrit)
             => DamageNumberPool.Instance?.Get(pos, amount, isCrit, _damageNumberConfig);
-
-        public bool TryGetDrops(out string resourceId, out int amount)
-        {
-            resourceId = resourceDef != null ? resourceDef.Id : string.Empty;
-            amount     = GameSession.Instance != null
-                ? GameSession.Instance.RNG.Range(dropMin, dropMax + 1)
-                : UnityEngine.Random.Range(dropMin, dropMax + 1);
-            return !string.IsNullOrEmpty(resourceId);
-        }
 
         public void SetOutline(bool show)
         {

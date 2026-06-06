@@ -5,7 +5,7 @@ using Duskborn.Core;
 
 namespace Duskborn.Gameplay.Loot
 {
-    public class LootManager : NetworkBehaviour
+    public class LootManager : MonoBehaviour
     {
         public static LootManager Instance { get; private set; }
 
@@ -31,13 +31,15 @@ namespace Duskborn.Gameplay.Loot
 
         public void ServerDropLoot(DropLootTable table, Vector3 origin)
         {
-            if (!IsServerStarted || table == null) return;
+            if (!InstanceFinder.IsServerStarted || table == null) return;
 
             SeededRNG rng         = GameSession.Instance?.RNG;
             int       currentNight = DayNightCycle.Instance?.CurrentNight ?? 0;
 
-            var hits  = table.Roll(rng, currentNight);
-            int total = hits.Count + 1; // gold coin occupies the last angle slot
+            var  hits       = table.Roll(rng, currentNight);
+            int  goldAmount = table.RollGold(rng);
+            bool spawnGold  = goldAmount > 0;
+            int  total      = hits.Count + (spawnGold ? 1 : 0);
 
             for (int i = 0; i < hits.Count; i++)
             {
@@ -73,7 +75,8 @@ namespace Duskborn.Gameplay.Loot
                 }
             }
 
-            SpawnGoldPickup(origin, table.RollGold(rng), hits.Count, total, rng);
+            if (spawnGold)
+                SpawnGoldPickup(origin, goldAmount, hits.Count, total, rng);
 
             DuskLog.Log(LogChannel.Loot,
                 $"LootManager: dropped {hits.Count} item(s) at {origin} (night {currentNight}).");

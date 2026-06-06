@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 3375655367651528246}
   - component: {fileID: 3664897843973142297}
   - component: {fileID: 2002914817134659099}
+  - component: {fileID: -4121080129504171373}
   m_Layer: 7
   m_Name: ResourceNode
   m_TagString: Untagged
@@ -133,10 +134,7 @@ MonoBehaviour:
   _componentIndexCache: 0
   _addedNetworkObject: {fileID: 2002914817134659099}
   _networkObjectCache: {fileID: 2002914817134659099}
-  resourceDef: {fileID: 11400000, guid: aa66a337d0db20b48a0fa1a898784f0e, type: 2}
-  maxHP: 30
-  dropMin: 1
-  dropMax: 3
+  maxHP: 100
   _damageNumberConfig: {fileID: 11400000, guid: eb5a6de148f00fa47adfa4984d057943, type: 2}
   outlineLayerName: ResourceOutline
   outlineRenderer: {fileID: 0}
@@ -224,7 +222,22 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584209271601482715
+  _initializedTimestamp: -8584209146305487726
+--- !u!114 &-4121080129504171373
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7967917925737338743}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19855649ed33cd943a654f7780f6df25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Loot.LootDropper
+  lootTable: {fileID: 11400000, guid: 6de064427e2bd1a4da454021f091b857, type: 2}
+  dropOrigin: {fileID: 3455726826707976111}
+  dropOriginUpOffset: 0.5
 --- !u!1001 &6562202791050913219
 PrefabInstance:
   m_ObjectHideFlags: 0

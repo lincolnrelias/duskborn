@@ -94,7 +94,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584209271601482715
+  _initializedTimestamp: -8584209146305487726
 --- !u!54 &4903646720888488186
 Rigidbody:
   m_ObjectHideFlags: 0

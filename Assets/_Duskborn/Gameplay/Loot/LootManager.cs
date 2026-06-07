@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using FishNet;
 using FishNet.Object;
 using UnityEngine;
@@ -36,50 +37,54 @@ namespace Duskborn.Gameplay.Loot
             SeededRNG rng         = GameSession.Instance?.RNG;
             int       currentNight = DayNightCycle.Instance?.CurrentNight ?? 0;
 
-            var  hits       = table.Roll(rng, currentNight);
-            int  goldAmount = table.RollGold(rng);
-            bool spawnGold  = goldAmount > 0;
-            int  total      = hits.Count + (spawnGold ? 1 : 0);
+            var hits       = table.Roll(rng, currentNight);
+            int goldAmount = table.RollGold(rng);
+            bool spawnGold = goldAmount > 0;
 
-            for (int i = 0; i < hits.Count; i++)
+            // Expand entries into individual physical items so each gets its own prefab.
+            var spawnList = new List<(GameObject prefab, string id)>();
+            foreach (var entry in hits)
             {
-                var entry  = hits[i];
-                var prefab = entry.itemDefinition?.dropPrefab;
-
                 if (string.IsNullOrEmpty(entry.itemDefinition.Id))
                 {
                     DuskLog.Warn(LogChannel.Loot,
                         $"LootManager: entry '{entry.itemDefinition.name}' has no id set on its asset — skipping.");
                     continue;
                 }
-
+                var prefab = entry.itemDefinition.dropPrefab;
                 if (prefab == null)
                 {
                     DuskLog.Warn(LogChannel.Loot,
                         $"LootManager: entry '{entry.itemDefinition.name}' has no dropPrefab — skipping.");
                     continue;
                 }
-
-                int amount = rng != null
+                int count = rng != null
                     ? rng.Range(entry.minAmount, entry.maxAmount + 1)
                     : UnityEngine.Random.Range(entry.minAmount, entry.maxAmount + 1);
+                for (int j = 0; j < count; j++)
+                    spawnList.Add((prefab, entry.itemDefinition.Id));
+            }
 
+            int total = spawnList.Count + (spawnGold ? 1 : 0);
+
+            for (int i = 0; i < spawnList.Count; i++)
+            {
+                var (prefab, id) = spawnList[i];
                 var go = Instantiate(prefab, origin + Vector3.up * 0.1f, Quaternion.identity);
                 InstanceFinder.ServerManager.Spawn(go);
-
                 var pickup = go.GetComponent<WorldItemPickup>();
                 if (pickup != null)
                 {
-                    pickup.ServerInitialize(entry.itemDefinition.Id, amount);
+                    pickup.ServerInitialize(id, 1);
                     pickup.ServerThrow(ComputeThrowDirection(i, total, rng));
                 }
             }
 
             if (spawnGold)
-                SpawnGoldPickup(origin, goldAmount, hits.Count, total, rng);
+                SpawnGoldPickup(origin, goldAmount, spawnList.Count, total, rng);
 
             DuskLog.Log(LogChannel.Loot,
-                $"LootManager: dropped {hits.Count} item(s) at {origin} (night {currentNight}).");
+                $"LootManager: dropped {spawnList.Count} item(s) at {origin} (night {currentNight}).");
         }
 
         // Evenly spaces items radially from the origin with per-item random angle variance.

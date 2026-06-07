@@ -183,7 +183,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: SceneId
-      value: 1065218046
+      value: 4257214459
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: WasActiveDuringEdit
@@ -309,7 +309,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2002914817134659099, guid: 1964db849fc5f9e4da3f95cb2eaeb0d1, type: 3}
       propertyPath: SceneId
-      value: 3619680218
+      value: 3028156381
       objectReference: {fileID: 0}
     - target: {fileID: 2002914817134659099, guid: 1964db849fc5f9e4da3f95cb2eaeb0d1, type: 3}
       propertyPath: WasActiveDuringEdit
@@ -626,7 +626,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: SceneId
-      value: 1434451935
+      value: 507379673
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: WasActiveDuringEdit
@@ -1097,7 +1097,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: SceneId
-      value: 3179147227
+      value: 2004877311
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: WasActiveDuringEdit
@@ -4816,7 +4816,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: SceneId
-      value: 4127059961
+      value: 910032895
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: WasActiveDuringEdit
@@ -5080,7 +5080,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2002914817134659099, guid: 1964db849fc5f9e4da3f95cb2eaeb0d1, type: 3}
       propertyPath: SceneId
-      value: 1052639229
+      value: 3032350686
       objectReference: {fileID: 0}
     - target: {fileID: 2002914817134659099, guid: 1964db849fc5f9e4da3f95cb2eaeb0d1, type: 3}
       propertyPath: WasActiveDuringEdit
@@ -6467,7 +6467,7 @@ MonoBehaviour:
   <PrefabId>k__BackingField: 65535
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 0
-  SceneId: 3695050745
+  SceneId: 3196059644
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
     Rotation: {x: 0, y: 0, z: 0, w: 0}
@@ -6605,10 +6605,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc8ae5a82e142e84ca1fc6fe339923bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Loot.LootManager
-  throwRadialSpeed: 3.5
-  throwUpSpeed: 5
-  throwRadialVariance: 1
-  throwUpVariance: 1.5
+  throwRadialSpeed: 1
+  throwUpSpeed: 1
+  throwRadialVariance: 3
+  throwUpVariance: 3
   worldGoldPickupPrefab: {fileID: 5752967656333843250, guid: 3192f5cb9a1226345b461c4be11ab017, type: 3}
 --- !u!224 &1876573324 stripped
 RectTransform:
@@ -7625,7 +7625,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2002914817134659099, guid: 1964db849fc5f9e4da3f95cb2eaeb0d1, type: 3}
       propertyPath: SceneId
-      value: 935198718
+      value: 1472200702
       objectReference: {fileID: 0}
     - target: {fileID: 2002914817134659099, guid: 1964db849fc5f9e4da3f95cb2eaeb0d1, type: 3}
       propertyPath: WasActiveDuringEdit

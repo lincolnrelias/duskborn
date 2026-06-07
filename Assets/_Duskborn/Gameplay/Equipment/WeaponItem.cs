@@ -18,6 +18,7 @@ namespace Duskborn.Gameplay.Equipment
     public class WeaponItem : InventoryItemBase, ILeftClickAction, IRightClickAction
     {
         public IReadOnlyList<StatBonus>   Bonuses       { get; }
+        public IReadOnlyList<TypeDamageModifier> TypeModifiers { get; }
         public GameObject                 Prefab        { get; }
         public WeaponBehaviour            Behaviour     { get; }
         public WeaponActionData[]         Actions       { get; }
@@ -29,6 +30,7 @@ namespace Duskborn.Gameplay.Equipment
 
         public WeaponItem(string id, string displayName, string description,
                           string iconId, IReadOnlyList<StatBonus> bonuses,
+                          IReadOnlyList<TypeDamageModifier> typeModifiers,
                           GameObject prefab, WeaponBehaviour behaviour,
                           WeaponActionData[] actions, WeaponSkill[] skills = null,
                           WeaponAudioProfile audioProfile = null,
@@ -36,6 +38,7 @@ namespace Duskborn.Gameplay.Equipment
             : base(id, displayName, description, iconId)
         {
             Bonuses       = bonuses ?? Array.Empty<StatBonus>();
+            TypeModifiers = typeModifiers ?? Array.Empty<TypeDamageModifier>();
             Prefab        = prefab;
             Behaviour     = behaviour;
             Actions       = actions ?? Array.Empty<WeaponActionData>();
@@ -43,6 +46,9 @@ namespace Duskborn.Gameplay.Equipment
             AudioProfile  = audioProfile;
             EffectProfile = effectProfile;
         }
+
+        public float GetTypeDamageMultiplier(TargetType targetTypes) =>
+            TypeDamageModifier.GetBestMultiplier(TypeModifiers, targetTypes);
 
         public virtual void OnLeftClick(CombatContext ctx)
         {

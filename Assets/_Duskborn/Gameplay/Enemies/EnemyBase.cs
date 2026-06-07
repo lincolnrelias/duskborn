@@ -15,11 +15,16 @@ using Duskborn.Gameplay.Player;
 namespace Duskborn.Gameplay.Enemies
 {
     [RequireComponent(typeof(NavMeshAgent))]
-    public abstract class EnemyBase : NetworkBehaviour, ICombatEntity, IDamageable, IHealthProvider
+    public abstract class EnemyBase : NetworkBehaviour, ICombatEntity, IDamageable, IHealthProvider, ITypedTarget
     {
         public Transform Transform => transform;
         [Header("Stats")]
         [SerializeField] private EntityStats _entity = new();
+
+        [Header("Creature Type")]
+        [SerializeField, TargetTypeFilter(TargetTypeMasks.EnemyTypes)]
+        private TargetType creatureTypes;
+        public TargetType Types => creatureTypes;
 
         [Header("Combat")]
         [SerializeField] protected float     attackRange = 1.5f;

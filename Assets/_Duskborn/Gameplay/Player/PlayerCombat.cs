@@ -36,6 +36,7 @@ namespace Duskborn.Gameplay.Player
         private ResourceNode _prevLinkedNode;
 
         private PlayerStats        _stats;
+        private PlayerWeaponHandler _weaponHandler;
         private ClassAbility       _classAbility;
         private ResourceInventory  _resourceInventory;
         private WeaponActionPlayer _weaponActionPlayer;
@@ -55,6 +56,7 @@ namespace Duskborn.Gameplay.Player
         private void Awake()
         {
             _stats              = GetComponent<PlayerStats>();
+            _weaponHandler      = GetComponent<PlayerWeaponHandler>();
             _classAbility       = GetComponent<ClassAbility>();
             _resourceInventory  = GetComponent<ResourceInventory>();
             _weaponActionPlayer = GetComponent<WeaponActionPlayer>();
@@ -319,6 +321,7 @@ namespace Duskborn.Gameplay.Player
                 bool    isCrit   = Random.value < _stats.CritChance;
                 float   damage   = _stats.Damage * damageMultiplier * (isCrit ? _stats.CritMultiplier : 1f);
                 if (_classAbility != null) damage = _classAbility.ModifyDamage(damage, enemy);
+                damage *= _weaponHandler?.ActiveWeapon?.GetTypeDamageMultiplier(enemy.Types) ?? 1f;
                 Vector3 hitPoint = col.ClosestPoint(transform.position);
                 Vector3 hitDir   = (enemy.transform.position - transform.position).normalized;
                 enemy.TakeDamage(damage, isCrit, hitPoint, hitDir);
@@ -350,6 +353,7 @@ namespace Duskborn.Gameplay.Player
                 bool  isCrit   = Random.value < _stats.CritChance;
                 float damage   = _stats.Damage * (isCrit ? _stats.CritMultiplier : 1f);
                 if (_classAbility != null) damage = _classAbility.ModifyDamage(damage, enemy);
+                damage *= _weaponHandler?.ActiveWeapon?.GetTypeDamageMultiplier(enemy.Types) ?? 1f;
                 Vector3 hitPoint = col.ClosestPoint(origin);
                 Vector3 hitDir   = (enemy.transform.position - transform.position).normalized;
                 enemy.TakeDamage(damage, isCrit, hitPoint, hitDir);
@@ -412,7 +416,8 @@ namespace Duskborn.Gameplay.Player
             var node = nodeObj.GetComponent<ResourceNode>();
             if (node == null || !node.IsAlive) return;
 
-            node.TakeDamage(_stats.Damage);
+            float damage = _stats.Damage * (_weaponHandler?.ActiveWeapon?.GetTypeDamageMultiplier(node.Types) ?? 1f);
+            node.TakeDamage(damage);
             RpcOnHitAudio(Owner, nodeObj.gameObject.tag);
             RpcOnHitEffect(nodeObj.gameObject.tag, nodeObj.transform.position);
 

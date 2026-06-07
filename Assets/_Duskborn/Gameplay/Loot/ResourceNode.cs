@@ -8,9 +8,14 @@ using Duskborn.Gameplay;
 
 namespace Duskborn.Gameplay.Loot
 {
-    public class ResourceNode : NetworkBehaviour, IDamageable, IHealthProvider
+    public class ResourceNode : NetworkBehaviour, IDamageable, IHealthProvider, ITypedTarget
     {
         [SerializeField] private float maxHP = 30f;
+
+        [Header("Material Type")]
+        [SerializeField, TargetTypeFilter(TargetTypeMasks.NodeTypes)]
+        private TargetType materialTypes;
+        public TargetType Types => materialTypes;
 
         [Header("Damage Numbers")]
         [SerializeField] private DamageNumberConfig _damageNumberConfig;

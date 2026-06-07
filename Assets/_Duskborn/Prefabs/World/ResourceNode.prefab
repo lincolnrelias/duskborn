@@ -135,6 +135,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 2002914817134659099}
   _networkObjectCache: {fileID: 2002914817134659099}
   maxHP: 100
+  materialTypes: 256
   _damageNumberConfig: {fileID: 11400000, guid: eb5a6de148f00fa47adfa4984d057943, type: 2}
   outlineLayerName: ResourceOutline
   outlineRenderer: {fileID: 0}
@@ -222,7 +223,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584209146305487726
+  _initializedTimestamp: -8584208438599076913
 --- !u!114 &-4121080129504171373
 MonoBehaviour:
   m_ObjectHideFlags: 0

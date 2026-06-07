@@ -159,6 +159,7 @@ MonoBehaviour:
     CritChanceBuffFactor: 1
     IncomingDamageBuffAdditive: 0
     IncomingDamageBuffFactor: 1
+  creatureTypes: 1
   attackRange: 2.5
   playerLayer:
     serializedVersion: 2
@@ -274,7 +275,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584209146305487726
+  _initializedTimestamp: -8584207567235192669
 --- !u!114 &6069308860891105275
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -12,6 +12,7 @@ namespace Duskborn.Gameplay.Equipment
     {
         [SerializeField] private GameObject       prefab;
         [SerializeField] private List<StatBonus>  bonuses;
+        [SerializeField] private List<TypeDamageModifier> typeModifiers;
         [SerializeField] private WeaponBehaviour  behaviour;
         // Index 0 = LMB action, index 1 = RMB action, etc.
         [SerializeField] private WeaponActionData[] actions;
@@ -22,6 +23,7 @@ namespace Duskborn.Gameplay.Equipment
 
         public GameObject               Prefab         => prefab;
         public IReadOnlyList<StatBonus> Bonuses        => bonuses;
+        public IReadOnlyList<TypeDamageModifier> TypeModifiers => typeModifiers;
         public WeaponBehaviour          Behaviour      => behaviour;
         public WeaponActionData[]       Actions        => actions;
         public WeaponSkill[]            Skills         => skills;
@@ -31,7 +33,7 @@ namespace Duskborn.Gameplay.Equipment
         public override IInventoryItem CreateRuntimeItem()
         {
             string iconId = Icon != null ? Icon.name : string.Empty;
-            return new WeaponItem(Id, DisplayName, Description, iconId, bonuses, prefab, behaviour, actions, skills, audioProfile, effectProfile);
+            return new WeaponItem(Id, DisplayName, Description, iconId, bonuses, typeModifiers, prefab, behaviour, actions, skills, audioProfile, effectProfile);
         }
     }
 }

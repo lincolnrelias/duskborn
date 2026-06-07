@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text;
 using Duskborn.Audio;
 using Duskborn.Effects;
 using InventorySystem.Core;
@@ -33,7 +34,38 @@ namespace Duskborn.Gameplay.Equipment
         public override IInventoryItem CreateRuntimeItem()
         {
             string iconId = Icon != null ? Icon.name : string.Empty;
-            return new WeaponItem(Id, DisplayName, Description, iconId, bonuses, typeModifiers, prefab, behaviour, actions, skills, audioProfile, effectProfile);
+            string description = BuildDescription(Description, bonuses, typeModifiers);
+            return new WeaponItem(Id, DisplayName, description, iconId, bonuses, typeModifiers, prefab, behaviour, actions, skills, audioProfile, effectProfile);
+        }
+
+        // Composes the displayed description from, in order: stat bonuses (line by line),
+        // type-damage modifiers (line by line), then the hand-written flavour description —
+        // each non-empty section separated by a blank line.
+        private static string BuildDescription(string customDescription, IReadOnlyList<StatBonus> bonuses,
+                                                IReadOnlyList<TypeDamageModifier> typeModifiers)
+        {
+            var sections = new List<string>();
+
+            if (bonuses != null && bonuses.Count > 0)
+            {
+                var lines = new StringBuilder();
+                foreach (var bonus in bonuses)
+                    lines.AppendLine(bonus.FormatLine());
+                sections.Add(lines.ToString().TrimEnd());
+            }
+
+            if (typeModifiers != null && typeModifiers.Count > 0)
+            {
+                var lines = new StringBuilder();
+                foreach (var modifier in typeModifiers)
+                    lines.AppendLine(modifier.FormatLine());
+                sections.Add(lines.ToString().TrimEnd());
+            }
+
+            if (!string.IsNullOrEmpty(customDescription))
+                sections.Add(customDescription);
+
+            return string.Join("\n\n", sections);
         }
     }
 }

@@ -24,5 +24,23 @@ namespace Duskborn.Gameplay.Equipment
         // Mode is only read by the buff system (PlayerBuffContainer). Gear and weapon contributors
         // always accumulate into the gear multiplier layer and ignore this field.
         public BonusMode Mode;
+
+        // Human-readable line for item descriptions/tooltips, e.g. "+15% Damage".
+        public string FormatLine()
+        {
+            string sign = Value >= 0 ? "+" : "";
+            return $"{sign}{Value * 100:F0}% {Label(Type)}";
+        }
+
+        private static string Label(StatType type) => type switch
+        {
+            StatType.HP              => "Max HP",
+            StatType.Damage          => "Damage",
+            StatType.MoveSpeed       => "Move Speed",
+            StatType.AttackSpeed     => "Attack Speed",
+            StatType.CritChance      => "Crit Chance",
+            StatType.DamageReduction => "Damage Reduction",
+            _                        => type.ToString()
+        };
     }
 }

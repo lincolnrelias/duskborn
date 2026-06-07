@@ -14,6 +14,13 @@ namespace Duskborn.Gameplay.Equipment
                  "If a target matches more than one modifier, only the single highest Bonus applies — they do not stack.")]
         public float Bonus;
 
+        // Human-readable line for item descriptions/tooltips, e.g. "+50% damage vs Beast".
+        public string FormatLine()
+        {
+            string sign = Bonus >= 0 ? "+" : "";
+            return $"{sign}{Bonus * 100:F0}% damage vs {Type}";
+        }
+
         // Best-match wins: only the single highest matching bonus applies (no stacking).
         public static float GetBestMultiplier(IReadOnlyList<TypeDamageModifier> modifiers, TargetType targetTypes)
         {

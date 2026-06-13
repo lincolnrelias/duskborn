@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.WeaponDefinition
   id: stone_axe
   displayName: Stone Axe
-  description: A heavy stone axe, well-suited to felling trees and splitting humanoid foes alike.
+  description: A heavy stone axe, well-suited to felling trees and splitting humanoid
+    foes alike
   icon: {fileID: 2800000, guid: f00953ca56fd7d84e93625f0a86482fc, type: 3}
   dropPrefab: {fileID: 0}
   prefab: {fileID: 4757211534840990446, guid: 0761d24af9de94747a949c3acd122201, type: 3}

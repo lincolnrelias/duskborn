@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Tree
   - Enemy
+  - Resource
   layers:
   - Default
   - TransparentFX
@@ -16,7 +17,7 @@ TagManager:
   - Enemy
   - ResourceNode
   - Player
-  - 
+  - Resource
   - 
   - 
   - 

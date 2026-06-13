@@ -15,9 +15,9 @@ GameObject:
   - component: {fileID: 2745176785061572893}
   - component: {fileID: 3326474339435070506}
   - component: {fileID: 7190483650033509852}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: droppable_log
-  m_TagString: Untagged
+  m_TagString: Resource
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -114,7 +114,7 @@ Rigidbody:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 320
+    m_Bits: 832
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 1

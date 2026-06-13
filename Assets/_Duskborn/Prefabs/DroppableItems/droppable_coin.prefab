@@ -15,9 +15,9 @@ GameObject:
   - component: {fileID: 3326474339435070506}
   - component: {fileID: 1751701025629654983}
   - component: {fileID: -5627284406055251348}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: droppable_coin
-  m_TagString: Untagged
+  m_TagString: Resource
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -94,7 +94,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584208432576904690
+  _initializedTimestamp: -8584202546531155918
 --- !u!54 &4903646720888488186
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -114,7 +114,7 @@ Rigidbody:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 320
+    m_Bits: 832
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 1

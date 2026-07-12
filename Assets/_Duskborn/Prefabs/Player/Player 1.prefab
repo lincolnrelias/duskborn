@@ -91,6 +91,8 @@ GameObject:
   - component: {fileID: 8369684736023879674}
   - component: {fileID: 1470526056991240466}
   - component: {fileID: -6865175293612143611}
+  - component: {fileID: -3397283148206250790}
+  - component: {fileID: 5105578093761831578}
   m_Layer: 8
   m_Name: Player 1
   m_TagString: Player
@@ -442,6 +444,7 @@ MonoBehaviour:
   - {fileID: 3923650547242843623}
   - {fileID: 5151783337402195587}
   - {fileID: 8514665050153253299}
+  - {fileID: -3397283148206250790}
   InitializedParentNetworkBehaviour: {fileID: 0}
   InitializedNestedNetworkObjects: []
   RuntimeParentNetworkBehaviour: {fileID: 0}
@@ -452,7 +455,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584202549779105203
+  _initializedTimestamp: -8584177259517934272
 --- !u!114 &8514665050153253299
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -647,6 +650,42 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f513e8b81a48504d9a7e19f414e41d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Effects.WeaponEffectPlayer
+--- !u!114 &-3397283148206250790
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7498212195385448204}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63ea5f7ab9dcacf4c8282fee52b884d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Player.PlayerDodge
+  _componentIndexCache: 5
+  _addedNetworkObject: {fileID: 5780092933335364822}
+  _networkObjectCache: {fileID: 5780092933335364822}
+  dodgeDistance: 4
+  dodgeDuration: 0.25
+  cooldown: 1.5
+  invulnerable: 1
+  iFrameDuration: 0.5
+  animator: {fileID: 0}
+--- !u!114 &5105578093761831578
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7498212195385448204}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17f1251a90bc8b244b83905498b512d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Combat.StatusEffectController
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 5780092933335364822}
+  _networkObjectCache: {fileID: 0}
 --- !u!1 &8615774888580447804
 GameObject:
   m_ObjectHideFlags: 0

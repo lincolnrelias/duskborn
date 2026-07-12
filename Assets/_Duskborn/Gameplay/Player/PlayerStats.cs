@@ -63,6 +63,7 @@ namespace Duskborn.Gameplay.Player
         // ── Buff container (for HP-delta tracking on stat changes) ───────────
         private PlayerBuffContainer _buffs;
         private HitFlash            _hitFlash;
+        private Combat.StatusEffectController _statusEffects;
 
         // ── HP (networked) ────────────────────────────────────────────────────
         private readonly SyncVar<float> _currentHP = new();
@@ -89,6 +90,7 @@ namespace Duskborn.Gameplay.Player
 
             _hitFlash = GetComponent<HitFlash>();
             if (_hitFlash == null) _hitFlash = gameObject.AddComponent<HitFlash>();
+            _statusEffects = GetComponent<Combat.StatusEffectController>();
         }
 
         private void OnCurrentHPSync(float prev, float next, bool asServer)
@@ -142,10 +144,27 @@ namespace Duskborn.Gameplay.Player
                 _currentHP.Value = MaxHP;
         }
 
+        // Server-only. Dodge i-frames and future damage-immunity windows.
+        public void SetInvulnerable(float duration)
+        {
+            if (!IsServerStarted) return;
+            if (_statusEffects == null)
+            {
+                DuskLog.Warn(LogChannel.Combat, $"{name}: no StatusEffectController — add it to the player prefab.");
+                return;
+            }
+            _statusEffects.ServerApply(Combat.StatusEffect.Invulnerable, duration);
+        }
+
         public void TakeDamage(float amount, bool isCrit = false)
         {
             if (!IsServerStarted) return;
             if (!IsAlive) return;
+            if (_statusEffects != null && _statusEffects.Has(Combat.StatusEffect.Invulnerable))
+            {
+                DuskLog.Log(LogChannel.Combat, $"{name}: dodged {amount:F1} damage (invulnerable).");
+                return;
+            }
             float actual = amount * EffectiveIncomingDamage;
             _currentHP.Value = Mathf.Max(0f, _currentHP.Value - actual);
             RpcShowDamageNumber(transform.position, actual, isCrit);

@@ -138,5 +138,15 @@ namespace Duskborn.Gameplay.Player
         }
 
         public void SetInputEnabled(bool enabled) => _inputEnabled = enabled;
+
+        // Current camera-relative input direction; facing direction when idle.
+        public Vector3 GetMoveDirectionWorld()
+        {
+            if (_moveInput.sqrMagnitude < 0.01f || _mainCam == null)
+                return transform.forward;
+            Vector3 f = Vector3.ProjectOnPlane(_mainCam.transform.forward, Vector3.up).normalized;
+            Vector3 r = Vector3.ProjectOnPlane(_mainCam.transform.right,   Vector3.up).normalized;
+            return (f * _moveInput.y + r * _moveInput.x).normalized;
+        }
     }
 }

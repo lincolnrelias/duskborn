@@ -17,6 +17,7 @@ namespace Duskborn.Gameplay.Hotkeys
         public const string Skill2   = "Skill2";
         public const string Skill3   = "Skill3";
         public const string Interact = "Interact";
+        public const string Dodge    = "Dodge";
 
         [Serializable]
         public struct Binding
@@ -31,6 +32,7 @@ namespace Duskborn.Gameplay.Hotkeys
             new() { actionId = Skill2,   key = KeyCode.E },
             new() { actionId = Skill3,   key = KeyCode.R },
             new() { actionId = Interact, key = KeyCode.F },
+            new() { actionId = Dodge,    key = KeyCode.Space },
         };
 
         private readonly Dictionary<string, Action> _handlers = new();

@@ -25,6 +25,7 @@ namespace Duskborn.Gameplay.Loot
         [SerializeField] private Renderer outlineRenderer;
 
         private readonly SyncVar<float> _currentHP = new();
+        private HitFlash _hitFlash;
         private uint _outlineMask;
         private uint _baseMask;
 
@@ -39,6 +40,9 @@ namespace Duskborn.Gameplay.Loot
         {
             _currentHP.Value    = maxHP;
             _currentHP.OnChange += OnHPChanged;
+
+            _hitFlash = GetComponent<HitFlash>();
+            if (_hitFlash == null) _hitFlash = gameObject.AddComponent<HitFlash>();
 
             if (outlineRenderer == null)
                 outlineRenderer = GetComponentInChildren<Renderer>();
@@ -75,7 +79,10 @@ namespace Duskborn.Gameplay.Loot
 
         [ObserversRpc(RunLocally = true)]
         private void RpcShowDamageNumber(Vector3 pos, float amount, bool isCrit)
-            => DamageNumberPool.Instance?.Get(pos, amount, isCrit, _damageNumberConfig);
+        {
+            DamageNumberPool.Instance?.Get(pos, amount, isCrit, _damageNumberConfig);
+            if (_hitFlash != null) _hitFlash.Flash();
+        }
 
         public void SetOutline(bool show)
         {

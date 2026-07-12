@@ -375,6 +375,7 @@ namespace Duskborn.Gameplay.Player
         {
             DuskLog.Log(LogChannel.Audio, $"RpcOnHitAudio: tag='{tag}'.");
             _hitNotifier?.Raise(new WeaponHitNotifier.HitData(tag, 0));
+            CameraShake.ShakeDealt();
         }
 
         [ObserversRpc]

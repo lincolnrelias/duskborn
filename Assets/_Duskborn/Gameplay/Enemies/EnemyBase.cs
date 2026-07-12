@@ -44,8 +44,12 @@ namespace Duskborn.Gameplay.Enemies
         [SerializeField] private Animator _animator;
 
         private EnemyRagdoll _ragdoll;
+        private HitFlash     _hitFlash;
         private Vector3      _deathHitPoint;
         private Vector3      _deathHitDirection;
+        private Vector3      _knockbackDir;
+        private float        _knockbackTimer;
+        private float        _staggerTimer;
 
         [Header("Outline")]
         [SerializeField] private string     outlineLayerName = "RedOutline";
@@ -120,6 +124,8 @@ namespace Duskborn.Gameplay.Enemies
             }
 
             _ragdoll            = GetComponent<EnemyRagdoll>();
+            _hitFlash           = GetComponent<HitFlash>();
+            if (_hitFlash == null) _hitFlash = gameObject.AddComponent<HitFlash>();
             _weaponActionPlayer = GetComponent<WeaponActionPlayer>();
             _hitNotifier        = GetComponent<WeaponHitNotifier>();
             _skillCooldowns     = new float[weapon?.Skills != null ? weapon.Skills.Length : 0];
@@ -141,6 +147,12 @@ namespace Duskborn.Gameplay.Enemies
 
             if (!IsServerStarted || !IsSpawned) return;
             if (!IsAlive) return;
+
+            if (_staggerTimer > 0f)
+            {
+                TickStagger();
+                return;
+            }
 
             AcquireTarget();
 
@@ -285,6 +297,33 @@ namespace Duskborn.Gameplay.Enemies
             _deathHitPoint     = hitPoint;
             _deathHitDirection = hitDirection.normalized;
             TakeDamage(amount, isCrit);
+            if (IsServerStarted && IsAlive) ApplyKnockback(hitDirection);
+        }
+
+        private void ApplyKnockback(Vector3 direction)
+        {
+            var s = CombatFeelSettings.Instance;
+            if (s == null || !s.knockbackEnabled) return;
+            direction.y = 0f;
+            if (direction.sqrMagnitude < 0.001f) return;
+            _knockbackDir   = direction.normalized;
+            _knockbackTimer = s.knockbackDuration;
+            _staggerTimer   = s.flinchDuration;
+        }
+
+        // Knockback slide + attack interruption while staggered. Server only.
+        private void TickStagger()
+        {
+            _staggerTimer -= Time.deltaTime;
+            if (!Agent.isOnNavMesh) return;
+            Agent.ResetPath();
+
+            if (_knockbackTimer <= 0f) return;
+            _knockbackTimer -= Time.deltaTime;
+            var s = CombatFeelSettings.Instance;
+            if (s == null) return;
+            float speed = s.knockbackDistance / Mathf.Max(s.knockbackDuration, 0.01f);
+            Agent.Move(_knockbackDir * (speed * Time.deltaTime));
         }
 
         public virtual void TakeDamage(float amount, bool isCrit = false)
@@ -299,7 +338,10 @@ namespace Duskborn.Gameplay.Enemies
 
         [ObserversRpc(RunLocally = true)]
         private void RpcShowDamageNumber(Vector3 pos, float amount, bool isCrit)
-            => DamageNumberPool.Instance?.Get(pos, amount, isCrit, _damageNumberConfig);
+        {
+            DamageNumberPool.Instance?.Get(pos, amount, isCrit, _damageNumberConfig);
+            if (_hitFlash != null) _hitFlash.Flash();
+        }
 
         private void OnHPChanged(float prev, float next, bool asServer)
         {
@@ -383,6 +425,8 @@ namespace Duskborn.Gameplay.Enemies
             OnDied         = null;
             CurrentTarget  = null;
             MeleeCooldown  = 0f;
+            _knockbackTimer = 0f;
+            _staggerTimer   = 0f;
             _warnedNoTarget  = false;
             _warnedNoNavMesh = false;
             _entity.maxHP    = _baseMaxHP;

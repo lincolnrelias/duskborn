@@ -62,6 +62,7 @@ namespace Duskborn.Gameplay.Player
 
         // ── Buff container (for HP-delta tracking on stat changes) ───────────
         private PlayerBuffContainer _buffs;
+        private HitFlash            _hitFlash;
 
         // ── HP (networked) ────────────────────────────────────────────────────
         private readonly SyncVar<float> _currentHP = new();
@@ -85,12 +86,16 @@ namespace Duskborn.Gameplay.Player
             }
             _currentHP.Value = MaxHP;
             _currentHP.OnChange += OnCurrentHPSync;
+
+            _hitFlash = GetComponent<HitFlash>();
+            if (_hitFlash == null) _hitFlash = gameObject.AddComponent<HitFlash>();
         }
 
         private void OnCurrentHPSync(float prev, float next, bool asServer)
         {
             OnHPChanged?.Invoke(next, MaxHP);
             OnHealthChanged?.Invoke(next, MaxHP);
+            if (!asServer && IsOwner && next < prev) CameraShake.ShakeTaken();
         }
 
         private void Start()
@@ -149,7 +154,10 @@ namespace Duskborn.Gameplay.Player
 
         [ObserversRpc(RunLocally = true)]
         private void RpcShowDamageNumber(Vector3 pos, float amount, bool isCrit)
-            => DamageNumberPool.Instance?.Get(pos, amount, isCrit, _damageNumberConfig);
+        {
+            DamageNumberPool.Instance?.Get(pos, amount, isCrit, _damageNumberConfig);
+            if (_hitFlash != null) _hitFlash.Flash();
+        }
 
         public void Heal(float amount)
         {

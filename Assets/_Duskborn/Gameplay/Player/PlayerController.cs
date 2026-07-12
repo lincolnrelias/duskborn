@@ -124,6 +124,7 @@ namespace Duskborn.Gameplay.Player
             _mainCam.transform.position = Vector3.Lerp(
                 _mainCam.transform.position, desired, cameraSmoothing * Time.deltaTime);
             _mainCam.transform.LookAt(transform.position + Vector3.up * cameraLookOffset);
+            _mainCam.transform.position += Duskborn.Effects.CameraShake.Offset;
         }
 
         private void UpdateAnimator()

@@ -36,7 +36,8 @@ namespace Duskborn.Gameplay.Player
         private Vector2 _inputSmoothVelocity;
         private Vector3 _velocity;
         private float   _cameraYaw;
-        private bool    _inputEnabled = true;
+        private bool    _inputEnabled    = true;
+        private bool    _rotationEnabled = true;
 
         public bool IsMoving => _moveInput.sqrMagnitude > 0.01f;
 
@@ -90,9 +91,12 @@ namespace Duskborn.Gameplay.Player
         private void HandleMovement()
         {
             // Character always faces camera yaw — WASD never rotates the body.
-            Quaternion targetRot = Quaternion.Euler(0f, _cameraYaw, 0f);
-            transform.rotation = Quaternion.RotateTowards(
-                transform.rotation, targetRot, rotationSpeed * Time.deltaTime);
+            if (_rotationEnabled)
+            {
+                Quaternion targetRot = Quaternion.Euler(0f, _cameraYaw, 0f);
+                transform.rotation = Quaternion.RotateTowards(
+                    transform.rotation, targetRot, rotationSpeed * Time.deltaTime);
+            }
 
             if (_smoothedInput.sqrMagnitude < 0.001f) return;
 
@@ -138,6 +142,10 @@ namespace Duskborn.Gameplay.Player
         }
 
         public void SetInputEnabled(bool enabled) => _inputEnabled = enabled;
+
+        // Keeps the body facing its current direction (movement still works). Used by PlayerDodge
+        // so the roll animation can finish before snapping back to camera yaw.
+        public void SetRotationEnabled(bool enabled) => _rotationEnabled = enabled;
 
         // Current camera-relative input direction; facing direction when idle.
         public Vector3 GetMoveDirectionWorld()

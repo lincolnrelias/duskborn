@@ -1,6 +1,5 @@
 using FishNet.Object;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using Duskborn.Effects;
 using Duskborn.Gameplay.Hotkeys;
 
@@ -20,6 +19,8 @@ namespace Duskborn.Gameplay.Player
 
         [Header("Animation")]
         [SerializeField] private Animator animator;
+        [Tooltip("How long the body stays facing the roll direction. Match the Roll clip length.")]
+        [SerializeField] private float rollAnimationDuration = 0.7f;
 
         private static readonly int HashRoll = Animator.StringToHash("Roll");
 
@@ -30,6 +31,7 @@ namespace Duskborn.Gameplay.Player
 
         private Vector3 _rollDir;
         private float   _rollTimer;
+        private float   _facingTimer;
         private float   _cooldownTimer;
         private System.Action _onDodge;
 
@@ -66,11 +68,11 @@ namespace Duskborn.Gameplay.Player
 
             if (_cooldownTimer > 0f) _cooldownTimer -= Time.deltaTime;
 
-            // Fallback when the scene HotkeyManager has no Dodge binding row yet.
-            var hk = HotkeyManager.Instance;
-            if ((hk == null || hk.GetKey(HotkeyManager.Dodge) == KeyCode.None) &&
-                Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
-                TryDodge();
+            if (_facingTimer > 0f)
+            {
+                _facingTimer -= Time.deltaTime;
+                if (_facingTimer <= 0f) _controller.SetRotationEnabled(true);
+            }
 
             if (!IsRolling) return;
 
@@ -87,8 +89,11 @@ namespace Duskborn.Gameplay.Player
 
             _rollDir       = _controller.GetMoveDirectionWorld();
             _rollTimer     = dodgeDuration;
+            _facingTimer   = Mathf.Max(rollAnimationDuration, dodgeDuration);
             _cooldownTimer = cooldown;
             _controller.SetInputEnabled(false);
+            _controller.SetRotationEnabled(false);
+            transform.rotation = Quaternion.LookRotation(_rollDir, Vector3.up);
             animator?.SetTrigger(HashRoll);
             _trail.EmitFor(dodgeDuration);
 

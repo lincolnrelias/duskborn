@@ -26,7 +26,9 @@ namespace Duskborn.Gameplay.Hotkeys
             public KeyCode key;
         }
 
-        [SerializeField] private Binding[] bindings =
+        // Canonical action list + default keys. The custom editor syncs scene components
+        // against this, so new actions only need a const + an entry here.
+        public static readonly Binding[] DefaultBindings =
         {
             new() { actionId = Skill1,   key = KeyCode.Q },
             new() { actionId = Skill2,   key = KeyCode.E },
@@ -34,6 +36,8 @@ namespace Duskborn.Gameplay.Hotkeys
             new() { actionId = Interact, key = KeyCode.F },
             new() { actionId = Dodge,    key = KeyCode.Space },
         };
+
+        [SerializeField] private Binding[] bindings = (Binding[])DefaultBindings.Clone();
 
         private readonly Dictionary<string, Action> _handlers = new();
 

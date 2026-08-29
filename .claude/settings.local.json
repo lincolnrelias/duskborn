@@ -63,7 +63,9 @@
       "Bash(find C:\\\\Users\\\\linco\\\\Mugg\\\\Assets\\\\_Duskborn *)",
       "Bash(ls C:UserslincoMuggAssets_DuskbornGameplayPlayer *)",
       "Bash(xargs grep -l \"enum EquipmentSlot\\\\|EquipmentSlot\")",
-      "mcp__unity-mcp__Unity_GetConsoleLogs"
+      "mcp__unity-mcp__Unity_GetConsoleLogs",
+      "WebSearch",
+      "PowerShell(dotnet build *)"
     ]
   }
 }

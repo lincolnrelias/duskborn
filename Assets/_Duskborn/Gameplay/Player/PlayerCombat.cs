@@ -283,14 +283,14 @@ namespace Duskborn.Gameplay.Player
             if (_linkedNode != null)
                 RequestNodeHitRpc(_linkedNode.NetworkObject);
 
-            RequestAttackRpc();
+            RequestAttackRpc(1f);
         }
 
         // ICombatEntity — fired by MeleeWeaponBehaviour at HitboxOpen.
         public void ExecuteBasicMelee()
         {
             if (_linkedNode != null) RequestNodeHitRpc(_linkedNode.NetworkObject);
-            RequestAttackRpc();
+            RequestAttackRpc(_weaponActionPlayer != null ? _weaponActionPlayer.CurrentComboMultiplier : 1f);
         }
 
         // Called by CleaveSkill via ICombatEntity.
@@ -340,18 +340,19 @@ namespace Duskborn.Gameplay.Player
         }
 
         [ServerRpc]
-        private void RequestAttackRpc()
+        private void RequestAttackRpc(float comboMultiplier)
         {
             Vector3    origin = transform.position + transform.forward * (attackRange * 0.5f);
             Collider[] cols   = Physics.OverlapSphere(origin, attackRange, enemyLayer);
             var hitEnemies = new List<EnemyBase>();
             Collider firstHitCol = null;
+            comboMultiplier = Mathf.Clamp(comboMultiplier, 0.1f, 5f);
             foreach (var col in cols)
             {
                 var enemy = col.GetComponentInParent<EnemyBase>();
                 if (enemy == null || !enemy.IsAlive) continue;
                 bool  isCrit   = Random.value < _stats.CritChance;
-                float damage   = _stats.Damage * (isCrit ? _stats.CritMultiplier : 1f);
+                float damage   = _stats.Damage * comboMultiplier * (isCrit ? _stats.CritMultiplier : 1f);
                 if (_classAbility != null) damage = _classAbility.ModifyDamage(damage, enemy);
                 damage *= _weaponHandler?.ActiveWeapon?.GetTypeDamageMultiplier(enemy.Types) ?? 1f;
                 Vector3 hitPoint = col.ClosestPoint(origin);

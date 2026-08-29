@@ -45,7 +45,13 @@ namespace Duskborn.Gameplay.Equipment
         private float              _runtimeSpeedMultiplier = 1f;
         private WeaponHitNotifier  _hitNotifier;
 
+        // Combo chain state (see WeaponActionData.ComboChain).
+        private int   _comboStep;
+        private int   _comboActionIndex = -1;
+        private float _comboExpiry;
+
         public bool              IsPlaying     => _isPlaying;
+        public float             CurrentComboMultiplier { get; private set; } = 1f;
         public WeaponItem        CurrentWeapon => _activeWeapon;
         public WeaponSkill       CurrentSkill  => _activeSkill;
         public WeaponHitNotifier HitNotifier   =>
@@ -124,8 +130,10 @@ namespace Duskborn.Gameplay.Equipment
             var data = weapon?.Actions != null && actionIndex < weapon.Actions.Length
                 ? weapon.Actions[actionIndex]
                 : null;
+            data?.EnsureMigrated();
 
-            var clip = data?.PickClip();
+            var entry = PickEntry(data, actionIndex);
+            var clip  = entry?.Clip;
             if (clip == null)
             {
                 DuskLog.Warn(LogChannel.ActionBar,
@@ -145,10 +153,7 @@ namespace Duskborn.Gameplay.Equipment
             _isPlaying         = true;
 
             // Sorted defensive copy so we never mutate the SO array.
-            _sortedEvents = data.Events != null
-                ? (WeaponActionEvent[])data.Events.Clone()
-                : Array.Empty<WeaponActionEvent>();
-            Array.Sort(_sortedEvents, (a, b) => a.NormalizedTime.CompareTo(b.NormalizedTime));
+            _sortedEvents = SortedEvents(entry.Events);
 
             DuskLog.Log(LogChannel.Audio, $"PlayAction [{actionIndex}]: firing swing audio. audioPlayer={(object)_audioPlayer ?? "null"} profile={weapon?.AudioProfile?.name ?? "null"}.");
             _audioPlayer?.PlaySwing(weapon?.AudioProfile);
@@ -160,6 +165,39 @@ namespace Duskborn.Gameplay.Equipment
 
             DuskLog.Log(LogChannel.ActionBar,
                 $"Weapon action [{actionIndex}] '{clip.name}' on '{weapon.DisplayName}'.");
+        }
+
+        // Combo chain: entries play in order while attacks land inside the reset window.
+        // Non-combo: random variant. Either way the entry's damage multiplier applies.
+        private WeaponActionClip PickEntry(WeaponActionData data, int actionIndex)
+        {
+            if (data == null || !data.HasEntries) return null;
+
+            WeaponActionClip entry;
+            if (data.ComboChain && data.Entries.Length > 1)
+            {
+                bool chained = actionIndex == _comboActionIndex && Time.time <= _comboExpiry;
+                int  step    = chained ? _comboStep : 0;
+                _comboActionIndex = actionIndex;
+                _comboStep        = (step + 1) % data.Entries.Length;
+                entry             = data.Entries[step];
+                DuskLog.Log(LogChannel.Combat, $"Combo step {step + 1}/{data.Entries.Length}.");
+            }
+            else
+                entry = data.PickRandom();
+
+            CurrentComboMultiplier = entry != null && entry.DamageMultiplier > 0f
+                ? entry.DamageMultiplier : 1f;
+            return entry;
+        }
+
+        private static WeaponActionEvent[] SortedEvents(WeaponActionEvent[] events)
+        {
+            var sorted = events != null
+                ? (WeaponActionEvent[])events.Clone()
+                : Array.Empty<WeaponActionEvent>();
+            Array.Sort(sorted, (a, b) => a.NormalizedTime.CompareTo(b.NormalizedTime));
+            return sorted;
         }
 
         private void ApplyMask(bool preserveLocomotion)
@@ -178,6 +216,10 @@ namespace Duskborn.Gameplay.Equipment
             _blendWeight = 0f;
             _activeSkill = null;
             _skillFired  = false;
+
+            // Window for the next click to continue the chain starts when this action ends.
+            if (_activeData != null && _activeData.ComboChain)
+                _comboExpiry = Time.time + _activeData.ComboResetTime;
             animator.applyRootMotion = _originalRootMotion;
             _playerController?.SetInputEnabled(true);
             _layerMixer.SetInputWeight(1, 0f);
@@ -197,7 +239,9 @@ namespace Duskborn.Gameplay.Equipment
             }
 
             var data = skill?.animation;
-            var clip = data?.PickClip();
+            data?.EnsureMigrated();
+            var entry = data?.PickRandom();
+            var clip  = entry?.Clip;
             if (clip == null)
             {
                 skill?.Use(ctx);
@@ -217,10 +261,7 @@ namespace Duskborn.Gameplay.Equipment
             _isPlaying         = true;
             _skillFired        = false;
 
-            _sortedEvents = data.Events != null
-                ? (WeaponActionEvent[])data.Events.Clone()
-                : Array.Empty<WeaponActionEvent>();
-            Array.Sort(_sortedEvents, (a, b) => a.NormalizedTime.CompareTo(b.NormalizedTime));
+            _sortedEvents = SortedEvents(entry.Events);
 
             ApplyMask(data.PreserveLocomotion);
             _clipPlayable = AnimationClipPlayable.Create(_graph, clip);

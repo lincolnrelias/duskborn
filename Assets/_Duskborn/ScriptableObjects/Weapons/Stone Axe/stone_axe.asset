@@ -35,12 +35,27 @@ MonoBehaviour:
   actions:
   - BaseSpeed: 1
     PreserveLocomotion: 1
-    Clips:
-    - {fileID: 7400000, guid: 3558db8e6c045c3418d8e7593f8a88de, type: 3}
-    - {fileID: 7400000, guid: f9808de8e12794d468604280ad76ca36, type: 3}
-    Events:
-    - Type: 0
-      NormalizedTime: 0.25
+    ComboChain: 1
+    ComboResetTime: 0.8
+    Entries:
+    - Clip: {fileID: 7400000, guid: 3558db8e6c045c3418d8e7593f8a88de, type: 3}
+      DamageMultiplier: 1
+      Events:
+      - Type: 0
+        NormalizedTime: 0.25
+    - Clip: {fileID: 7400000, guid: f9808de8e12794d468604280ad76ca36, type: 3}
+      DamageMultiplier: 1
+      Events:
+      - Type: 0
+        NormalizedTime: 0.25
+    - Clip: {fileID: 7400000, guid: 210680178f4ec7045b47ffeeb53bc31d, type: 3}
+      DamageMultiplier: 1
+      Events:
+      - Type: 0
+        NormalizedTime: 0.25
+    Clips: []
+    Events: []
+    ComboDamageMultipliers: []
   skills:
   - {fileID: 11400000, guid: d57cb9290c0fd0b4ea77e6fd29e1bd3c, type: 2}
   audioProfile: {fileID: 11400000, guid: 658caad55867c5d41829bba0cc8ead5b, type: 2}

@@ -17,13 +17,18 @@ MonoBehaviour:
   animation:
     BaseSpeed: 1.7
     PreserveLocomotion: 0
-    Clips:
-    - {fileID: 7400000, guid: c9a2ed53d56d62740be43c06c115f8d0, type: 3}
-    Events:
-    - Type: 0
-      NormalizedTime: 0.347
+    ComboChain: 0
+    ComboResetTime: 0.8
+    Entries:
+    - Clip: {fileID: 7400000, guid: c9a2ed53d56d62740be43c06c115f8d0, type: 3}
+      DamageMultiplier: 1
+      Events:
+      - Type: 0
+        NormalizedTime: 0.347
+    Clips: []
+    Events: []
+    ComboDamageMultipliers: []
   hitAudioOverride: {fileID: 8300000, guid: 9af62a927c7cc5a4fb40b5808e97ec59, type: 3}
-  hitEffectOverride: {fileID: 0}
   effectProfile: {fileID: 11400000, guid: 4365837daea7cab4ebadeab220765a1c, type: 2}
   arcDegrees: 180
   damageMultiplier: 1

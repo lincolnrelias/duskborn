@@ -5,11 +5,26 @@ using Duskborn.Gameplay.Equipment;
 
 namespace Duskborn.Editor
 {
+    /// <summary>
+    /// Draws WeaponActionData as: action settings on top, then one boxed section per clip
+    /// (combo step / variant) with its own clip, damage multiplier, event timeline and
+    /// event rows. Legacy shared-events data migrates automatically on draw.
+    /// </summary>
     [CustomPropertyDrawer(typeof(WeaponActionData))]
     public class WeaponActionDataDrawer : PropertyDrawer
     {
         private const float TimelineH  = 36f;
         private const float DragRadius = 7f;
+        private const float BoxPad     = 4f;
+        private const float BoxGap     = 6f;
+
+        private static readonly Color[] StepColors =
+        {
+            new(0.35f, 0.75f, 1f),
+            new(1f,    0.75f, 0.3f),
+            new(1f,    0.35f, 0.45f),
+            new(0.55f, 1f,    0.5f),
+        };
 
         // Only one marker drag active at a time across all drawers.
         private static string s_DragPath = null;
@@ -17,92 +32,186 @@ namespace Duskborn.Editor
 
         public override float GetPropertyHeight(SerializedProperty prop, GUIContent label)
         {
+            MigrateLegacy(prop);
+
             float lh  = EditorGUIUtility.singleLineHeight;
             float pad = EditorGUIUtility.standardVerticalSpacing;
-            var clips  = prop.FindPropertyRelative("Clips");
-            var events = prop.FindPropertyRelative("Events");
-            int  nc    = clips?.arraySize  ?? 0;
-            int  ne    = events?.arraySize ?? 0;
+            var entries = prop.FindPropertyRelative("Entries");
+            bool combo  = prop.FindPropertyRelative("ComboChain").boolValue;
 
-            return (lh + pad)            // Clips header row
-                 + nc * (lh + pad)       // per-clip row
-                 + (lh + pad)            // Speed slider
-                 + (lh + pad)            // Preserve Locomotion toggle
-                 + (TimelineH + pad)     // timeline
-                 + (lh + pad)            // Events header row
-                 + ne * (lh + pad);      // per-event row
+            float h = (lh + pad)                    // Speed
+                    + (lh + pad)                    // Preserve Locomotion
+                    + (lh + pad)                    // Combo toggle
+                    + (combo ? lh + pad : 0f)       // Combo reset time
+                    + (lh + pad);                   // Clips header + add button
+
+            for (int i = 0; i < entries.arraySize; i++)
+            {
+                int ne = entries.GetArrayElementAtIndex(i).FindPropertyRelative("Events").arraySize;
+                h += BoxPad * 2f
+                   + (lh + pad) * 2f                // header, clip
+                   + (TimelineH + pad)
+                   + (lh + pad)                     // events header
+                   + ne * (lh + pad)
+                   + BoxGap;
+            }
+            return h;
         }
 
         public override void OnGUI(Rect pos, SerializedProperty prop, GUIContent label)
         {
+            MigrateLegacy(prop);
+
             float lh  = EditorGUIUtility.singleLineHeight;
             float pad = EditorGUIUtility.standardVerticalSpacing;
 
             EditorGUI.BeginProperty(pos, label, prop);
 
-            var clipsProp   = prop.FindPropertyRelative("Clips");
-            var eventsProp  = prop.FindPropertyRelative("Events");
+            var entriesProp = prop.FindPropertyRelative("Entries");
             var useMaskProp = prop.FindPropertyRelative("PreserveLocomotion");
             var speedProp   = prop.FindPropertyRelative("BaseSpeed");
+            var comboProp   = prop.FindPropertyRelative("ComboChain");
+            var comboReset  = prop.FindPropertyRelative("ComboResetTime");
 
-            // ── Clips header: label + array-size field ────────────────────────
-            var r  = Row(ref pos, lh, pad);
-            float lw = EditorGUIUtility.labelWidth;
-            EditorGUI.LabelField(new Rect(r.x, r.y, lw, r.height), "Clips");
-
-            EditorGUI.BeginChangeCheck();
-            int newClipSize = EditorGUI.IntField(new Rect(r.x + lw, r.y, 40, r.height),
-                                                  clipsProp.arraySize);
-            if (EditorGUI.EndChangeCheck() && newClipSize >= 0)
-                clipsProp.arraySize = newClipSize;
-
-            // ── Per-clip rows ─────────────────────────────────────────────────
-            for (int i = 0; i < clipsProp.arraySize; i++)
-            {
-                r = Row(ref pos, lh, pad);
-                var clipElement = clipsProp.GetArrayElementAtIndex(i);
-                EditorGUI.LabelField(new Rect(r.x, r.y, 20f, r.height), i.ToString());
-                EditorGUI.PropertyField(new Rect(r.x + 20f, r.y, r.width - 20f, r.height),
-                                         clipElement, GUIContent.none);
-            }
-
-            // ── Speed slider ──────────────────────────────────────────────────
-            r = Row(ref pos, lh, pad);
+            // ── Action settings ───────────────────────────────────────────────
+            var r = Row(ref pos, lh, pad);
             EditorGUI.Slider(r, speedProp, 0.1f, 3f,
                 new GUIContent("Speed", "Base playback speed. 1 = authored speed. Scaled by RuntimeSpeedMultiplier at runtime."));
 
-            // ── Preserve Locomotion toggle ────────────────────────────────────
             r = Row(ref pos, lh, pad);
             useMaskProp.boolValue = EditorGUI.ToggleLeft(r,
                 new GUIContent("Preserve Locomotion / No Root Motion",
                     "ON: upper-body mask, locomotion drives legs and movement.\nOFF: full-body override, animation drives movement via root motion."),
                 useMaskProp.boolValue);
 
-            // ── Timeline ──────────────────────────────────────────────────────
-            var barRect = Row(ref pos, TimelineH, pad);
-            DrawTimeline(barRect, eventsProp, prop.propertyPath);
-
-            // ── Events header: label + array-size field ───────────────────────
             r = Row(ref pos, lh, pad);
-            EditorGUI.LabelField(new Rect(r.x, r.y, lw, r.height), "Events");
+            comboProp.boolValue = EditorGUI.ToggleLeft(r,
+                new GUIContent("Combo Chain (clips play in order)",
+                    "ON: clips are sequential combo steps, chaining while attacks land inside the reset window.\nOFF: a random clip variant is picked per attack."),
+                comboProp.boolValue);
 
-            EditorGUI.BeginChangeCheck();
-            int newEventSize = EditorGUI.IntField(new Rect(r.x + lw, r.y, 40, r.height),
-                                                   eventsProp.arraySize);
-            if (EditorGUI.EndChangeCheck() && newEventSize >= 0)
-                eventsProp.arraySize = newEventSize;
-
-            // ── Per-event rows ────────────────────────────────────────────────
-            for (int i = 0; i < eventsProp.arraySize; i++)
+            bool combo = comboProp.boolValue;
+            if (combo)
             {
                 r = Row(ref pos, lh, pad);
-                DrawEventRow(r, eventsProp.GetArrayElementAtIndex(i), i);
+                EditorGUI.Slider(r, comboReset, 0.1f, 3f,
+                    new GUIContent("Combo Reset Time",
+                        "Seconds after an attack ends before the chain resets to step 1."));
             }
+
+            // ── Clips header + add button ─────────────────────────────────────
+            r = Row(ref pos, lh, pad);
+            EditorGUI.LabelField(r, combo ? $"Combo Steps ({entriesProp.arraySize})"
+                                          : $"Clip Variants ({entriesProp.arraySize})",
+                                 EditorStyles.boldLabel);
+            if (GUI.Button(new Rect(r.xMax - 80f, r.y, 80f, r.height), "+ Add Clip"))
+                entriesProp.arraySize++; // duplicates the last entry: keeps events/audio as a starting point
+
+            // ── Per-clip boxes ────────────────────────────────────────────────
+            int deleteIndex = -1;
+            for (int i = 0; i < entriesProp.arraySize; i++)
+            {
+                var entry  = entriesProp.GetArrayElementAtIndex(i);
+                var events = entry.FindPropertyRelative("Events");
+                int ne     = events.arraySize;
+
+                float boxH = BoxPad * 2f + (lh + pad) * 2f + (TimelineH + pad)
+                           + (lh + pad) + ne * (lh + pad);
+                var box = new Rect(pos.x, pos.y, pos.width, boxH);
+                GUI.Box(box, GUIContent.none, EditorStyles.helpBox);
+
+                var inner = new Rect(box.x + BoxPad, box.y + BoxPad, box.width - BoxPad * 2f, boxH);
+                Color accent = StepColors[i % StepColors.Length];
+
+                // Header: color chip + name + damage multiplier + delete.
+                var hr = Row(ref inner, lh, pad);
+                EditorGUI.DrawRect(new Rect(hr.x, hr.y + 3f, 4f, hr.height - 6f), accent);
+                EditorGUI.LabelField(new Rect(hr.x + 10f, hr.y, 120f, hr.height),
+                    combo ? $"Step {i + 1}" : $"Variant {i + 1}", EditorStyles.boldLabel);
+
+                var multProp = entry.FindPropertyRelative("DamageMultiplier");
+                if (multProp.floatValue <= 0f) multProp.floatValue = 1f;
+                EditorGUI.LabelField(new Rect(hr.xMax - 110f, hr.y, 46f, hr.height), "× dmg");
+                multProp.floatValue = EditorGUI.FloatField(
+                    new Rect(hr.xMax - 66f, hr.y, 40f, hr.height), multProp.floatValue);
+
+                if (GUI.Button(new Rect(hr.xMax - 20f, hr.y, 20f, hr.height), "✕",
+                               EditorStyles.miniButton))
+                    deleteIndex = i;
+
+                var cr = Row(ref inner, lh, pad);
+                EditorGUI.PropertyField(cr, entry.FindPropertyRelative("Clip"),
+                    new GUIContent("Clip"));
+
+                // Timeline + events for THIS clip.
+                var barRect = Row(ref inner, TimelineH, pad);
+                DrawTimeline(barRect, events, events.propertyPath);
+
+                var er = Row(ref inner, lh, pad);
+                EditorGUI.LabelField(new Rect(er.x, er.y, EditorGUIUtility.labelWidth, er.height), "Events");
+                EditorGUI.BeginChangeCheck();
+                int newEventSize = EditorGUI.IntField(
+                    new Rect(er.x + EditorGUIUtility.labelWidth, er.y, 40, er.height), ne);
+                if (EditorGUI.EndChangeCheck() && newEventSize >= 0)
+                    events.arraySize = newEventSize;
+
+                for (int j = 0; j < events.arraySize && j < ne; j++)
+                {
+                    var evr = Row(ref inner, lh, pad);
+                    DrawEventRow(evr, events.GetArrayElementAtIndex(j), j);
+                }
+
+                pos.y += boxH + BoxGap;
+            }
+
+            if (deleteIndex >= 0)
+                entriesProp.DeleteArrayElementAtIndex(deleteIndex);
 
             EditorGUI.EndProperty();
 
-            if (s_DragPath == prop.propertyPath && Event.current.type == EventType.MouseDrag)
+            if (s_DragPath != null && s_DragPath.StartsWith(prop.propertyPath) &&
+                Event.current.type == EventType.MouseDrag)
                 GUI.changed = true;
+        }
+
+        // ── Legacy migration (Clips/Events/ComboDamageMultipliers → Entries) ──
+
+        private static void MigrateLegacy(SerializedProperty prop)
+        {
+            var entries = prop.FindPropertyRelative("Entries");
+            var clips   = prop.FindPropertyRelative("Clips");
+            if (entries.arraySize > 0 || clips.arraySize == 0) return;
+
+            var events = prop.FindPropertyRelative("Events");
+            var mults  = prop.FindPropertyRelative("ComboDamageMultipliers");
+
+            entries.arraySize = clips.arraySize;
+            for (int i = 0; i < clips.arraySize; i++)
+            {
+                var e = entries.GetArrayElementAtIndex(i);
+                e.FindPropertyRelative("Clip").objectReferenceValue =
+                    clips.GetArrayElementAtIndex(i).objectReferenceValue;
+
+                float m = i < mults.arraySize ? mults.GetArrayElementAtIndex(i).floatValue : 1f;
+                e.FindPropertyRelative("DamageMultiplier").floatValue = m > 0f ? m : 1f;
+
+                var dst = e.FindPropertyRelative("Events");
+                dst.arraySize = events.arraySize;
+                for (int j = 0; j < events.arraySize; j++)
+                {
+                    var src = events.GetArrayElementAtIndex(j);
+                    var d   = dst.GetArrayElementAtIndex(j);
+                    d.FindPropertyRelative("Type").enumValueIndex =
+                        src.FindPropertyRelative("Type").enumValueIndex;
+                    d.FindPropertyRelative("NormalizedTime").floatValue =
+                        src.FindPropertyRelative("NormalizedTime").floatValue;
+                }
+            }
+
+            clips.arraySize  = 0;
+            events.arraySize = 0;
+            mults.arraySize  = 0;
+            prop.serializedObject.ApplyModifiedPropertiesWithoutUndo();
         }
 
         // ── Timeline ──────────────────────────────────────────────────────────

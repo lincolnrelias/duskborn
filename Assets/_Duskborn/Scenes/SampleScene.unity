@@ -183,7 +183,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: SceneId
-      value: 4257214459
+      value: 2101342174
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: WasActiveDuringEdit
@@ -309,7 +309,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2002914817134659099, guid: 1964db849fc5f9e4da3f95cb2eaeb0d1, type: 3}
       propertyPath: SceneId
-      value: 3028156381
+      value: 356515837
       objectReference: {fileID: 0}
     - target: {fileID: 2002914817134659099, guid: 1964db849fc5f9e4da3f95cb2eaeb0d1, type: 3}
       propertyPath: WasActiveDuringEdit
@@ -626,7 +626,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: SceneId
-      value: 507379673
+      value: 4286578685
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: WasActiveDuringEdit
@@ -1097,7 +1097,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: SceneId
-      value: 2004877311
+      value: 4282249215
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: WasActiveDuringEdit
@@ -4816,7 +4816,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: SceneId
-      value: 910032895
+      value: 343928831
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: WasActiveDuringEdit
@@ -5080,7 +5080,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2002914817134659099, guid: 1964db849fc5f9e4da3f95cb2eaeb0d1, type: 3}
       propertyPath: SceneId
-      value: 3032350686
+      value: 922615805
       objectReference: {fileID: 0}
     - target: {fileID: 2002914817134659099, guid: 1964db849fc5f9e4da3f95cb2eaeb0d1, type: 3}
       propertyPath: WasActiveDuringEdit
@@ -6248,6 +6248,8 @@ GameObject:
   - component: {fileID: 1870906754}
   - component: {fileID: 1870906755}
   - component: {fileID: 1870906756}
+  - component: {fileID: 1870906757}
+  - component: {fileID: 1870906758}
   m_Layer: 0
   m_Name: _Managers
   m_TagString: Untagged
@@ -6467,7 +6469,7 @@ MonoBehaviour:
   <PrefabId>k__BackingField: 65535
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 0
-  SceneId: 3196059644
+  SceneId: 3170889690
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
     Rotation: {x: 0, y: 0, z: 0, w: 0}
@@ -6605,11 +6607,49 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc8ae5a82e142e84ca1fc6fe339923bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Loot.LootManager
-  throwRadialSpeed: 1
-  throwUpSpeed: 1
-  throwRadialVariance: 3
-  throwUpVariance: 3
+  throwSpeed: 8
+  throwSpeedVariance: 1
+  coneAngle: 22.3
+  coneAngleVariance: 8
+  azimuthJitter: 0.4
+  dropInterval: 0.2
   worldGoldPickupPrefab: {fileID: 5752967656333843250, guid: 3192f5cb9a1226345b461c4be11ab017, type: 3}
+--- !u!114 &1870906757
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1870906736}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28c09dc693bd3ae4191a0d5de0f8ba89, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Effects.PixelationEffectController
+  pixelationMaterial: {fileID: 2100000, guid: 90411102f293ba741bb72743e48c9f52, type: 2}
+--- !u!114 &1870906758
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1870906736}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0aabcb2190c2364d829e2ec6003049f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Effects.CombatFeelSettings
+  hitFlashEnabled: 1
+  hitFlashDuration: 0.14
+  hitFlashColor: {r: 1, g: 1, b: 1, a: 1}
+  knockbackEnabled: 1
+  knockbackDistance: 0.6
+  knockbackDuration: 0.12
+  flinchDuration: 0.25
+  cameraShakeEnabled: 0
+  shakeOnHitDealt: 0.06
+  shakeOnHitTaken: 0.18
+  shakeDuration: 0.2
 --- !u!224 &1876573324 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 790095091216091730, guid: e1a0316d80816c44cb68cbe778dd50e9, type: 3}
@@ -7625,7 +7665,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2002914817134659099, guid: 1964db849fc5f9e4da3f95cb2eaeb0d1, type: 3}
       propertyPath: SceneId
-      value: 1472200702
+      value: 1547563000
       objectReference: {fileID: 0}
     - target: {fileID: 2002914817134659099, guid: 1964db849fc5f9e4da3f95cb2eaeb0d1, type: 3}
       propertyPath: WasActiveDuringEdit

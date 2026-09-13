@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: M_Foliage_Grass
+  m_Shader: {fileID: 4800000, guid: 7e8b91a2c3d4e5f6789012345678ab01, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 1
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap:
+    RenderType: Opaque
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs: []
+    m_Ints: []
+    m_Floats:
+    - _CelCutoff: 0.42
+    - _CelSmoothness: 0.08
+    - _Cutoff: 0
+    - _RimIntensity: 0.22
+    - _RimPower: 4
+    - _SSSIdealDist: 1
+    - _SSSIntensity: 1.25
+    - _SSSPower: 2.8
+    - _SunlightBoost: 1.15
+    - _TerrainBlendHeight: 0.38
+    - _TerrainBlendStrength: 0.85
+    - _WindFlutterSpeed: 7
+    - _WindFlutterStrength: 0.06
+    - _WindFrequency: 0.38
+    - _WindSpeed: 1.6
+    - _WindStrength: 0.28
+    m_Colors:
+    - _BaseMap_ST: {r: 1, g: 1, b: 0, a: 0}
+    - _RimColor: {r: 1, g: 1, b: 1, a: 1}
+    - _RootColor: {r: 0.18, g: 0.42, b: 0.16, a: 1}
+    - _SSSColor: {r: 0.65, g: 0.95, b: 0.32, a: 1}
+    - _ShadowTint: {r: 0.38, g: 0.42, b: 0.54, a: 1}
+    - _TipColor: {r: 0.45, g: 0.82, b: 0.28, a: 1}
+    - _WindDirection: {r: 1, g: 0.35, b: 0, a: 0}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

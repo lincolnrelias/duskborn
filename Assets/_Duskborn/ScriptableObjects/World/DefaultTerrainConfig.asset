@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a1f4b23c9e84321901a2f3456789abc, type: 3}
+  m_Name: DefaultTerrainConfig
+  m_EditorClassIdentifier: Assembly-CSharp::LowPolyTerrainConfig
+  chunksX: 5
+  chunksZ: 5
+  chunkSize: 32
+  cellSize: 1
+  seed: 4242
+  noiseScale: 0.042
+  octaves: 3
+  persistence: 0.5
+  lacunarity: 2
+  heightMultiplier: 15
+  boundaryType: 0
+  boundaryFalloffStart: 0.78
+  boundaryFalloffDistance: 0.2
+  boundaryWallHeight: 28
+  centralSanctuaryRadius: 14
+  centralSanctuaryFlattenStrength: 0.85
+  centralSanctuaryOffsetAboveWater: 1.8
+  terraceStep: 2.2
+  terraceRampSmoothness: 0.45
+  waterLevel: 4.6
+  waterColor: {r: 0.12, g: 0.38, b: 0.72, a: 1}
+  sandColor: {r: 0.88, g: 0.8, b: 0.58, a: 1}
+  grassColor: {r: 0.32, g: 0.68, b: 0.26, a: 1}
+  deepGrassColor: {r: 0.2, g: 0.48, b: 0.22, a: 1}
+  cliffColor: {r: 0.38, g: 0.36, b: 0.4, a: 1}
+  rockColor: {r: 0.52, g: 0.5, b: 0.52, a: 1}
+  snowColor: {r: 0.95, g: 0.96, b: 0.99, a: 1}
+  steepSlopeThreshold: 38
+  facetAOIntensity: 0.22

@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: M_Skybox_Stylized
+  m_Shader: {fileID: 4800000, guid: 8d7a12e4f019b846c9213456789abc01, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs: []
+    m_Ints: []
+    m_Floats:
+    - _CloudCurvature: 0.28
+    - _CloudCutoff: 0.52
+    - _CloudOpacity: 0.88
+    - _CloudScale: 0.75
+    - _CloudSoftness: 0.08
+    - _DayNightBlend: 0.59235036
+    - _DuskDawnIntensity: 1.45
+    - _GroundFalloff: 1.2
+    - _GroundHeight: 0.45
+    - _HorizonFalloff: 1.4
+    - _HorizonHeight: 0.35
+    - _HorizonOffset: 0
+    - _MoonCrescentSize: 0.92
+    - _MoonCrescentStrength: 0.95
+    - _MoonHaloFalloff: 16
+    - _MoonHaloIntensity: 0.65
+    - _MoonIntensity: 1.5
+    - _MoonRadius: 4.8
+    - _MoonSoftness: 0.25
+    - _StarBrightness: 2.8
+    - _StarDensity: 0.985
+    - _StarScale: 95
+    - _StarSize: 0.14
+    - _StarTwinkleSpeed: 3.2
+    - _SunHaloFalloff: 12
+    - _SunHaloIntensity: 0.85
+    - _SunIntensity: 1.8
+    - _SunRadius: 5.5
+    - _SunSoftness: 0.35
+    m_Colors:
+    - _CloudBaseColor: {r: 0.98, g: 0.98, b: 1, a: 1}
+    - _CloudShadowColor: {r: 0.58, g: 0.68, b: 0.88, a: 1}
+    - _CloudSpeed: {r: 0.008, g: 0.004, b: 0, a: 0}
+    - _CloudSunHighlight: {r: 1, g: 0.92, b: 0.72, a: 1}
+    - _DayGroundColor: {r: 0.35, g: 0.45, b: 0.38, a: 1}
+    - _DayHorizonColor: {r: 0.72, g: 0.88, b: 0.98, a: 1}
+    - _DayZenithColor: {r: 0.28, g: 0.58, b: 0.95, a: 1}
+    - _DuskDawnColor: {r: 1, g: 0.48, b: 0.22, a: 1}
+    - _MoonColor: {r: 0.85, g: 0.92, b: 1, a: 1}
+    - _MoonCrescentOffset: {r: 0.32, g: 0.18, b: 0, a: 0}
+    - _MoonDirection: {r: 0.44830322, g: -0.7140735, b: 0.53770196, a: 0}
+    - _MoonHaloColor: {r: 0.35, g: 0.55, b: 0.95, a: 1}
+    - _NightGroundColor: {r: 0.03, g: 0.04, b: 0.08, a: 1}
+    - _NightHorizonColor: {r: 0.12, g: 0.18, b: 0.32, a: 1}
+    - _NightZenithColor: {r: 0.04, g: 0.06, b: 0.16, a: 1}
+    - _StarColor: {r: 0.95, g: 0.98, b: 1, a: 1}
+    - _SunColor: {r: 1, g: 0.96, b: 0.78, a: 1}
+    - _SunDirection: {r: -0.44830322, g: 0.7140735, b: -0.53770196, a: 0}
+    - _SunHaloColor: {r: 1, g: 0.82, b: 0.45, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

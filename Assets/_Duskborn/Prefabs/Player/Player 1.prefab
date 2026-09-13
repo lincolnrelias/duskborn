@@ -139,7 +139,7 @@ SphereCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Radius: 2.5
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 0.1, z: 0}
 --- !u!136 &8237282190464118947
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -162,7 +162,7 @@ CapsuleCollider:
   m_Radius: 0.5
   m_Height: 2
   m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 0.23, z: 0}
 --- !u!143 &4733055338495611918
 CharacterController:
   m_ObjectHideFlags: 0
@@ -423,7 +423,7 @@ MonoBehaviour:
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 11
+  <PrefabId>k__BackingField: 13
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 9206078603152192552
   SceneId: 0
@@ -445,6 +445,7 @@ MonoBehaviour:
   - {fileID: 5151783337402195587}
   - {fileID: 8514665050153253299}
   - {fileID: -3397283148206250790}
+  - {fileID: 5105578093761831578}
   InitializedParentNetworkBehaviour: {fileID: 0}
   InitializedNestedNetworkObjects: []
   RuntimeParentNetworkBehaviour: {fileID: 0}
@@ -455,7 +456,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584177259517934272
+  _initializedTimestamp: -8584123531337430739
 --- !u!114 &8514665050153253299
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -671,6 +672,7 @@ MonoBehaviour:
   invulnerable: 1
   iFrameDuration: 0.5
   animator: {fileID: 0}
+  rollAnimationDuration: 0.7
 --- !u!114 &5105578093761831578
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -683,9 +685,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 17f1251a90bc8b244b83905498b512d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Combat.StatusEffectController
-  _componentIndexCache: 255
+  _componentIndexCache: 6
   _addedNetworkObject: {fileID: 5780092933335364822}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 5780092933335364822}
 --- !u!1 &8615774888580447804
 GameObject:
   m_ObjectHideFlags: 0

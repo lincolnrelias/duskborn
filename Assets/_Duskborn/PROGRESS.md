@@ -213,30 +213,16 @@
 ---
 
 ## Phase 4 — World Generation
-> Status: [ ] NOT STARTED
+> Status: [~] IN PROGRESS
 
-### 4.1 Seed Distribution
-- [ ] Host generates seed, broadcasts before scene load
-- [ ] All clients init `SeededRNG` with same seed before `WorldGenerator.Generate()`
-- [ ] Validation test: two instances generate identical worlds from same seed
-
-### 4.2 Terrain Layout
-- [ ] `WorldGenerator.cs` — chunked map grid
-- [ ] Chunk types: Plains, Forest, Rock, River
-- [ ] Tree + resource node placement in Forest chunks
-- [ ] Rock formations (stone/iron nodes, natural barriers)
-- [ ] Player spawn: central clearing, guaranteed flat
-
-### 4.3 Points of Interest
-- [ ] Workbench site prefab chunks at seeded positions
-- [ ] Shrine spawn points (min 3, seeded)
-- [ ] Chest spawn points (seeded, tier by distance from spawn)
-- [ ] Runtime NavMesh bake after terrain gen
-
-### 4.4 Enemy Spawn Perimeter
-- [ ] Map bounds defined
-- [ ] `SpawnPerimeter.cs` — N evenly-spaced spawn points at map edge
-- [ ] WaveManager reads SpawnPerimeter for night spawning
+### 4.1 Low-Poly Chunked Terrain Generation (Handout Implementation)
+- [x] `LowPolyTerrainConfig.cs` (SO) — grid dimensions (MxN), fractal noise (fBm), terracing, biome vertex colors, slope angle threshold
+- [x] `TerrainNoise.cs` — multi-octave Perlin noise in global world space coordinates
+- [x] `TerrainChunk.cs` — flat-shaded low-poly mesh generation with non-shared vertices, seamless borders ((size+1)x(size+1) heightmap), vertex colors, and MeshCollider
+- [x] `ChunkGridManager.cs` — central manager spawning MxN chunk grid, applying vertex color material, and runtime NavMesh baking
+- [x] `LowPolyTerrainVertexColor.shader` & `M_TerrainLowPoly.mat` — URP shader and material with vertex color & lighting support
+- [x] `DefaultTerrainConfig.asset` — default configuration asset (3x3 chunks, 16 quads/chunk, 2m cellSize)
+- [ ] Runtime POI placement & resource distribution (post-terrain stage)
 
 ---
 
@@ -373,6 +359,17 @@
 | FishNet | — | Installed (confirmed) |
 | FishySteamworks | — | MISSING — install after FishNet |
 | Steamworks.NET | — | MISSING — install after FishySteamworks |
+
+## Files Written (Session 10 — 2026-08-29, terrain generation handout)
+| File | Change |
+|------|--------|
+| `Gameplay/World/LowPolyTerrainConfig.cs` | NEW — SO holding grid dimensions, fBm noise parameters, terracing, vertex colors, slope threshold |
+| `Gameplay/World/TerrainNoise.cs` | NEW — Multi-octave fBm Perlin noise sampling in global world coordinates |
+| `Gameplay/World/TerrainChunk.cs` | NEW — Flat-shaded procedural mesh with non-shared vertices, seamless borders, vertex colors, MeshCollider |
+| `Gameplay/World/ChunkGridManager.cs` | NEW — MxN chunk grid manager, material assignment, runtime NavMesh bake |
+| `Art/Shaders/LowPolyTerrainVertexColor.shader` | NEW — URP lit vertex color flat shader |
+| `Art/Materials/M_TerrainLowPoly.mat` | NEW — Terrain vertex color material |
+| `ScriptableObjects/World/DefaultTerrainConfig.asset` | NEW — Default terrain configuration asset |
 
 ## Files Written (Session 9 — 2026-04-29, networking foundation + sync)
 | File | Change |

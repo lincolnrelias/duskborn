@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a1f4b23c9e84321901a2f3456789abc, type: 3}
+  m_Name: TerrainConfig_SteepMountains
+  m_EditorClassIdentifier: Assembly-CSharp::LowPolyTerrainConfig
+  chunksX: 4
+  chunksZ: 4
+  chunkSize: 128
+  cellSize: 1
+  seed: 8848
+  noiseScale: 0.06
+  octaves: 4
+  persistence: 0.52
+  lacunarity: 2.1
+  heightMultiplier: 24
+  boundaryType: 1
+  boundaryFalloffStart: 0.75
+  boundaryFalloffDistance: 0.22
+  boundaryWallHeight: 32
+  centralSanctuaryRadius: 15
+  centralSanctuaryFlattenStrength: 0.88
+  centralSanctuaryOffsetAboveWater: 2.2
+  terraceStep: 2.6
+  terraceRampSmoothness: 0.45
+  waterLevel: 3
+  waterColor: {r: 0.12, g: 0.38, b: 0.72, a: 1}
+  sandColor: {r: 0.85, g: 0.78, b: 0.55, a: 1}
+  grassColor: {r: 0.26, g: 0.62, b: 0.24, a: 1}
+  deepGrassColor: {r: 0.16, g: 0.44, b: 0.18, a: 1}
+  cliffColor: {r: 0.34, g: 0.32, b: 0.36, a: 1}
+  rockColor: {r: 0.52, g: 0.5, b: 0.52, a: 1}
+  snowColor: {r: 0.95, g: 0.96, b: 0.99, a: 1}
+  steepSlopeThreshold: 35
+  facetAOIntensity: 0.26

@@ -19,9 +19,27 @@ namespace Duskborn.Gameplay.Loot
         [SerializeField] private Renderer outlineRenderer;
 
         private readonly SyncVar<bool> _isOpenSync = new();
+        private readonly SyncVar<int>  _goldCostSync = new();
 
         public bool IsOpen   => _isOpenSync.Value;
-        public int  GoldCost => goldCost;
+        public int  GoldCost => _goldCostSync.Value > 0 ? _goldCostSync.Value : goldCost;
+
+        public void Configure(int cost, LootTable table)
+        {
+            goldCost = cost;
+            if (IsServerStarted)
+                _goldCostSync.Value = cost;
+            lootTable = table;
+            if (priceLabel != null)
+                priceLabel.text = $"{cost}g";
+        }
+
+        public override void OnStartServer()
+        {
+            base.OnStartServer();
+            if (_goldCostSync.Value <= 0)
+                _goldCostSync.Value = goldCost;
+        }
 
         private uint _outlineMask;
         private uint _baseMask;
@@ -57,9 +75,10 @@ namespace Duskborn.Gameplay.Loot
         {
             if (priceLabel == null) return;
 
+            int activeCost = GoldCost;
             int cost = GoldManager.Instance != null
-                ? GoldManager.Instance.GetChestCost(goldCost)
-                : goldCost;
+                ? GoldManager.Instance.GetChestCost(activeCost)
+                : activeCost;
 
             priceLabel.text = $"{cost}g";
 
@@ -79,9 +98,10 @@ namespace Duskborn.Gameplay.Loot
                 return;
             }
 
+            int activeCost = GoldCost;
             int cost = GoldManager.Instance != null
-                ? GoldManager.Instance.GetChestCost(goldCost)
-                : goldCost;
+                ? GoldManager.Instance.GetChestCost(activeCost)
+                : activeCost;
 
             if (GoldManager.Instance == null || !GoldManager.Instance.TrySpend(cost))
             {
@@ -93,22 +113,32 @@ namespace Duskborn.Gameplay.Loot
                 ? GameSession.Instance.RNG.Range(0, lootTable.Items.Length)
                 : Random.Range(0, lootTable.Items.Length);
 
+            ItemDefinition awardedItem = lootTable.Items[index];
+
             // Apply item on the server so server-side stat multipliers are updated.
-            inventory.AddBuff(lootTable.Items[index]);
+            inventory.AddBuff(awardedItem);
 
             GoldManager.Instance.OnChestOpened(cost);
             _isOpenSync.Value = true; // disables chest on all clients via SyncVar hook
 
             // Tell the owning client to also add the item so their local inventory/display is correct.
-            DeliverItemRpc(requester, inventory.GetComponent<NetworkObject>(), index);
+            DeliverItemRpc(requester, inventory.GetComponent<NetworkObject>(), index, awardedItem != null ? awardedItem.name : string.Empty);
         }
 
         [TargetRpc]
-        private void DeliverItemRpc(NetworkConnection conn, NetworkObject playerNob, int itemIndex)
+        private void DeliverItemRpc(NetworkConnection conn, NetworkObject playerNob, int itemIndex, string itemName)
         {
             if (IsServerStarted) return; // host already applied in ServerOpen
-            if (lootTable == null || itemIndex >= lootTable.Items.Length) return;
-            playerNob.GetComponent<PlayerBuffContainer>()?.AddBuff(lootTable.Items[itemIndex]);
+            
+            ItemDefinition item = null;
+            if (!string.IsNullOrEmpty(itemName) && ItemDefinitionRegistry.Instance != null)
+                item = ItemDefinitionRegistry.Instance.GetById(itemName);
+
+            if (item == null && lootTable != null && itemIndex >= 0 && itemIndex < lootTable.Items.Length)
+                item = lootTable.Items[itemIndex];
+
+            if (item != null)
+                playerNob.GetComponent<PlayerBuffContainer>()?.AddBuff(item);
         }
     }
 }

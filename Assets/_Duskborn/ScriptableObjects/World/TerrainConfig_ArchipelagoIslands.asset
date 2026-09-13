@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a1f4b23c9e84321901a2f3456789abc, type: 3}
+  m_Name: TerrainConfig_ArchipelagoIslands
+  m_EditorClassIdentifier: Assembly-CSharp::LowPolyTerrainConfig
+  chunksX: 4
+  chunksZ: 4
+  chunkSize: 128
+  cellSize: 1
+  seed: 5050
+  noiseScale: 0.05
+  octaves: 3
+  persistence: 0.5
+  lacunarity: 2
+  heightMultiplier: 13
+  boundaryType: 0
+  boundaryFalloffStart: 0.75
+  boundaryFalloffDistance: 0.22
+  boundaryWallHeight: 28
+  centralSanctuaryRadius: 13
+  centralSanctuaryFlattenStrength: 0.85
+  centralSanctuaryOffsetAboveWater: 1.6
+  terraceStep: 1.6
+  terraceRampSmoothness: 0.5
+  waterLevel: 3
+  waterColor: {r: 0.1, g: 0.42, b: 0.78, a: 1}
+  sandColor: {r: 0.92, g: 0.85, b: 0.6, a: 1}
+  grassColor: {r: 0.28, g: 0.7, b: 0.28, a: 1}
+  deepGrassColor: {r: 0.16, g: 0.46, b: 0.2, a: 1}
+  cliffColor: {r: 0.36, g: 0.34, b: 0.38, a: 1}
+  rockColor: {r: 0.5, g: 0.48, b: 0.5, a: 1}
+  snowColor: {r: 0.95, g: 0.96, b: 0.99, a: 1}
+  steepSlopeThreshold: 36
+  facetAOIntensity: 0.22

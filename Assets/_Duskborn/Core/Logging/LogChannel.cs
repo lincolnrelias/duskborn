@@ -21,6 +21,7 @@ namespace Duskborn
         ActionBar        = 16,
         Audio            = 17,
         Effects          = 18,
+        World            = 19,
     }
 
     [System.Flags]
@@ -46,6 +47,7 @@ namespace Duskborn
         ActionBar        = 1 << 16,
         Audio            = 1 << 17,
         Effects          = 1 << 18,
+        World            = 1 << 19,
         All              = ~0,
     }
 }

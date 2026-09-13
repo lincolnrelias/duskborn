@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69a035e9387548a99afbe57083e2590a, type: 3}
+  m_Name: Prop_Fiber
+  m_EditorClassIdentifier: 
+  propName: Fiber
+  prefab: {fileID: 7967917925737338743, guid: b9454bca9bef49dabd2de10acef4c022, type: 3}
+  clusterSettings:
+    enableClustering: 1
+    clustersPerChunk: 2
+    nodesPerCluster: {x: 3, y: 6}
+    clusterRadius: 4.5
+    intraClusterSpacing: 1.6
+    interClusterSpacing: 3.5
+  solidRadius: 0.6
+  canopyRadius: 0
+  minRadialDistance: 12
+  maxRadialDistance: 0
+  minPerChunk: 2
+  maxPerChunk: 5
+  minHeight: 1
+  maxHeight: 120
+  maxSlopeAngle: 20
+  scaleRange: {x: 0.75, y: 1.15}
+  randomYRotation: 1
+  alignToNormal: 0
+  exclusionRadius: 1.5

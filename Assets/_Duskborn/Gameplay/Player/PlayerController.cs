@@ -27,9 +27,10 @@ namespace Duskborn.Gameplay.Player
         private static readonly int HashVelocityX = Animator.StringToHash("VelocityX");
         private static readonly int HashVelocityY = Animator.StringToHash("VelocityY");
 
-        private CharacterController _cc;
-        private PlayerStats         _stats;
-        private Camera              _mainCam;
+        private CharacterController   _cc;
+        private PlayerStats           _stats;
+        private Camera                _mainCam;
+        private PlayerWaterInteraction _waterInteraction;
 
         private Vector2 _moveInput;
         private Vector2 _smoothedInput;
@@ -43,9 +44,14 @@ namespace Duskborn.Gameplay.Player
 
         private void Awake()
         {
-            _cc      = GetComponent<CharacterController>();
-            _stats   = GetComponent<PlayerStats>();
-            _mainCam = Camera.main;
+            _cc               = GetComponent<CharacterController>();
+            _stats            = GetComponent<PlayerStats>();
+            _mainCam          = Camera.main;
+            _waterInteraction = GetComponent<PlayerWaterInteraction>();
+            if (_waterInteraction == null)
+            {
+                _waterInteraction = gameObject.AddComponent<PlayerWaterInteraction>();
+            }
 
             _cameraYaw = transform.eulerAngles.y;
         }
@@ -58,6 +64,12 @@ namespace Duskborn.Gameplay.Player
 
         private void Update()
         {
+            if (_waterInteraction != null)
+            {
+                bool moving = IsOwner ? IsMoving : (_cc != null && _cc.velocity.sqrMagnitude > 0.05f);
+                _waterInteraction.NotifyMovement(moving, _cc != null ? _cc.velocity : Vector3.zero);
+            }
+
             if (!IsOwner) return;
             if (!_inputEnabled || !_stats.IsAlive) return;
             HandleCameraRotation();
@@ -105,7 +117,8 @@ namespace Duskborn.Gameplay.Player
 
             // Not normalized — magnitude encodes current speed fraction (0–1).
             Vector3 moveDir = camForward * _smoothedInput.y + camRight * _smoothedInput.x;
-            _cc.Move(moveDir * (_stats.MoveSpeed * Time.deltaTime));
+            float waterMod = _waterInteraction != null ? _waterInteraction.SpeedModifier : 1f;
+            _cc.Move(moveDir * (_stats.MoveSpeed * waterMod * Time.deltaTime));
         }
 
         private void HandleGravity()

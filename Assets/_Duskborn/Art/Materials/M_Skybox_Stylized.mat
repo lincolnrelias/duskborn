@@ -65,14 +65,14 @@ Material:
     - _DuskDawnColor: {r: 1, g: 0.48, b: 0.22, a: 1}
     - _MoonColor: {r: 0.85, g: 0.92, b: 1, a: 1}
     - _MoonCrescentOffset: {r: 0.32, g: 0.18, b: 0, a: 0}
-    - _MoonDirection: {r: 0.46257114, g: -0.77106434, b: 0.43759325, a: 0}
+    - _MoonDirection: {r: 0.4176467, g: -0.8941108, b: 0.16167015, a: 0}
     - _MoonHaloColor: {r: 0.35, g: 0.55, b: 0.95, a: 1}
     - _NightGroundColor: {r: 0.03, g: 0.04, b: 0.08, a: 1}
     - _NightHorizonColor: {r: 0.12, g: 0.18, b: 0.32, a: 1}
     - _NightZenithColor: {r: 0.04, g: 0.06, b: 0.16, a: 1}
     - _StarColor: {r: 0.95, g: 0.98, b: 1, a: 1}
     - _SunColor: {r: 1, g: 0.96, b: 0.78, a: 1}
-    - _SunDirection: {r: -0.46257114, g: 0.77106434, b: -0.43759325, a: 0}
+    - _SunDirection: {r: -0.4176467, g: 0.8941108, b: -0.16167015, a: 0}
     - _SunHaloColor: {r: 1, g: 0.82, b: 0.45, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

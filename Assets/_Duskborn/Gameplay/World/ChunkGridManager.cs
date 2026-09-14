@@ -162,6 +162,10 @@ public class ChunkGridManager : MonoBehaviour
             {
                 GenerateProps(ActivePropsSeed);
             }
+            else if (propsPlacer != null)
+            {
+                propsPlacer.EnsureSpawnPointsReady(propsConfig);
+            }
         }
         else
         {

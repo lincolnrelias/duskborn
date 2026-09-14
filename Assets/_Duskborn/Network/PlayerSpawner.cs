@@ -13,6 +13,11 @@ namespace Duskborn.Network
 
         private int _nextIndex;
 
+        public void SetSpawnPoints(Transform[] points)
+        {
+            spawnPoints = points;
+        }
+
         public override void OnStartServer()
         {
             base.OnStartServer();
@@ -28,6 +33,22 @@ namespace Duskborn.Network
         private void OnRemoteConnectionState(NetworkConnection conn, RemoteConnectionStateArgs args)
         {
             if (args.ConnectionState != RemoteConnectionState.Started) return;
+
+            if (spawnPoints == null || spawnPoints.Length == 0 || spawnPoints[0] == null)
+            {
+                GameObject spawnGroup = GameObject.Find("SpawnPoints");
+                if (spawnGroup != null && spawnGroup.transform.childCount > 0)
+                {
+                    System.Collections.Generic.List<Transform> list = new System.Collections.Generic.List<Transform>();
+                    for (int i = 0; i < spawnGroup.transform.childCount; i++)
+                    {
+                        Transform child = spawnGroup.transform.GetChild(i);
+                        if (child != null) list.Add(child);
+                    }
+                    if (list.Count > 0) spawnPoints = list.ToArray();
+                }
+            }
+
             if (playerPrefab == null || spawnPoints == null || spawnPoints.Length == 0) return;
 
             int index = Mathf.Clamp(_nextIndex, 0, spawnPoints.Length - 1);

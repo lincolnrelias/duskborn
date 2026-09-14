@@ -13,12 +13,19 @@ namespace Duskborn.Gameplay.World
     [SelectionBase]
     public class WorldPropsPlacer : MonoBehaviour
     {
-        [Header("Hierarquia de Props")]
+        [Header("Hierarquia de Props & Spawns")]
         [Tooltip("Transform pai onde todos os props instanciados serão agrupados. Criado automaticamente se nulo.")]
         [SerializeField] private Transform propsContainer;
 
+        [Tooltip("Transform pai onde os pontos de spawn de jogadores são gerados. Criado automaticamente se nulo.")]
+        [SerializeField] private Transform spawnPointsContainer;
+
         public Transform PropsContainer => propsContainer;
+        public Transform SpawnPointsContainer => spawnPointsContainer;
         public int PropsCount => propsContainer != null ? propsContainer.childCount : 0;
+
+        private readonly List<Transform> _spawnPoints = new List<Transform>();
+        public IReadOnlyList<Transform> SpawnPoints => _spawnPoints;
 
         private readonly List<Vector3> _placedPositions = new List<Vector3>();
         private readonly SpatialOccupancyMap _occupancyMap = new SpatialOccupancyMap();
@@ -29,6 +36,7 @@ namespace Duskborn.Gameplay.World
         private void Awake()
         {
             EnsureContainer();
+            EnsureSpawnPointsContainer();
         }
 
         private void OnEnable()
@@ -45,11 +53,54 @@ namespace Duskborn.Gameplay.World
         {
             SubscribeToNetworkEvents();
 
+            EnsureSpawnPointsReady();
+
             // Se o servidor já iniciou antes ou durante o Start, spawna os props agora
             if (Application.isPlaying && InstanceFinder.ServerManager != null && InstanceFinder.ServerManager.Started)
             {
                 SpawnAllPropsOnServer();
             }
+        }
+
+        public void EnsureSpawnPointsReady(WorldPropsConfig configToUse = null)
+        {
+            EnsureSpawnPointsContainer();
+
+            if (_spawnPoints.Count > 0 && _spawnPoints[0] != null)
+            {
+                SyncWithPlayerSpawners(_spawnPoints.ToArray());
+                return;
+            }
+
+            if (spawnPointsContainer != null && spawnPointsContainer.childCount > 0)
+            {
+                _spawnPoints.Clear();
+                for (int i = 0; i < spawnPointsContainer.childCount; i++)
+                {
+                    Transform child = spawnPointsContainer.GetChild(i);
+                    if (child != null)
+                        _spawnPoints.Add(child);
+                }
+                if (_spawnPoints.Count > 0)
+                {
+                    SyncWithPlayerSpawners(_spawnPoints.ToArray());
+                    return;
+                }
+            }
+
+            WorldPropsConfig targetConfig = configToUse;
+            if (targetConfig == null && ChunkGridManager.Instance != null)
+            {
+                targetConfig = ChunkGridManager.Instance.propsConfig;
+            }
+
+            float centerGroundY = 0f;
+            if (RaycastGround(new Vector3(0f, 150f, 0f), out RaycastHit centerHit))
+            {
+                centerGroundY = centerHit.point.y;
+            }
+
+            SetupPlayerSpawnPoints(targetConfig, centerGroundY);
         }
 
         private void OnDisable()
@@ -350,35 +401,78 @@ namespace Duskborn.Gameplay.World
 
         private void SetupPlayerSpawnPoints(WorldPropsConfig propsConfig, float groundY)
         {
-            GameObject existingSpawnPoints = GameObject.Find("SpawnPoints");
-            if (existingSpawnPoints != null)
-            {
-                Vector3 pos = existingSpawnPoints.transform.position;
-                pos.y = groundY + 0.1f;
-                existingSpawnPoints.transform.position = pos;
-                return;
-            }
+            EnsureSpawnPointsContainer();
+            ClearSpawnPoints();
 
-            if (propsConfig.playerSpawnPointPrefab != null)
-            {
-                Instantiate(propsConfig.playerSpawnPointPrefab, new Vector3(0f, groundY + 0.1f, 0f), Quaternion.identity, propsContainer);
-            }
-            else
-            {
-                // Cria nó de spawn points se não houver na cena
-                GameObject spawnParent = new GameObject("SpawnPoints");
-                spawnParent.transform.position = new Vector3(0f, groundY + 0.1f, 0f);
-                spawnParent.transform.parent = propsContainer;
+            spawnPointsContainer.position = new Vector3(0f, groundY, 0f);
 
-                for (int i = 0; i < 5; i++)
+            int count = (propsConfig != null && propsConfig.playerSpawnPointsCount > 0)
+                ? propsConfig.playerSpawnPointsCount
+                : 5;
+            float radius = (propsConfig != null && propsConfig.playerSpawnRadius > 0f)
+                ? propsConfig.playerSpawnRadius
+                : 6.5f;
+
+            _spawnPoints.Clear();
+
+            for (int i = 0; i < count; i++)
+            {
+                float angle = i * (360f / count) * Mathf.Deg2Rad;
+                Vector3 offset = new Vector3(Mathf.Cos(angle) * radius, 0f, Mathf.Sin(angle) * radius);
+
+                Vector3 rayOrigin = new Vector3(offset.x, 150f, offset.z);
+                float pointGroundY = groundY;
+                if (RaycastGround(rayOrigin, out RaycastHit hit))
                 {
-                    float angle = i * (360f / 5f) * Mathf.Deg2Rad;
-                    Vector3 offset = new Vector3(Mathf.Cos(angle) * 2f, 0f, Mathf.Sin(angle) * 2f);
-                    GameObject sp = new GameObject($"SpawnPoint_{i}");
-                    sp.transform.parent = spawnParent.transform;
-                    sp.transform.position = spawnParent.transform.position + offset;
+                    pointGroundY = hit.point.y;
                 }
+
+                Vector3 worldPos = new Vector3(offset.x, pointGroundY + 0.05f, offset.z);
+                Vector3 lookDir = new Vector3(-offset.x, 0f, -offset.z).normalized;
+                Quaternion rot = lookDir != Vector3.zero ? Quaternion.LookRotation(lookDir) : Quaternion.identity;
+
+                GameObject spGO;
+                if (propsConfig != null && propsConfig.playerSpawnPointPrefab != null)
+                {
+#if UNITY_EDITOR
+                    if (!Application.isPlaying)
+                    {
+                        spGO = (GameObject)UnityEditor.PrefabUtility.InstantiatePrefab(propsConfig.playerSpawnPointPrefab, spawnPointsContainer);
+                        if (spGO == null)
+                        {
+                            spGO = Instantiate(propsConfig.playerSpawnPointPrefab, worldPos, rot, spawnPointsContainer);
+                        }
+                        spGO.transform.SetPositionAndRotation(worldPos, rot);
+                        UnityEditor.Undo.RegisterCreatedObjectUndo(spGO, "Spawn Player Point");
+                    }
+                    else
+#endif
+                    {
+                        spGO = Instantiate(propsConfig.playerSpawnPointPrefab, worldPos, rot, spawnPointsContainer);
+                    }
+                    spGO.name = $"spawn_point_{i + 1}";
+                }
+                else
+                {
+                    spGO = new GameObject($"spawn_point_{i + 1}");
+                    spGO.transform.parent = spawnPointsContainer;
+                    spGO.transform.SetPositionAndRotation(worldPos, rot);
+#if UNITY_EDITOR
+                    if (!Application.isPlaying)
+                    {
+                        UnityEditor.Undo.RegisterCreatedObjectUndo(spGO, "Spawn Player Point");
+                    }
+#endif
+                    var sp = spGO.AddComponent<PlayerSpawnPoint>();
+                    sp.spawnIndex = i;
+                }
+
+                _spawnPoints.Add(spGO.transform);
+                _occupancyMap.Register(worldPos, solidRadius: 1.0f, canopyRadius: 0f, OccupancyType.Player_Sanctuary);
             }
+
+            SyncWithPlayerSpawners(_spawnPoints.ToArray());
+            DuskLog.Log(LogChannel.World, $"[WorldPropsPlacer] {_spawnPoints.Count} pontos de spawn de jogador gerados com sucesso com o relevo.");
         }
 
         private void PlaceResourceNodes(LowPolyTerrainConfig terrainConfig, WorldPropsConfig propsConfig, SeededRNG rng)
@@ -822,7 +916,80 @@ namespace Duskborn.Gameplay.World
                 }
             }
 
+            ClearSpawnPoints();
             EnsureContainer();
+            EnsureSpawnPointsContainer();
+        }
+
+        public void ClearSpawnPoints()
+        {
+            _spawnPoints.Clear();
+
+            for (int i = transform.childCount - 1; i >= 0; i--)
+            {
+                Transform child = transform.GetChild(i);
+                if (child != null && child.name == "SpawnPoints")
+                {
+                    for (int c = child.childCount - 1; c >= 0; c--)
+                    {
+                        Transform sp = child.GetChild(c);
+                        if (sp != null)
+                        {
+                            if (Application.isPlaying)
+                                Destroy(sp.gameObject);
+                            else
+                                DestroyImmediate(sp.gameObject);
+                        }
+                    }
+                }
+            }
+        }
+
+        public void EnsureSpawnPointsContainer()
+        {
+            if (spawnPointsContainer != null) return;
+
+            Transform existing = transform.Find("SpawnPoints");
+            if (existing != null)
+            {
+                spawnPointsContainer = existing;
+            }
+            else
+            {
+                GameObject go = new GameObject("SpawnPoints");
+                go.transform.parent = transform;
+                go.transform.localPosition = Vector3.zero;
+                spawnPointsContainer = go.transform;
+            }
+        }
+
+        public void SyncWithPlayerSpawners(Transform[] spawnTransforms)
+        {
+            if (spawnTransforms == null || spawnTransforms.Length == 0) return;
+
+            var fishnetSpawner = FindAnyObjectByType<FishNet.Component.Spawning.PlayerSpawner>();
+            if (fishnetSpawner != null)
+            {
+                fishnetSpawner.Spawns = spawnTransforms;
+#if UNITY_EDITOR
+                if (!Application.isPlaying)
+                {
+                    UnityEditor.EditorUtility.SetDirty(fishnetSpawner);
+                }
+#endif
+            }
+
+            var duskbornSpawner = FindAnyObjectByType<Duskborn.Network.PlayerSpawner>();
+            if (duskbornSpawner != null)
+            {
+                duskbornSpawner.SetSpawnPoints(spawnTransforms);
+#if UNITY_EDITOR
+                if (!Application.isPlaying)
+                {
+                    UnityEditor.EditorUtility.SetDirty(duskbornSpawner);
+                }
+#endif
+            }
         }
 
         public void EnsureContainer()

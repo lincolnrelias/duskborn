@@ -16,6 +16,12 @@ namespace Duskborn.Gameplay.World
         [Tooltip("Prefab opcional para instanciar pontos de spawn de jogadores na clareira se não existirem na cena.")]
         public GameObject playerSpawnPointPrefab;
 
+        [Tooltip("Quantidade de pontos de spawn de jogadores a serem gerados proceduralmente na clareira central.")]
+        [Range(1, 10)] public int playerSpawnPointsCount = 5;
+
+        [Tooltip("Raio em metros do círculo de spawn ao redor do centro da clareira.")]
+        [Range(2f, 15f)] public float playerSpawnRadius = 6.5f;
+
         [Header("Recursos Naturais (Resource Nodes)")]
         [Tooltip("Definição ecológica de árvores (Madeira).")]
         public PropDefinition treeProp;

@@ -50,10 +50,10 @@ Material:
     - _ShoreWaveSpeed: 0.45
     - _SunSpecCutoff: 0.65
     - _SunSpecIntensity: 1.35
-    - _SunSpecPower: 64
-    - _WaveHeight: 0.04
-    - _WaveLength: 10
-    - _WaveSpeed: 0.85
+    - _SunSpecPower: 93
+    - _WaveHeight: 0.042
+    - _WaveLength: 3.3
+    - _WaveSpeed: 0.66
     - _WaveSteepness: 0.3
     m_Colors:
     - _CausticsColor: {r: 0.75, g: 0.96, b: 1, a: 1}

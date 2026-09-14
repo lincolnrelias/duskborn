@@ -1,0 +1,10 @@
+# Duskborn Chest Material Library
+newmtl Wood
+Kd 0.63 0.48 0.35
+
+newmtl Iron
+Kd 0.22 0.24 0.27
+
+newmtl Gold
+Kd 0.85 0.70 0.20
+

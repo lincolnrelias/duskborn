@@ -82,6 +82,7 @@ public class ChunkGridManager : MonoBehaviour
         }
         UpdateWaterPlanePosition();
 #endif
+        EnsureFoliageMaterials();
     }
 
     [Header("Renderização & Material")]
@@ -116,6 +117,9 @@ public class ChunkGridManager : MonoBehaviour
 
     [Tooltip("Material para os arbustos estilizados (shader Duskborn/StylizedFoliage).")]
     public Material foliageBushMaterial;
+
+    [Tooltip("Nível de densidade da vegetação procedural (estilo Genshin / Zelda).")]
+    public Duskborn.Gameplay.World.Foliage.FoliageDensityPreset foliageDensityPreset = Duskborn.Gameplay.World.Foliage.FoliageDensityPreset.High;
 
     [Header("Navegação & AI (NavMesh)")]
     [Tooltip("Referência opcional ao NavMeshSurface. Se vazio, buscará automaticamente neste GameObject ou na cena.")]
@@ -248,15 +252,39 @@ public class ChunkGridManager : MonoBehaviour
         Debug.Log($"[ChunkGridManager] Grid {config.chunksX}x{config.chunksZ} gerada com sucesso com TerrainSeed={activeSeed}, PropsSeed={activePropsSeed} ({loadedChunks.Count} chunks).");
     }
 
+    private void EnsureFoliageMaterials()
+    {
+        #if UNITY_EDITOR
+        if (foliageGrassMaterial == null)
+        {
+            foliageGrassMaterial = UnityEditor.AssetDatabase.LoadAssetAtPath<Material>("Assets/_Duskborn/Art/Materials/M_Foliage_Grass.mat");
+        }
+        if (foliageBushMaterial == null)
+        {
+            foliageBushMaterial = UnityEditor.AssetDatabase.LoadAssetAtPath<Material>("Assets/_Duskborn/Art/Materials/M_Foliage_Bush.mat");
+        }
+        #endif
+        if (foliageGrassMaterial == null)
+        {
+            foliageGrassMaterial = Resources.Load<Material>("Materials/M_Foliage_Grass");
+        }
+        if (foliageBushMaterial == null)
+        {
+            foliageBushMaterial = Resources.Load<Material>("Materials/M_Foliage_Bush");
+        }
+    }
+
     [ContextMenu("Regerar Apenas Folhagem")]
     public void RegenerateFoliageOnly()
     {
+        EnsureFoliageMaterials();
         GenerateFoliage(ActiveSeed);
     }
 
     public void GenerateFoliage(int seed)
     {
         if (config == null) return;
+        EnsureFoliageMaterials();
 
         var existingChunks = GetComponentsInChildren<TerrainChunk>(true);
         if (existingChunks == null || existingChunks.Length == 0) return;
@@ -274,6 +302,7 @@ public class ChunkGridManager : MonoBehaviour
             }
 
             placer.SetMaterials(foliageGrassMaterial, foliageBushMaterial);
+            placer.SetDensityPreset(foliageDensityPreset);
 
             if (generateFoliage)
             {

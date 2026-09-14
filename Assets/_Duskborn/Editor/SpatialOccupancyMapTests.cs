@@ -19,6 +19,10 @@ namespace Duskborn.Editor
             RunTest(Test_CanPlacePropClearance, ref passed, ref total);
             RunTest(Test_ClusterSpacingSimulation, ref passed, ref total);
             RunTest(Test_FoliageCollisionRejection, ref passed, ref total);
+            RunTest(Test_FoliageArchetypeMeshes, ref passed, ref total);
+            RunTest(Test_FoliageDensityPresets, ref passed, ref total);
+            RunTest(Test_WildflowerPaletteVariety, ref passed, ref total);
+            RunTest(Test_NewFoliageArchetypes, ref passed, ref total);
 
             Debug.Log($"<color=#55FF55><b>[SpatialOccupancyMapTests] {passed}/{total} testes passaram com sucesso!</b></color>");
         }
@@ -172,6 +176,127 @@ namespace Duskborn.Editor
             Assert(!map.IsSolidOccupied(canopyPoint, clearanceRadius: 0.2f), "Ponto a 2.5m deve ser livre de colisão sólida.");
             Assert(map.IsUnderCanopy(canopyPoint, out float canopyWeight), "Ponto a 2.5m deve ser reconhecido como sob a copa.");
             Assert(canopyWeight > 0f, "Peso da copa deve ser positivo sob a copa.");
+        }
+
+        public static void Test_FoliageArchetypeMeshes()
+        {
+            // 1. Lush Clump
+            Mesh lushMesh = Gameplay.World.Foliage.FoliageMeshUtility.CreateLushGrassClumpMesh(bladeCount: 9);
+            Assert(lushMesh != null, "Malha LushGrassClumpMesh não deve ser nula.");
+            Assert(lushMesh.vertexCount > 35, $"LushGrassClump deve ter pelo menos 36 vértices. Obtido: {lushMesh.vertexCount}");
+            Assert(lushMesh.triangles.Length > 0, "LushGrassClump deve conter triângulos.");
+
+            // 2. Wildflower Tuft
+            Mesh flowerMesh = Gameplay.World.Foliage.FoliageMeshUtility.CreateWildflowerTuftMesh(bladeCount: 5, flowerCount: 3);
+            Assert(flowerMesh != null, "Malha WildflowerTuftMesh não deve ser nula.");
+            Assert(flowerMesh.vertexCount > 30, $"WildflowerTuft deve ter pelo menos 31 vértices. Obtido: {flowerMesh.vertexCount}");
+
+            // Verifica se existem vértices de pétalas com uv.x >= 2.0f
+            Vector2[] uvs = flowerMesh.uv;
+            int petalVertices = 0;
+            for (int i = 0; i < uvs.Length; i++)
+            {
+                if (uvs[i].x >= 2.0f) petalVertices++;
+            }
+            Assert(petalVertices >= 12, $"WildflowerTuft deve ter pelo menos 12 vértices de pétalas com UV.x >= 2.0f. Obtido: {petalVertices}");
+
+            // 3. Fern Bush
+            Mesh fernMesh = Gameplay.World.Foliage.FoliageMeshUtility.CreateFernBushMesh(frondCount: 7);
+            Assert(fernMesh != null, "Malha FernBushMesh não deve ser nula.");
+            Assert(fernMesh.vertexCount >= 35, $"FernBush deve ter pelo menos 35 vértices. Obtido: {fernMesh.vertexCount}");
+        }
+
+        public static void Test_FoliageDensityPresets()
+        {
+            GameObject testGo = new GameObject("TestFoliagePlacer");
+            try
+            {
+                // Adiciona um TerrainChunk dummy para satisfazer RequireComponent
+                testGo.AddComponent<TerrainChunk>();
+                var placer = testGo.AddComponent<Gameplay.World.Foliage.ChunkFoliagePlacer>();
+
+                // High (Padrão)
+                placer.SetDensityPreset(Gameplay.World.Foliage.FoliageDensityPreset.High);
+                Assert(placer.GrassTuftsPerChunk == 1800, $"High preset deve ter 1800 gramas. Obtido: {placer.GrassTuftsPerChunk}");
+                Assert(placer.BushesPerChunk == 32, $"High preset deve ter 32 arbustos. Obtido: {placer.BushesPerChunk}");
+
+                // Ultra Genshin
+                placer.SetDensityPreset(Gameplay.World.Foliage.FoliageDensityPreset.Ultra_Genshin);
+                Assert(placer.GrassTuftsPerChunk == 3200, $"Ultra_Genshin preset deve ter 3200 gramas. Obtido: {placer.GrassTuftsPerChunk}");
+                Assert(placer.BushesPerChunk == 48, $"Ultra_Genshin preset deve ter 48 arbustos. Obtido: {placer.BushesPerChunk}");
+
+                // Cinematic Lush
+                placer.SetDensityPreset(Gameplay.World.Foliage.FoliageDensityPreset.Cinematic_Lush);
+                Assert(placer.GrassTuftsPerChunk == 5000, $"Cinematic_Lush preset deve ter 5000 gramas. Obtido: {placer.GrassTuftsPerChunk}");
+                Assert(placer.BushesPerChunk == 64, $"Cinematic_Lush preset deve ter 64 arbustos. Obtido: {placer.BushesPerChunk}");
+
+                // Medium
+                placer.SetDensityPreset(Gameplay.World.Foliage.FoliageDensityPreset.Medium);
+                Assert(placer.GrassTuftsPerChunk == 950, $"Medium preset deve ter 950 gramas. Obtido: {placer.GrassTuftsPerChunk}");
+
+                // Low
+                placer.SetDensityPreset(Gameplay.World.Foliage.FoliageDensityPreset.Low);
+                Assert(placer.GrassTuftsPerChunk == 400, $"Low preset deve ter 400 gramas. Obtido: {placer.GrassTuftsPerChunk}");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(testGo);
+            }
+        }
+
+        public static void Test_WildflowerPaletteVariety()
+        {
+            var palettes = Gameplay.World.Foliage.ChunkFoliagePlacer.WildflowerPalettes;
+            Assert(palettes != null && palettes.Length >= 4, "Deve haver pelo menos 4 variações de cores de flores silvestres.");
+
+            for (int i = 0; i < palettes.Length; i++)
+            {
+                Color c = palettes[i];
+                Assert(c.r >= 0f && c.r <= 1f, "Canal R deve estar em [0,1].");
+                Assert(c.g >= 0f && c.g <= 1f, "Canal G deve estar em [0,1].");
+                Assert(c.b >= 0f && c.b <= 1f, "Canal B deve estar em [0,1].");
+            }
+        }
+
+        public static void Test_NewFoliageArchetypes()
+        {
+            // 1. Dense Carpet Grass
+            Mesh carpet = Gameplay.World.Foliage.FoliageMeshUtility.CreateDenseCarpetMesh(bladeCount: 8);
+            Assert(carpet != null, "Malha CreateDenseCarpetMesh não deve ser nula.");
+            Assert(carpet.vertexCount >= 40, $"DenseCarpet deve ter pelo menos 40 vértices. Obtido: {carpet.vertexCount}");
+            Assert(carpet.triangles.Length > 0, "DenseCarpet deve possuir triângulos.");
+
+            Vector3[] carpetNormals = carpet.normals;
+            for (int i = 0; i < carpetNormals.Length; i++)
+            {
+                Assert(carpetNormals[i].y >= 0.90f, $"Normais de DenseCarpet devem apontar predominantemente para cima (Y >= 0.90). Obtido: {carpetNormals[i].y}");
+            }
+
+            // 2. Prairie Grass
+            Mesh prairie = Gameplay.World.Foliage.FoliageMeshUtility.CreatePrairieGrassMesh(bladeCount: 5);
+            Assert(prairie != null, "Malha CreatePrairieGrassMesh não deve ser nula.");
+            Assert(prairie.vertexCount >= 25, $"PrairieGrass deve ter pelo menos 25 vértices. Obtido: {prairie.vertexCount}");
+
+            // 3. Reed Grass
+            Mesh reed = Gameplay.World.Foliage.FoliageMeshUtility.CreateReedGrassMesh(bladeCount: 6);
+            Assert(reed != null, "Malha CreateReedGrassMesh não deve ser nula.");
+            Assert(reed.vertexCount >= 30, $"ReedGrass deve ter pelo menos 30 vértices. Obtido: {reed.vertexCount}");
+
+            // 4. Flowering Bush (com UV.x >= 2.0f nos botões florais)
+            Mesh flowerBush = Gameplay.World.Foliage.FoliageMeshUtility.CreateFloweringBushMesh(lobes: 4, flowerCount: 10);
+            Assert(flowerBush != null, "Malha CreateFloweringBushMesh não deve ser nula.");
+            Vector2[] bushUVs = flowerBush.uv;
+            int budVerts = 0;
+            for (int i = 0; i < bushUVs.Length; i++)
+            {
+                if (bushUVs[i].x >= 2.0f) budVerts++;
+            }
+            Assert(budVerts >= 20, $"FloweringBush deve conter vértices de botões florais com UV.x >= 2.0f. Obtido: {budVerts}");
+
+            // 5. Ground Shrub
+            Mesh groundShrub = Gameplay.World.Foliage.FoliageMeshUtility.CreateGroundShrubMesh(lobes: 5);
+            Assert(groundShrub != null, "Malha CreateGroundShrubMesh não deve ser nula.");
+            Assert(groundShrub.vertexCount >= 40, $"GroundShrub deve conter pelo menos 40 vértices. Obtido: {groundShrub.vertexCount}");
         }
     }
 }

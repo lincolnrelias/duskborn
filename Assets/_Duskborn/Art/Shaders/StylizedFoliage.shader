@@ -5,6 +5,7 @@ Shader "Duskborn/StylizedFoliage"
         [Header(Foliage Colors and Root Blending)]
         _RootColor("Root / Base Foliage Color", Color) = (0.18, 0.42, 0.16, 1.0)
         _TipColor("Tip / Upper Foliage Color", Color) = (0.42, 0.78, 0.28, 1.0)
+        _VertexColorBlend("Vertex Color Blend (0 = Mat Gradient, 1 = Mesh Vertex Colors)", Range(0.0, 1.0)) = 1.0
         _TerrainBlendHeight("Terrain Blend Height (UV.y)", Range(0.0, 1.0)) = 0.35
         _TerrainBlendStrength("Terrain Blend Strength", Range(0.0, 1.0)) = 0.85
         _BaseMap("Texture Map (Optional)", 2D) = "white" {}
@@ -24,6 +25,8 @@ Shader "Duskborn/StylizedFoliage"
         _SSSPower("SSS Directional Sharpness", Range(1.0, 8.0)) = 2.8
 
         [Header(Cel Shading and Lighting)]
+        _NormalUpBlend("Normal Upward Blend (Homogenous Anime Lighting)", Range(0.0, 1.0)) = 0.92
+        _RootAOIntensity("Root Contact AO Intensity", Range(0.0, 1.0)) = 0.38
         _CelCutoff("Cel Shadow Cutoff", Range(0.0, 1.0)) = 0.42
         _CelSmoothness("Cel Smoothness", Range(0.01, 0.4)) = 0.08
         _ShadowTint("Shadow Color Tint", Color) = (0.38, 0.42, 0.54, 1.0)
@@ -49,6 +52,7 @@ Shader "Duskborn/StylizedFoliage"
         CBUFFER_START(UnityPerMaterial)
             half4  _RootColor;
             half4  _TipColor;
+            float  _VertexColorBlend;
             float  _TerrainBlendHeight;
             float  _TerrainBlendStrength;
             float4 _BaseMap_ST;
@@ -65,6 +69,8 @@ Shader "Duskborn/StylizedFoliage"
             float  _SSSIntensity;
             float  _SSSPower;
 
+            float  _NormalUpBlend;
+            float  _RootAOIntensity;
             float  _CelCutoff;
             float  _CelSmoothness;
             half4  _ShadowTint;
@@ -85,20 +91,20 @@ Shader "Duskborn/StylizedFoliage"
             float2 windDir = normalize(_WindDirection.xy);
             float t = _Time.y * _WindSpeed;
 
-            // 1. Rajada de Vento Harmônica (Gusts)
+            // 1. Rajada de Vento Harmônica Contínua (Macro Gust Waves estilo BotW / Genshin)
             float gustCoord = dot(positionWS.xz, windDir) * _WindFrequency - t;
-            float gust = sin(gustCoord) * 0.72 + sin(gustCoord * 1.85 + 1.3) * 0.28;
-            float gustEnvelope = pow(sin(gustCoord * 0.4) * 0.5 + 0.5, 2.0);
-            float totalGust = (gust + gustEnvelope * 1.3) * _WindStrength;
+            float gust = sin(gustCoord) * 0.70 + sin(gustCoord * 1.85 + 1.2) * 0.30;
+            float gustEnvelope = pow(sin(gustCoord * 0.45) * 0.5 + 0.5, 2.0);
+            float totalGust = (gust * 0.75 + gustEnvelope * 1.1) * _WindStrength;
 
             // 2. Tremor / Fluttering de Alta Frequência nas Folhas e Pontas
-            float flutterPhase = (positionWS.x * 2.1 + positionWS.y * 3.4 + positionWS.z * 1.8) + _Time.y * _WindFlutterSpeed;
+            float flutterPhase = (positionWS.x * 1.6 + positionWS.y * 2.4 + positionWS.z * 1.6) + _Time.y * _WindFlutterSpeed;
             float flutter = sin(flutterPhase) * _WindFlutterStrength;
 
             // 3. Deslocamento com curvatura orgânica e conservação de volume
             float displacement = (totalGust + flutter) * anchor;
             positionWS.xz += windDir * displacement;
-            positionWS.y -= abs(displacement) * 0.16;
+            positionWS.y -= abs(displacement) * 0.14;
 
             return positionWS;
         }
@@ -179,19 +185,24 @@ Shader "Duskborn/StylizedFoliage"
                 }
 
                 // Inverte a normal caso a face seja traseira (Two-Sided foliage)
-                float3 normalWS = normalize(input.normalWS) * (facing > 0 ? 1.0 : -1.0);
+                float3 rawNormalWS = normalize(input.normalWS) * (facing > 0 ? 1.0 : -1.0);
 
-                // 1. Gradiente Base -> Ponta
-                half3 foliageBase = lerp(_RootColor.rgb, _TipColor.rgb, saturate(input.uv.y)) * texColor.rgb;
+                // Alinhamento de Normal para o Topo (Homogenous Anime Lighting estilo Genshin / Zelda)
+                // Faz com que toda a vegetação reflita luz de forma homogênea como o terreno, eliminando o ruído lâmina-a-lâmina
+                float3 upNormal = float3(0.0, 1.0, 0.0);
+                float3 normalWS = normalize(lerp(rawNormalWS, upNormal, _NormalUpBlend));
 
-                // 2. Mescla Orgânica de Cor com o Terreno no Pé da Planta (elimina corte brusco)
-                if (_TerrainBlendStrength > 0.01)
-                {
-                    // Usa input.color.rgb (cor do vértice do terreno bakeada no mesh ou enviada pelo placer)
-                    half3 terrainColor = input.color.rgb;
-                    float blendRatio = saturate(1.0 - input.uv.y / max(0.01, _TerrainBlendHeight)) * _TerrainBlendStrength;
-                    foliageBase = lerp(foliageBase, terrainColor, blendRatio);
-                }
+                // 1. Gradiente Base -> Ponta do Material
+                half3 matGradient = lerp(_RootColor.rgb, _TipColor.rgb, saturate(input.uv.y));
+
+                // 2. Mescla com as Cores de Vértice Procedurais (Bakeadas por tufo, pétalas de flor e terreno)
+                half3 foliageBase = lerp(matGradient, input.color.rgb, _VertexColorBlend) * texColor.rgb;
+
+                // 3. Mescla de Contato com o Terreno e Oclusão de Raiz (Root AO)
+                // Garante que o pé da planta se funda organicamente com o relevo sem criar costuras visuais secas
+                float rootBlend = saturate(1.0 - input.uv.y / max(0.01, _TerrainBlendHeight));
+                float rootAO = lerp(1.0, 1.0 - _RootAOIntensity, rootBlend);
+                foliageBase *= rootAO;
 
                 // 3. Iluminação Cel-Shaded com Sombras Suaves
                 Light mainLight = GetMainLight(TransformWorldToShadowCoord(input.positionWS));
@@ -421,7 +432,9 @@ Shader "Duskborn/StylizedFoliage"
                     half4 texColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv);
                     clip(texColor.a - _Cutoff);
                 }
-                return half4(NormalizeNormalPerPixel(normalize(input.normalWS)), 0.0);
+                float3 rawNorm = normalize(input.normalWS);
+                float3 normWS = normalize(lerp(rawNorm, float3(0.0, 1.0, 0.0), _NormalUpBlend));
+                return half4(NormalizeNormalPerPixel(normWS), 0.0);
             }
             ENDHLSL
         }

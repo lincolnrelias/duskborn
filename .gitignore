@@ -92,3 +92,11 @@ Assets/Blink.meta
 # NOTE: .meta files MUST be tracked.
 # Unity uses them for asset GUIDs — removing them breaks all scene/prefab references.
 # ===========================
+
+# ===========================
+# Procedurally generated world & terrain
+# ===========================
+**/NavMesh-*.asset
+**/NavMesh-*.asset.meta
+**/NavMesh*.asset
+**/NavMesh*.asset.meta

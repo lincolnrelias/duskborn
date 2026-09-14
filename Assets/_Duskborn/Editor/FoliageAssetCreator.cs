@@ -25,17 +25,38 @@ namespace Duskborn.Editor
             AssetDatabase.Refresh();
 
             // 1. Gera e salva as Malhas .asset
-            Mesh grassMesh = FoliageMeshUtility.CreateGrassTuftMesh(bladeCount: 6, height: 1.0f, baseWidth: 0.18f);
-            string grassMeshPath = $"{meshFolder}/Mesh_GrassTuft.asset";
-            AssetDatabase.CreateAsset(grassMesh, grassMeshPath);
+            Mesh grassMesh = FoliageMeshUtility.CreateGrassTuftMesh(bladeCount: 5, height: 0.95f, baseWidth: 0.16f);
+            AssetDatabase.CreateAsset(grassMesh, $"{meshFolder}/Mesh_GrassTuft.asset");
 
-            Mesh bushMesh = FoliageMeshUtility.CreateBushMesh(lobes: 4, baseRadius: 0.7f, height: 1.1f);
-            string bushMeshPath = $"{meshFolder}/Mesh_Bush.asset";
-            AssetDatabase.CreateAsset(bushMesh, bushMeshPath);
+            Mesh carpetMesh = FoliageMeshUtility.CreateDenseCarpetMesh(bladeCount: 8, height: 0.85f, baseWidth: 0.24f);
+            AssetDatabase.CreateAsset(carpetMesh, $"{meshFolder}/Mesh_DenseCarpet.asset");
+
+            Mesh lushMesh = FoliageMeshUtility.CreateLushGrassClumpMesh(bladeCount: 9, height: 1.30f, baseWidth: 0.22f);
+            AssetDatabase.CreateAsset(lushMesh, $"{meshFolder}/Mesh_LushGrassClump.asset");
+
+            Mesh prairieMesh = FoliageMeshUtility.CreatePrairieGrassMesh(bladeCount: 5, height: 0.70f, baseWidth: 0.14f);
+            AssetDatabase.CreateAsset(prairieMesh, $"{meshFolder}/Mesh_PrairieGrass.asset");
+
+            Mesh reedMesh = FoliageMeshUtility.CreateReedGrassMesh(bladeCount: 6, height: 1.45f, baseWidth: 0.12f);
+            AssetDatabase.CreateAsset(reedMesh, $"{meshFolder}/Mesh_ReedGrass.asset");
+
+            Mesh wildflowerMesh = FoliageMeshUtility.CreateWildflowerTuftMesh(bladeCount: 5, flowerCount: 3, height: 0.90f, flowerHeight: 1.15f);
+            AssetDatabase.CreateAsset(wildflowerMesh, $"{meshFolder}/Mesh_WildflowerTuft.asset");
+
+            Mesh bushMesh = FoliageMeshUtility.CreateBushMesh(lobes: 4, baseRadius: 0.65f, height: 1.0f);
+            AssetDatabase.CreateAsset(bushMesh, $"{meshFolder}/Mesh_Bush.asset");
+
+            Mesh floweringBushMesh = FoliageMeshUtility.CreateFloweringBushMesh(lobes: 4, flowerCount: 12, baseRadius: 0.65f, height: 1.0f);
+            AssetDatabase.CreateAsset(floweringBushMesh, $"{meshFolder}/Mesh_FloweringBush.asset");
+
+            Mesh fernMesh = FoliageMeshUtility.CreateFernBushMesh(frondCount: 7, radius: 0.85f, height: 0.65f);
+            AssetDatabase.CreateAsset(fernMesh, $"{meshFolder}/Mesh_FernBush.asset");
+
+            Mesh groundShrubMesh = FoliageMeshUtility.CreateGroundShrubMesh(lobes: 5, radius: 0.95f, height: 0.45f);
+            AssetDatabase.CreateAsset(groundShrubMesh, $"{meshFolder}/Mesh_GroundShrub.asset");
 
             Mesh treeCanopyMesh = FoliageMeshUtility.CreateTreeCanopyMesh(radius: 2.2f, height: 3.5f);
-            string treeCanopyMeshPath = $"{meshFolder}/Mesh_TreeCanopy.asset";
-            AssetDatabase.CreateAsset(treeCanopyMesh, treeCanopyMeshPath);
+            AssetDatabase.CreateAsset(treeCanopyMesh, $"{meshFolder}/Mesh_TreeCanopy.asset");
 
             // Carrega Materiais
             Material grassMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Duskborn/Art/Materials/M_Foliage_Grass.mat");
@@ -43,31 +64,19 @@ namespace Duskborn.Editor
             Material treeCanopyMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Duskborn/Art/Materials/M_Foliage_TreeCanopy.mat");
             Material woodMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Duskborn/Art/Models/Wood.mat");
 
-            // 2. Prefab: Tufo de Grama
-            GameObject grassGO = new GameObject("Prefab_GrassTuft");
-            var mfGrass = grassGO.AddComponent<MeshFilter>();
-            var mrGrass = grassGO.AddComponent<MeshRenderer>();
-            mfGrass.sharedMesh = grassMesh;
-            mrGrass.sharedMaterial = grassMat;
-            mrGrass.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
-            mrGrass.receiveShadows = true;
+            // 2. Prefabs: Tufos de Grama
+            SaveFoliagePrefab(grassMesh, grassMat, "Prefab_GrassTuft", prefabFolder);
+            SaveFoliagePrefab(carpetMesh, grassMat, "Prefab_DenseCarpetGrass", prefabFolder);
+            SaveFoliagePrefab(lushMesh, grassMat, "Prefab_LushGrassClump", prefabFolder);
+            SaveFoliagePrefab(prairieMesh, grassMat, "Prefab_PrairieGrass", prefabFolder);
+            SaveFoliagePrefab(reedMesh, grassMat, "Prefab_ReedGrass", prefabFolder);
+            SaveFoliagePrefab(wildflowerMesh, grassMat, "Prefab_WildflowerTuft", prefabFolder);
 
-            string grassPrefabPath = $"{prefabFolder}/Prefab_GrassTuft.prefab";
-            PrefabUtility.SaveAsPrefabAsset(grassGO, grassPrefabPath);
-            Object.DestroyImmediate(grassGO);
-
-            // 3. Prefab: Arbusto Estilizado
-            GameObject bushGO = new GameObject("Prefab_StylizedBush");
-            var mfBush = bushGO.AddComponent<MeshFilter>();
-            var mrBush = bushGO.AddComponent<MeshRenderer>();
-            mfBush.sharedMesh = bushMesh;
-            mrBush.sharedMaterial = bushMat;
-            mrBush.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
-            mrBush.receiveShadows = true;
-
-            string bushPrefabPath = $"{prefabFolder}/Prefab_StylizedBush.prefab";
-            PrefabUtility.SaveAsPrefabAsset(bushGO, bushPrefabPath);
-            Object.DestroyImmediate(bushGO);
+            // 3. Prefabs: Arbustos
+            SaveFoliagePrefab(bushMesh, bushMat, "Prefab_StylizedBush", prefabFolder);
+            SaveFoliagePrefab(floweringBushMesh, bushMat, "Prefab_FloweringBush", prefabFolder);
+            SaveFoliagePrefab(fernMesh, bushMat, "Prefab_FernBush", prefabFolder);
+            SaveFoliagePrefab(groundShrubMesh, bushMat, "Prefab_GroundShrub", prefabFolder);
 
             // 4. Prefab: Árvore Estilizada (Tronco + Copa com Shader de Folhagem)
             GameObject treeGO = new GameObject("Prefab_StylizedTree");
@@ -107,6 +116,21 @@ namespace Duskborn.Editor
             AssetDatabase.Refresh();
 
             Debug.Log($"[FoliageAssetCreator] Folhagem criada com sucesso!\nMeshes em: {meshFolder}\nPrefabs em: {prefabFolder}");
+        }
+
+        private static void SaveFoliagePrefab(Mesh mesh, Material material, string prefabName, string folder)
+        {
+            GameObject go = new GameObject(prefabName);
+            var mf = go.AddComponent<MeshFilter>();
+            var mr = go.AddComponent<MeshRenderer>();
+            mf.sharedMesh = mesh;
+            mr.sharedMaterial = material;
+            mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+            mr.receiveShadows = true;
+
+            string path = $"{folder}/{prefabName}.prefab";
+            PrefabUtility.SaveAsPrefabAsset(go, path);
+            Object.DestroyImmediate(go);
         }
     }
 }

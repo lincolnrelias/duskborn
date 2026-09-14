@@ -29,8 +29,10 @@ Material:
     - _CelCutoff: 0.42
     - _CelSmoothness: 0.08
     - _Cutoff: 0
+    - _NormalUpBlend: 0.92
     - _RimIntensity: 0.22
     - _RimPower: 4
+    - _RootAOIntensity: 0.38
     - _SSSIdealDist: 1
     - _SSSIntensity: 1.25
     - _SSSPower: 2.8

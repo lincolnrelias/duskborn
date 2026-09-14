@@ -6088,8 +6088,8 @@ MonoBehaviour:
   waterSubdivisions: 20
   generateAtmosphereFX: 1
   generateFoliage: 1
-  foliageGrassMaterial: {fileID: 0}
-  foliageBushMaterial: {fileID: 0}
+  foliageGrassMaterial: {fileID: 2100000, guid: 6a5b4c3d2e1f09876543210fedcba01, type: 2}
+  foliageBushMaterial: {fileID: 2100000, guid: 6a5b4c3d2e1f09876543210fedcba02, type: 2}
   navMeshSurface: {fileID: 1866741459}
 --- !u!4 &1866741457
 Transform:

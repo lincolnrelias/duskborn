@@ -24,20 +24,20 @@ Shader "Duskborn/LowPolyWater"
 
         [Header(Stylized Foam System)]
         _FoamColor("Foam Color", Color) = (0.98, 0.99, 1.0, 1.0)
-        _FoamDistance("Shoreline Foam Reach", Range(0.05, 1.5)) = 0.30
-        _ContactRimWidth("Shore Contact Rim Width", Range(0.01, 0.15)) = 0.04
+        _FoamDistance("Shoreline Foam Reach", Range(0.05, 1.5)) = 0.28
+        _ContactRimWidth("Shore Contact Rim Width", Range(0.01, 0.15)) = 0.035
         _FoamNoiseScale("Foam Bubble Scale", Range(0.5, 10.0)) = 4.0
         _FoamNoiseSpeed("Foam Drift Speed", Range(0.01, 0.5)) = 0.08
         _FoamCutoff("Foam Bubble Coverage", Range(0.1, 0.9)) = 0.52
-        _ShoreWaveSpeed("Tidal Breathing Speed", Range(0.1, 2.0)) = 0.55
-        _ShoreTideAmount("Tidal Reach Variation", Range(0.0, 0.5)) = 0.12
+        _ShoreWaveSpeed("Tidal Breathing Speed", Range(0.1, 2.0)) = 0.45
+        _ShoreTideAmount("Tidal Reach Variation", Range(0.0, 0.5)) = 0.08
         _CrestFoamThreshold("Wave Crest Foam Trigger", Range(0.3, 1.0)) = 0.75
 
         [Header(Gerstner Waves and Surface Motion)]
-        _WaveSpeed("Wave Overall Speed", Range(0.1, 3.0)) = 1.15
-        _WaveHeight("Wave Amplitude", Range(0.0, 0.3)) = 0.065
-        _WaveSteepness("Wave Crest Pinch", Range(0.0, 1.0)) = 0.45
-        _WaveLength("Base Wavelength", Range(1.0, 20.0)) = 8.0
+        _WaveSpeed("Wave Overall Speed", Range(0.1, 3.0)) = 0.85
+        _WaveHeight("Wave Amplitude", Range(0.0, 0.3)) = 0.040
+        _WaveSteepness("Wave Crest Pinch", Range(0.0, 1.0)) = 0.30
+        _WaveLength("Base Wavelength", Range(1.0, 25.0)) = 10.0
         _FacetStrength("Low-Poly Faceting (0=Smooth 1=Faceted)", Range(0.0, 1.0)) = 0.0
 
         [Header(Lighting Specular and SSS)]
@@ -94,7 +94,7 @@ Shader "Duskborn/LowPolyWater"
                 float3 positionWS   : TEXCOORD0;
                 float3 normalWS     : TEXCOORD1;
                 float4 screenPos    : TEXCOORD2;
-                float  waveHeight   : TEXCOORD3;
+                float2 waveData     : TEXCOORD3;
                 float  fogFactor    : TEXCOORD4;
             };
 
@@ -190,10 +190,10 @@ Shader "Duskborn/LowPolyWater"
                 float3 binormal = float3(0, 0, 1);
                 float crestAccum = 0.0;
 
-                // 3 Oitavas de Ondas de Gerstner Harmônicas
+                // 3 Oitavas de Ondas de Gerstner Harmônicas (Comprimentos maiores e velocidades suaves)
                 EvaluateGerstnerWave(float2(0.8, 0.6), _WaveLength, 0.45, t, positionWS, disp, tangent, binormal, crestAccum);
-                EvaluateGerstnerWave(float2(-0.6, 0.8), _WaveLength * 0.58, 0.35, t * 1.15, positionWS, disp, tangent, binormal, crestAccum);
-                EvaluateGerstnerWave(float2(0.9, -0.4), _WaveLength * 0.28, 0.25, t * 1.35, positionWS, disp, tangent, binormal, crestAccum);
+                EvaluateGerstnerWave(float2(-0.6, 0.8), _WaveLength * 0.68, 0.35, t * 1.08, positionWS, disp, tangent, binormal, crestAccum);
+                EvaluateGerstnerWave(float2(0.9, -0.4), _WaveLength * 0.45, 0.20, t * 1.18, positionWS, disp, tangent, binormal, crestAccum);
 
                 positionWS += disp;
 
@@ -215,7 +215,7 @@ Shader "Duskborn/LowPolyWater"
                 output.positionCS = TransformWorldToHClip(positionWS);
                 output.normalWS   = normalWS;
                 output.screenPos  = ComputeScreenPos(output.positionCS);
-                output.waveHeight = saturate((crestAccum / 3.0) * 0.5 + 0.5);
+                output.waveData   = float2(saturate((crestAccum / 3.0) * 0.5 + 0.5), disp.y);
                 output.fogFactor  = ComputeFogFactor(output.positionCS.z);
 
                 return output;
@@ -322,25 +322,34 @@ Shader "Duskborn/LowPolyWater"
                 half3 causticColor = _CausticsColor.rgb * (totalCaustic * shadowAtten * mainLight.color);
                 blendedBase += causticColor;
 
-                // 4. Sistema de Espuma Estilizada Multi-Camada (Otimizado para poças e margens)
+                // 4. Sistema de Espuma Estilizada Multi-Camada (Otimizado para poças, margens e gargantas estreitas)
                 float foamSpeed = _FoamNoiseSpeed;
                 float2 fUV1 = input.positionWS.xz * _FoamNoiseScale + float2(0.25, 0.18) * (t * foamSpeed);
                 float2 fUV2 = input.positionWS.xz * (_FoamNoiseScale * 1.65) - float2(0.18, 0.22) * (t * foamSpeed * 1.25);
                 float foamNoise = Voronoi2D(fUV1) * 0.65 + Voronoi2D(fUV2) * 0.35;
 
+                // Profundidade estabilizada: desacopla o contorno da margem da oscilação vertical da onda.
+                // Em gargantas/canais estreitos onde as bordas estão muito próximas, isso impede que
+                // as duas margens balancem, respirem e se empurrem em direção ao centro em alta frequência.
+                float stableDepth = max(0.001, waterDepth - input.waveData.y * 0.85);
+
                 // 4.1 Contorno Nítido de Contato na Margem e Obstáculos
-                // Cria um outline nítido na linha de encontro com a terra (0 a 4cm), sem preencher o corpo da água
-                float rimFactor = 1.0 - saturate(waterDepth / max(0.005, _ContactRimWidth));
+                // Cria um outline nítido na linha de encontro com a terra (0 a 3.5cm), sem preencher o canal
+                float rimFactor = 1.0 - saturate(stableDepth / max(0.005, _ContactRimWidth));
                 float contactRim = smoothstep(0.25, 0.85, rimFactor * 1.15 - foamNoise * 0.35);
 
-                // 4.2 Espuma de Arrebentação e Maré (com respiração suave e preservação de água translúcida)
+                // 4.2 Espuma de Arrebentação e Maré (com amortecimento em gargantas estreitas)
                 float tidalCycle = sin(t * _ShoreWaveSpeed + input.positionWS.x * 0.2 + input.positionWS.z * 0.2) * _ShoreTideAmount;
-                float effectiveShoreDist = max(0.05, _FoamDistance * (1.0 + tidalCycle));
-                float shoreFactor = saturate(1.0 - waterDepth / effectiveShoreDist);
 
-                // Atenuação suave em águas ultra rasas: poças rasas mantêm apenas a borda de contato limpa
+                // Em canais estreitos/gargantas onde as margens são próximas e rasas, amortece a respiração de maré
+                // para evitar que as ondas das duas margens se acumulem e se sobreponham no centro
+                float tidalDamp = smoothstep(0.06, 0.32, stableDepth);
+                float effectiveShoreDist = max(0.04, _FoamDistance * (1.0 + tidalCycle * tidalDamp));
+                float shoreFactor = saturate(1.0 - stableDepth / effectiveShoreDist);
+
+                // Atenuação suave em águas ultra rasas: mantém apenas a borda de contato limpa
                 // e o centro translúcido com cáusticas, sem virar uma mancha branca sólida
-                float washFoamShallowFade = smoothstep(0.02, 0.08, waterDepth);
+                float washFoamShallowFade = smoothstep(0.02, 0.08, stableDepth);
                 float foamThreshold = lerp(0.85, _FoamCutoff, shoreFactor);
                 float washFoam = smoothstep(foamThreshold, foamThreshold + 0.08, foamNoise) * shoreFactor * washFoamShallowFade;
 
@@ -348,10 +357,10 @@ Shader "Duskborn/LowPolyWater"
 
                 // 4.3 Espuma de Crista de Onda (Whitecaps ativas apenas em águas abertas/profundas)
                 float crestFoam = 0.0;
-                if (input.waveHeight > _CrestFoamThreshold)
+                if (input.waveData.x > _CrestFoamThreshold)
                 {
-                    float deepWaterMask = smoothstep(0.18, 0.45, waterDepth);
-                    float crestFrac = (input.waveHeight - _CrestFoamThreshold) / max(0.01, 1.0 - _CrestFoamThreshold);
+                    float deepWaterMask = smoothstep(0.18, 0.45, stableDepth);
+                    float crestFrac = (input.waveData.x - _CrestFoamThreshold) / max(0.01, 1.0 - _CrestFoamThreshold);
                     crestFoam = smoothstep(_FoamCutoff, _FoamCutoff + 0.15, crestFrac * 1.3 - foamNoise * 0.5) * deepWaterMask;
                 }
 
@@ -389,7 +398,7 @@ Shader "Duskborn/LowPolyWater"
 
                 // Subsurface Scattering (Translucidez vibrante na crista da onda contra o Sol)
                 half sssDot = saturate(dot(viewDirWS, -mainLight.direction));
-                half sss = pow(sssDot, _SSSPower) * saturate(input.waveHeight * 1.8) * _SSSIntensity * shadowSoft;
+                half sss = pow(sssDot, _SSSPower) * saturate(input.waveData.x * 1.8) * _SSSIntensity * shadowSoft;
                 half3 sssHighlight = _SSSColor.rgb * (sss * mainLight.color);
 
                 // Reflexão de Fresnel no Horizonte (com base F0 mínima para manter brilho em visão perpendicular)

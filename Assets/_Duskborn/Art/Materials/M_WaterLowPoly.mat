@@ -33,19 +33,21 @@ Material:
     - _CausticsSpeed: 0.2
     - _CausticsStrength: 0.1
     - _ChromaticAberration: 0.012
-    - _CrestFoamThreshold: 0.72
+    - _ContactRimWidth: 0.04
+    - _CrestFoamThreshold: 0.75
     - _DepthDensity: 0.85
     - _FacetStrength: 0
-    - _FoamCutoff: 0.48
-    - _FoamDistance: 0.95
-    - _FoamNoiseScale: 3.5
+    - _FoamCutoff: 0.52
+    - _FoamDistance: 0.3
+    - _FoamNoiseScale: 4
+    - _FoamNoiseSpeed: 0.08
     - _FresnelBase: 0.18
     - _FresnelPower: 3.5
     - _RefractionStrength: 0.045
     - _SSSIntensity: 0.65
     - _SSSPower: 3
-    - _ShoreTideAmount: 0.35
-    - _ShoreWaveSpeed: 1.4
+    - _ShoreTideAmount: 0.12
+    - _ShoreWaveSpeed: 0.55
     - _SunSpecCutoff: 0.65
     - _SunSpecIntensity: 1.35
     - _SunSpecPower: 64

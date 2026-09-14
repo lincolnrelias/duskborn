@@ -24,12 +24,14 @@ Shader "Duskborn/LowPolyWater"
 
         [Header(Stylized Foam System)]
         _FoamColor("Foam Color", Color) = (0.98, 0.99, 1.0, 1.0)
-        _FoamDistance("Shoreline Foam Reach", Range(0.1, 3.0)) = 0.95
-        _FoamNoiseScale("Foam Bubble Scale", Range(0.5, 10.0)) = 3.5
-        _FoamCutoff("Foam Edge Sharpness", Range(0.1, 0.9)) = 0.48
-        _ShoreWaveSpeed("Tidal Breathing Speed", Range(0.2, 4.0)) = 1.4
-        _ShoreTideAmount("Tidal Reach Variation", Range(0.0, 1.0)) = 0.35
-        _CrestFoamThreshold("Wave Crest Foam Trigger", Range(0.3, 1.0)) = 0.72
+        _FoamDistance("Shoreline Foam Reach", Range(0.05, 1.5)) = 0.30
+        _ContactRimWidth("Shore Contact Rim Width", Range(0.01, 0.15)) = 0.04
+        _FoamNoiseScale("Foam Bubble Scale", Range(0.5, 10.0)) = 4.0
+        _FoamNoiseSpeed("Foam Drift Speed", Range(0.01, 0.5)) = 0.08
+        _FoamCutoff("Foam Bubble Coverage", Range(0.1, 0.9)) = 0.52
+        _ShoreWaveSpeed("Tidal Breathing Speed", Range(0.1, 2.0)) = 0.55
+        _ShoreTideAmount("Tidal Reach Variation", Range(0.0, 0.5)) = 0.12
+        _CrestFoamThreshold("Wave Crest Foam Trigger", Range(0.3, 1.0)) = 0.75
 
         [Header(Gerstner Waves and Surface Motion)]
         _WaveSpeed("Wave Overall Speed", Range(0.1, 3.0)) = 1.15
@@ -116,7 +118,9 @@ Shader "Duskborn/LowPolyWater"
 
                 float4 _FoamColor;
                 float  _FoamDistance;
+                float  _ContactRimWidth;
                 float  _FoamNoiseScale;
+                float  _FoamNoiseSpeed;
                 float  _FoamCutoff;
                 float  _ShoreWaveSpeed;
                 float  _ShoreTideAmount;
@@ -318,30 +322,40 @@ Shader "Duskborn/LowPolyWater"
                 half3 causticColor = _CausticsColor.rgb * (totalCaustic * shadowAtten * mainLight.color);
                 blendedBase += causticColor;
 
-                // 4. Sistema de Espuma Estilizada Multi-Camada
-                float2 fUV1 = input.positionWS.xz * _FoamNoiseScale + float2(0.3, 0.2) * (t * 0.45);
-                float2 fUV2 = input.positionWS.xz * (_FoamNoiseScale * 1.75) - float2(0.25, 0.35) * (t * 0.65);
+                // 4. Sistema de Espuma Estilizada Multi-Camada (Otimizado para poças e margens)
+                float foamSpeed = _FoamNoiseSpeed;
+                float2 fUV1 = input.positionWS.xz * _FoamNoiseScale + float2(0.25, 0.18) * (t * foamSpeed);
+                float2 fUV2 = input.positionWS.xz * (_FoamNoiseScale * 1.65) - float2(0.18, 0.22) * (t * foamSpeed * 1.25);
                 float foamNoise = Voronoi2D(fUV1) * 0.65 + Voronoi2D(fUV2) * 0.35;
 
-                // Espuma de Arrebentação e Margem com Respiração de Maré
-                float tidalCycle = sin(t * _ShoreWaveSpeed + input.positionWS.x * 0.25 + input.positionWS.z * 0.25) * _ShoreTideAmount;
-                float effectiveShoreDist = max(0.01, _FoamDistance * (1.0 + tidalCycle));
-                float shoreProximity = 1.0 - saturate(waterDepth / effectiveShoreDist);
+                // 4.1 Contorno Nítido de Contato na Margem e Obstáculos
+                // Cria um outline nítido na linha de encontro com a terra (0 a 4cm), sem preencher o corpo da água
+                float rimFactor = 1.0 - saturate(waterDepth / max(0.005, _ContactRimWidth));
+                float contactRim = smoothstep(0.25, 0.85, rimFactor * 1.15 - foamNoise * 0.35);
 
-                // Corte estilizado cel-shaded da espuma
-                float shoreFoam = smoothstep(_FoamCutoff - 0.08, _FoamCutoff + 0.08, shoreProximity * 1.45 - foamNoise * 0.65);
-                float contactRim = smoothstep(0.01, 0.06, waterDepth) * (1.0 - smoothstep(0.06, 0.16, waterDepth));
-                shoreFoam = saturate(shoreFoam + contactRim * 0.5);
+                // 4.2 Espuma de Arrebentação e Maré (com respiração suave e preservação de água translúcida)
+                float tidalCycle = sin(t * _ShoreWaveSpeed + input.positionWS.x * 0.2 + input.positionWS.z * 0.2) * _ShoreTideAmount;
+                float effectiveShoreDist = max(0.05, _FoamDistance * (1.0 + tidalCycle));
+                float shoreFactor = saturate(1.0 - waterDepth / effectiveShoreDist);
 
-                // Espuma de Crista de Onda (Whitecaps)
+                // Atenuação suave em águas ultra rasas: poças rasas mantêm apenas a borda de contato limpa
+                // e o centro translúcido com cáusticas, sem virar uma mancha branca sólida
+                float washFoamShallowFade = smoothstep(0.02, 0.08, waterDepth);
+                float foamThreshold = lerp(0.85, _FoamCutoff, shoreFactor);
+                float washFoam = smoothstep(foamThreshold, foamThreshold + 0.08, foamNoise) * shoreFactor * washFoamShallowFade;
+
+                float shoreFoam = saturate(contactRim + washFoam);
+
+                // 4.3 Espuma de Crista de Onda (Whitecaps ativas apenas em águas abertas/profundas)
                 float crestFoam = 0.0;
                 if (input.waveHeight > _CrestFoamThreshold)
                 {
+                    float deepWaterMask = smoothstep(0.18, 0.45, waterDepth);
                     float crestFrac = (input.waveHeight - _CrestFoamThreshold) / max(0.01, 1.0 - _CrestFoamThreshold);
-                    crestFoam = smoothstep(_FoamCutoff, _FoamCutoff + 0.15, crestFrac * 1.3 - foamNoise * 0.5);
+                    crestFoam = smoothstep(_FoamCutoff, _FoamCutoff + 0.15, crestFrac * 1.3 - foamNoise * 0.5) * deepWaterMask;
                 }
 
-                // Espuma de Contato e Esteira nos Pés do Jogador (ponto médio estilizado)
+                // 4.4 Espuma de Contato e Esteira nos Pés do Jogador (ponto médio estilizado)
                 float playerFoam = 0.0;
                 if (_PlayerWaterData.w > 0.01)
                 {

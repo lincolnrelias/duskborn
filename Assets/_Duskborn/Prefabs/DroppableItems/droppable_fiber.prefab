@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 3326474339435070506}
   - component: {fileID: 7190483650033509852}
   m_Layer: 9
-  m_Name: droppable_log
+  m_Name: droppable_fiber
   m_TagString: Resource
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -32,7 +32,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 15, y: 30, z: 30}
+  m_LocalScale: {x: 2.5, y: 2.5, z: 2.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -67,14 +67,14 @@ MonoBehaviour:
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 2
+  <PrefabId>k__BackingField: 0
   <SpawnableCollectionId>k__BackingField: 0
-  <AssetPathHash>k__BackingField: 18014749864378002816
+  <AssetPathHash>k__BackingField: 0
   SceneId: 0
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
     Rotation: {x: 0, y: 0, z: 0, w: 1}
-    Scale: {x: 20, y: 20, z: 20}
+    Scale: {x: 2.5, y: 2.5, z: 2.5}
     IsValid: 1
   <IsNested>k__BackingField: 0
   WasActiveDuringEdit: 0
@@ -94,7 +94,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584209271601482715
+  _initializedTimestamp: 0
 --- !u!54 &4903646720888488186
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -165,7 +165,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 76a7bab969c316e4bb67d23d55402b77, type: 2}
+  - {fileID: 2100000, guid: 8f772b3b80bbe084eb02b378f58b4551, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -196,7 +196,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5752967656333843250}
-  m_Mesh: {fileID: -8219245959427184297, guid: 4f7281b8ff0cb454d91accb3059cca72, type: 3}
+  m_Mesh: {fileID: 4300000, guid: 7d1c7ca4cc58c4d43850e2414c6dd526, type: 3}
 --- !u!64 &7190483650033509852
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -218,4 +218,4 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 1
   m_CookingOptions: 30
-  m_Mesh: {fileID: -8219245959427184297, guid: 4f7281b8ff0cb454d91accb3059cca72, type: 3}
+  m_Mesh: {fileID: 4300000, guid: 7d1c7ca4cc58c4d43850e2414c6dd526, type: 3}

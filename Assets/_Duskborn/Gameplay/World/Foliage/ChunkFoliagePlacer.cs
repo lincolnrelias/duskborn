@@ -43,9 +43,9 @@ namespace Duskborn.Gameplay.World.Foliage
         [Range(0, 6000)]
         [SerializeField] private int grassTuftsPerChunk = 1800;
 
-        [Tooltip("Quantidade de arbustos gerados por chunk.")]
+        [Tooltip("Quantidade de arbustos gerados por chunk (desativado por padrão).")]
         [Range(0, 100)]
-        [SerializeField] private int bushesPerChunk = 32;
+        [SerializeField] private int bushesPerChunk = 0;
 
         [Header("Distribuição de Arquétipos de Grama")]
         [Tooltip("Proporção de grama carpete densa para cobertura contínua de solo (Dense Carpet Grass).")]
@@ -147,23 +147,23 @@ namespace Duskborn.Gameplay.World.Foliage
             {
                 case FoliageDensityPreset.Low:
                     grassTuftsPerChunk = 400;
-                    bushesPerChunk = 12;
+                    bushesPerChunk = 0;
                     break;
                 case FoliageDensityPreset.Medium:
                     grassTuftsPerChunk = 950;
-                    bushesPerChunk = 20;
+                    bushesPerChunk = 0;
                     break;
                 case FoliageDensityPreset.High:
                     grassTuftsPerChunk = 1800;
-                    bushesPerChunk = 32;
+                    bushesPerChunk = 0;
                     break;
                 case FoliageDensityPreset.Ultra_Genshin:
                     grassTuftsPerChunk = 3200;
-                    bushesPerChunk = 48;
+                    bushesPerChunk = 0;
                     break;
                 case FoliageDensityPreset.Cinematic_Lush:
                     grassTuftsPerChunk = 5000;
-                    bushesPerChunk = 64;
+                    bushesPerChunk = 0;
                     break;
             }
         }
@@ -262,8 +262,11 @@ namespace Duskborn.Gameplay.World.Foliage
             // 1. Gera o lote consolidado de grama e flores (1 draw call por chunk)
             BuildGrassBatch(config, seed, rng, minX, maxX, minZ, maxZ, halfMapX, halfMapZ, centerRadiusSqr, occupancyMap);
 
-            // 2. Gera o lote consolidado de arbustos e samambaias (1 draw call por chunk)
-            BuildBushBatch(config, seed, rng, minX, maxX, minZ, maxZ, halfMapX, halfMapZ, centerRadiusSqr, occupancyMap);
+            // 2. Arbustos (desativados a pedido do usuário por artefatos visuais)
+            if (bushesPerChunk > 0)
+            {
+                BuildBushBatch(config, seed, rng, minX, maxX, minZ, maxZ, halfMapX, halfMapZ, centerRadiusSqr, occupancyMap);
+            }
         }
 
         private float EvaluateMeadowPatch(float worldX, float worldZ, int activeSeed)

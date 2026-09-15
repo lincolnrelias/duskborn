@@ -1,5 +1,7 @@
 ; FBX 6.1.0 project file
 ; Generated for Duskborn
+; ----------------------------------------------------
+
 FBXHeaderExtension:  {
 	FBXHeaderVersion: 1003
 	FBXVersion: 6100
@@ -8,7 +10,7 @@ FBXHeaderExtension:  {
 		Year: 2026
 		Month: 09
 		Day: 15
-		Hour: 17
+		Hour: 18
 		Minute: 00
 		Second: 00
 		Millisecond: 0
@@ -18,7 +20,7 @@ FBXHeaderExtension:  {
 		FlagPLE: 0
 	}
 }
-CreationTime: "2026-09-15 17:00:00:000"
+CreationTime: "2026-09-15 18:00:00:000"
 Creator: "Duskborn Exporter"
 
 Definitions:  {
@@ -72,32 +74,56 @@ Objects:  {
 		LayerElementMaterial: 0 {
 			Version: 101
 			Name: ""
-			MappingInformationType: "AllSame"
+			MappingInformationType: "ByPolygon"
 			ReferenceInformationType: "IndexToDirect"
-			Materials: 0
+			Materials: 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 		}
-	}
-	Geometry: "Geometry::", "Mesh" {
+		Layer: 0 {
+			Version: 100
+			LayerElement:  {
+				Type: "LayerElementNormal"
+				TypedIndex: 0
+			}
+			LayerElement:  {
+				Type: "LayerElementUV"
+				TypedIndex: 0
+			}
+			LayerElement:  {
+				Type: "LayerElementMaterial"
+				TypedIndex: 0
+			}
+		}
 	}
 	Material: "Material::Mat_Default", "" {
 		Version: 102
 		ShadingModel: "lambert"
 		MultiLayer: 0
 		Properties60:  {
-			Property: "ShadingModel", "KString", "", "Lambert"
-			Property: "Diffuse", "ColorRGB", "A",0.8,0.8,0.8
+			Property: "DiffuseColor", "ColorRGB", "",0.70,0.70,0.72
+		}
+	}
+	GlobalSettings:  {
+		Version: 1000
+		Properties60:  {
+			Property: "UpAxis", "int", "",1
+			Property: "UpAxisSign", "int", "",1
+			Property: "FrontAxis", "int", "",2
+			Property: "FrontAxisSign", "int", "",1
+			Property: "CoordAxis", "int", "",0
+			Property: "CoordAxisSign", "int", "",1
+			Property: "UnitScaleFactor", "double", "",1
 		}
 	}
 }
 
 Relations:  {
 	Model: "Model::FiberReeds", "Mesh" {
-		Channel: "OO" {
-			Target: "Material::Mat_Default"
-		}
+	}
+	Material: "Material::Mat_Default", "" {
 	}
 }
 
-Takes:  {
-	Current: ""
+Connections:  {
+	Connect: "OO", "Model::FiberReeds", "Model::Scene"
+	Connect: "OO", "Material::Mat_Default", "Model::FiberReeds"
 }

@@ -1,5 +1,7 @@
 ; FBX 6.1.0 project file
 ; Generated for Duskborn
+; ----------------------------------------------------
+
 FBXHeaderExtension:  {
 	FBXHeaderVersion: 1003
 	FBXVersion: 6100
@@ -8,7 +10,7 @@ FBXHeaderExtension:  {
 		Year: 2026
 		Month: 09
 		Day: 15
-		Hour: 15
+		Hour: 18
 		Minute: 00
 		Second: 00
 		Millisecond: 0
@@ -18,7 +20,7 @@ FBXHeaderExtension:  {
 		FlagPLE: 0
 	}
 }
-CreationTime: "2026-09-15 15:00:00:000"
+CreationTime: "2026-09-15 18:00:00:000"
 Creator: "Duskborn Exporter"
 
 Definitions:  {
@@ -72,9 +74,9 @@ Objects:  {
 		LayerElementMaterial: 0 {
 			Version: 101
 			Name: ""
-			MappingInformationType: "AllSame"
+			MappingInformationType: "ByPolygon"
 			ReferenceInformationType: "IndexToDirect"
-			Materials: 0
+			Materials: 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 		}
 		Layer: 0 {
 			Version: 100
@@ -97,20 +99,31 @@ Objects:  {
 		ShadingModel: "lambert"
 		MultiLayer: 0
 		Properties60:  {
-			Property: "ShadingModel", "KString", "", "Lambert"
-			Property: "Diffuse", "ColorRGB", "A",0.8,0.8,0.8
+			Property: "DiffuseColor", "ColorRGB", "",0.70,0.70,0.72
+		}
+	}
+	GlobalSettings:  {
+		Version: 1000
+		Properties60:  {
+			Property: "UpAxis", "int", "",1
+			Property: "UpAxisSign", "int", "",1
+			Property: "FrontAxis", "int", "",2
+			Property: "FrontAxisSign", "int", "",1
+			Property: "CoordAxis", "int", "",0
+			Property: "CoordAxisSign", "int", "",1
+			Property: "UnitScaleFactor", "double", "",1
 		}
 	}
 }
 
 Relations:  {
 	Model: "Model::StoneOutcrop", "Mesh" {
-		Channel: "OO" {
-			Target: "Material::Mat_Default"
-		}
+	}
+	Material: "Material::Mat_Default", "" {
 	}
 }
 
-Takes:  {
-	Current: ""
+Connections:  {
+	Connect: "OO", "Model::StoneOutcrop", "Model::Scene"
+	Connect: "OO", "Material::Mat_Default", "Model::StoneOutcrop"
 }

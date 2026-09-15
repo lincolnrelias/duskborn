@@ -179,6 +179,13 @@ namespace Duskborn.Editor
                 {
                     SpatialOccupancyMapTests.RunAllTests();
                 }
+
+                EditorGUILayout.Space(4);
+                GUI.backgroundColor = new Color(0.85f, 0.45f, 0.95f);
+                if (GUILayout.Button("🔨 Reimportar & Validar Modelos/Prefabs de Recursos", GUILayout.Height(28)))
+                {
+                    ReimportAndValidateResourceNodes(manager);
+                }
             }
 
             if (manager.generateWaterPlane)
@@ -330,6 +337,106 @@ namespace Duskborn.Editor
             {
                 Debug.LogError($"[ChunkGridManagerEditor] Não foi possível carregar o preset em: {assetPath}");
             }
+        }
+
+        private static void ReimportAndValidateResourceNodes(ChunkGridManager manager)
+        {
+            string[] fbxPaths = new string[]
+            {
+                "Assets/_Duskborn/Art/Models/Tree_Pine.fbx",
+                "Assets/_Duskborn/Art/Models/Tree_Birch.fbx",
+                "Assets/_Duskborn/Art/Models/StoneRock.fbx",
+                "Assets/_Duskborn/Art/Models/StoneMonolith.fbx",
+                "Assets/_Duskborn/Art/Models/StoneOutcrop.fbx",
+                "Assets/_Duskborn/Art/Models/IronRidge.fbx",
+                "Assets/_Duskborn/Art/Models/IronVein.fbx",
+                "Assets/_Duskborn/Art/Models/FiberHerbs.fbx",
+                "Assets/_Duskborn/Art/Models/FiberFern.fbx",
+                "Assets/_Duskborn/Art/Models/FiberReeds.fbx"
+            };
+
+            for (int i = 0; i < fbxPaths.Length; i++)
+            {
+                AssetDatabase.ImportAsset(fbxPaths[i], ImportAssetOptions.ForceUpdate);
+            }
+
+            string[] prefabPaths = new string[]
+            {
+                "Assets/_Duskborn/Prefabs/World/ResourceNode.prefab",
+                "Assets/_Duskborn/Prefabs/World/ResourceNode_Pine.prefab",
+                "Assets/_Duskborn/Prefabs/World/ResourceNode_Birch.prefab",
+                "Assets/_Duskborn/Prefabs/World/Node_Stone.prefab",
+                "Assets/_Duskborn/Prefabs/World/Node_Stone_Monolith.prefab",
+                "Assets/_Duskborn/Prefabs/World/Node_Stone_Outcrop.prefab",
+                "Assets/_Duskborn/Prefabs/World/Node_Iron.prefab",
+                "Assets/_Duskborn/Prefabs/World/Node_Iron_Ridge.prefab",
+                "Assets/_Duskborn/Prefabs/World/Node_Iron_Vein.prefab",
+                "Assets/_Duskborn/Prefabs/World/Node_Fiber.prefab",
+                "Assets/_Duskborn/Prefabs/World/Node_Fiber_Herbs.prefab",
+                "Assets/_Duskborn/Prefabs/World/Node_Fiber_Fern.prefab"
+            };
+
+            for (int i = 0; i < prefabPaths.Length; i++)
+            {
+                AssetDatabase.ImportAsset(prefabPaths[i], ImportAssetOptions.ForceUpdate);
+            }
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            if (manager != null && manager.propsPlacer != null && manager.propsPlacer.PropsContainer != null)
+            {
+                var sceneNobs = manager.propsPlacer.PropsContainer.GetComponentsInChildren<FishNet.Object.NetworkObject>(true);
+                var reserializeMethod = typeof(FishNet.Object.NetworkObject).GetMethod("ReserializeEditorSetValues",
+                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+                for (int i = 0; i < sceneNobs.Length; i++)
+                {
+                    if (sceneNobs[i] != null)
+                    {
+                        reserializeMethod?.Invoke(sceneNobs[i], new object[] { true, true });
+                        EditorUtility.SetDirty(sceneNobs[i]);
+                    }
+                }
+            }
+
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("=== DUSKBORN MODEL & PREFAB VALIDATION ===");
+
+            int totalOk = 0;
+            for (int i = 0; i < prefabPaths.Length; i++)
+            {
+                string path = prefabPaths[i];
+                var go = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                if (go == null)
+                {
+                    sb.AppendLine($"❌ {path}: Falha ao carregar Prefab!");
+                    continue;
+                }
+
+                var mf = go.GetComponent<MeshFilter>();
+                var mr = go.GetComponent<MeshRenderer>();
+                var col = go.GetComponent<Collider>();
+                var nob = go.GetComponent<FishNet.Object.NetworkObject>();
+
+                bool hasMesh = mf != null && mf.sharedMesh != null && mf.sharedMesh.vertexCount > 0;
+                bool hasMat = mr != null && mr.sharedMaterial != null;
+                bool hasCol = col != null;
+                bool hasNob = nob != null && nob.PrefabId != FishNet.Object.NetworkObject.UNSET_PREFABID_VALUE;
+
+                string status = (hasMesh && hasMat && hasCol && hasNob) ? "✅ OK" : "⚠️ AVISO";
+                if (hasMesh && hasMat && hasCol && hasNob) totalOk++;
+
+                string meshInfo = hasMesh ? $"Mesh: '{mf.sharedMesh.name}' ({mf.sharedMesh.vertexCount} verts)" : "SEM MALHA!";
+                string matInfo = hasMat ? $"Mat: '{mr.sharedMaterial.name}'" : "SEM MATERIAL!";
+                string nobInfo = hasNob ? $"PrefabId: {nob.PrefabId}" : "NetworkObject PENDENTE";
+
+                sb.AppendLine($"{status} | {go.name,-24} | {meshInfo,-32} | {matInfo,-24} | {nobInfo}");
+            }
+
+            sb.AppendLine($"Resultado: {totalOk}/{prefabPaths.Length} prefabs 100% validados e sincronizados.");
+            Debug.Log(sb.ToString());
+            EditorUtility.DisplayDialog("Validação de Modelos", $"Validação concluída: {totalOk}/{prefabPaths.Length} prefabs validados com sucesso!\nConsulte a Console para o relatório completo.", "OK");
         }
     }
 }

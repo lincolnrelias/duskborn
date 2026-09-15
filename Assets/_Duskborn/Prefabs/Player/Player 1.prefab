@@ -208,7 +208,7 @@ MonoBehaviour:
     maxHP: 100
     damage: 10
     attackSpeed: 1
-    moveSpeed: 5
+    moveSpeed: 15
     critChance: 0
     critMultiplier: 1.5
     HPMultiplier: 1

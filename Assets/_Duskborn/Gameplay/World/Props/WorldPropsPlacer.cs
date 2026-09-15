@@ -264,6 +264,27 @@ namespace Duskborn.Gameplay.World
             // 4. Distribuição de Baús (Chests) com Escalonamento de Distância
             PlaceChests(terrainConfig, propsConfig, rng);
 
+#if UNITY_EDITOR
+            if (!Application.isPlaying && propsContainer != null)
+            {
+                NetworkObject[] nobs = propsContainer.GetComponentsInChildren<NetworkObject>(true);
+                int countReserialized = 0;
+                var reserializeMethod = typeof(NetworkObject).GetMethod("ReserializeEditorSetValues",
+                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+                for (int i = 0; i < nobs.Length; i++)
+                {
+                    if (nobs[i] != null)
+                    {
+                        reserializeMethod?.Invoke(nobs[i], new object[] { true, true });
+                        UnityEditor.EditorUtility.SetDirty(nobs[i]);
+                        countReserialized++;
+                    }
+                }
+                DuskLog.Log(LogChannel.World, $"[WorldPropsPlacer] Serializados {countReserialized} NetworkObjects com SceneIds válidos no Editor.");
+            }
+#endif
+
             DuskLog.Log(LogChannel.World, $"[WorldPropsPlacer] Geração de props concluída! Total de posições: {_placedPositions.Count}, Ocupação indexada: {_occupancyMap.Count}.");
         }
 

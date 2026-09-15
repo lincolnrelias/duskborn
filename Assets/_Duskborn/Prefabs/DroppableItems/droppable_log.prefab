@@ -67,14 +67,14 @@ MonoBehaviour:
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 2
+  <PrefabId>k__BackingField: 32
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 18014749864378002816
   SceneId: 0
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
     Rotation: {x: 0, y: 0, z: 0, w: 1}
-    Scale: {x: 20, y: 20, z: 20}
+    Scale: {x: 15, y: 30, z: 30}
     IsValid: 1
   <IsNested>k__BackingField: 0
   WasActiveDuringEdit: 0
@@ -94,7 +94,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584209271601482715
+  _initializedTimestamp: -8584120955576229850
 --- !u!54 &4903646720888488186
 Rigidbody:
   m_ObjectHideFlags: 0

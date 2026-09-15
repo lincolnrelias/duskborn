@@ -1,0 +1,23 @@
+fileFormatVersion: 2
+guid: 14b9c1083f2a41d98a2456b3c10a4003
+ModelImporter:
+  serializedVersion: 22
+  fileIDToRecycleName:
+    100000: //RootNode
+    400000: //RootNode
+    2100000: Mat_Default
+    2300000: //RootNode
+    3300000: //RootNode
+    4300000: StoneMonolith
+    7400000: Default Take
+    9500000: //RootNode
+  externalObjects: {}
+  materials:
+    importMaterials: 0
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  meshes:
+    globalScale: 1
+    useFileUnits: 1
+    weldVertices: 1

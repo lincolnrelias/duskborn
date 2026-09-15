@@ -14,6 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   propName: Fiber
   prefab: {fileID: 7967917925737338743, guid: b9454bca9bef49dabd2de10acef4c022, type: 3}
+  prefabVariations:
+  - {fileID: 7967917925737338743, guid: a1b2c3d4e5f647018000000000000007, type: 3}
+  - {fileID: 7967917925737338743, guid: a1b2c3d4e5f647018000000000000008, type: 3}
   clusterSettings:
     enableClustering: 1
     clustersPerChunk: 2
@@ -31,6 +34,7 @@ MonoBehaviour:
   maxHeight: 120
   maxSlopeAngle: 20
   scaleRange: {x: 0.75, y: 1.15}
+  heightScaleMultiplier: {x: 1, y: 1}
   randomYRotation: 1
   alignToNormal: 0
   exclusionRadius: 1.5

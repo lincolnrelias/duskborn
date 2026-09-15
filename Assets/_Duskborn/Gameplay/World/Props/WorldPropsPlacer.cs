@@ -656,9 +656,13 @@ namespace Duskborn.Gameplay.World
                         }
 
                         float scale = rng.Range(propDef.scaleRange.x, propDef.scaleRange.y);
-                        Vector3 scaleVec = Vector3.one * scale;
+                        float heightFactor = (propDef.heightScaleMultiplier.x > 0f && propDef.heightScaleMultiplier.y > 0f)
+                            ? rng.Range(propDef.heightScaleMultiplier.x, propDef.heightScaleMultiplier.y)
+                            : 1f;
+                        Vector3 scaleVec = new Vector3(scale, scale * heightFactor, scale);
 
-                        InstantiateProp(propDef.prefab, hit.point, rot, scaleVec);
+                        GameObject chosenPrefab = propDef.GetRandomPrefab(rng);
+                        InstantiateProp(chosenPrefab, hit.point, rot, scaleVec);
                         _placedPositions.Add(hit.point);
                         _occupancyMap.Register(hit.point, effectiveSolidRadius * scale, effectiveCanopyRadius * scale, OccupancyType.Resource_Solid);
                         break;
@@ -749,9 +753,13 @@ namespace Duskborn.Gameplay.World
                     }
 
                     float scale = rng.Range(propDef.scaleRange.x, propDef.scaleRange.y);
-                    Vector3 scaleVec = Vector3.one * scale;
+                    float heightFactor = (propDef.heightScaleMultiplier.x > 0f && propDef.heightScaleMultiplier.y > 0f)
+                        ? rng.Range(propDef.heightScaleMultiplier.x, propDef.heightScaleMultiplier.y)
+                        : 1f;
+                    Vector3 scaleVec = new Vector3(scale, scale * heightFactor, scale);
 
-                    InstantiateProp(propDef.prefab, hit.point, rot, scaleVec);
+                    GameObject chosenPrefab = propDef.GetRandomPrefab(rng);
+                    InstantiateProp(chosenPrefab, hit.point, rot, scaleVec);
                     _placedPositions.Add(hit.point);
                     _occupancyMap.Register(hit.point, effectiveSolidRadius * scale, effectiveCanopyRadius * scale, OccupancyType.Resource_Solid);
                     break;

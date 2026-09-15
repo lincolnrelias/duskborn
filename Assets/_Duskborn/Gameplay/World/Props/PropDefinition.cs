@@ -1,3 +1,4 @@
+using Duskborn.Core;
 using UnityEngine;
 
 namespace Duskborn.Gameplay.World
@@ -30,8 +31,29 @@ namespace Duskborn.Gameplay.World
         [Tooltip("Nome identificador do prop (ex: Árvore, Rocha, Minério de Ferro, Fibra).")]
         public string propName = "Tree";
 
-        [Tooltip("Prefab a ser instanciado.")]
+        [Tooltip("Prefab base a ser instanciado.")]
         public GameObject prefab;
+
+        [Tooltip("Variações de modelo/prefab para este prop (se preenchido, sorteia entre o base e as variações).")]
+        public GameObject[] prefabVariations;
+
+        /// <summary>
+        /// Sorteia deterministicamente um prefab entre o prefab base e suas variações.
+        /// </summary>
+        public GameObject GetRandomPrefab(SeededRNG rng = null)
+        {
+            if (prefabVariations != null && prefabVariations.Length > 0)
+            {
+                int total = 1 + prefabVariations.Length;
+                int choice = rng != null ? rng.Range(0, total) : UnityEngine.Random.Range(0, total);
+                if (choice > 0)
+                {
+                    var variant = prefabVariations[choice - 1];
+                    if (variant != null) return variant;
+                }
+            }
+            return prefab;
+        }
 
         [Header("Configuração de Agrupamento (Clusters)")]
         public ResourceClusterSettings clusterSettings = new ResourceClusterSettings();
@@ -80,6 +102,9 @@ namespace Duskborn.Gameplay.World
         [Header("Variação de Escala e Rotação")]
         [Tooltip("Intervalo de escala aleatória uniforme (mínimo, máximo).")]
         public Vector2 scaleRange = new Vector2(0.85f, 1.25f);
+
+        [Tooltip("Multiplicador aleatório de altura (eixo Y). (1, 1) mantém proporção perfeitamente uniforme.")]
+        public Vector2 heightScaleMultiplier = new Vector2(1f, 1f);
 
         [Tooltip("Aplica rotação aleatória no eixo vertical Y (0 a 360 graus).")]
         public bool randomYRotation = true;

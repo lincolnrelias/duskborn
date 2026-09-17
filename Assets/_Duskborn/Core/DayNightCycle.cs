@@ -19,6 +19,7 @@ namespace Duskborn.Core
         PreDawn     // Madrugada (Fim da noite)
     }
 
+    [ExecuteAlways]
     public class DayNightCycle : NetworkBehaviour
     {
         public static DayNightCycle Instance { get; private set; }
@@ -44,16 +45,16 @@ namespace Duskborn.Core
 
         [Header("Elevação Solar & Lunar (Anti-Sombras Esticadas)")]
         [Tooltip("Ângulo mínimo de elevação do Sol (evita sombras esticadas e distorcidas no amanhecer/entardecer).")]
-        [Range(30f, 60f)]
-        [SerializeField] private float minSunPitch = 40f;
+        [Range(15f, 60f)]
+        [SerializeField] private float minSunPitch = 32f;
         [Tooltip("Ângulo máximo de elevação do Sol ao meio-dia.")]
-        [Range(50f, 85f)]
+        [Range(45f, 85f)]
         [SerializeField] private float maxSunPitch = 68f;
         [Tooltip("Ângulo mínimo de elevação da Lua à noite.")]
-        [Range(30f, 60f)]
-        [SerializeField] private float minMoonPitch = 38f;
+        [Range(15f, 60f)]
+        [SerializeField] private float minMoonPitch = 28f;
         [Tooltip("Ângulo máximo de elevação da Lua à meia-noite.")]
-        [Range(50f, 85f)]
+        [Range(45f, 85f)]
         [SerializeField] private float maxMoonPitch = 62f;
 
         private readonly SyncVar<float> _timeRemaining = new();
@@ -91,7 +92,7 @@ namespace Duskborn.Core
 
         private void Awake()
         {
-            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+            if (Application.isPlaying && Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
 
             if (directionalLight == null)
@@ -103,12 +104,17 @@ namespace Duskborn.Core
                 }
             }
 
+            if (directionalLight != null && RenderSettings.sun == null)
+            {
+                RenderSettings.sun = directionalLight;
+            }
+
             if (skyboxMaterial == null)
             {
                 skyboxMaterial = RenderSettings.skybox;
             }
 
-            if (GetComponent<Duskborn.Audio.DayNightAudio>() == null)
+            if (Application.isPlaying && GetComponent<Duskborn.Audio.DayNightAudio>() == null)
                 gameObject.AddComponent<Duskborn.Audio.DayNightAudio>();
 #if UNITY_EDITOR
             if (skyboxMaterial == null || skyboxMaterial.shader == null || skyboxMaterial.shader.name != "Duskborn/StylizedSkybox")
@@ -121,6 +127,23 @@ namespace Duskborn.Core
                 }
             }
 #endif
+        }
+
+        private void OnEnable()
+        {
+            Instance = this;
+            if (directionalLight == null)
+            {
+                directionalLight = RenderSettings.sun != null ? RenderSettings.sun : FindAnyObjectByType<Light>();
+            }
+            if (directionalLight != null && RenderSettings.sun == null)
+            {
+                RenderSettings.sun = directionalLight;
+            }
+            if (skyboxMaterial == null)
+            {
+                skyboxMaterial = RenderSettings.skybox;
+            }
         }
 
         public override void OnStartServer()
@@ -141,6 +164,7 @@ namespace Duskborn.Core
             UpdateProgressiveTime();
             UpdateLighting();
 
+            if (!Application.isPlaying) return;
             if (!_running || !IsServerStarted) return;
 
             _timeRemaining.Value -= Time.deltaTime;
@@ -296,154 +320,63 @@ namespace Duskborn.Core
             float progress = PhaseProgress;
 
             // 1. Rotação Orbital Celeste Contínua e Sem Saltos
-            Quaternion sunRot;
-            Quaternion moonRot;
+            CalculateCelestialVectors(
+                isDay, progress, minSunPitch, maxSunPitch, minMoonPitch, maxMoonPitch,
+                out Vector3 sunSkyDir, out Vector3 moonSkyDir, out Vector3 lightForward
+            );
 
-            float sunPitch = Mathf.Lerp(minSunPitch, maxSunPitch, Mathf.Sin(progress * Mathf.PI));
-            float sunYaw = Mathf.Lerp(35f, 145f, progress);
-            sunRot = Quaternion.Euler(sunPitch, sunYaw, 0f);
-
-            float moonPitch = Mathf.Lerp(minMoonPitch, maxMoonPitch, Mathf.Sin(progress * Mathf.PI));
-            float moonYaw = Mathf.Lerp(215f, 325f, progress);
-            moonRot = Quaternion.Euler(moonPitch, moonYaw, 0f);
-
-            // Transição suave (Slerp) do DirectionalLight entre Pôr do Sol e Nascer da Lua (e vice-versa)
-            // sem descontinuidades nem estalos de sombra
             if (rotateCelestialBodies)
             {
-                if (isDay)
-                {
-                    if (progress > 0.90f)
-                    {
-                        // Últimos 10% do dia: transição contínua entre poente do sol e levante da lua
-                        float blend = Mathf.SmoothStep(0f, 1f, (progress - 0.90f) / 0.10f * 0.5f);
-                        directionalLight.transform.rotation = Quaternion.Slerp(sunRot, Quaternion.Euler(minMoonPitch, 215f, 0f), blend);
-                    }
-                    else if (progress < 0.08f)
-                    {
-                        // Primeiros 8% do dia: transição contínua a partir do poente da lua
-                        float blend = Mathf.SmoothStep(0f, 1f, 0.5f + (progress / 0.08f) * 0.5f);
-                        directionalLight.transform.rotation = Quaternion.Slerp(Quaternion.Euler(minMoonPitch, 325f, 0f), sunRot, blend);
-                    }
-                    else
-                    {
-                        directionalLight.transform.rotation = sunRot;
-                    }
-                }
-                else
-                {
-                    if (progress < 0.10f)
-                    {
-                        // Primeiros 10% da noite: continuidade perfeita com o fim do dia
-                        float blend = Mathf.SmoothStep(0f, 1f, 0.5f + (progress / 0.10f) * 0.5f);
-                        directionalLight.transform.rotation = Quaternion.Slerp(Quaternion.Euler(minSunPitch, 145f, 0f), moonRot, blend);
-                    }
-                    else if (progress > 0.92f)
-                    {
-                        // Últimos 8% da noite: início da passagem suave para a aurora
-                        float blend = Mathf.SmoothStep(0f, 1f, (progress - 0.92f) / 0.08f * 0.5f);
-                        directionalLight.transform.rotation = Quaternion.Slerp(moonRot, Quaternion.Euler(minSunPitch, 35f, 0f), blend);
-                    }
-                    else
-                    {
-                        directionalLight.transform.rotation = moonRot;
-                    }
-                }
-            }
-
-            // Vetores celestes contínuos para o Skybox (Sol afunda suavemente sob o horizonte à noite, Lua de dia)
-            Vector3 sunSkyDir;
-            Vector3 moonSkyDir;
-
-            if (isDay)
-            {
-                float skySunPitch = Mathf.Sin(progress * Mathf.PI) * maxSunPitch;
-                float skySunYaw = Mathf.Lerp(35f, 145f, progress);
-                sunSkyDir = Quaternion.Euler(skySunPitch, skySunYaw, 0f) * Vector3.forward;
-
-                float skyMoonPitch = -Mathf.Sin(progress * Mathf.PI) * maxMoonPitch;
-                float skyMoonYaw = Mathf.Lerp(215f, 325f, progress);
-                moonSkyDir = Quaternion.Euler(skyMoonPitch, skyMoonYaw, 0f) * Vector3.forward;
-            }
-            else
-            {
-                float skySunPitch = -Mathf.Sin(progress * Mathf.PI) * maxSunPitch;
-                float skySunYaw = Mathf.Lerp(145f, 395f, progress);
-                sunSkyDir = Quaternion.Euler(skySunPitch, skySunYaw, 0f) * Vector3.forward;
-
-                float skyMoonPitch = Mathf.Sin(progress * Mathf.PI) * maxMoonPitch;
-                float skyMoonYaw = Mathf.Lerp(215f, 325f, progress);
-                moonSkyDir = Quaternion.Euler(skyMoonPitch, skyMoonYaw, 0f) * Vector3.forward;
+                directionalLight.transform.rotation = Quaternion.LookRotation(lightForward, Vector3.up);
             }
 
             // 2. Cor e Intensidade Progressivas da Luz Direcional
+            Color lightColor;
             if (dayNightLightColor != null && dayNightLightColor.colorKeys.Length > 2)
             {
-                directionalLight.color = dayNightLightColor.Evaluate(isDay ? progress * 0.5f : 0.5f + progress * 0.5f);
+                lightColor = dayNightLightColor.Evaluate(isDay ? progress * 0.5f : 0.5f + progress * 0.5f);
             }
             else
             {
-                directionalLight.color = EvaluateProceduralLightColor(isDay, progress);
+                lightColor = EvaluateProceduralLightColor(isDay, progress);
             }
 
+            // Boss Night 7: Matiz carmesim do chefe
+            bool isBossNight = !isDay && CurrentNight >= TotalNights;
+            if (isBossNight)
+            {
+                lightColor = Color.Lerp(lightColor, new Color(1.0f, 0.28f, 0.22f), 0.75f);
+            }
+            directionalLight.color = lightColor;
+
+            float intensity;
             if (dayNightIntensity != null && dayNightIntensity.keys.Length > 0)
             {
-                directionalLight.intensity = dayNightIntensity.Evaluate(isDay ? progress * 0.5f : 0.5f + progress * 0.5f);
+                intensity = dayNightIntensity.Evaluate(isDay ? progress * 0.5f : 0.5f + progress * 0.5f);
             }
             else
             {
-                directionalLight.intensity = EvaluateProceduralIntensity(isDay, progress);
+                intensity = EvaluateProceduralIntensity(isDay, progress);
             }
+            if (isBossNight)
+            {
+                intensity = Mathf.Max(intensity, 0.42f);
+            }
+            directionalLight.intensity = intensity;
+
+            // Ajuste dinâmico de sombra (sombras nítidas de dia, etéreas e suaves à noite)
+            directionalLight.shadowStrength = isDay 
+                ? Mathf.Lerp(0.75f, 0.85f, Mathf.Sin(progress * Mathf.PI))
+                : (isBossNight ? 0.70f : 0.55f);
 
             // 3. Fator de Transição Contínuo do Skybox (0 = Dia, 1 = Noite)
-            // Continuidade exata: t=1.0 de dia coincide exatamente com t=0.0 de noite (0.65f), e vice-versa no amanhecer (0.50f)
-            float nightBlend;
-            if (skyboxNightBlendCurve != null && skyboxNightBlendCurve.keys.Length > 0)
-            {
-                nightBlend = skyboxNightBlendCurve.Evaluate(isDay ? progress * 0.5f : 0.5f + progress * 0.5f);
-            }
-            else
-            {
-                if (isDay)
-                {
-                    if (progress < 0.15f)
-                    {
-                        // Alvorecer: transita de 0.50f (aurora da madrugada) para 0.0f (dia límpido)
-                        nightBlend = Mathf.Lerp(0.50f, 0.0f, Mathf.SmoothStep(0f, 1f, progress / 0.15f));
-                    }
-                    else if (progress > 0.80f)
-                    {
-                        // Crepúsculo: transita suavemente de 0.0f para 0.65f (pôr do sol avermelhado)
-                        nightBlend = Mathf.Lerp(0.0f, 0.65f, Mathf.SmoothStep(0f, 1f, (progress - 0.80f) / 0.20f));
-                    }
-                    else
-                    {
-                        nightBlend = 0f;
-                    }
-                }
-                else
-                {
-                    if (progress < 0.15f)
-                    {
-                        // Início da noite: continua de 0.65f até 1.0f (noite completa)
-                        nightBlend = Mathf.Lerp(0.65f, 1.0f, Mathf.SmoothStep(0f, 1f, progress / 0.15f));
-                    }
-                    else if (progress > 0.82f)
-                    {
-                        // Madrugada: transita suavemente de 1.0f para 0.50f (primeira claridade da alvorada)
-                        nightBlend = Mathf.Lerp(1.0f, 0.50f, Mathf.SmoothStep(0f, 1f, (progress - 0.82f) / 0.18f));
-                    }
-                    else
-                    {
-                        nightBlend = 1f;
-                    }
-                }
-            }
+            float nightBlend = CalculateNightBlendFactor(isDay, progress, skyboxNightBlendCurve);
 
             // 4. Atualização das propriedades do Material Skybox
             if (skyboxMaterial != null)
             {
                 skyboxMaterial.SetFloat("_DayNightBlend", nightBlend);
+                skyboxMaterial.SetFloat("_BossNightBlend", isBossNight ? 1.0f : 0.0f);
                 skyboxMaterial.SetVector("_SunDirection", sunSkyDir);
                 skyboxMaterial.SetVector("_MoonDirection", moonSkyDir);
 
@@ -459,6 +392,11 @@ namespace Duskborn.Core
                     Color duskCol = skyboxMaterial.HasProperty("_DuskDawnColor") 
                         ? skyboxMaterial.GetColor("_DuskDawnColor") 
                         : new Color(1.0f, 0.48f, 0.22f);
+
+                    if (isBossNight)
+                    {
+                        nightHoriz = Color.Lerp(nightHoriz, new Color(0.55f, 0.12f, 0.10f), 0.85f);
+                    }
 
                     Color horizonCol = Color.Lerp(dayHoriz, nightHoriz, nightBlend);
 
@@ -493,13 +431,179 @@ namespace Duskborn.Core
                     Color dayGround = skyboxMaterial.HasProperty("_DayGroundColor") ? skyboxMaterial.GetColor("_DayGroundColor") : new Color(0.35f, 0.45f, 0.38f);
                     Color nightGround = skyboxMaterial.HasProperty("_NightGroundColor") ? skyboxMaterial.GetColor("_NightGroundColor") : new Color(0.03f, 0.04f, 0.08f);
 
+                    if (isBossNight)
+                    {
+                        nightZenith = Color.Lerp(nightZenith, new Color(0.25f, 0.05f, 0.07f), 0.85f);
+                        nightGround = Color.Lerp(nightGround, new Color(0.12f, 0.02f, 0.03f), 0.85f);
+                    }
+
                     RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
                     RenderSettings.ambientSkyColor = Color.Lerp(dayZenith * 0.65f, nightZenith * 0.45f, nightBlend);
                     RenderSettings.ambientEquatorColor = Color.Lerp(horizonCol * 0.55f, nightHoriz * 0.35f, nightBlend);
                     RenderSettings.ambientGroundColor = Color.Lerp(dayGround * 0.45f, nightGround * 0.25f, nightBlend);
+
+                    // Sincronização da cor de sombra subtrativa
+                    Color dayShadowColor = new Color(0.42f, 0.48f, 0.63f, 1.0f);
+                    Color nightShadowColor = isBossNight ? new Color(0.35f, 0.10f, 0.12f, 1.0f) : new Color(0.12f, 0.14f, 0.25f, 1.0f);
+                    RenderSettings.subtractiveShadowColor = Color.Lerp(dayShadowColor, nightShadowColor, nightBlend);
                 }
             }
         }
+
+        public static void CalculateCelestialVectors(
+            bool isDay,
+            float progress,
+            float minSunPitch,
+            float maxSunPitch,
+            float minMoonPitch,
+            float maxMoonPitch,
+            out Vector3 sunSkyDir,
+            out Vector3 moonSkyDir,
+            out Vector3 lightForward)
+        {
+            // O Sol nasce a Leste (yaw 75°), passa pelo Sul ao meio-dia (yaw 180°), e se põe a Oeste (yaw 285°)
+            float daySunYaw = Mathf.Lerp(75f, 285f, progress);
+            float daySunPitch = Mathf.Sin(progress * Mathf.PI) * (maxSunPitch + 6f) - 3f;
+
+            // À noite, o Sol viaja sob a terra pelo Norte
+            float nightSunYaw = Mathf.Lerp(285f, 435f, progress) % 360f;
+            float nightSunPitch = -Mathf.Sin(progress * Mathf.PI) * (maxSunPitch + 6f) - 3f;
+
+            // A Lua nasce a Leste ao anoitecer, passa pelo Sul à meia-noite, e se põe a Oeste ao amanhecer
+            float nightMoonYaw = Mathf.Lerp(75f, 285f, progress);
+            float nightMoonPitch = Mathf.Sin(progress * Mathf.PI) * (maxMoonPitch + 6f) - 3f;
+
+            // De dia, a Lua viaja sob a terra pelo Norte
+            float dayMoonYaw = Mathf.Lerp(285f, 435f, progress) % 360f;
+            float dayMoonPitch = -Mathf.Sin(progress * Mathf.PI) * (maxMoonPitch + 6f) - 3f;
+
+            float sunPitch = isDay ? daySunPitch : nightSunPitch;
+            float sunYaw   = isDay ? daySunYaw   : nightSunYaw;
+
+            float moonPitch = isDay ? dayMoonPitch : nightMoonPitch;
+            float moonYaw   = isDay ? dayMoonYaw   : nightMoonYaw;
+
+            // Vetores celestes tridimensionais absolutos (Y > 0 quando visível no céu)
+            sunSkyDir = SphericalToDirection(sunPitch, sunYaw);
+            moonSkyDir = SphericalToDirection(moonPitch, moonYaw);
+
+            // Cálculo dos vetores de luz direcional para o solo (com pitch mínimo anti-sombras esticadas)
+            float sunLightPitch = Mathf.Max(minSunPitch, sunPitch);
+            Vector3 sunLightForward = -SphericalToDirection(sunLightPitch, daySunYaw);
+
+            float moonLightPitch = Mathf.Max(minMoonPitch, nightMoonPitch);
+            Vector3 moonLightForward = -SphericalToDirection(moonLightPitch, nightMoonYaw);
+
+            // Vetores âncora para transição sem estalos nem descontinuidades nas passagens Dia/Noite
+            // No poente: o Sol se põe a Oeste (285°), e a Lua nasce a Leste (75°)
+            Vector3 sunsetSunLightFwd    = -SphericalToDirection(minSunPitch, 285f);
+            Vector3 moonriseMoonLightFwd = -SphericalToDirection(minMoonPitch, 75f);
+
+            // Na alvorada: a Lua se põe a Oeste (285°), e o Sol nasce a Leste (75°)
+            Vector3 moonsetMoonLightFwd  = -SphericalToDirection(minMoonPitch, 285f);
+            Vector3 sunriseSunLightFwd   = -SphericalToDirection(minSunPitch, 75f);
+
+            // Continuidade perfeita entre Pôr do Sol e Nascer da Lua (e vice-versa)
+            if (isDay)
+            {
+                if (progress > 0.90f)
+                {
+                    // Últimos 10% do dia: Slerp contínuo entre o poente do Sol (Oeste) e o levante da Lua (Leste)
+                    float t = Mathf.SmoothStep(0f, 1f, (progress - 0.90f) / 0.10f * 0.5f);
+                    lightForward = Vector3.Slerp(sunLightForward, moonriseMoonLightFwd, t);
+                }
+                else if (progress < 0.08f)
+                {
+                    // Primeiros 8% do dia: transição contínua a partir do poente da Lua (Oeste) para o Sol nascente (Leste)
+                    float t = Mathf.SmoothStep(0f, 1f, 0.5f + (progress / 0.08f) * 0.5f);
+                    lightForward = Vector3.Slerp(moonsetMoonLightFwd, sunLightForward, t);
+                }
+                else
+                {
+                    lightForward = sunLightForward;
+                }
+            }
+            else
+            {
+                if (progress < 0.10f)
+                {
+                    // Primeiros 10% da noite: continuidade exata com o fim do dia
+                    float t = Mathf.SmoothStep(0f, 1f, 0.5f + (progress / 0.10f) * 0.5f);
+                    lightForward = Vector3.Slerp(sunsetSunLightFwd, moonLightForward, t);
+                }
+                else if (progress > 0.92f)
+                {
+                    // Últimos 8% da noite: transição suave e contínua para o nascer do Sol (Leste)
+                    float t = Mathf.SmoothStep(0f, 1f, (progress - 0.92f) / 0.08f * 0.5f);
+                    lightForward = Vector3.Slerp(moonLightForward, sunriseSunLightFwd, t);
+                }
+                else
+                {
+                    lightForward = moonLightForward;
+                }
+            }
+        }
+
+        public static Vector3 SphericalToDirection(float pitchDeg, float yawDeg)
+        {
+            float radPitch = pitchDeg * Mathf.Deg2Rad;
+            float radYaw = yawDeg * Mathf.Deg2Rad;
+            float cosP = Mathf.Cos(radPitch);
+            return new Vector3(
+                cosP * Mathf.Sin(radYaw),
+                Mathf.Sin(radPitch),
+                cosP * Mathf.Cos(radYaw)
+            ).normalized;
+        }
+
+        public static float CalculateNightBlendFactor(bool isDay, float progress, AnimationCurve customCurve = null)
+        {
+            if (customCurve != null && customCurve.keys.Length > 0)
+            {
+                return customCurve.Evaluate(isDay ? progress * 0.5f : 0.5f + progress * 0.5f);
+            }
+
+            if (isDay)
+            {
+                if (progress < 0.15f)
+                {
+                    // Alvorecer: transita de 0.50f (aurora da madrugada) para 0.0f (dia límpido)
+                    return Mathf.Lerp(0.50f, 0.0f, Mathf.SmoothStep(0f, 1f, progress / 0.15f));
+                }
+                if (progress > 0.80f)
+                {
+                    // Crepúsculo: transita suavemente de 0.0f para 0.65f (pôr do sol avermelhado)
+                    return Mathf.Lerp(0.0f, 0.65f, Mathf.SmoothStep(0f, 1f, (progress - 0.80f) / 0.20f));
+                }
+                return 0f;
+            }
+            else
+            {
+                if (progress < 0.15f)
+                {
+                    // Início da noite: continua de 0.65f até 1.0f (noite completa)
+                    return Mathf.Lerp(0.65f, 1.0f, Mathf.SmoothStep(0f, 1f, progress / 0.15f));
+                }
+                if (progress > 0.82f)
+                {
+                    // Madrugada: transita suavemente de 1.0f para 0.50f (primeira claridade da alvorada)
+                    return Mathf.Lerp(1.0f, 0.50f, Mathf.SmoothStep(0f, 1f, (progress - 0.82f) / 0.18f));
+                }
+                return 1f;
+            }
+        }
+
+#if UNITY_EDITOR
+        public void SetPhaseAndProgressForEditor(bool isDay, float progress, int nightNumber = 1)
+        {
+            _isDaySync.Value = isDay;
+            _nightSync.Value = nightNumber;
+            float duration = isDay ? dayDuration : nightDuration;
+            _timeRemaining.Value = Mathf.Clamp01(1f - progress) * duration;
+            UpdateProgressiveTime();
+            UpdateLighting();
+        }
+#endif
 
         private Color EvaluateProceduralLightColor(bool isDay, float progress)
         {

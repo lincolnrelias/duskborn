@@ -18,6 +18,8 @@ namespace Duskborn.Editor
             RunTest(Test_VisualBlendBoundaryContinuity, ref passed, ref total);
             RunTest(Test_ProceduralLightingContinuity, ref passed, ref total);
             RunTest(Test_ClockTimeContinuity, ref passed, ref total);
+            RunTest(Test_CelestialSunMoonDayNightSanity, ref passed, ref total);
+            RunTest(Test_DirectionalLightAndShadowSanity, ref passed, ref total);
 
             Debug.Log($"<color=#55FF55><b>[DayNightCycleTests] {passed}/{total} testes passaram com sucesso!</b></color>");
         }
@@ -133,6 +135,62 @@ namespace Duskborn.Editor
             float nightEndHour = (20f + 1f * 10f) % 24f;
             AssertApproximately(nightStartHour, 20f, 0.01f, "Noite deve começar às 20:00");
             AssertApproximately(nightEndHour, 6f, 0.01f, "Noite deve encerrar às 06:00 (amanhecer)");
+        }
+
+        private static void Test_CelestialSunMoonDayNightSanity()
+        {
+            // Valida que durante todo o dia útil o Sol está no céu e a Lua sob o horizonte
+            for (float p = 0.05f; p <= 0.95f; p += 0.15f)
+            {
+                DayNightCycle.CalculateCelestialVectors(true, p, 32f, 68f, 28f, 62f, out Vector3 sunDir, out Vector3 moonDir, out _);
+                AssertTrue(sunDir.y > 0f, $"Em progresso {p:F2} do dia, Sol DEVE estar no céu (sunDir.y={sunDir.y:F3} > 0)");
+                AssertTrue(moonDir.y < 0f, $"Em progresso {p:F2} do dia, Lua DEVE estar sob o horizonte (moonDir.y={moonDir.y:F3} < 0)");
+            }
+
+            // Valida que durante toda a noite a Lua está no céu e o Sol sob o horizonte
+            for (float p = 0.05f; p <= 0.95f; p += 0.15f)
+            {
+                DayNightCycle.CalculateCelestialVectors(false, p, 32f, 68f, 28f, 62f, out Vector3 sunDir, out Vector3 moonDir, out _);
+                AssertTrue(moonDir.y > 0f, $"Em progresso {p:F2} da noite, Lua DEVE estar no céu (moonDir.y={moonDir.y:F3} > 0)");
+                AssertTrue(sunDir.y < 0f, $"Em progresso {p:F2} da noite, Sol DEVE estar sob o horizonte (sunDir.y={sunDir.y:F3} < 0)");
+            }
+
+            // Valida elevações máximas ao Meio-dia e Meia-noite
+            DayNightCycle.CalculateCelestialVectors(true, 0.5f, 32f, 68f, 28f, 62f, out Vector3 middaySun, out _, out _);
+            AssertTrue(middaySun.y > 0.85f, $"Sol ao meio-dia deve atingir elevação máxima (y={middaySun.y:F3})");
+
+            DayNightCycle.CalculateCelestialVectors(false, 0.5f, 32f, 68f, 28f, 62f, out _, out Vector3 midnightMoon, out _);
+            AssertTrue(midnightMoon.y > 0.80f, $"Lua à meia-noite deve atingir elevação máxima (y={midnightMoon.y:F3})");
+        }
+
+        private static void Test_DirectionalLightAndShadowSanity()
+        {
+            // Valida que a luz direcional SEMPRE aponta para baixo (Y < 0), iluminando o terreno e projetando sombras
+            for (float p = 0f; p <= 1f; p += 0.1f)
+            {
+                DayNightCycle.CalculateCelestialVectors(true, p, 32f, 68f, 28f, 62f, out _, out _, out Vector3 dayLightFwd);
+                AssertTrue(dayLightFwd.y < 0f, $"Em progresso {p:F1} do dia, luz deve incidir para o chão (light.y={dayLightFwd.y:F3} < 0)");
+
+                DayNightCycle.CalculateCelestialVectors(false, p, 32f, 68f, 28f, 62f, out _, out _, out Vector3 nightLightFwd);
+                AssertTrue(nightLightFwd.y < 0f, $"Em progresso {p:F1} da noite, luar deve incidir para o chão (light.y={nightLightFwd.y:F3} < 0)");
+            }
+
+            // Valida continuidade perfeita na transição Pôr do Sol -> Noite (sem saltos de sombra)
+            DayNightCycle.CalculateCelestialVectors(true, 1.0f, 32f, 68f, 28f, 62f, out _, out _, out Vector3 dayEndLightFwd);
+            DayNightCycle.CalculateCelestialVectors(false, 0.0f, 32f, 68f, 28f, 62f, out _, out _, out Vector3 nightStartLightFwd);
+            float duskDelta = Vector3.Distance(dayEndLightFwd, nightStartLightFwd);
+            AssertApproximately(duskDelta, 0f, 0.005f, "Vetor de luz na passagem Crepúsculo->Anoitecer deve ser contínuo (sem saltos de sombra)");
+
+            // Valida continuidade perfeita na transição Madrugada -> Aurora (sem saltos de sombra)
+            DayNightCycle.CalculateCelestialVectors(false, 1.0f, 32f, 68f, 28f, 62f, out _, out _, out Vector3 nightEndLightFwd);
+            DayNightCycle.CalculateCelestialVectors(true, 0.0f, 32f, 68f, 28f, 62f, out _, out _, out Vector3 dayStartLightFwd);
+            float dawnDelta = Vector3.Distance(nightEndLightFwd, dayStartLightFwd);
+            AssertApproximately(dawnDelta, 0f, 0.005f, "Vetor de luz na passagem Madrugada->Alvorecer deve ser contínuo (sem saltos de sombra)");
+
+            // Valida alinhamento físico: ao Meio-dia o Sol fica ao Sul (z < 0) e sombras projetam-se ao Norte (z > 0)
+            DayNightCycle.CalculateCelestialVectors(true, 0.5f, 32f, 68f, 28f, 62f, out Vector3 middaySun, out _, out Vector3 middayLightFwd);
+            AssertTrue(middaySun.z < 0f, "Sol ao meio-dia deve estar a Sul no hemisfério norte estilizado");
+            AssertTrue(middayLightFwd.z > 0f, "Luz deve apontar para o Norte ao meio-dia, projetando sombras a Norte");
         }
 
         // Funções de réplica idênticas ao DayNightCycle para verificação determinística

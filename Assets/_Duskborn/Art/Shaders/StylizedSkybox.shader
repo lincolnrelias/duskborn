@@ -54,19 +54,25 @@ Shader "Duskborn/StylizedSkybox"
         _StarBrightness("Star Peak Brightness", Range(0.5, 6.0)) = 2.8
         _StarTwinkleSpeed("Star Twinkle Frequency", Range(0.5, 10.0)) = 3.2
 
-        [Header(Anime Ghibli Clouds)]
+        [Header(Stylized Ghibli Anime Clouds)]
         _CloudBaseColor("Cloud Lit Base Color", Color) = (0.98, 0.98, 1.0, 1.0)
         _CloudShadowColor("Cloud Shadow Tint", Color) = (0.58, 0.68, 0.88, 1.0)
         _CloudSunHighlight("Cloud Sun Edge Highlight", Color) = (1.0, 0.92, 0.72, 1.0)
-        _CloudSpeed("Cloud Panning Velocity", Vector) = (0.008, 0.004, 0.0, 0.0)
+        _CloudDuskHighlight("Cloud Dusk/Dawn Rim Color", Color) = (1.0, 0.52, 0.28, 1.0)
+        _CloudMoonHighlight("Cloud Moon Silver Highlight", Color) = (0.80, 0.88, 1.0, 1.0)
+        _CloudSpeed("Cloud Panning Velocity", Vector) = (0.006, 0.003, 0.0, 0.0)
         _CloudScale("Cloud Density Scale", Range(0.1, 5.0)) = 0.75
-        _CloudCutoff("Cloud Coverage Threshold", Range(0.1, 0.9)) = 0.52
+        _CloudCutoff("Cloud Coverage Threshold", Range(0.1, 0.9)) = 0.46
         _CloudSoftness("Cloud Edge Cel Softness", Range(0.01, 0.4)) = 0.08
         _CloudCurvature("Sky Dome Curvature Factor", Range(0.05, 0.8)) = 0.28
-        _CloudOpacity("Cloud Overall Opacity", Range(0.0, 1.0)) = 0.88
+        _CloudOpacity("Cloud Overall Opacity", Range(0.0, 1.0)) = 0.92
+        _CloudWarpStrength("Cloud Domain Warp (Anti-Spheroid)", Range(0.0, 2.0)) = 0.65
+        _CloudCirrusStrength("High Cirrus Wisps", Range(0.0, 1.0)) = 0.30
+        _CloudNormalBump("Cloud Volumetric Cel Shading", Range(0.5, 10.0)) = 4.5
 
         [Header(Day Night Global Controller)]
         _DayNightBlend("Day to Night Blend (0=Day, 1=Night)", Range(0.0, 1.0)) = 0.0
+        _BossNightBlend("Boss Night Blood Moon Blend", Range(0.0, 1.0)) = 0.0
     }
 
     SubShader
@@ -150,14 +156,20 @@ Shader "Duskborn/StylizedSkybox"
                 half4 _CloudBaseColor;
                 half4 _CloudShadowColor;
                 half4 _CloudSunHighlight;
+                half4 _CloudDuskHighlight;
+                half4 _CloudMoonHighlight;
                 float4 _CloudSpeed;
                 float _CloudScale;
                 float _CloudCutoff;
                 float _CloudSoftness;
                 float _CloudCurvature;
                 float _CloudOpacity;
+                float _CloudWarpStrength;
+                float _CloudCirrusStrength;
+                float _CloudNormalBump;
 
                 float _DayNightBlend;
+                float _BossNightBlend;
             CBUFFER_END
 
             Varyings vert(Attributes input)
@@ -207,25 +219,62 @@ Shader "Duskborn/StylizedSkybox"
                 return lerp(lerp(a, b, u.x), lerp(c, d, u.x), u.y);
             }
 
-            float Voronoi2D(float2 uv)
+            // Rotated 2D FBM (Fractal Brownian Motion)
+            float FBM2D(float2 p)
             {
-                float2 p = floor(uv);
-                float2 f = frac(uv);
-                float minDist = 1.0;
-
+                float val = 0.0;
+                float amp = 0.5;
+                float2x2 rot = float2x2(0.80, 0.60, -0.60, 0.80);
                 [unroll]
-                for (int j = -1; j <= 1; j++)
+                for (int i = 0; i < 4; i++)
                 {
-                    [unroll]
-                    for (int i = -1; i <= 1; i++)
-                    {
-                        float2 b = float2(i, j);
-                        float2 r = b - f + float2(Hash2D(p + b), Hash2D((p + b) * 1.618));
-                        float d = dot(r, r);
-                        minDist = min(minDist, d);
-                    }
+                    val += amp * SmoothNoise2D(p);
+                    p = mul(rot, p) * 2.02 + float2(4.2, 7.8);
+                    amp *= 0.5;
                 }
-                return sqrt(minDist);
+                return val;
+            }
+
+            // Billow FBM for voluminous, puffy anime cloud formations
+            float BillowFBM2D(float2 p)
+            {
+                float val = 0.0;
+                float amp = 0.5;
+                float2x2 rot = float2x2(0.80, 0.60, -0.60, 0.80);
+                [unroll]
+                for (int i = 0; i < 3; i++)
+                {
+                    float n = SmoothNoise2D(p);
+                    val += amp * (1.0 - abs(n * 2.0 - 1.0));
+                    p = mul(rot, p) * 2.05 + float2(12.3, 15.7);
+                    amp *= 0.5;
+                }
+                return val;
+            }
+
+            // Professional Domain Warping: twists, billows and breaks spherical symmetry completely
+            float SampleCloudDensity(float2 uv)
+            {
+                float2 q = float2(
+                    FBM2D(uv * 1.25),
+                    FBM2D(uv * 1.25 + float2(5.2, 1.3))
+                );
+
+                float2 r = float2(
+                    FBM2D(uv * 2.1 + 2.8 * q + float2(1.7, 9.2)),
+                    FBM2D(uv * 2.1 + 2.8 * q + float2(8.3, 2.8))
+                );
+
+                float2 warpedUV = uv + r * _CloudWarpStrength;
+
+                float fbmBase = FBM2D(warpedUV * 2.2);
+                float billow = BillowFBM2D(warpedUV * 2.5);
+                float cumulus = lerp(fbmBase, billow, 0.52);
+
+                // Wispy high cirrus streaks drifting in the upper atmosphere
+                float cirrus = SmoothNoise2D(uv * 5.2 + float2(uv.y * 1.8, 0.0)) * _CloudCirrusStrength;
+
+                return saturate(cumulus * 0.88 + cirrus * 0.22);
             }
 
             half4 frag(Varyings input) : SV_Target
@@ -233,19 +282,40 @@ Shader "Duskborn/StylizedSkybox"
                 float3 viewDir = normalize(input.viewDirWS);
                 float y = viewDir.y - _HorizonOffset;
 
-                // 1. Interpolação de Cores Dia / Noite
-                half3 zenithTarget  = lerp(_DayZenithColor.rgb,  _NightZenithColor.rgb,  _DayNightBlend);
-                half3 horizonTarget = lerp(_DayHorizonColor.rgb, _NightHorizonColor.rgb, _DayNightBlend);
-                half3 groundTarget  = lerp(_DayGroundColor.rgb,  _NightGroundColor.rgb,  _DayNightBlend);
+                // 1. Sky Gradients with Night 7 Blood Moon support
+                half3 dayZenith = _DayZenithColor.rgb;
+                half3 dayHorizon = _DayHorizonColor.rgb;
+                half3 dayGround = _DayGroundColor.rgb;
 
-                // Brilho alaranjado de Alvorada/Crepúsculo na linha do horizonte quando o sol está próximo ao nível 0
+                half3 nightZenith = _NightZenithColor.rgb;
+                half3 nightHorizon = _NightHorizonColor.rgb;
+                half3 nightGround = _NightGroundColor.rgb;
+
+                // Boss Night (Night 7): dramatic deep crimson / blood sky
+                if (_BossNightBlend > 0.01)
+                {
+                    half3 bossZenith = half3(0.24, 0.04, 0.06);
+                    half3 bossHorizon = half3(0.55, 0.12, 0.10);
+                    half3 bossGround = half3(0.12, 0.02, 0.03);
+
+                    nightZenith = lerp(nightZenith, bossZenith, _BossNightBlend);
+                    nightHorizon = lerp(nightHorizon, bossHorizon, _BossNightBlend);
+                    nightGround = lerp(nightGround, bossGround, _BossNightBlend);
+                }
+
+                half3 zenithTarget  = lerp(dayZenith, nightZenith, _DayNightBlend);
+                half3 horizonTarget = lerp(dayHorizon, nightHorizon, _DayNightBlend);
+                half3 groundTarget  = lerp(dayGround, nightGround, _DayNightBlend);
+
+                // Sunset / Sunrise horizon flare aligned with the Sun
                 float3 sunDir = normalize(_SunDirection.xyz);
-                float sunHorizonProximity = saturate(1.0 - abs(sunDir.y) * 3.8);
-                float sunAzimuthProximity = saturate(dot(normalize(float3(viewDir.x, 0.0, viewDir.z)), normalize(float3(sunDir.x, 0.0, sunDir.z))));
-                half3 duskFlare = _DuskDawnColor.rgb * (pow(sunAzimuthProximity, 3.5) * sunHorizonProximity * _DuskDawnIntensity);
+                float sunHorizonProximity = saturate(1.0 - abs(sunDir.y) * 3.5);
+                float sunAzimuthProximity = saturate(dot(normalize(float3(viewDir.x, 0.0, viewDir.z)), 
+                                                         normalize(float3(sunDir.x, 0.0, sunDir.z))));
+                half3 duskFlare = _DuskDawnColor.rgb * (pow(sunAzimuthProximity, 3.5) * sunHorizonProximity * _DuskDawnIntensity * (1.0 - _DayNightBlend * 0.7));
                 horizonTarget += duskFlare;
 
-                // 2. Gradiente do Céu de Três Paradas (Zenith -> Horizon -> Ground)
+                // 2. Three-Stop Spherical Sky Gradient
                 half3 skyColor;
                 if (y >= 0.0)
                 {
@@ -258,7 +328,8 @@ Shader "Duskborn/StylizedSkybox"
                     skyColor = lerp(horizonTarget, groundTarget, pow(t, _GroundFalloff));
                 }
 
-                // 3. Estrelas Noturnas Cintilantes (Twinkling Stars)
+                // 3. Twinkling Stars (visible when clear sky and dark)
+                half3 starLight = half3(0, 0, 0);
                 if (viewDir.y > 0.01 && _DayNightBlend > 0.05)
                 {
                     float3 starPos = viewDir * _StarScale;
@@ -272,33 +343,32 @@ Shader "Duskborn/StylizedSkybox"
                         float starGlow = saturate(1.0 - dist / max(0.01, _StarSize));
                         starGlow = pow(starGlow, 2.5);
 
-                        // Cintilação orgânica temporal com fase individual por estrela
                         float twinkle = sin(_Time.y * _StarTwinkleSpeed + starRand * 45.0) * 0.5 + 0.5;
                         twinkle = lerp(0.35, 1.0, twinkle);
 
-                        // Esmaecimento suave nas bordas do horizonte e desaparecimento de dia
                         float horizonStarFade = saturate(viewDir.y * 6.0);
                         float nightStarVisibility = pow(_DayNightBlend, 1.8);
 
-                        half3 starLight = _StarColor.rgb * (starGlow * twinkle * _StarBrightness * horizonStarFade * nightStarVisibility);
+                        starLight = _StarColor.rgb * (starGlow * twinkle * _StarBrightness * horizonStarFade * nightStarVisibility);
                         skyColor += starLight;
                     }
                 }
 
-                // 4. Disco Solar Estilizado (Crisp Cel-Shaded Sun)
+                // 4. Stylized Cel Sun Disc & Corona
                 float sunCosAngle = dot(viewDir, sunDir);
                 float sunAngleRad = acos(clamp(sunCosAngle, -1.0, 1.0));
-                float sunRadLimit = _SunRadius * 0.0174532925; // Graus para radianos
+                float sunRadLimit = _SunRadius * 0.0174532925;
                 float sunSoftnessRad = max(0.001, _SunSoftness * 0.0174532925);
 
                 float sunDisc = 1.0 - smoothstep(sunRadLimit - sunSoftnessRad, sunRadLimit + sunSoftnessRad, sunAngleRad);
                 float sunHalo = pow(saturate(sunCosAngle), _SunHaloFalloff) * _SunHaloIntensity;
-                float sunElevationFade = saturate(sunDir.y * 4.0 + 0.25);
+                // Sun fades gracefully when crossing below horizon (sunDir.y <= 0)
+                float sunElevationFade = saturate((sunDir.y + 0.08) * 8.0);
 
                 half3 sunContribution = (_SunColor.rgb * sunDisc * _SunIntensity + _SunHaloColor.rgb * sunHalo) * sunElevationFade;
                 skyColor += sunContribution;
 
-                // 5. Disco Lunar Estilizado com Fase Crescente (Stylized Cel Moon)
+                // 5. Stylized Cel Moon Disc & Crescent Aura
                 float3 moonDir = normalize(_MoonDirection.xyz);
                 float moonCosAngle = dot(viewDir, moonDir);
                 float moonAngleRad = acos(clamp(moonCosAngle, -1.0, 1.0));
@@ -307,7 +377,6 @@ Shader "Duskborn/StylizedSkybox"
 
                 float moonDisc = 1.0 - smoothstep(moonRadLimit - moonSoftnessRad, moonRadLimit + moonSoftnessRad, moonAngleRad);
 
-                // Corte da sombra crescente (crescent cutout)
                 float3 moonMaskDir = normalize(moonDir + _MoonCrescentOffset.xyz * 0.12);
                 float moonMaskAngleRad = acos(clamp(dot(viewDir, moonMaskDir), -1.0, 1.0));
                 float moonMaskDisc = 1.0 - smoothstep(moonRadLimit * _MoonCrescentSize - moonSoftnessRad, 
@@ -316,37 +385,81 @@ Shader "Duskborn/StylizedSkybox"
                 float crescentMoon = saturate(moonDisc - moonMaskDisc * _MoonCrescentStrength);
 
                 float moonHalo = pow(saturate(moonCosAngle), _MoonHaloFalloff) * _MoonHaloIntensity * _DayNightBlend;
-                float moonElevationFade = saturate(moonDir.y * 4.0 + 0.25);
+                // Moon fades gracefully when crossing below horizon (moonDir.y <= 0)
+                float moonElevationFade = saturate((moonDir.y + 0.08) * 8.0);
 
-                half3 moonContribution = (_MoonColor.rgb * crescentMoon * _MoonIntensity + _MoonHaloColor.rgb * moonHalo) * moonElevationFade;
+                half3 moonCol = _MoonColor.rgb;
+                half3 moonHaloCol = _MoonHaloColor.rgb;
+                if (_BossNightBlend > 0.01)
+                {
+                    moonCol = lerp(moonCol, half3(1.0, 0.28, 0.20), _BossNightBlend);
+                    moonHaloCol = lerp(moonHaloCol, half3(0.95, 0.15, 0.10), _BossNightBlend);
+                }
+
+                half3 moonContribution = (moonCol * crescentMoon * _MoonIntensity + moonHaloCol * moonHalo) * moonElevationFade;
                 skyColor += moonContribution;
 
-                // 6. Camada de Nuvens Estilizadas Estilo Anime / Ghibli
+                // 6. Professional Anime Ghibli Cloud System
                 if (viewDir.y > 0.02)
                 {
-                    // Projeção esférica na cúpula celeste com amortecimento no horizonte
-                    float domeY = max(0.05, viewDir.y + _CloudCurvature);
+                    // Hemispherical dome UV projection with smooth horizon curve
+                    float domeY = max(0.06, viewDir.y + _CloudCurvature);
                     float2 cloudUV = (viewDir.xz / domeY) * _CloudScale + _Time.y * _CloudSpeed.xy;
 
-                    // Duas oitavas de ruído harmônico orgânico
-                    float n1 = SmoothNoise2D(cloudUV * 3.5);
-                    float n2 = Voronoi2D(cloudUV * 7.0 + float2(0.4, 0.8));
-                    float combinedNoise = n1 * 0.65 + (1.0 - n2) * 0.35;
+                    // Volumetric density sampling
+                    float eps = 0.016;
+                    float d0 = SampleCloudDensity(cloudUV);
+                    float dX = SampleCloudDensity(cloudUV + float2(eps, 0.0)) - d0;
+                    float dY = SampleCloudDensity(cloudUV + float2(0.0, eps)) - d0;
 
-                    // Corte estilizado cel-shaded com bordas nítidas
-                    float cloudMask = smoothstep(_CloudCutoff - _CloudSoftness, _CloudCutoff + _CloudSoftness, combinedNoise);
+                    // Multi-tier Cel Thresholding
+                    float cloudMask = smoothstep(_CloudCutoff - _CloudSoftness, _CloudCutoff + _CloudSoftness, d0);
 
-                    // Iluminação de 2 tons nas nuvens (crina iluminada pelo sol e corpo com sombra atmosférica)
-                    float sunLightAlignment = saturate(dot(viewDir, sunDir) * 0.5 + 0.5);
-                    half3 cloudSunColor = lerp(_CloudBaseColor.rgb, _CloudSunHighlight.rgb, sunLightAlignment * (1.0 - _DayNightBlend));
-                    half3 cloudShadowColor = lerp(_CloudShadowColor.rgb, _NightHorizonColor.rgb * 0.8, _DayNightBlend);
-                    half3 cloudFinalColor = lerp(cloudShadowColor, cloudSunColor, saturate(combinedNoise * 1.4));
+                    // Procedural surface normal for 3D volumetric cel shading
+                    float3 cloudNormal = normalize(float3(-dX * _CloudNormalBump, 1.0, -dY * _CloudNormalBump));
 
-                    // Desvanecimento natural da nuvem na borda do horizonte
-                    float horizonCloudFade = saturate(viewDir.y * 3.5);
-                    float totalCloudAlpha = cloudMask * horizonCloudFade * _CloudOpacity;
+                    // Celestial light vector for cloud illumination (Sun by day, Moon by night)
+                    float3 activeCelestialDir = lerp(sunDir, moonDir, _DayNightBlend);
+                    float NdotL = saturate(dot(cloudNormal, activeCelestialDir));
 
-                    skyColor = lerp(skyColor, cloudFinalColor, totalCloudAlpha);
+                    // Three-tone Cel bands: Highlight -> Lit Body -> Ambient Shadow
+                    float celHighlight = smoothstep(0.62, 0.70, NdotL);
+                    float celBody = smoothstep(0.28, 0.36, NdotL);
+
+                    // Active highlight color based on period
+                    float isSunset = saturate(1.0 - abs(sunDir.y) * 2.8) * (1.0 - _DayNightBlend);
+                    half3 sunHighlight = lerp(_CloudSunHighlight.rgb, _CloudDuskHighlight.rgb, isSunset);
+                    half3 activeHighlight = lerp(sunHighlight, _CloudMoonHighlight.rgb, _DayNightBlend);
+                    if (_BossNightBlend > 0.01)
+                    {
+                        activeHighlight = lerp(activeHighlight, half3(1.0, 0.32, 0.22), _BossNightBlend);
+                    }
+
+                    // Shadow tone harmonized with sky atmosphere
+                    half3 dayShadow = _CloudShadowColor.rgb;
+                    half3 nightShadow = lerp(_NightHorizonColor.rgb * 0.75, half3(0.20, 0.05, 0.08), _BossNightBlend);
+                    half3 ambientCloudShadow = lerp(dayShadow, nightShadow, _DayNightBlend);
+
+                    // Lit body color (with sunset warm apricot tinting at dusk)
+                    half3 litBodyColor = lerp(_CloudBaseColor.rgb, _CloudDuskHighlight.rgb * 0.95, isSunset * 0.65);
+
+                    // Combine cel bands
+                    half3 cloudTone = lerp(ambientCloudShadow, litBodyColor, celBody);
+                    cloudTone = lerp(cloudTone, activeHighlight, celHighlight);
+
+                    // Forward scattering / Silver lining fringe when viewing clouds against Sun or Moon
+                    float sunAlign = saturate(dot(viewDir, sunDir));
+                    float moonAlign = saturate(dot(viewDir, moonDir));
+                    float celestialAlign = lerp(sunAlign, moonAlign, _DayNightBlend);
+                    float silverLining = pow(celestialAlign, 6.0) * smoothstep(_CloudCutoff, _CloudCutoff + 0.15, d0) * (1.0 - smoothstep(_CloudCutoff + 0.18, _CloudCutoff + 0.38, d0));
+                    cloudTone += activeHighlight * (silverLining * 1.35);
+
+                    // Smooth horizon fade to seamlessly integrate with distant mountains and fog
+                    float horizonFade = saturate(viewDir.y * 4.2);
+                    float totalCloudAlpha = cloudMask * horizonFade * _CloudOpacity;
+
+                    // Composite cloud deck over sky and stars (clouds naturally occlude background stars)
+                    skyColor = lerp(skyColor, cloudTone, totalCloudAlpha);
                 }
 
                 return half4(skyColor, 1.0);

@@ -688,62 +688,208 @@ def gen_music_main_menu():
     stereo = create_stereo(left, right)
     return simple_reverb(stereo, decay=0.5, wet=0.35)
 
+def lute_pluck(freq, duration_s, decay=0.994, brightness=0.55):
+    period = max(2, int(SR / freq))
+    n = int(SR * duration_s)
+    raw = np.random.uniform(-1.0, 1.0, period)
+    buf = np.zeros(period)
+    for i in range(period):
+        buf[i] = 0.5 * raw[i] + 0.25 * raw[(i-1)%period] + 0.25 * raw[(i+1)%period]
+    
+    out = np.zeros(n)
+    for i in range(n):
+        val = buf[i % period]
+        out[i] = val
+        next_val = buf[(i + 1) % period]
+        buf[i % period] = (brightness * val + (1.0 - brightness) * next_val) * decay
+    
+    return lowpass_filter(out, min(2200, freq * 8), q=0.75)
+
+def folk_flute_note(freq, duration_s, vibrato_speed=5.3, vibrato_depth=0.014, breath_amt=0.08):
+    n = int(SR * duration_s)
+    t = np.linspace(0, duration_s, n, endpoint=False)
+    
+    vib_env = np.clip((t - 0.22) / 0.45, 0.0, 1.0) * vibrato_depth
+    vibrato = 1.0 + vib_env * np.sin(2 * np.pi * vibrato_speed * t)
+    
+    scoop = 1.0 - 0.012 * np.exp(-t / 0.04)
+    inst_freq = freq * vibrato * scoop
+    phase = np.cumsum(2 * np.pi * inst_freq / SR)
+    
+    h1 = np.sin(phase)
+    h2 = 0.38 * np.sin(2 * phase)
+    h3 = 0.10 * np.sin(3 * phase)
+    h4 = 0.03 * np.sin(4 * phase)
+    tone = h1 + h2 + h3 + h4
+    
+    breath = bandpass_filter(pink_noise(n), 3200, q=2.8) * breath_amt
+    
+    attack_n = int(SR * 0.07)
+    release_n = int(SR * 0.18)
+    env = np.ones(n)
+    if attack_n < n:
+        env[:attack_n] = np.sin(np.linspace(0, np.pi/2, attack_n)) ** 2
+    if release_n < n:
+        env[-release_n:] = np.cos(np.linspace(0, np.pi/2, release_n)) ** 2
+        
+    return (tone + breath) * env
+
+def bowed_string_chord(freqs, duration_s, root_freq):
+    n = int(SR * duration_s)
+    t = np.linspace(0, duration_s, n, endpoint=False)
+    out = np.zeros(n)
+    for f in freqs:
+        saw1 = 2.0 * ((f * t * 0.9994) % 1.0) - 1.0
+        saw2 = 2.0 * ((f * t * 1.0006) % 1.0) - 1.0
+        tone = (saw1 + saw2) * 0.5
+        filtered = lowpass_filter(tone, 620, q=1.1)
+        out += filtered * 0.22
+        
+    sub = np.sin(2 * np.pi * root_freq * t) * 0.18
+    out += sub
+    
+    fade_n = int(SR * 0.65)
+    env = np.ones(n)
+    if fade_n < n:
+        env[:fade_n] = np.sin(np.linspace(0, np.pi/2, fade_n)) ** 2
+        env[-fade_n:] = np.cos(np.linspace(0, np.pi/2, fade_n)) ** 2
+    return out * env
+
+def dulcimer_accent(freq, duration_s=2.8):
+    n = int(SR * duration_s)
+    t = np.linspace(0, duration_s, n, endpoint=False)
+    p1 = np.sin(2 * np.pi * freq * t) * np.exp(-3.5 * t)
+    p2 = 0.35 * np.sin(2 * np.pi * (freq * 2.008) * t) * np.exp(-5.5 * t)
+    p3 = 0.15 * np.sin(2 * np.pi * (freq * 3.015) * t) * np.exp(-8.0 * t)
+    return (p1 + p2 + p3) * 0.3
+
 def gen_music_day_exploration():
-    duration = 44.0
-    n = int(SR * duration)
-    t = np.linspace(0, duration, n)
+    # 75 BPM -> 0.8s per beat, 3.2s per bar, 16 bars = 51.2s
+    beat_s = 0.8
+    bar_s = 3.2
+    num_bars = 16
+    loop_duration = num_bars * bar_s
     
-    left = np.zeros(n)
-    right = np.zeros(n)
+    extra_bars = 1
+    total_duration = loop_duration + (extra_bars * bar_s) + 3.0
     
+    n_loop = int(SR * loop_duration)
+    n_total = int(SR * total_duration)
+    
+    left = np.zeros(n_total)
+    right = np.zeros(n_total)
+    
+    # 16-bar progression in D Dorian / D Minor
     chords = [
-        [98.0, 146.83, 196.0, 246.94, 293.66],  # G
-        [82.4, 123.47, 164.81, 196.0, 246.94], # Em
-        [65.41, 130.81, 164.81, 196.0, 261.63],# C
-        [73.42, 146.83, 220.0, 293.66, 369.99] # D
+        (73.42, [110.0, 174.61, 261.63], [73.42, 110.0, 174.61, 220.0, 261.63, 329.63, 220.0, 174.61]),
+        (73.42, [110.0, 174.61, 220.0], [73.42, 146.83, 174.61, 220.0, 293.66, 220.0, 174.61, 146.83]),
+        (65.41, [98.0, 164.81, 246.94], [65.41, 98.0, 164.81, 196.0, 261.63, 293.66, 196.0, 164.81]),
+        (98.0, [130.81, 164.81, 220.0], [98.0, 130.81, 164.81, 196.0, 220.0, 261.63, 196.0, 164.81]),
+        (58.27, [87.31, 146.83, 220.0], [58.27, 87.31, 146.83, 174.61, 220.0, 293.66, 220.0, 174.61]),
+        (87.31, [116.54, 146.83, 220.0], [87.31, 116.54, 146.83, 174.61, 220.0, 261.63, 174.61, 146.83]),
+        (55.0, [82.41, 130.81, 196.0], [55.0, 82.41, 130.81, 164.81, 196.0, 261.63, 196.0, 164.81]),
+        (82.41, [110.0, 130.81, 196.0], [82.41, 110.0, 130.81, 164.81, 196.0, 220.0, 164.81, 130.81]),
+        (73.42, [110.0, 174.61, 220.0], [73.42, 110.0, 174.61, 220.0, 293.66, 349.23, 293.66, 220.0]),
+        (49.0, [73.42, 116.54, 174.61], [49.0, 73.42, 116.54, 174.61, 220.0, 293.66, 220.0, 174.61]),
+        (43.65, [65.41, 110.0, 164.81], [43.65, 65.41, 110.0, 164.81, 220.0, 261.63, 220.0, 164.81]),
+        (65.41, [110.0, 164.81, 196.0], [65.41, 110.0, 164.81, 196.0, 261.63, 329.63, 261.63, 196.0]),
+        (49.0, [73.42, 116.54, 174.61], [49.0, 73.42, 116.54, 174.61, 233.08, 293.66, 233.08, 174.61]),
+        (65.41, [98.0, 164.81, 233.08], [65.41, 98.0, 164.81, 233.08, 293.66, 329.63, 293.66, 233.08]),
+        (55.0, [82.41, 110.0, 146.83], [55.0, 82.41, 110.0, 146.83, 164.81, 220.0, 164.81, 146.83]),
+        (55.0, [82.41, 98.0, 138.59], [55.0, 82.41, 98.0, 138.59, 164.81, 196.0, 220.0, 277.18])
     ]
-    chord_len = 11.0
+    all_chords = chords + [chords[0]]
     
-    for c_idx, chord in enumerate(chords):
-        for rep in range(4):
-            strum_time = (c_idx * chord_len) + (rep * 2.75)
-            for s_idx, note_f in enumerate(chord):
-                onset_s = strum_time + s_idx * 0.035
-                onset = int(onset_s * SR)
-                if onset >= n: break
-                pluck = karplus_strong(note_f, 3.2, decay=0.994)
-                rem = min(len(pluck), n - onset)
-                left[onset:onset+rem] += pluck[:rem] * 0.28
-                right[onset:onset+rem] += pluck[:rem] * 0.28
-                
-    flute_notes = [293.66, 329.63, 392.0, 440.0, 493.88, 587.33]
-    for phrase in range(4):
-        for f_idx in range(6):
-            f_start = phrase * 11.0 + f_idx * 1.5 + 1.0
-            onset = int(f_start * SR)
-            dur_s = 1.2
-            dur_n = int(dur_s * SR)
-            if onset + dur_n >= n: break
-            t_flute = np.linspace(0, dur_s, dur_n)
-            vibrato = 1.0 + 0.012 * np.sin(2 * np.pi * 5.0 * t_flute)
-            freq = flute_notes[(f_idx + phrase * 2) % len(flute_notes)] * vibrato
-            phase = np.cumsum(2 * np.pi * freq / SR)
-            flute_tone = (np.sin(phase) + 0.15 * np.sin(2 * phase)) * (np.sin(np.pi * t_flute / dur_s) ** 1.5) * 0.18
-            left[onset:onset+dur_n] += flute_tone * 0.4
-            right[onset:onset+dur_n] += flute_tone * 0.6
+    # 1. Lute & Strings
+    step_duration = bar_s / 8.0
+    for bar_idx, (root_f, pad_freqs, arp_notes) in enumerate(all_chords):
+        bar_start_s = bar_idx * bar_s
+        pad_onset = int(bar_start_s * SR)
+        pad = bowed_string_chord(pad_freqs, 3.4, root_f)
+        pad_rem = min(len(pad), n_total - pad_onset)
+        if pad_rem > 0:
+            left[pad_onset:pad_onset+pad_rem] += pad[:pad_rem] * 0.32
+            right[pad_onset:pad_onset+pad_rem] += pad[:pad_rem] * 0.32
             
-    wind = bandpass_filter(pink_noise(n), 520, q=1.5) * 0.06
-    left += wind
-    right += np.roll(wind, 40)
+        for step, note_f in enumerate(arp_notes):
+            step_time = bar_start_s + (step * step_duration) + (np.sin(bar_idx * 7 + step) * 0.002)
+            onset = int(step_time * SR)
+            if onset >= n_total: break
+            note_dur = 2.4 if step in (0, 4) else 1.2
+            pluck = lute_pluck(note_f, note_dur, decay=0.993, brightness=0.55 if step in (0, 4) else 0.65)
+            rem = min(len(pluck), n_total - onset)
+            if rem <= 0: continue
+            vol = 0.38 if step == 0 else (0.30 if step == 4 else 0.22)
+            pan = -0.15 if step in (0, 4) else (0.15 if step % 2 == 1 else -0.05)
+            left[onset:onset+rem] += pluck[:rem] * vol * (0.5 - pan)
+            right[onset:onset+rem] += pluck[:rem] * vol * (0.5 + pan)
+            
+    # 2. Medieval Whistle / Flute
+    melody = [
+        (1.6, 220.0, 0.7), (2.4, 293.66, 1.2), (3.8, 329.63, 0.7), (4.6, 349.23, 1.3),
+        (6.4, 392.0, 0.8), (7.4, 329.63, 1.1), (8.6, 261.63, 0.9), (9.8, 293.66, 2.4),
+        (13.2, 349.23, 0.9), (14.2, 392.0, 0.8), (15.2, 440.0, 1.3),
+        (16.8, 466.16, 0.9), (17.8, 440.0, 0.8), (18.8, 349.23, 1.2),
+        (20.2, 392.0, 0.9), (21.2, 329.63, 0.8), (22.2, 261.63, 1.0), (23.4, 293.66, 2.5),
+        (26.0, 440.0, 0.8), (27.0, 523.25, 0.8), (28.0, 587.33, 1.5),
+        (30.0, 523.25, 0.7), (30.8, 466.16, 0.7), (31.6, 440.0, 0.9),
+        (32.8, 523.25, 0.9), (33.8, 440.0, 0.8), (34.8, 349.23, 1.2),
+        (36.2, 392.0, 1.4), (37.8, 329.63, 0.8),
+        (39.0, 293.66, 0.8), (40.0, 349.23, 0.8), (41.0, 392.0, 1.3),
+        (42.6, 440.0, 1.1), (43.8, 329.63, 0.9), (44.8, 349.23, 0.8),
+        (46.0, 293.66, 1.3), (47.4, 329.63, 1.3), (49.0, 293.66, 2.4),
+        (51.2 + 1.6, 220.0, 0.7), (51.2 + 2.4, 293.66, 1.2)
+    ]
+    for (onset_s, f_hz, dur_s) in melody:
+        onset = int(onset_s * SR)
+        if onset >= n_total: break
+        flute = folk_flute_note(f_hz, dur_s, vibrato_speed=5.3, vibrato_depth=0.015, breath_amt=0.08)
+        rem = min(len(flute), n_total - onset)
+        if rem <= 0: continue
+        left[onset:onset+rem] += flute[:rem] * 0.28
+        right[onset:onset+rem] += flute[:rem] * 0.34
+        
+    # 3. Dulcimer Chimes
+    chimes = [
+        (0.0, 587.33), (12.8, 466.16), (25.6, 587.33), (32.0, 698.46), (44.8, 440.0), (51.2, 587.33)
+    ]
+    for (chime_s, chime_f) in chimes:
+        onset = int(chime_s * SR)
+        if onset >= n_total: break
+        bell = dulcimer_accent(chime_f, 2.8)
+        rem = min(len(bell), n_total - onset)
+        if rem <= 0: continue
+        left[onset:onset+rem] += bell[:rem] * 0.22
+        right[onset:onset+rem] += bell[:rem] * 0.18
+        
+    # 4. Wind Bed
+    wind_raw = pink_noise(n_total)
+    left += bandpass_filter(wind_raw, 480, q=1.2) * 0.045
+    right += bandpass_filter(np.roll(wind_raw, 120), 540, q=1.2) * 0.045
     
-    seam_len = int(SR * 2.0)
-    fade_in = np.linspace(0, 1, seam_len)
-    fade_out = np.linspace(1, 0, seam_len)
-    left[:seam_len] = left[:seam_len] * fade_in + left[-seam_len:] * fade_out
-    right[:seam_len] = right[:seam_len] * fade_in + right[-seam_len:] * fade_out
+    # 5. Hall Reverb
+    stereo_raw = create_stereo(left, right)
+    stereo_rev = np.vstack((
+        simple_reverb(stereo_raw[0], decay=0.38, wet=0.25),
+        simple_reverb(stereo_raw[1], decay=0.38, wet=0.25)
+    ))
     
-    stereo = create_stereo(left, right)
-    return simple_reverb(stereo, decay=0.45, wet=0.28)
+    # 6. Seamless Loop Folding
+    w_samples = int(SR * bar_s)
+    out_left = stereo_rev[0, :n_loop].copy()
+    out_right = stereo_rev[1, :n_loop].copy()
+    
+    cont_left = stereo_rev[0, n_loop:n_loop + w_samples]
+    cont_right = stereo_rev[1, n_loop:n_loop + w_samples]
+    
+    t_win = np.linspace(0, np.pi / 2, w_samples)
+    w_in = np.sin(t_win) ** 2
+    w_out = np.cos(t_win) ** 2
+    
+    out_left[:w_samples] = w_out * cont_left + w_in * out_left[:w_samples]
+    out_right[:w_samples] = w_out * cont_right + w_in * out_right[:w_samples]
+    
+    return create_stereo(out_left, out_right)
 
 def gen_music_night_combat():
     duration = 45.0
@@ -895,7 +1041,9 @@ def main():
     
     # 7. Adaptive Music & Ambience Tracks
     save_wav(f"{music_dir}/music_main_menu.wav", gen_music_main_menu())
-    save_wav(f"{music_dir}/music_day_exploration.wav", gen_music_day_exploration())
+    day_music = gen_music_day_exploration()
+    save_wav(f"{music_dir}/music_day_exploration.wav", day_music)
+    save_wav("Assets/_Duskborn/Resources/Music/music_day_exploration.wav", day_music)
     save_wav(f"{music_dir}/music_night_combat.wav", gen_music_night_combat())
     
     print("\nAll Duskborn audio assets generated successfully!")

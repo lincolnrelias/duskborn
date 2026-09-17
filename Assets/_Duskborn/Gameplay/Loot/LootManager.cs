@@ -25,9 +25,15 @@ namespace Duskborn.Gameplay.Loot
         [Range(0f, 1f)]
         [SerializeField] private float azimuthJitter = 0.4f;
 
-        [Header("Timing")]
-        [Tooltip("Delay in seconds between each item spawn — forms a sequential 'barrage' rather than spawning everything at once.")]
-        [SerializeField] private float dropInterval = 0.2f;
+        [Tooltip("Random tumbling torque applied to items upon launch.")]
+        [SerializeField] private float throwTorque = 4.0f;
+
+        [Header("Spawn Separation")]
+        [Tooltip("Initial radial distance from origin where items appear, spreading them around the body to prevent overlapping.")]
+        [SerializeField] private float spawnSpreadRadius = 0.25f;
+        [Tooltip("Vertical spawn offset above the origin.")]
+        [SerializeField] private float spawnHeightOffset = 0.15f;
+
 
         [Header("Gold")]
         [SerializeField] private GameObject worldGoldPickupPrefab;
@@ -36,6 +42,8 @@ namespace Duskborn.Gameplay.Loot
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
+
+            ConfigureCollisionLayers();
         }
 
         private void OnDestroy()
@@ -43,11 +51,35 @@ namespace Duskborn.Gameplay.Loot
             if (Instance == this) Instance = null;
         }
 
+        private void ConfigureCollisionLayers()
+        {
+            int resourceLayer = LayerMask.NameToLayer("Resource");
+            if (resourceLayer < 0) return;
+
+            // Resource drops should never collide with each other
+            Physics.IgnoreLayerCollision(resourceLayer, resourceLayer, true);
+
+            // Resource drops should never collide with enemies or ragdoll bodies
+            int enemyLayer = LayerMask.NameToLayer("Enemy");
+            if (enemyLayer >= 0)
+                Physics.IgnoreLayerCollision(resourceLayer, enemyLayer, true);
+
+            // Resource drops should never collide with resource nodes
+            int resourceNodeLayer = LayerMask.NameToLayer("ResourceNode");
+            if (resourceNodeLayer >= 0)
+                Physics.IgnoreLayerCollision(resourceLayer, resourceNodeLayer, true);
+
+            // Resource drops should never collide with players
+            int playerLayer = LayerMask.NameToLayer("Player");
+            if (playerLayer >= 0)
+                Physics.IgnoreLayerCollision(resourceLayer, playerLayer, true);
+        }
+
         public void ServerDropLoot(DropLootTable table, Vector3 origin)
         {
             if (!InstanceFinder.IsServerStarted || table == null) return;
 
-            SeededRNG rng         = GameSession.Instance?.RNG;
+            SeededRNG rng          = GameSession.Instance?.RNG;
             int       currentNight = DayNightCycle.Instance?.CurrentNight ?? 0;
 
             var hits       = table.Roll(rng, currentNight);
@@ -79,46 +111,125 @@ namespace Duskborn.Gameplay.Loot
             }
 
             int total = spawnList.Count + (spawnGold ? 1 : 0);
+            if (total == 0) return;
 
-            StartCoroutine(DropSequence(spawnList, spawnGold, goldAmount, origin, total, rng));
+            // Instantly burst-throw all items from the body simultaneously
+            SpawnAllLootInstant(spawnList, spawnGold, goldAmount, origin, total, rng);
 
             DuskLog.Log(LogChannel.Loot,
                 $"LootManager: dropping {spawnList.Count} item(s) at {origin} (night {currentNight}).");
         }
 
-        // Spawns and throws items one at a time with a delay between each, forming a sequential barrage.
-        private IEnumerator DropSequence(List<(GameObject prefab, string id)> spawnList, bool spawnGold, int goldAmount, Vector3 origin, int total, SeededRNG rng)
+        private void SpawnAllLootInstant(
+            List<(GameObject prefab, string id)> spawnList,
+            bool spawnGold,
+            int goldAmount,
+            Vector3 origin,
+            int total,
+            SeededRNG rng)
         {
+            float baseAngle = RandRange(rng, 0f, 360f);
+            var spawnedColliders = new List<Collider>();
+
             for (int i = 0; i < spawnList.Count; i++)
             {
                 var (prefab, id) = spawnList[i];
-                SpawnItem(prefab, id, origin, i, total, rng);
-                yield return new WaitForSeconds(dropInterval);
+                var go = SpawnItem(prefab, id, origin, i, total, baseAngle, rng);
+                if (go != null)
+                    RegisterAndIgnoreCollisions(go, spawnedColliders);
             }
 
             if (spawnGold)
-                SpawnGoldPickup(origin, goldAmount, spawnList.Count, total, rng);
+            {
+                var go = SpawnGoldPickup(origin, goldAmount, spawnList.Count, total, baseAngle, rng);
+                if (go != null)
+                    RegisterAndIgnoreCollisions(go, spawnedColliders);
+            }
         }
 
-        private void SpawnItem(GameObject prefab, string id, Vector3 origin, int index, int total, SeededRNG rng)
+        private void RegisterAndIgnoreCollisions(GameObject go, List<Collider> collidersList)
         {
-            var go = Instantiate(prefab, origin + Vector3.up * 0.1f, Quaternion.identity);
+            var newCols = go.GetComponentsInChildren<Collider>();
+            foreach (var newCol in newCols)
+            {
+                if (newCol == null) continue;
+                foreach (var existingCol in collidersList)
+                {
+                    if (existingCol != null)
+                        Physics.IgnoreCollision(newCol, existingCol, true);
+                }
+                collidersList.Add(newCol);
+            }
+        }
+
+        private GameObject SpawnItem(GameObject prefab, string id, Vector3 origin, int index, int total, float baseAngle, SeededRNG rng)
+        {
+            Vector3 throwVelocity = ComputeThrowDirection(index, total, baseAngle, rng, out float azimuth);
+            Vector3 spawnPos       = CalculateSpawnPosition(origin, azimuth, total);
+
+            var go = Instantiate(prefab, spawnPos, Quaternion.Euler(0f, azimuth * Mathf.Rad2Deg, 0f));
             InstanceFinder.ServerManager.Spawn(go);
             var pickup = go.GetComponent<WorldItemPickup>();
             if (pickup != null)
             {
                 pickup.ServerInitialize(id, 1);
-                pickup.ServerThrow(ComputeThrowDirection(index, total, rng));
+                pickup.ServerThrow(throwVelocity, throwTorque);
             }
+            return go;
+        }
+
+        private GameObject SpawnGoldPickup(Vector3 origin, int amount, int throwIndex, int throwTotal, float baseAngle, SeededRNG rng)
+        {
+            if (worldGoldPickupPrefab == null)
+            {
+                DuskLog.Warn(LogChannel.Loot, "LootManager: worldGoldPickupPrefab not assigned — adding gold directly.");
+                GoldManager.Instance?.AddGold(amount);
+                return null;
+            }
+
+            Vector3 throwVelocity = ComputeThrowDirection(throwIndex, throwTotal, baseAngle, rng, out float azimuth);
+            Vector3 spawnPos       = CalculateSpawnPosition(origin, azimuth, throwTotal);
+
+            var go = Instantiate(worldGoldPickupPrefab, spawnPos, Quaternion.Euler(0f, azimuth * Mathf.Rad2Deg, 0f));
+            InstanceFinder.ServerManager.Spawn(go);
+
+            var goldPickup = go.GetComponent<WorldGoldPickup>();
+            if (goldPickup == null)
+            {
+                DuskLog.Warn(LogChannel.Loot,
+                    $"LootManager: '{worldGoldPickupPrefab.name}' has no WorldGoldPickup component — swap WorldItemPickup for WorldGoldPickup on that prefab.");
+                InstanceFinder.ServerManager.Despawn(go.GetComponent<NetworkObject>(), DespawnType.Destroy);
+                GoldManager.Instance?.AddGold(amount);
+                return null;
+            }
+
+            goldPickup.ServerInitialize(amount);
+            goldPickup.ServerThrow(throwVelocity, throwTorque);
+            return go;
+        }
+
+        private Vector3 CalculateSpawnPosition(Vector3 origin, float azimuth, int total)
+        {
+            Vector3 spawnPos = origin + Vector3.up * spawnHeightOffset;
+            if (total > 1 && spawnSpreadRadius > 0f)
+            {
+                Vector3 radialOffset = new Vector3(Mathf.Cos(azimuth), 0f, Mathf.Sin(azimuth)) * spawnSpreadRadius;
+                spawnPos += radialOffset;
+            }
+            return spawnPos;
         }
 
         // Spaces items evenly around a full circle, each launched along a cone surface
         // (fixed angle from straight up) so the burst forms a cone widening toward the top.
-        private Vector3 ComputeThrowDirection(int index, int total, SeededRNG rng)
+        private Vector3 ComputeThrowDirection(int index, int total, float baseAngle, SeededRNG rng, out float azimuth)
         {
             float slotDeg  = total > 0 ? 360f / total : 0f;
             float jitter   = slotDeg * 0.5f * azimuthJitter;
-            float azimuth  = (slotDeg * index + RandRange(rng, -jitter, jitter)) * Mathf.Deg2Rad;
+            float angleDeg = total == 1
+                ? baseAngle
+                : (baseAngle + slotDeg * index + RandRange(rng, -jitter, jitter));
+
+            azimuth = angleDeg * Mathf.Deg2Rad;
 
             float cone  = Mathf.Clamp(coneAngle + RandRange(rng, -coneAngleVariance, coneAngleVariance), 0f, 90f) * Mathf.Deg2Rad;
             float speed = Mathf.Max(0f, throwSpeed + RandRange(rng, -throwSpeedVariance, throwSpeedVariance));
@@ -135,32 +246,6 @@ namespace Duskborn.Gameplay.Loot
 
         private static float RandRange(SeededRNG rng, float min, float max) =>
             rng != null ? rng.Range(min, max) : UnityEngine.Random.Range(min, max);
-
-        private void SpawnGoldPickup(Vector3 origin, int amount, int throwIndex, int throwTotal, SeededRNG rng)
-        {
-            if (worldGoldPickupPrefab == null)
-            {
-                DuskLog.Warn(LogChannel.Loot, "LootManager: worldGoldPickupPrefab not assigned — adding gold directly.");
-                GoldManager.Instance?.AddGold(amount);
-                return;
-            }
-
-            var go = Instantiate(worldGoldPickupPrefab, origin + Vector3.up * 0.1f, Quaternion.identity);
-            InstanceFinder.ServerManager.Spawn(go);
-
-            var goldPickup = go.GetComponent<WorldGoldPickup>();
-            if (goldPickup == null)
-            {
-                DuskLog.Warn(LogChannel.Loot,
-                    $"LootManager: '{worldGoldPickupPrefab.name}' has no WorldGoldPickup component — swap WorldItemPickup for WorldGoldPickup on that prefab.");
-                InstanceFinder.ServerManager.Despawn(go.GetComponent<NetworkObject>(), DespawnType.Destroy);
-                GoldManager.Instance?.AddGold(amount);
-                return;
-            }
-
-            goldPickup.ServerInitialize(amount);
-            goldPickup.ServerThrow(ComputeThrowDirection(throwIndex, throwTotal, rng));
-        }
 
         // Adjusts a single entry's baseChance at runtime (mutates in-memory ScriptableObject only — not saved to disk).
         public void ModifyDropChance(DropLootTable table, int entryIndex, float delta)

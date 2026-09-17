@@ -42,9 +42,12 @@ namespace Duskborn.Gameplay.Loot
             LootManager.Instance?.ServerDropLoot(lootTable, GetDropPosition());
         }
 
-        private Vector3 GetDropPosition() =>
-            dropOrigin != null
+        private Vector3 GetDropPosition()
+        {
+            Vector3 basePos = (dropOrigin != null && dropOrigin != transform)
                 ? dropOrigin.position
-                : transform.position + Vector3.up * dropOriginUpOffset;
+                : transform.position;
+            return basePos + Vector3.up * dropOriginUpOffset;
+        }
     }
 }

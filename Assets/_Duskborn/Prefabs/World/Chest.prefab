@@ -115,6 +115,7 @@ MonoBehaviour:
   goldCost: 3
   lootTable: {fileID: 11400000, guid: 950a218e4beb2224ab756592277a2c09, type: 2}
   priceLabel: {fileID: 4079926186998577024}
+  openClip: {fileID: 0}
   outlineLayerName: GreenOutline
   outlineRenderer: {fileID: 8399161928399641455}
 --- !u!65 &2849177113198978205
@@ -222,7 +223,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584120955576229850
+  _initializedTimestamp: -8584119473664110649
 --- !u!1 &7632067650714462482
 GameObject:
   m_ObjectHideFlags: 0

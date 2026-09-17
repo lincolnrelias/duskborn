@@ -129,6 +129,10 @@ namespace Duskborn.Gameplay.Enemies
             _weaponActionPlayer = GetComponent<WeaponActionPlayer>();
             _hitNotifier        = GetComponent<WeaponHitNotifier>();
             _skillCooldowns     = new float[weapon?.Skills != null ? weapon.Skills.Length : 0];
+
+            if (GetComponent<EnemyAudioFeedback>() == null)
+                gameObject.AddComponent<EnemyAudioFeedback>();
+
             SpawnWeaponVisual();
         }
 
@@ -248,6 +252,7 @@ namespace Duskborn.Gameplay.Enemies
             DuskLog.Log(LogChannel.Enemy, $"{name} melee hit for {dmg:F1}{(isCrit ? " CRIT" : "")}");
             RpcRaiseHitAudio(CurrentTarget.tag);
             RpcSpawnHitEffect(CurrentTarget.tag, CurrentTarget.position);
+            GetComponent<EnemyAudioFeedback>()?.PlayAttackVoice();
         }
 
         // ── ICombatEntity ─────────────────────────────────────────────────────

@@ -17,8 +17,12 @@ namespace Duskborn.UI
         public string targetGameScene = "SampleScene";
 
         [Header("Áudio")]
-        [Tooltip("Efeito sonoro opcional ao clicar em botões (ex: gold_sfx ou pickup_sfx).")]
+        [Tooltip("Trilha sonora temática do Menu Principal.")]
+        public AudioClip menuMusic;
+        [Tooltip("Efeito sonoro ao clicar em botões.")]
         public AudioClip clickSfx;
+        [Tooltip("Efeito sonoro ao abrir pergaminho/modal.")]
+        public AudioClip modalOpenSfx;
 
         // Estado dos Modais
         private bool _showLoreModal = false;
@@ -78,25 +82,53 @@ namespace Duskborn.UI
             CleanupTextures();
         }
 
+        private void Start()
+        {
+            TryLoadAudio();
+
+            if (menuMusic != null && Duskborn.Audio.AudioManager.Instance != null)
+            {
+                Duskborn.Audio.AudioManager.Instance.PlayMusic(menuMusic, 1.5f);
+            }
+        }
+
         private void TryLoadAudio()
         {
+            if (menuMusic == null) menuMusic = Resources.Load<AudioClip>("Music/music_main_menu");
+            if (clickSfx == null) clickSfx = Resources.Load<AudioClip>("SFX/ui_button_click");
+            if (modalOpenSfx == null) modalOpenSfx = Resources.Load<AudioClip>("SFX/ui_modal_open");
+
 #if UNITY_EDITOR
+            if (menuMusic == null)
+                menuMusic = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Duskborn/Audio/Music/music_main_menu.wav");
             if (clickSfx == null)
-            {
-                clickSfx = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Duskborn/Art/SFX/gold_sfx.mp3");
-                if (clickSfx == null)
-                {
-                    clickSfx = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Duskborn/Art/SFX/pickup_sfx.wav");
-                }
-            }
+                clickSfx = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Duskborn/Art/SFX/ui_button_click.wav");
+            if (modalOpenSfx == null)
+                modalOpenSfx = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Duskborn/Art/SFX/ui_modal_open.wav");
 #endif
         }
 
         private void PlayButtonSound()
         {
+            if (clickSfx == null) TryLoadAudio();
             if (clickSfx != null)
             {
-                AudioSource.PlayClipAtPoint(clickSfx, Camera.main != null ? Camera.main.transform.position : Vector3.zero, _masterVolume);
+                if (Duskborn.Audio.AudioManager.Instance != null)
+                    Duskborn.Audio.AudioManager.Instance.PlayUISfx(clickSfx);
+                else
+                    AudioSource.PlayClipAtPoint(clickSfx, Camera.main != null ? Camera.main.transform.position : Vector3.zero, _masterVolume);
+            }
+        }
+
+        private void PlayModalSound()
+        {
+            if (modalOpenSfx == null) TryLoadAudio();
+            if (modalOpenSfx != null)
+            {
+                if (Duskborn.Audio.AudioManager.Instance != null)
+                    Duskborn.Audio.AudioManager.Instance.PlayUISfx(modalOpenSfx);
+                else
+                    AudioSource.PlayClipAtPoint(modalOpenSfx, Camera.main != null ? Camera.main.transform.position : Vector3.zero, _masterVolume);
             }
         }
 
@@ -139,9 +171,32 @@ namespace Duskborn.UI
             LoadGame();
         }
 
+        public static bool LoadedFromMainMenu { get; set; } = false;
+
+#if UNITY_EDITOR
+        [UnityEditor.InitializeOnEnterPlayMode]
+        private static void OnEnterPlayMode(UnityEditor.EnterPlayModeOptions options)
+        {
+            LoadedFromMainMenu = false;
+        }
+#endif
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStaticsOnSubsystemRegistration()
+        {
+            LoadedFromMainMenu = false;
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void ResetStaticsOnBeforeSceneLoad()
+        {
+            LoadedFromMainMenu = false;
+        }
+
         public void LoadGame()
         {
             Debug.Log($"[MainMenuController] Iniciando jornada na cena: {targetGameScene}");
+            LoadedFromMainMenu = true;
             SceneManager.LoadScene(targetGameScene);
         }
 
@@ -199,14 +254,14 @@ namespace Duskborn.UI
             // Botão 2: Pergaminho de Saber
             if (DrawStoneButton(new Rect(btnX, startY + spacing, btnW, btnH), "📜   PERGAMINHO DE SABER", false))
             {
-                PlayButtonSound();
+                PlayModalSound();
                 _showLoreModal = true;
             }
 
             // Botão 3: Configurações do Reino
             if (DrawStoneButton(new Rect(btnX, startY + spacing * 2, btnW, btnH), "⚙   CONFIGURAÇÕES", false))
             {
-                PlayButtonSound();
+                PlayModalSound();
                 _showSettingsModal = true;
             }
 
@@ -403,6 +458,7 @@ namespace Duskborn.UI
                 _masterVolume = newVol;
                 AudioListener.volume = _masterVolume;
                 PlayerPrefs.SetFloat("Duskborn_MasterVolume", _masterVolume);
+                Duskborn.Audio.AudioManager.Instance?.SetMasterVolume(_masterVolume);
             }
 
             contentY += 55;

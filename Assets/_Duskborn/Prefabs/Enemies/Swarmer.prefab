@@ -275,7 +275,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584120955576229850
+  _initializedTimestamp: -8584119473664110649
 --- !u!114 &6069308860891105275
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -412,6 +412,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Audio.WeaponAudioPlayer
   audioSource: {fileID: -2351370629229474915}
+  pitchVariation: 0.06
+  swingVolume: 0.85
+  hitVolume: 1
 --- !u!114 &7509770433554689990
 MonoBehaviour:
   m_ObjectHideFlags: 0

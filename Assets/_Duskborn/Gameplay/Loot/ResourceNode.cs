@@ -20,6 +20,9 @@ namespace Duskborn.Gameplay.Loot
         [Header("Damage Numbers")]
         [SerializeField] private DamageNumberConfig _damageNumberConfig;
 
+        [Header("Áudio")]
+        [SerializeField] private AudioClip depletedClip;
+
         [Header("Outline")]
         [SerializeField] private string   outlineLayerName = "GreenOutline";
         [SerializeField] private Renderer outlineRenderer;
@@ -74,7 +77,25 @@ namespace Duskborn.Gameplay.Loot
             RpcShowDamageNumber(transform.position, amount, isCrit);
             DuskLog.Log(LogChannel.Loot, $"{name}: -{amount:F1} HP → {_currentHP.Value:F1}/{maxHP}");
             if (_currentHP.Value <= 0f)
+            {
                 OnDepleted?.Invoke();
+                RpcPlayDepletedAudio(transform.position, materialTypes);
+            }
+        }
+
+        [ObserversRpc(RunLocally = true)]
+        private void RpcPlayDepletedAudio(Vector3 pos, TargetType type)
+        {
+            AudioClip clip = type.HasFlag(TargetType.Tree)
+                ? (depletedClip != null ? depletedClip : Resources.Load<AudioClip>("SFX/tree_fall"))
+                : (depletedClip != null ? depletedClip : Resources.Load<AudioClip>("SFX/rock_shatter"));
+            if (clip != null)
+            {
+                if (Duskborn.Audio.AudioManager.Instance != null)
+                    Duskborn.Audio.AudioManager.Instance.PlayAtPoint(clip, pos, 0.95f, 2f, 40f);
+                else
+                    AudioSource.PlayClipAtPoint(clip, pos);
+            }
         }
 
         [ObserversRpc(RunLocally = true)]

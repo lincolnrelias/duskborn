@@ -84,40 +84,46 @@ namespace Duskborn.UI
             var cycle = DayNightCycle.Instance;
             var state = GameStateManager.Instance;
 
-            string phase   = cycle  != null ? cycle.Phase.ToString()                : "—";
-            string night   = cycle  != null ? cycle.CurrentNight.ToString()         : "—";
-            string timer   = cycle  != null ? $"{cycle.PhaseTimeRemaining:F0}s"     : "—";
-            string gstate  = state  != null ? state.CurrentState.ToString()         : "—";
-            int    alive   = waveManager != null ? waveManager.AliveEnemyCount      : 0;
-            int    pending = waveManager != null ? waveManager.RemainingEvents       : 0;
-            int    gold    = GoldManager.Instance != null ? GoldManager.Instance.Gold : 0;
+            string period  = cycle  != null ? $"{cycle.PeriodDisplayName} [{cycle.ClockTimeString}]" : "—";
+            string night   = cycle  != null ? cycle.CurrentNight.ToString()                         : "—";
+            string timer   = cycle  != null 
+                ? (cycle.IsDay ? $"{cycle.PhaseTimeRemaining:F0}s até Noite" : $"{cycle.PhaseTimeRemaining:F0}s até Amanhecer")
+                : "—";
+            string gstate  = state  != null ? state.CurrentState.ToString()                         : "—";
+            int    alive   = waveManager != null ? waveManager.AliveEnemyCount                      : 0;
+            int    pending = waveManager != null ? waveManager.RemainingEvents                     : 0;
+            int    gold    = GoldManager.Instance != null ? GoldManager.Instance.Gold             : 0;
 
             var players = PlayerRegistry.All;
             var sb = new StringBuilder();
-            sb.AppendLine($"Phase:   {phase}  (Night {night})");
-            sb.AppendLine($"Timer:   {timer}");
-            sb.AppendLine($"State:   {gstate}");
-            sb.AppendLine($"Gold:    {gold}");
+            sb.AppendLine($"Fase:    {period} (Noite {night})");
+            sb.AppendLine($"Tempo:   {timer}");
+            if (cycle != null && cycle.IsDusk)
+            {
+                sb.AppendLine(">> AVISO: Crepúsculo! Retorne à base! <<");
+            }
+            sb.AppendLine($"Estado:  {gstate}");
+            sb.AppendLine($"Ouro:    {gold}");
             sb.AppendLine($"Buffs:   {(_inventory != null ? _inventory.Buffs.Count : 0)}");
             if (_resources != null)
             {
                 foreach (KeyValuePair<string, int> kv in _resources.Counts)
                     if (kv.Value > 0) sb.AppendLine($"{kv.Key}: {kv.Value}");
             }
-            sb.AppendLine($"Enemies: {alive} alive  |  {pending} queued");
+            sb.AppendLine($"Inimigos: {alive} vivos  |  {pending} na fila");
             sb.AppendLine("─────────────────");
             if (players.Count == 0)
-                sb.AppendLine("No players registered");
+                sb.AppendLine("Nenhum jogador registrado");
             else
                 for (int i = 0; i < players.Count; i++)
                     sb.AppendLine($"P{i + 1} HP: {players[i].CurrentHP:F0} / {players[i].MaxHP:F0}");
 
             sb.AppendLine("─────────────────");
-            sb.AppendLine("F1 Skip day  F2 End night");
-            sb.AppendLine("F3 Damage    F4 Print timeline");
-            sb.AppendLine("C  Toggle stats");
+            sb.AppendLine("F1 Pular dia  F2 Encerrar noite");
+            sb.AppendLine("F3 Dano       F4 Linha do tempo");
+            sb.AppendLine("C  Alternar estatísticas");
 
-            float w = 260f, h = 220f;
+            float w = 270f, h = (cycle != null && cycle.IsDusk) ? 252f : 234f;
             GUI.Box(new Rect(10, 10, w, h), GUIContent.none, _boxStyle);
             GUI.Label(new Rect(18, 14, w - 8, h - 4), sb.ToString(), _labelStyle);
         }

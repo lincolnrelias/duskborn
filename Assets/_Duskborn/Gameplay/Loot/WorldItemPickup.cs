@@ -50,11 +50,17 @@ namespace Duskborn.Gameplay.Loot
             _amount.Value     = amount;
         }
 
-        public void ServerThrow(Vector3 impulse)
+        public void ServerThrow(Vector3 impulse, float torque = 0f)
         {
             var rb = GetComponent<Rigidbody>();
             if (rb != null)
+            {
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
                 rb.AddForce(impulse, ForceMode.VelocityChange);
+                if (torque > 0f)
+                    rb.AddTorque(Random.insideUnitSphere * torque, ForceMode.VelocityChange);
+            }
             else
                 DuskLog.Warn(LogChannel.Loot, $"{name}: ServerThrow called but no Rigidbody found.");
         }
@@ -85,8 +91,14 @@ namespace Duskborn.Gameplay.Loot
         private void DeliverResourceRpc(NetworkConnection conn, NetworkObject playerNob, string resourceId, int amount)
         {
             playerNob.GetComponent<ResourceInventory>()?.Add(resourceId, amount);
+            if (pickupClip == null) pickupClip = Resources.Load<AudioClip>("SFX/item_pickup");
             if (pickupClip != null)
-                AudioSource.PlayClipAtPoint(pickupClip, playerNob.transform.position);
+            {
+                if (Duskborn.Audio.AudioManager.Instance != null)
+                    Duskborn.Audio.AudioManager.Instance.PlayAtPoint(pickupClip, playerNob.transform.position, 1.0f);
+                else
+                    AudioSource.PlayClipAtPoint(pickupClip, playerNob.transform.position);
+            }
         }
     }
 }

@@ -12,14 +12,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bf6db92f782e69488ba7baddc021b35, type: 3}
   m_Name: stone_axe_audio_profile
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Audio.WeaponAudioProfile
-  swingClips: []
+  swingClips:
+  - {fileID: 8300000, guid: 478b08c7ad9c006038d248663540320d, type: 3}
+  - {fileID: 8300000, guid: 133f874279a0f1f6dd2aa9975039ee25, type: 3}
+  - {fileID: 8300000, guid: 7756b7b89d365dd82ba6b10988eca6dc, type: 3}
   surfaces:
   - tag: Tree
     clips:
-    - {fileID: 8300000, guid: 9af62a927c7cc5a4fb40b5808e97ec59, type: 3}
+    - {fileID: 8300000, guid: 92931fa3b00ab1bca30373337ad96609, type: 3}
+    - {fileID: 8300000, guid: 4e83f09ad9c0fbf8bb9593ae495ad810, type: 3}
+    - {fileID: 8300000, guid: 0b6b0c9b65edc797e849cb0ce5ec2bd8, type: 3}
   - tag: Enemy
     clips:
-    - {fileID: 8300000, guid: 9af62a927c7cc5a4fb40b5808e97ec59, type: 3}
+    - {fileID: 8300000, guid: f78a753bbdea3a62f5cd329b65a49625, type: 3}
+    - {fileID: 8300000, guid: 663220863f5ab6fcc3d79439bab147bd, type: 3}
+    - {fileID: 8300000, guid: b50e3c1997ff07e4799d8eecedf9f36c, type: 3}
+  - tag: Stone
+    clips:
+    - {fileID: 8300000, guid: 51acb640ae3084b84aa3d881e2d15b77, type: 3}
+    - {fileID: 8300000, guid: bfbccb06c263dae155cf6a4989912512, type: 3}
+    - {fileID: 8300000, guid: d4c0a63070c5f853db8d86f45a4c260f, type: 3}
+  - tag: Metal
+    clips:
+    - {fileID: 8300000, guid: 2f88ac29995e2cb8bab18ab74f7e7772, type: 3}
+    - {fileID: 8300000, guid: a49454b3707d88e55cf50dfb0958a631, type: 3}
+    - {fileID: 8300000, guid: c233de10320ddd0c921867c208f098da, type: 3}
+  - tag: Resource
+    clips:
+    - {fileID: 8300000, guid: 92931fa3b00ab1bca30373337ad96609, type: 3}
+    - {fileID: 8300000, guid: 4e83f09ad9c0fbf8bb9593ae495ad810, type: 3}
   - tag: Player
     clips:
-    - {fileID: 8300000, guid: 9af62a927c7cc5a4fb40b5808e97ec59, type: 3}
+    - {fileID: 8300000, guid: f78a753bbdea3a62f5cd329b65a49625, type: 3}
+    - {fileID: 8300000, guid: 663220863f5ab6fcc3d79439bab147bd, type: 3}
+  - tag: Default
+    clips:
+    - {fileID: 8300000, guid: fef273983342a0d2320bc2fd2301a650, type: 3}
+    - {fileID: 8300000, guid: 9ef9ccb7a48dea2785f33dd1b6415819, type: 3}

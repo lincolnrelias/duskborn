@@ -28,7 +28,7 @@ MonoBehaviour:
     Clips: []
     Events: []
     ComboDamageMultipliers: []
-  hitAudioOverride: {fileID: 8300000, guid: 9af62a927c7cc5a4fb40b5808e97ec59, type: 3}
+  hitAudioOverride: {fileID: 8300000, guid: b50e3c1997ff07e4799d8eecedf9f36c, type: 3}
   effectProfile: {fileID: 11400000, guid: 4365837daea7cab4ebadeab220765a1c, type: 2}
   arcDegrees: 180
   damageMultiplier: 1

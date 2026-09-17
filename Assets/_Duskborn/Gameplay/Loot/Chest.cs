@@ -13,6 +13,7 @@ namespace Duskborn.Gameplay.Loot
         [SerializeField] private int         goldCost  = 50;
         [SerializeField] private LootTable   lootTable;
         [SerializeField] private TextMeshPro priceLabel;
+        [SerializeField] private AudioClip   openClip;
 
         [Header("Outline")]
         [SerializeField] private string   outlineLayerName = "GreenOutline";
@@ -62,7 +63,18 @@ namespace Duskborn.Gameplay.Loot
 
         private void OnIsOpenChanged(bool prev, bool next, bool asServer)
         {
-            if (next) gameObject.SetActive(false);
+            if (next)
+            {
+                if (openClip == null) openClip = Resources.Load<AudioClip>("SFX/chest_open");
+                if (openClip != null)
+                {
+                    if (Duskborn.Audio.AudioManager.Instance != null)
+                        Duskborn.Audio.AudioManager.Instance.PlayAtPoint(openClip, transform.position, 1.0f);
+                    else
+                        AudioSource.PlayClipAtPoint(openClip, transform.position);
+                }
+                gameObject.SetActive(false);
+            }
         }
 
         public void SetOutline(bool show)

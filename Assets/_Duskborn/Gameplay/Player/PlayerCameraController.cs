@@ -187,6 +187,11 @@ namespace Duskborn.Gameplay.Player
 
             SnapCameraToTarget();
 
+            // Aplica sensibilidade e inversão carregadas do GameSettings
+            sensitivityX = Duskborn.Core.GameSettings.MouseSensitivity;
+            sensitivityY = Duskborn.Core.GameSettings.MouseSensitivity;
+            invertPitch  = Duskborn.Core.GameSettings.InvertPitch;
+
             if (autoLockCursor)
                 SetCursorLocked(true);
         }
@@ -484,6 +489,30 @@ namespace Duskborn.Gameplay.Player
                 if (autoLockCursor)
                     SetCursorLocked(true);
             }
+        }
+
+        public float SensitivityX
+        {
+            get => sensitivityX;
+            set => sensitivityX = value;
+        }
+
+        public float SensitivityY
+        {
+            get => sensitivityY;
+            set => sensitivityY = value;
+        }
+
+        public bool InvertPitch
+        {
+            get => invertPitch;
+            set => invertPitch = value;
+        }
+
+        public void SetSensitivity(float sensitivity)
+        {
+            sensitivityX = sensitivity;
+            sensitivityY = sensitivity;
         }
     }
 }

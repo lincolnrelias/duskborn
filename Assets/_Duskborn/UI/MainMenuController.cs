@@ -69,9 +69,9 @@ namespace Duskborn.UI
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
 
-            _masterVolume = PlayerPrefs.GetFloat("Duskborn_MasterVolume", 1.0f);
-            AudioListener.volume = _masterVolume;
-            _isFullScreen = Screen.fullScreen;
+            Duskborn.Core.GameSettings.LoadAll();
+            _masterVolume = Duskborn.Core.GameSettings.MasterVolume;
+            _isFullScreen = Duskborn.Core.GameSettings.FullScreen;
 
             InitEmbers();
             TryLoadAudio();
@@ -456,9 +456,7 @@ namespace Duskborn.UI
             if (Math.Abs(newVol - _masterVolume) > 0.01f)
             {
                 _masterVolume = newVol;
-                AudioListener.volume = _masterVolume;
-                PlayerPrefs.SetFloat("Duskborn_MasterVolume", _masterVolume);
-                Duskborn.Audio.AudioManager.Instance?.SetMasterVolume(_masterVolume);
+                Duskborn.Core.GameSettings.SetMasterVolume(_masterVolume);
             }
 
             contentY += 55;
@@ -470,7 +468,7 @@ namespace Duskborn.UI
             {
                 PlayButtonSound();
                 _isFullScreen = !_isFullScreen;
-                Screen.fullScreen = _isFullScreen;
+                Duskborn.Core.GameSettings.SetFullScreen(_isFullScreen);
             }
 
             // Botão Concluir

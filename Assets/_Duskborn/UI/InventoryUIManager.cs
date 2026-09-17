@@ -75,6 +75,8 @@ namespace Duskborn.UI
 
             if (IsInventoryKeyDown())
                 Toggle();
+            else if (IsOpen && IsEscapeKeyDown())
+                Close();
         }
 
         private void OnDestroy()
@@ -278,12 +280,29 @@ namespace Duskborn.UI
                     OnResourceChanged(kv.Key, kv.Value);
         }
 
+        public bool IsOpen => inventoryRoot != null && inventoryRoot.activeSelf;
+
+        public void Close()
+        {
+            if (IsOpen)
+                Toggle();
+        }
+
         private static bool IsInventoryKeyDown()
         {
 #if ENABLE_INPUT_SYSTEM
             return Keyboard.current != null && Keyboard.current.iKey.wasPressedThisFrame;
 #else
             return Input.GetKeyDown(KeyCode.I);
+#endif
+        }
+
+        private static bool IsEscapeKeyDown()
+        {
+#if ENABLE_INPUT_SYSTEM
+            return Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame;
+#else
+            return Input.GetKeyDown(KeyCode.Escape);
 #endif
         }
     }

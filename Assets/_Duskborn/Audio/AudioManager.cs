@@ -136,17 +136,23 @@ namespace Duskborn.Audio
 
         private void LoadVolumePreferences()
         {
-            masterVolume   = PlayerPrefs.GetFloat(PrefMasterVolume, masterVolume);
+            float defaultMaster = PlayerPrefs.GetFloat("Duskborn_MasterVolume", masterVolume);
+            masterVolume   = PlayerPrefs.GetFloat(PrefMasterVolume, defaultMaster);
             musicVolume    = PlayerPrefs.GetFloat(PrefMusicVolume, musicVolume);
             sfxVolume      = PlayerPrefs.GetFloat(PrefSfxVolume, sfxVolume);
             ambienceVolume = PlayerPrefs.GetFloat(PrefAmbientVol, ambienceVolume);
             uiVolume       = PlayerPrefs.GetFloat(PrefUiVolume, uiVolume);
+
+            AudioListener.volume = masterVolume;
+            UpdateAllVolumes();
         }
 
         public void SetMasterVolume(float volume)
         {
             masterVolume = Mathf.Clamp01(volume);
             PlayerPrefs.SetFloat(PrefMasterVolume, masterVolume);
+            PlayerPrefs.SetFloat("Duskborn_MasterVolume", masterVolume);
+            AudioListener.volume = masterVolume;
             UpdateAllVolumes();
         }
 
@@ -180,12 +186,14 @@ namespace Duskborn.Audio
 
         private void UpdateAllVolumes()
         {
+            AudioListener.volume = masterVolume;
+
             float activeMusicVol = masterVolume * musicVolume;
-            if (_activeSourceIsA)
+            if (_activeSourceIsA && _musicSourceA != null)
             {
                 _musicSourceA.volume = activeMusicVol;
             }
-            else
+            else if (_musicSourceB != null)
             {
                 _musicSourceB.volume = activeMusicVol;
             }

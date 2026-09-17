@@ -48,10 +48,10 @@ Shader "Duskborn/StylizedSkybox"
 
         [Header(Twinkling Night Stars)]
         _StarColor("Star Brightness Color", Color) = (0.95, 0.98, 1.0, 1.0)
-        _StarDensity("Star Threshold Cutoff", Range(0.92, 0.999)) = 0.985
-        _StarScale("Star Celestial Grid Scale", Range(20.0, 250.0)) = 95.0
-        _StarSize("Star Point Radius", Range(0.02, 0.35)) = 0.14
-        _StarBrightness("Star Peak Brightness", Range(0.5, 6.0)) = 2.8
+        _StarDensity("Star Threshold Cutoff", Range(0.90, 0.999)) = 0.975
+        _StarScale("Star Celestial Grid Scale", Range(20.0, 250.0)) = 110.0
+        _StarSize("Star Point Radius", Range(0.02, 0.45)) = 0.20
+        _StarBrightness("Star Peak Brightness", Range(0.5, 8.0)) = 3.8
         _StarTwinkleSpeed("Star Twinkle Frequency", Range(0.5, 10.0)) = 3.2
 
         [Header(Stylized Ghibli Anime Clouds)]
@@ -62,10 +62,12 @@ Shader "Duskborn/StylizedSkybox"
         _CloudMoonHighlight("Cloud Moon Silver Highlight", Color) = (0.80, 0.88, 1.0, 1.0)
         _CloudSpeed("Cloud Panning Velocity", Vector) = (0.006, 0.003, 0.0, 0.0)
         _CloudScale("Cloud Density Scale", Range(0.1, 5.0)) = 0.75
-        _CloudCutoff("Cloud Coverage Threshold", Range(0.1, 0.9)) = 0.46
+        _CloudCutoff("Cloud Coverage Threshold (Day)", Range(0.1, 0.9)) = 0.46
+        _NightCloudCutoff("Cloud Coverage Cutoff (Night)", Range(0.1, 0.95)) = 0.62
         _CloudSoftness("Cloud Edge Cel Softness", Range(0.01, 0.4)) = 0.08
         _CloudCurvature("Sky Dome Curvature Factor", Range(0.05, 0.8)) = 0.28
-        _CloudOpacity("Cloud Overall Opacity", Range(0.0, 1.0)) = 0.92
+        _CloudOpacity("Cloud Overall Opacity (Day)", Range(0.0, 1.0)) = 0.92
+        _NightCloudOpacity("Cloud Overall Opacity (Night)", Range(0.0, 1.0)) = 0.55
         _CloudWarpStrength("Cloud Domain Warp (Anti-Spheroid)", Range(0.0, 2.0)) = 0.65
         _CloudCirrusStrength("High Cirrus Wisps", Range(0.0, 1.0)) = 0.30
         _CloudNormalBump("Cloud Volumetric Cel Shading", Range(0.5, 10.0)) = 4.5
@@ -161,9 +163,11 @@ Shader "Duskborn/StylizedSkybox"
                 float4 _CloudSpeed;
                 float _CloudScale;
                 float _CloudCutoff;
+                float _NightCloudCutoff;
                 float _CloudSoftness;
                 float _CloudCurvature;
                 float _CloudOpacity;
+                float _NightCloudOpacity;
                 float _CloudWarpStrength;
                 float _CloudCirrusStrength;
                 float _CloudNormalBump;
@@ -328,30 +332,90 @@ Shader "Duskborn/StylizedSkybox"
                     skyColor = lerp(horizonTarget, groundTarget, pow(t, _GroundFalloff));
                 }
 
-                // 3. Twinkling Stars (visible when clear sky and dark)
+                // 3. Twinkling Stars (prominent anchor stars + deep field celestial canopy)
                 half3 starLight = half3(0, 0, 0);
-                if (viewDir.y > 0.01 && _DayNightBlend > 0.05)
+                if (viewDir.y > 0.01 && _DayNightBlend > 0.02)
                 {
-                    float3 starPos = viewDir * _StarScale;
-                    float3 starCell = floor(starPos);
-                    float starRand = Hash3D(starCell);
+                    // Horizon fade (stars fade out near misty horizon) and dusk-to-night fade
+                    float horizonStarFade = smoothstep(0.02, 0.20, viewDir.y);
+                    float nightStarVisibility = smoothstep(0.05, 0.70, _DayNightBlend);
 
-                    if (starRand > _StarDensity)
+                    // --- Layer 1: Prominent Bright Anchor Stars (with subtle celestial color variations) ---
+                    float3 starPos1 = viewDir * _StarScale;
+                    float3 starCell1 = floor(starPos1);
+                    float starRand1 = Hash3D(starCell1);
+
+                    if (starRand1 > _StarDensity)
                     {
-                        float3 cellFract = frac(starPos) - 0.5;
-                        float dist = length(cellFract);
-                        float starGlow = saturate(1.0 - dist / max(0.01, _StarSize));
-                        starGlow = pow(starGlow, 2.5);
+                        // Jitter star position safely inside cell interior (0.3 to 0.7) to prevent cell edge clipping
+                        float3 jitter1 = float3(
+                            frac(starRand1 * 17.13),
+                            frac(starRand1 * 31.41),
+                            frac(starRand1 * 73.79)
+                        ) - 0.5;
+                        float3 starCenter1 = starCell1 + 0.5 + jitter1 * 0.38;
+                        float3 starDir1 = normalize(starCenter1);
 
-                        float twinkle = sin(_Time.y * _StarTwinkleSpeed + starRand * 45.0) * 0.5 + 0.5;
-                        twinkle = lerp(0.35, 1.0, twinkle);
+                        // True angular distance scaled into cell coordinate space
+                        float dist1 = _StarScale * length(viewDir - starDir1);
+                        float size1 = _StarSize * lerp(0.75, 1.40, frac(starRand1 * 43.1));
 
-                        float horizonStarFade = saturate(viewDir.y * 6.0);
-                        float nightStarVisibility = pow(_DayNightBlend, 1.8);
+                        if (dist1 < size1)
+                        {
+                            float starGlow = saturate(1.0 - dist1 / size1);
+                            starGlow = pow(starGlow, 2.0);
 
-                        starLight = _StarColor.rgb * (starGlow * twinkle * _StarBrightness * horizonStarFade * nightStarVisibility);
-                        skyColor += starLight;
+                            // Twinkle with individual phase
+                            float twinkle = sin(_Time.y * _StarTwinkleSpeed + starRand1 * 62.83) * 0.5 + 0.5;
+                            twinkle = lerp(0.45, 1.25, twinkle);
+
+                            // Extra radiance boost for major anchor stars
+                            float anchorBoost = (starRand1 > (_StarDensity + (1.0 - _StarDensity) * 0.65)) ? 1.8 : 1.0;
+
+                            // Subtle spectral tinting: sapphire diamond, golden topaz, or pure white
+                            half3 starTint = _StarColor.rgb;
+                            float tintRand = frac(starRand1 * 11.3);
+                            if (tintRand > 0.68)
+                                starTint *= half3(0.85, 0.94, 1.18); // cool diamond
+                            else if (tintRand < 0.28)
+                                starTint *= half3(1.15, 1.02, 0.86); // warm gold
+
+                            starLight += starTint * (starGlow * twinkle * _StarBrightness * anchorBoost * horizonStarFade * nightStarVisibility);
+                        }
                     }
+
+                    // --- Layer 2: Deep Field Shimmering Stars (rich cosmic depth) ---
+                    float fieldScale = _StarScale * 1.65;
+                    float3 starPos2 = viewDir * fieldScale;
+                    float3 starCell2 = floor(starPos2);
+                    float starRand2 = Hash3D(starCell2 + float3(117.5, 31.2, 79.8));
+
+                    if (starRand2 > lerp(0.962, 0.980, _StarDensity))
+                    {
+                        float3 jitter2 = float3(
+                            frac(starRand2 * 23.41),
+                            frac(starRand2 * 47.19),
+                            frac(starRand2 * 89.23)
+                        ) - 0.5;
+                        float3 starCenter2 = starCell2 + 0.5 + jitter2 * 0.38;
+                        float3 starDir2 = normalize(starCenter2);
+
+                        float dist2 = fieldScale * length(viewDir - starDir2);
+                        float size2 = _StarSize * 0.62;
+
+                        if (dist2 < size2)
+                        {
+                            float starGlow2 = saturate(1.0 - dist2 / size2);
+                            starGlow2 = pow(starGlow2, 2.4);
+
+                            float twinkle2 = sin(_Time.y * (_StarTwinkleSpeed * 1.35) + starRand2 * 41.0) * 0.5 + 0.5;
+                            twinkle2 = lerp(0.3, 1.05, twinkle2);
+
+                            starLight += _StarColor.rgb * (starGlow2 * twinkle2 * (_StarBrightness * 0.6) * horizonStarFade * nightStarVisibility);
+                        }
+                    }
+
+                    skyColor += starLight;
                 }
 
                 // 4. Stylized Cel Sun Disc & Corona
@@ -402,6 +466,11 @@ Shader "Duskborn/StylizedSkybox"
                 // 6. Professional Anime Ghibli Cloud System
                 if (viewDir.y > 0.02)
                 {
+                    // Dynamic Day to Night Cloud Modulation:
+                    // At night, clouds part into sparser, lighter wisps allowing the starry cosmos to shine through
+                    float activeCutoff = lerp(_CloudCutoff, _NightCloudCutoff, _DayNightBlend);
+                    float activeOpacity = lerp(_CloudOpacity, _NightCloudOpacity, _DayNightBlend);
+
                     // Hemispherical dome UV projection with smooth horizon curve
                     float domeY = max(0.06, viewDir.y + _CloudCurvature);
                     float2 cloudUV = (viewDir.xz / domeY) * _CloudScale + _Time.y * _CloudSpeed.xy;
@@ -412,8 +481,8 @@ Shader "Duskborn/StylizedSkybox"
                     float dX = SampleCloudDensity(cloudUV + float2(eps, 0.0)) - d0;
                     float dY = SampleCloudDensity(cloudUV + float2(0.0, eps)) - d0;
 
-                    // Multi-tier Cel Thresholding
-                    float cloudMask = smoothstep(_CloudCutoff - _CloudSoftness, _CloudCutoff + _CloudSoftness, d0);
+                    // Multi-tier Cel Thresholding using active day/night cutoff
+                    float cloudMask = smoothstep(activeCutoff - _CloudSoftness, activeCutoff + _CloudSoftness, d0);
 
                     // Procedural surface normal for 3D volumetric cel shading
                     float3 cloudNormal = normalize(float3(-dX * _CloudNormalBump, 1.0, -dY * _CloudNormalBump));
@@ -451,14 +520,14 @@ Shader "Duskborn/StylizedSkybox"
                     float sunAlign = saturate(dot(viewDir, sunDir));
                     float moonAlign = saturate(dot(viewDir, moonDir));
                     float celestialAlign = lerp(sunAlign, moonAlign, _DayNightBlend);
-                    float silverLining = pow(celestialAlign, 6.0) * smoothstep(_CloudCutoff, _CloudCutoff + 0.15, d0) * (1.0 - smoothstep(_CloudCutoff + 0.18, _CloudCutoff + 0.38, d0));
+                    float silverLining = pow(celestialAlign, 6.0) * smoothstep(activeCutoff, activeCutoff + 0.15, d0) * (1.0 - smoothstep(activeCutoff + 0.18, activeCutoff + 0.38, d0));
                     cloudTone += activeHighlight * (silverLining * 1.35);
 
                     // Smooth horizon fade to seamlessly integrate with distant mountains and fog
                     float horizonFade = saturate(viewDir.y * 4.2);
-                    float totalCloudAlpha = cloudMask * horizonFade * _CloudOpacity;
+                    float totalCloudAlpha = cloudMask * horizonFade * activeOpacity;
 
-                    // Composite cloud deck over sky and stars (clouds naturally occlude background stars)
+                    // Composite cloud deck over sky and stars (clouds softly veil or clear for background stars)
                     skyColor = lerp(skyColor, cloudTone, totalCloudAlpha);
                 }
 

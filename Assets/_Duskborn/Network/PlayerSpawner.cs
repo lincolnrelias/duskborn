@@ -33,6 +33,16 @@ namespace Duskborn.Network
         private void OnRemoteConnectionState(NetworkConnection conn, RemoteConnectionStateArgs args)
         {
             if (args.ConnectionState != RemoteConnectionState.Started) return;
+            StartCoroutine(SpawnPlayerRoutine(conn));
+        }
+
+        private System.Collections.IEnumerator SpawnPlayerRoutine(NetworkConnection conn)
+        {
+            // Aguarda a geração assíncrona do terreno estar concluída para evitar que o jogador caia no vácuo
+            while (ChunkGridManager.Instance != null && !ChunkGridManager.Instance.IsWorldReady)
+            {
+                yield return null;
+            }
 
             if (spawnPoints == null || spawnPoints.Length == 0 || spawnPoints[0] == null)
             {
@@ -49,7 +59,7 @@ namespace Duskborn.Network
                 }
             }
 
-            if (playerPrefab == null || spawnPoints == null || spawnPoints.Length == 0) return;
+            if (playerPrefab == null || spawnPoints == null || spawnPoints.Length == 0) yield break;
 
             int index = Mathf.Clamp(_nextIndex, 0, spawnPoints.Length - 1);
             _nextIndex++;

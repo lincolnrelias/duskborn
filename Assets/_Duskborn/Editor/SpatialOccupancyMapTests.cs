@@ -23,6 +23,7 @@ namespace Duskborn.Editor
             RunTest(Test_FoliageDensityPresets, ref passed, ref total);
             RunTest(Test_WildflowerPaletteVariety, ref passed, ref total);
             RunTest(Test_NewFoliageArchetypes, ref passed, ref total);
+            RunTest(Test_GenerationBudget, ref passed, ref total);
 
             Debug.Log($"<color=#55FF55><b>[SpatialOccupancyMapTests] {passed}/{total} testes passaram com sucesso!</b></color>");
         }
@@ -297,6 +298,16 @@ namespace Duskborn.Editor
             Mesh groundShrub = Gameplay.World.Foliage.FoliageMeshUtility.CreateGroundShrubMesh(lobes: 5);
             Assert(groundShrub != null, "Malha CreateGroundShrubMesh não deve ser nula.");
             Assert(groundShrub.vertexCount >= 40, $"GroundShrub deve conter pelo menos 40 vértices. Obtido: {groundShrub.vertexCount}");
+        }
+
+        public static void Test_GenerationBudget()
+        {
+            var budget = new GenerationBudget(maxMillisecondsPerFrame: 5f);
+            Assert(!budget.ShouldYield(), "Orçamento recém-iniciado não deve sinalizar yield de imediato.");
+
+            System.Threading.Thread.Sleep(8);
+            Assert(budget.ShouldYield(), "Após transcorrer 8ms com orçamento de 5ms, ShouldYield deve ser true.");
+            Assert(!budget.ShouldYield(), "Imediatamente após o yield, ShouldYield deve ter sido resetado para false.");
         }
     }
 }

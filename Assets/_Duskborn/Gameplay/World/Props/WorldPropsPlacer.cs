@@ -288,6 +288,155 @@ namespace Duskborn.Gameplay.World
             DuskLog.Log(LogChannel.World, $"[WorldPropsPlacer] Geração de props concluída! Total de posições: {_placedPositions.Count}, Ocupação indexada: {_occupancyMap.Count}.");
         }
 
+        /// <summary>
+        /// Versão assíncrona do posicionamento de props e recursos, respeitando o frame budget para manter 60+ FPS constante.
+        /// </summary>
+        public IEnumerator PlaceWorldPropsAsync(
+            LowPolyTerrainConfig terrainConfig,
+            WorldPropsConfig propsConfig,
+            int seed,
+            GenerationBudget budget = null,
+            System.Action<float, string> onProgress = null)
+        {
+            if (terrainConfig == null || propsConfig == null)
+            {
+                DuskLog.Warn(LogChannel.World, "[WorldPropsPlacer] Configuração de terreno ou de props nula!");
+                yield break;
+            }
+
+            budget ??= new GenerationBudget(8f);
+
+            EnsureContainer();
+            ClearProps();
+            _occupancyMap.Clear();
+
+            Physics.SyncTransforms();
+
+            SeededRNG rng = new SeededRNG(seed);
+            _placedPositions.Clear();
+
+            onProgress?.Invoke(0.05f, "Configurando Santuário Central e Spawns...");
+            PlaceCentralClearing(terrainConfig, propsConfig, rng);
+            if (budget.ShouldYield()) yield return null;
+
+            onProgress?.Invoke(0.12f, "Preservando Clareiras de Combate...");
+            PlaceCombatClearings(terrainConfig, propsConfig, rng);
+            if (budget.ShouldYield()) yield return null;
+
+            // 3. Recursos Naturais por Chunk com Time-Slicing
+            yield return PlaceResourceNodesAsyncRoutine(terrainConfig, propsConfig, rng, budget, (p, detail) =>
+            {
+                onProgress?.Invoke(Mathf.Lerp(0.15f, 0.85f, p), detail);
+            });
+
+            // 4. Distribuição de Baús
+            onProgress?.Invoke(0.90f, "Distribuindo Baús de Tesouro...");
+            PlaceChests(terrainConfig, propsConfig, rng);
+            if (budget.ShouldYield()) yield return null;
+
+#if UNITY_EDITOR
+            if (!Application.isPlaying && propsContainer != null)
+            {
+                NetworkObject[] nobs = propsContainer.GetComponentsInChildren<NetworkObject>(true);
+                int countReserialized = 0;
+                var reserializeMethod = typeof(NetworkObject).GetMethod("ReserializeEditorSetValues",
+                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+                for (int i = 0; i < nobs.Length; i++)
+                {
+                    if (nobs[i] != null)
+                    {
+                        reserializeMethod?.Invoke(nobs[i], new object[] { true, true });
+                        UnityEditor.EditorUtility.SetDirty(nobs[i]);
+                        countReserialized++;
+                    }
+                }
+                DuskLog.Log(LogChannel.World, $"[WorldPropsPlacer] Serializados {countReserialized} NetworkObjects com SceneIds válidos no Editor.");
+            }
+#endif
+
+            onProgress?.Invoke(1.0f, $"Props concluídos ({_placedPositions.Count} objetos).");
+            DuskLog.Log(LogChannel.World, $"[WorldPropsPlacer] Geração assíncrona de props concluída! Total de posições: {_placedPositions.Count}, Ocupação indexada: {_occupancyMap.Count}.");
+        }
+
+        private IEnumerator PlaceResourceNodesAsyncRoutine(
+            LowPolyTerrainConfig terrainConfig,
+            WorldPropsConfig propsConfig,
+            SeededRNG rng,
+            GenerationBudget budget,
+            System.Action<float, string> onProgress)
+        {
+            List<PropDefinition> propDefs = new List<PropDefinition>();
+            if (propsConfig.treeProp != null) propDefs.Add(propsConfig.treeProp);
+            if (propsConfig.stoneProp != null) propDefs.Add(propsConfig.stoneProp);
+            if (propsConfig.ironProp != null) propDefs.Add(propsConfig.ironProp);
+            if (propsConfig.fiberProp != null) propDefs.Add(propsConfig.fiberProp);
+
+            if (propsConfig.extraProps != null)
+            {
+                foreach (var extra in propsConfig.extraProps)
+                {
+                    if (extra != null) propDefs.Add(extra);
+                }
+            }
+
+            if (propDefs.Count == 0) yield break;
+
+            int startX = -terrainConfig.chunksX / 2;
+            int startZ = -terrainConfig.chunksZ / 2;
+            float chunkWorldLength = terrainConfig.chunkSize * terrainConfig.cellSize;
+            float centerRadiusSqr = propsConfig.centerClearingRadius * propsConfig.centerClearingRadius;
+
+            float halfMapX = (terrainConfig.chunksX * terrainConfig.chunkSize * terrainConfig.cellSize) * 0.5f;
+            float halfMapZ = (terrainConfig.chunksZ * terrainConfig.chunkSize * terrainConfig.cellSize) * 0.5f;
+            float mapRadius = Mathf.Min(halfMapX, halfMapZ);
+            float maxBoundaryRadius = terrainConfig.boundaryType != LowPolyTerrainConfig.MapBoundaryType.None
+                ? terrainConfig.GetPlayableBoundaryRadius(mapRadius) * 0.95f
+                : (mapRadius * 0.95f);
+
+            int totalChunks = terrainConfig.chunksX * terrainConfig.chunksZ;
+            int currentChunkIndex = 0;
+
+            for (int cz = startZ; cz < startZ + terrainConfig.chunksZ; cz++)
+            {
+                for (int cx = startX; cx < startX + terrainConfig.chunksX; cx++)
+                {
+                    float chunkMinX = cx * chunkWorldLength;
+                    float chunkMaxX = chunkMinX + chunkWorldLength;
+                    float chunkMinZ = cz * chunkWorldLength;
+                    float chunkMaxZ = chunkMinZ + chunkWorldLength;
+
+                    currentChunkIndex++;
+                    float progress = (float)currentChunkIndex / totalChunks;
+                    onProgress?.Invoke(progress, $"Espalhando recursos naturais (Chunk {currentChunkIndex}/{totalChunks})...");
+
+                    foreach (var propDef in propDefs)
+                    {
+                        if (propDef.prefab == null) continue;
+
+                        var cluster = propDef.clusterSettings;
+                        bool clusteringEnabled = cluster != null ? cluster.enableClustering : propDef.useClustering;
+
+                        if (clusteringEnabled && cluster != null)
+                        {
+                            PlaceClusteredPropsForChunk(propDef, cluster, chunkMinX, chunkMaxX, chunkMinZ, chunkMaxZ,
+                                centerRadiusSqr, maxBoundaryRadius, terrainConfig, rng);
+                        }
+                        else
+                        {
+                            PlaceIndividualPropsForChunk(propDef, chunkMinX, chunkMaxX, chunkMinZ, chunkMaxZ,
+                                centerRadiusSqr, maxBoundaryRadius, terrainConfig, rng);
+                        }
+
+                        if (budget.ShouldYield())
+                        {
+                            yield return null;
+                        }
+                    }
+                }
+            }
+        }
+
         private bool RaycastGround(Vector3 rayOrigin, out RaycastHit groundHit)
         {
             RaycastHit[] hits = Physics.RaycastAll(rayOrigin, Vector3.down, 300f);

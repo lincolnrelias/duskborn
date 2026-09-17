@@ -24,7 +24,7 @@ public class TerrainChunk : MonoBehaviour
         }
     }
 
-    public void Initialize(Vector2Int coord, LowPolyTerrainConfig configuration, int seedOverride = 0)
+    public void Initialize(Vector2Int coord, LowPolyTerrainConfig configuration, int seedOverride = 0, bool autoGenerateMesh = true)
     {
         ChunkCoord = coord;
         config = configuration;
@@ -32,10 +32,28 @@ public class TerrainChunk : MonoBehaviour
         meshFilter = GetComponent<MeshFilter>();
         meshCollider = GetComponent<MeshCollider>();
 
-        GenerateMesh();
+        if (autoGenerateMesh)
+        {
+            GenerateMesh();
+        }
     }
 
     public void GenerateMesh()
+    {
+        Mesh mesh = BuildMesh();
+        ApplyMesh(mesh);
+    }
+
+    public void ApplyMesh(Mesh mesh)
+    {
+        if (meshFilter == null) meshFilter = GetComponent<MeshFilter>();
+        if (meshCollider == null) meshCollider = GetComponent<MeshCollider>();
+
+        meshFilter.sharedMesh = mesh;
+        meshCollider.sharedMesh = mesh;
+    }
+
+    public Mesh BuildMesh()
     {
         int size = config.chunkSize;
         float cellSize = config.cellSize;
@@ -88,8 +106,7 @@ public class TerrainChunk : MonoBehaviour
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
 
-        meshFilter.sharedMesh = mesh;
-        meshCollider.sharedMesh = mesh;
+        return mesh;
     }
 
     private void AddFace(Vector3 a, Vector3 b, Vector3 c, List<Vector3> verts, List<int> tris, List<Color> cols)

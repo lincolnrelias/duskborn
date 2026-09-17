@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Duskborn.Core;
+using Duskborn.Gameplay.World;
 using Unity.AI.Navigation;
 
 namespace Duskborn.Gameplay.World.Foliage
@@ -269,6 +270,63 @@ namespace Duskborn.Gameplay.World.Foliage
             }
         }
 
+        /// <summary>
+        /// Geração assíncrona da folhagem do chunk fatiada em múltiplos frames para manter 60+ FPS constante.
+        /// </summary>
+        public System.Collections.IEnumerator GenerateFoliageAsync(
+            LowPolyTerrainConfig config,
+            int seed,
+            SpatialOccupancyMap occupancyMap = null,
+            GenerationBudget budget = null)
+        {
+            if (config == null) yield break;
+            EnsureMaterials();
+            ClearFoliage();
+
+            if (densityPreset != FoliageDensityPreset.Custom)
+            {
+                ApplyDensityPreset();
+            }
+
+            if (_terrainChunk == null) _terrainChunk = GetComponent<TerrainChunk>();
+            Vector2Int coord = _terrainChunk != null ? _terrainChunk.ChunkCoord : Vector2Int.zero;
+
+            if (occupancyMap == null)
+            {
+                var gridMgr = GetComponentInParent<ChunkGridManager>();
+                if (gridMgr == null) gridMgr = ChunkGridManager.Instance;
+                if (gridMgr != null && gridMgr.propsPlacer != null)
+                {
+                    occupancyMap = gridMgr.propsPlacer.OccupancyMap;
+                }
+            }
+
+            int chunkSeed = seed ^ (coord.x * 73856093) ^ (coord.y * 19349663);
+            SeededRNG rng = new SeededRNG(chunkSeed);
+
+            float chunkWorldLength = config.chunkSize * config.cellSize;
+            float minX = coord.x * chunkWorldLength;
+            float maxX = minX + chunkWorldLength;
+            float minZ = coord.y * chunkWorldLength;
+            float maxZ = minZ + chunkWorldLength;
+
+            float halfMapX = (config.chunksX * config.chunkSize * config.cellSize) * 0.5f;
+            float halfMapZ = (config.chunksZ * config.chunkSize * config.cellSize) * 0.5f;
+            float centerRadiusSqr = (config.centralSanctuaryRadius * 0.9f) * (config.centralSanctuaryRadius * 0.9f);
+
+            budget ??= new GenerationBudget(8f);
+
+            // 1. Gera o lote consolidado de grama e flores assincronamente
+            yield return BuildGrassBatchRoutine(config, seed, rng, minX, maxX, minZ, maxZ, halfMapX, halfMapZ, centerRadiusSqr, occupancyMap, budget);
+
+            // 2. Arbustos
+            if (bushesPerChunk > 0)
+            {
+                BuildBushBatch(config, seed, rng, minX, maxX, minZ, maxZ, halfMapX, halfMapZ, centerRadiusSqr, occupancyMap);
+                if (budget.ShouldYield()) yield return null;
+            }
+        }
+
         private float EvaluateMeadowPatch(float worldX, float worldZ, int activeSeed)
         {
             float n1 = Mathf.PerlinNoise((worldX + activeSeed * 19.31f) * macroNoiseScale, (worldZ + activeSeed * 37.73f) * macroNoiseScale);
@@ -287,7 +345,21 @@ namespace Duskborn.Gameplay.World.Foliage
             float centerRadiusSqr,
             SpatialOccupancyMap occupancyMap)
         {
-            if (grassTuftsPerChunk <= 0 || grassMaterial == null) return;
+            var routine = BuildGrassBatchRoutine(config, activeSeed, rng, minX, maxX, minZ, maxZ, halfMapX, halfMapZ, centerRadiusSqr, occupancyMap, null);
+            while (routine.MoveNext()) { }
+        }
+
+        private System.Collections.IEnumerator BuildGrassBatchRoutine(
+            LowPolyTerrainConfig config,
+            int activeSeed,
+            SeededRNG rng,
+            float minX, float maxX, float minZ, float maxZ,
+            float halfMapX, float halfMapZ,
+            float centerRadiusSqr,
+            SpatialOccupancyMap occupancyMap,
+            GenerationBudget budget)
+        {
+            if (grassTuftsPerChunk <= 0 || grassMaterial == null) yield break;
 
             Mesh carpetMesh = FoliageMeshUtility.CreateDenseCarpetMesh(bladeCount: 18, radius: 0.85f, height: 0.90f, baseWidth: 0.28f);
             Mesh lushMesh = FoliageMeshUtility.CreateLushGrassClumpMesh(bladeCount: 15, radius: 0.75f, height: 1.30f, baseWidth: 0.22f);
@@ -497,6 +569,11 @@ namespace Duskborn.Gameplay.World.Foliage
                         combinedColors,
                         combinedTris
                     );
+                }
+
+                if (budget != null && budget.ShouldYield())
+                {
+                    yield return null;
                 }
             }
 

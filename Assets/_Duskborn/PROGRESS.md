@@ -67,7 +67,8 @@
 > Status: [~] IN PROGRESS
 
 ### 1.1 Player Controller
-- [x] `PlayerController.cs` — WASD movement; right-click drag orbit camera (fixed-angle, no feedback loop)
+- [x] `PlayerController.cs` — WASD movement, body alignment, gravity and animator integration (decoupled from camera)
+- [x] `PlayerCameraController.cs` — Dedicated 3rd-person camera: spherical orbit (Yaw/Pitch), SphereCast collision & occlusion prevention, shoulder framing, terrain damping, dynamic FOV, decoupled camera shake, cursor management
 - [x] `PlayerStats.cs` — HP, damage, speed, attackSpeed; multiplier system; PlayerRegistry auto-register; death → GameOver; **Networked (SyncVar HP)**
 - [x] `PlayerRegistry.cs` — static cache; FindNearest + FindMostIsolated; Clear() removed from Bootstrapper (was wiping OnEnable registrations)
 - [ ] Animation states: Idle, Walk, Run, Attack, Hit, Die
@@ -451,7 +452,8 @@
 | `Core/DayNightCycle.cs` | Day/Night timer, events, lighting | 1.2 |
 | `Core/SceneLoader.cs` | Scene name constants + async loader | 0.4 |
 | `Gameplay/Player/PlayerStats.cs` | HP, damage, speed, multiplier system | 1.1 |
-| `Gameplay/Player/PlayerController.cs` | WASD movement, third-person camera | 1.1 |
+| `Gameplay/Player/PlayerController.cs` | WASD movement, body alignment, animator integration | 1.1 |
+| `Gameplay/Player/PlayerCameraController.cs` | Orbit, occlusion collision, shoulder framing, FOV kick | 1.1 |
 | `Gameplay/Enemies/EnemyBase.cs` | NavMesh AI, melee attack, death, pool interface | 1.3 |
 | `Gameplay/Enemies/EnemyPool.cs` | Queue-based enemy pool | 1.3 |
 | `Gameplay/Enemies/Swarmer.cs` | Night 1 enemy (uses EnemyBase defaults) | 1.3 |

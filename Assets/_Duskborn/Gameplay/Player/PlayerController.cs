@@ -8,13 +8,6 @@ namespace Duskborn.Gameplay.Player
     [RequireComponent(typeof(PlayerStats))]
     public class PlayerController : NetworkBehaviour
     {
-        [Header("Camera")]
-        [SerializeField] private float cameraDistance    = 8f;
-        [SerializeField] private float cameraHeight      = 10f;
-        [SerializeField] private float cameraSmoothing   = 8f;
-        [SerializeField] private float cameraLookOffset  = 1f;
-        [SerializeField] private float cameraSensitivity = 3f;
-
         [Header("Movement")]
         [SerializeField] private float gravityMultiplier = 2f;
         [SerializeField] private float rotationSpeed     = 720f;
@@ -27,33 +20,63 @@ namespace Duskborn.Gameplay.Player
         private static readonly int HashVelocityX = Animator.StringToHash("VelocityX");
         private static readonly int HashVelocityY = Animator.StringToHash("VelocityY");
 
-        private CharacterController   _cc;
-        private PlayerStats           _stats;
-        private Camera                _mainCam;
+        private CharacterController    _cc;
+        private PlayerStats            _stats;
+        private PlayerCameraController _camController;
         private PlayerWaterInteraction _waterInteraction;
 
         private Vector2 _moveInput;
         private Vector2 _smoothedInput;
         private Vector2 _inputSmoothVelocity;
         private Vector3 _velocity;
-        private float   _cameraYaw;
         private bool    _inputEnabled    = true;
         private bool    _rotationEnabled = true;
 
-        public bool IsMoving => _moveInput.sqrMagnitude > 0.01f;
+        public bool  IsMoving  => _moveInput.sqrMagnitude > 0.01f;
+        public float CameraYaw => _camController != null ? _camController.CurrentYaw : transform.eulerAngles.y;
 
         private void Awake()
         {
-            _cc               = GetComponent<CharacterController>();
-            _stats            = GetComponent<PlayerStats>();
-            _mainCam          = Camera.main;
+            _cc            = GetComponent<CharacterController>();
+            _stats         = GetComponent<PlayerStats>();
+            _camController = GetComponent<PlayerCameraController>();
+            if (_camController == null)
+            {
+                _camController = gameObject.AddComponent<PlayerCameraController>();
+            }
+
             _waterInteraction = GetComponent<PlayerWaterInteraction>();
             if (_waterInteraction == null)
             {
                 _waterInteraction = gameObject.AddComponent<PlayerWaterInteraction>();
             }
 
-            _cameraYaw = transform.eulerAngles.y;
+            if (GetComponent<Duskborn.Audio.FootstepAudio>() == null)
+                gameObject.AddComponent<Duskborn.Audio.FootstepAudio>();
+            if (GetComponent<Duskborn.Audio.PlayerAudioFeedback>() == null)
+                gameObject.AddComponent<Duskborn.Audio.PlayerAudioFeedback>();
+        }
+
+        public override void OnStartClient()
+        {
+            base.OnStartClient();
+            if (IsOwner)
+            {
+                if (_camController == null)
+                    _camController = GetComponent<PlayerCameraController>();
+                _camController?.InitializeForOwner();
+            }
+        }
+
+        public override void OnOwnershipClient(FishNet.Connection.NetworkConnection prevOwner)
+        {
+            base.OnOwnershipClient(prevOwner);
+            if (IsOwner)
+            {
+                if (_camController == null)
+                    _camController = GetComponent<PlayerCameraController>();
+                _camController?.InitializeForOwner();
+            }
         }
 
         public void OnMove(InputValue value)
@@ -72,26 +95,13 @@ namespace Duskborn.Gameplay.Player
 
             if (!IsOwner) return;
             if (!_inputEnabled || !_stats.IsAlive) return;
-            HandleCameraRotation();
             SmoothInput();
             HandleMovement();
             HandleGravity();
             UpdateAnimator();
         }
 
-        private void LateUpdate()
-        {
-            if (!IsOwner) return;
-            FollowCamera();
-        }
-
         // -------------------------------------------------------------------------
-
-        private void HandleCameraRotation()
-        {
-            if (Input.GetMouseButton(1))
-                _cameraYaw += Input.GetAxis("Mouse X") * cameraSensitivity;
-        }
 
         private void SmoothInput()
         {
@@ -102,20 +112,22 @@ namespace Duskborn.Gameplay.Player
 
         private void HandleMovement()
         {
-            // Character always faces camera yaw — WASD never rotates the body.
+            float targetYaw = CameraYaw;
+
+            // O personagem acompanha o ângulo horizontal da câmera ao girar
             if (_rotationEnabled)
             {
-                Quaternion targetRot = Quaternion.Euler(0f, _cameraYaw, 0f);
+                Quaternion targetRot = Quaternion.Euler(0f, targetYaw, 0f);
                 transform.rotation = Quaternion.RotateTowards(
                     transform.rotation, targetRot, rotationSpeed * Time.deltaTime);
             }
 
             if (_smoothedInput.sqrMagnitude < 0.001f) return;
 
-            Vector3 camForward = Vector3.ProjectOnPlane(_mainCam.transform.forward, Vector3.up).normalized;
-            Vector3 camRight   = Vector3.ProjectOnPlane(_mainCam.transform.right,   Vector3.up).normalized;
+            Vector3 camForward = _camController != null ? _camController.CameraForward : transform.forward;
+            Vector3 camRight   = _camController != null ? _camController.CameraRight   : transform.right;
 
-            // Not normalized — magnitude encodes current speed fraction (0–1).
+            // Vetor de movimento relativo à orientação da câmera
             Vector3 moveDir = camForward * _smoothedInput.y + camRight * _smoothedInput.x;
             float waterMod = _waterInteraction != null ? _waterInteraction.SpeedModifier : 1f;
             _cc.Move(moveDir * (_stats.MoveSpeed * waterMod * Time.deltaTime));
@@ -131,42 +143,29 @@ namespace Duskborn.Gameplay.Player
             _cc.Move(_velocity * Time.deltaTime);
         }
 
-        private void FollowCamera()
-        {
-            if (_mainCam == null) return;
-
-            Vector3 offset  = Quaternion.Euler(0f, _cameraYaw, 0f) * new Vector3(0f, 0f, -cameraDistance);
-            Vector3 desired = transform.position + offset + Vector3.up * cameraHeight;
-
-            _mainCam.transform.position = Vector3.Lerp(
-                _mainCam.transform.position, desired, cameraSmoothing * Time.deltaTime);
-            _mainCam.transform.LookAt(transform.position + Vector3.up * cameraLookOffset);
-            _mainCam.transform.position += Duskborn.Effects.CameraShake.Offset;
-        }
-
         private void UpdateAnimator()
         {
             if (_animator == null) return;
 
-            // Character faces camera, so smoothed input IS local-space velocity:
-            // Y = forward/back, X = strafe. No projection needed.
+            // O personagem alinha-se à câmera, então a entrada suavizada representa velocidade no espaço local:
+            // Y = frente/trás, X = strafe lateral.
             _animator.SetFloat(HashVelocityX, _smoothedInput.x);
             _animator.SetFloat(HashVelocityY, _smoothedInput.y);
         }
 
         public void SetInputEnabled(bool enabled) => _inputEnabled = enabled;
 
-        // Keeps the body facing its current direction (movement still works). Used by PlayerDodge
-        // so the roll animation can finish before snapping back to camera yaw.
+        // Mantém o corpo voltado para a direção atual (usado pelo PlayerDodge para manter o rolamento alinhado).
         public void SetRotationEnabled(bool enabled) => _rotationEnabled = enabled;
 
-        // Current camera-relative input direction; facing direction when idle.
+        // Direção de movimento no mundo relativa à câmera
         public Vector3 GetMoveDirectionWorld()
         {
-            if (_moveInput.sqrMagnitude < 0.01f || _mainCam == null)
+            if (_moveInput.sqrMagnitude < 0.01f)
                 return transform.forward;
-            Vector3 f = Vector3.ProjectOnPlane(_mainCam.transform.forward, Vector3.up).normalized;
-            Vector3 r = Vector3.ProjectOnPlane(_mainCam.transform.right,   Vector3.up).normalized;
+
+            Vector3 f = _camController != null ? _camController.CameraForward : transform.forward;
+            Vector3 r = _camController != null ? _camController.CameraRight   : transform.right;
             return (f * _moveInput.y + r * _moveInput.x).normalized;
         }
     }

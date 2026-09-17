@@ -207,11 +207,6 @@ MonoBehaviour:
   _componentIndexCache: 1
   _addedNetworkObject: {fileID: 5780092933335364822}
   _networkObjectCache: {fileID: 5780092933335364822}
-  cameraDistance: 8
-  cameraHeight: 6
-  cameraSmoothing: 5
-  cameraLookOffset: 1
-  cameraSensitivity: 3
   gravityMultiplier: 2
   rotationSpeed: 720
   accelTime: 0.15
@@ -416,7 +411,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584120955576229850
+  _initializedTimestamp: -8584119473664110649
 --- !u!114 &8514665050153253299
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -257,6 +257,10 @@ namespace Duskborn.UI
             if (inventoryRoot == null) return;
             bool willShow = !inventoryRoot.activeSelf;
             inventoryRoot.SetActive(willShow);
+
+            // Libera o cursor e pausa a rotação da câmera quando o inventário estiver aberto
+            PlayerCameraController.LocalInstance?.SetRotationLocked(willShow);
+
             if (willShow)
                 SyncResources();
         }

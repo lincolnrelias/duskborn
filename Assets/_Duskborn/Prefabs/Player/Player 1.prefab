@@ -245,11 +245,6 @@ MonoBehaviour:
   _componentIndexCache: 1
   _addedNetworkObject: {fileID: 5780092933335364822}
   _networkObjectCache: {fileID: 5780092933335364822}
-  cameraDistance: 8
-  cameraHeight: 6
-  cameraSmoothing: 5
-  cameraLookOffset: 1
-  cameraSensitivity: 3
   gravityMultiplier: 2
   rotationSpeed: 720
   accelTime: 0.15
@@ -423,7 +418,7 @@ MonoBehaviour:
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 13
+  <PrefabId>k__BackingField: 19
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 9206078603152192552
   SceneId: 0
@@ -456,7 +451,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584123531337430739
+  _initializedTimestamp: -8584119473664110649
 --- !u!114 &8514665050153253299
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -530,6 +525,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Audio.WeaponAudioPlayer
   audioSource: {fileID: 8369684736023879674}
+  pitchVariation: 0.06
+  swingVolume: 0.85
+  hitVolume: 1
 --- !u!82 &8369684736023879674
 AudioSource:
   m_ObjectHideFlags: 0

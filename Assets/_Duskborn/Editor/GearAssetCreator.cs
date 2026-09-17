@@ -75,6 +75,58 @@ namespace Duskborn.Editor
             Debug.Log("[GearAssetCreator] Stone Axe asset created at " + path);
         }
 
+        [MenuItem("Duskborn/Create Stone Pickaxe Asset")]
+        public static void CreateStonePickaxe()
+        {
+            if (!AssetDatabase.IsValidFolder("Assets/_Duskborn/ScriptableObjects"))
+                AssetDatabase.CreateFolder("Assets/_Duskborn", "ScriptableObjects");
+            if (!AssetDatabase.IsValidFolder(WeaponOutputFolder))
+                AssetDatabase.CreateFolder("Assets/_Duskborn/ScriptableObjects", "Weapons");
+
+            string folder = $"{WeaponOutputFolder}/Stone Pickaxe";
+            if (!AssetDatabase.IsValidFolder(folder))
+                AssetDatabase.CreateFolder(WeaponOutputFolder, "Stone Pickaxe");
+
+            string path = $"{folder}/stone_pickaxe.asset";
+            if (AssetDatabase.LoadAssetAtPath<WeaponDefinition>(path) != null)
+            {
+                Debug.Log("[GearAssetCreator] stone_pickaxe.asset already exists — skipped.");
+                return;
+            }
+
+            var bonuses = new[] { Bonus(StatType.Damage, 0.15f), Bonus(StatType.AttackSpeed, 0.05f) };
+            var asset   = ScriptableObject.CreateInstance<WeaponDefinition>();
+            var so      = new SerializedObject(asset);
+
+            so.FindProperty("id").stringValue          = "stone_pickaxe";
+            so.FindProperty("displayName").stringValue = "Stone Pickaxe";
+            so.FindProperty("description").stringValue = "A sturdy stone pickaxe, well-suited to breaking stone and mining ore veins alike";
+
+            var bonusesProp = so.FindProperty("bonuses");
+            bonusesProp.arraySize = bonuses.Length;
+            for (int i = 0; i < bonuses.Length; i++)
+            {
+                var elem = bonusesProp.GetArrayElementAtIndex(i);
+                elem.FindPropertyRelative("Type").enumValueIndex = (int)bonuses[i].Type;
+                elem.FindPropertyRelative("Value").floatValue    = bonuses[i].Value;
+            }
+
+            var typeModsProp = so.FindProperty("typeModifiers");
+            if (typeModsProp != null)
+            {
+                typeModsProp.arraySize = 1;
+                var elem = typeModsProp.GetArrayElementAtIndex(0);
+                elem.FindPropertyRelative("Type").enumValueIndex = (int)Duskborn.Gameplay.TargetType.MiningNode;
+                elem.FindPropertyRelative("Bonus").floatValue    = 3.0f;
+            }
+
+            so.ApplyModifiedPropertiesWithoutUndo();
+            AssetDatabase.CreateAsset(asset, path);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Debug.Log("[GearAssetCreator] Stone Pickaxe asset created at " + path);
+        }
+
         private static void EnsureFolder()
         {
             if (!AssetDatabase.IsValidFolder("Assets/_Duskborn/ScriptableObjects"))

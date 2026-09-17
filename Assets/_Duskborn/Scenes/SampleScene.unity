@@ -4524,6 +4524,7 @@ MonoBehaviour:
   startingItems:
   - {fileID: 11400000, guid: c5f1fc34a5fc23f45bc0c04272f2478d, type: 2}
   - {fileID: 11400000, guid: 601f53b2da268ec439655f119087feb4, type: 2}
+  - {fileID: 11400000, guid: 0aa265baf59b4068bf539eadb27c59f5, type: 2}
 --- !u!114 &1304203858
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6374,6 +6375,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3a9a11ae746e4ff3a7115f03d8e48c47, type: 2}
   - {fileID: 11400000, guid: 7b8ed100cc2a4de08f6c6424bf65ab89, type: 2}
   - {fileID: 11400000, guid: 601f53b2da268ec439655f119087feb4, type: 2}
+  - {fileID: 11400000, guid: 0aa265baf59b4068bf539eadb27c59f5, type: 2}
   canvas: {fileID: 716757293362228541}
   gridRoot: {fileID: 4660813222437477426}
   gridController: {fileID: 1257629744082048637}

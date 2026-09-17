@@ -20,6 +20,12 @@ namespace Duskborn.Gameplay.World
         [Tooltip("Cor das partículas durante a noite (vaga-lumes / energia etérea).")]
         [SerializeField] private Color nightParticleColor = new Color(0.45f, 0.85f, 1f, 0.75f);
 
+        [Tooltip("Cor das partículas durante o crepúsculo (faíscas e brasas douradas/acobreadas).")]
+        [SerializeField] private Color duskParticleColor = new Color(1f, 0.55f, 0.25f, 0.70f);
+
+        [Tooltip("Cor das partículas durante o alvorecer (orvalho e luz matinal rosada).")]
+        [SerializeField] private Color dawnParticleColor = new Color(1f, 0.80f, 0.70f, 0.65f);
+
         [Tooltip("Velocidade de transição de cor entre dia e noite.")]
         [SerializeField] private float transitionSpeed = 1.5f;
 
@@ -49,11 +55,29 @@ namespace Duskborn.Gameplay.World
             // Posiciona o emissor centrado na câmera com offset frontal
             transform.position = _mainCamera.transform.position + _mainCamera.transform.forward * 4f;
 
-            // Transição orgânica de cor entre dia e noite
-            bool isDay = DayNightCycle.Instance == null || DayNightCycle.Instance.Phase == DayPhase.Day;
-            Color targetColor = isDay ? dayParticleColor : nightParticleColor;
-            _currentColor = Color.Lerp(_currentColor, targetColor, Time.deltaTime * transitionSpeed);
+            // Transição orgânica e progressiva acompanhando o período do dia
+            Color targetColor;
+            if (DayNightCycle.Instance != null)
+            {
+                targetColor = DayNightCycle.Instance.CurrentPeriod switch
+                {
+                    CyclePeriod.Dawn      => dawnParticleColor,
+                    CyclePeriod.Morning   => dayParticleColor,
+                    CyclePeriod.Midday    => dayParticleColor,
+                    CyclePeriod.Afternoon => Color.Lerp(dayParticleColor, duskParticleColor, 0.4f),
+                    CyclePeriod.Dusk      => duskParticleColor,
+                    CyclePeriod.Nightfall => Color.Lerp(duskParticleColor, nightParticleColor, 0.6f),
+                    CyclePeriod.Midnight  => nightParticleColor,
+                    CyclePeriod.PreDawn   => Color.Lerp(nightParticleColor, dawnParticleColor, 0.5f),
+                    _                     => dayParticleColor
+                };
+            }
+            else
+            {
+                targetColor = dayParticleColor;
+            }
 
+            _currentColor = Color.Lerp(_currentColor, targetColor, Time.deltaTime * transitionSpeed);
             _mainModule.startColor = new ParticleSystem.MinMaxGradient(_currentColor);
         }
 

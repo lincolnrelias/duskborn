@@ -4,8 +4,23 @@ using UnityEngine;
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
 public class TerrainChunk : MonoBehaviour
 {
-    [field: SerializeField]
-    public Vector2Int ChunkCoord { get; private set; }
+    [SerializeField] private Vector2Int _chunkCoord;
+    public Vector2Int ChunkCoord
+    {
+        get
+        {
+            if (_chunkCoord == Vector2Int.zero && gameObject != null && gameObject.name.StartsWith("Chunk_"))
+            {
+                string[] parts = gameObject.name.Split('_');
+                if (parts.Length >= 3 && int.TryParse(parts[1], out int px) && int.TryParse(parts[2], out int pz))
+                {
+                    _chunkCoord = new Vector2Int(px, pz);
+                }
+            }
+            return _chunkCoord;
+        }
+        private set => _chunkCoord = value;
+    }
     private LowPolyTerrainConfig config;
     private int activeSeed;
     private MeshFilter meshFilter;
@@ -13,15 +28,8 @@ public class TerrainChunk : MonoBehaviour
 
     private void Awake()
     {
-        // Fallback defensivo para recuperar coordenadas de chunks pré-existentes na cena
-        if (ChunkCoord == Vector2Int.zero && gameObject.name.StartsWith("Chunk_"))
-        {
-            string[] parts = gameObject.name.Split('_');
-            if (parts.Length >= 3 && int.TryParse(parts[1], out int px) && int.TryParse(parts[2], out int pz))
-            {
-                ChunkCoord = new Vector2Int(px, pz);
-            }
-        }
+        // Garante a leitura e inicialização da coordenada mesmo se o chunk foi pré-gerado pelo editor
+        _ = ChunkCoord;
     }
 
     public void Initialize(Vector2Int coord, LowPolyTerrainConfig configuration, int seedOverride = 0, bool autoGenerateMesh = true)

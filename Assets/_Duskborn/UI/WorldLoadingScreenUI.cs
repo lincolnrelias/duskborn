@@ -14,6 +14,12 @@ namespace Duskborn.UI
     public class WorldLoadingScreenUI : MonoBehaviour
     {
         public static WorldLoadingScreenUI Instance { get; private set; }
+ 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStatics()
+        {
+            Instance = null;
+        }
 
         [Header("Estado de Carregamento")]
         [Range(0f, 1f)] public float targetProgress = 0f;

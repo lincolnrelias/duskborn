@@ -47,6 +47,9 @@ public class ChunkGridManager : MonoBehaviour
                 propsPlacer = gameObject.AddComponent<WorldPropsPlacer>();
             }
         }
+
+        // Se o terreno já foi gerado na cena pelo Editor e não viemos do Menu Principal, pula o carregamento
+        CheckAndApplyExistingTerrain();
     }
 
     private void OnDestroy()
@@ -132,8 +135,11 @@ public class ChunkGridManager : MonoBehaviour
     [Tooltip("Se ativado, exibe a tela de carregamento procedural estilizada inspirada no Minecraft durante a geração.")]
     public bool showLoadingScreen = true;
 
-    [Tooltip("Se ativado, sempre limpa chunks antigos da cena e gera um novo mundo procedural completo com tela de carregamento ao dar Play.")]
-    public bool alwaysGenerateOnPlay = true;
+    [Tooltip("Se ativado, sempre limpa chunks antigos da cena e força uma nova geração procedural com tela de carregamento ao dar Play.")]
+    public bool forceRegenerateOnPlay = false;
+
+    [Tooltip("Se ativado, quando o jogo for iniciado diretamente nesta cena no Editor e o terreno já tiver sido gerado, pula completamente o carregamento para testes instantâneos.")]
+    public bool skipLoadingIfTerrainExists = true;
 
     [Tooltip("Orçamento máximo de processamento por quadro em milissegundos (ex: 8ms para 60+ FPS constante).")]
     [Range(2f, 20f)] public float frameBudgetMs = 8f;
@@ -150,41 +156,151 @@ public class ChunkGridManager : MonoBehaviour
     {
         if (config == null) return;
 
-        if (alwaysGenerateOnPlay || useRandomSeed)
+        // Se já foi inicializado instantaneamente no Awake através do terreno existente, não faz nada
+        if (IsWorldReady) return;
+
+        // Tenta novamente caso algum chunk tenha sido registrado ou criado entre Awake e Start
+        if (CheckAndApplyExistingTerrain())
         {
-            StartCoroutine(GenerateGridAsync());
+            return;
         }
-        else
+
+        // Consome a flag do menu principal caso tenha vindo por lá
+        if (Duskborn.UI.MainMenuController.LoadedFromMainMenu)
         {
-            var existingChunks = GetComponentsInChildren<TerrainChunk>(true);
-            if (existingChunks != null && existingChunks.Length > 0)
+            Duskborn.UI.MainMenuController.LoadedFromMainMenu = false;
+        }
+
+        StartCoroutine(GenerateGridAsync());
+    }
+
+    /// <summary>
+    /// Busca chunks de terreno pré-existentes na cena com múltiplas estratégias defensivas.
+    /// </summary>
+    public bool TryFindExistingChunks(out List<TerrainChunk> foundChunks)
+    {
+        foundChunks = new List<TerrainChunk>();
+
+        // 1. Filhos diretos ou indiretos deste GameObject
+        var childChunks = GetComponentsInChildren<TerrainChunk>(true);
+        if (childChunks != null && childChunks.Length > 0)
+        {
+            foreach (var c in childChunks)
             {
-                // O terreno já foi gerado na cena pelo Editor
-                foreach (var chunk in existingChunks)
+                if (c != null && !foundChunks.Contains(c))
                 {
-                    if (chunk != null)
-                        loadedChunks[chunk.ChunkCoord] = chunk;
+                    foundChunks.Add(c);
                 }
-                Debug.Log($"[ChunkGridManager] Terreno carregado da cena ({loadedChunks.Count} chunks).");
-
-                if (generateWaterPlane && transform.Find("WaterPlane") == null)
-                {
-                    GenerateWaterPlane();
-                }
-
-                if (generateAtmosphereFX && transform.Find("WorldAtmosphere") == null)
-                {
-                    EnsureAtmosphereFX();
-                }
-
-                // Inicializa pós-processamento assíncrono para folhagem e props pendentes
-                StartCoroutine(InitExistingSceneTerrainAsync(existingChunks));
-            }
-            else
-            {
-                StartCoroutine(GenerateGridAsync());
             }
         }
+
+        // 2. Chunks em qualquer lugar da cena ativa (caso estejam na raiz ou sob outro parent)
+        var allChunks = FindObjectsByType<TerrainChunk>(FindObjectsInactive.Include);
+        if (allChunks != null && allChunks.Length > 0)
+        {
+            foreach (var c in allChunks)
+            {
+                if (c != null && !foundChunks.Contains(c))
+                {
+                    foundChunks.Add(c);
+                }
+            }
+        }
+
+        // 3. Fallback: procurar GameObjects com prefixo "Chunk_" que sejam filhos deste transform
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            Transform child = transform.GetChild(i);
+            if (child != null && child.name.StartsWith("Chunk_"))
+            {
+                TerrainChunk tc = child.GetComponent<TerrainChunk>();
+                if (tc == null)
+                {
+                    tc = child.gameObject.AddComponent<TerrainChunk>();
+                }
+                if (!foundChunks.Contains(tc))
+                {
+                    foundChunks.Add(tc);
+                }
+            }
+        }
+
+        return foundChunks.Count > 0;
+    }
+
+    /// <summary>
+    /// Verifica se o terreno existente na cena deve ser aproveitado, ignorando tela de carregamento e geração procedural.
+    /// </summary>
+    private bool CheckAndApplyExistingTerrain()
+    {
+        if (forceRegenerateOnPlay)
+        {
+            return false;
+        }
+
+        if (!skipLoadingIfTerrainExists)
+        {
+            return false;
+        }
+
+        if (Duskborn.UI.MainMenuController.LoadedFromMainMenu)
+        {
+            return false;
+        }
+
+        if (TryFindExistingChunks(out var chunks) && chunks.Count > 0)
+        {
+            UseExistingSceneTerrain(chunks);
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Utiliza o terreno pré-gerado existente na cena do Editor, pulando a tela de carregamento e ativando o mundo instantaneamente.
+    /// </summary>
+    private void UseExistingSceneTerrain(IEnumerable<TerrainChunk> existingChunks)
+    {
+        loadedChunks.Clear();
+        foreach (var chunk in existingChunks)
+        {
+            if (chunk != null)
+            {
+                loadedChunks[chunk.ChunkCoord] = chunk;
+            }
+        }
+
+        if (generateWaterPlane && transform.Find("WaterPlane") == null)
+        {
+            GenerateWaterPlane();
+        }
+
+        if (generateAtmosphereFX && transform.Find("WorldAtmosphere") == null)
+        {
+            EnsureAtmosphereFX();
+        }
+
+        if (propsPlacer != null)
+        {
+            propsPlacer.EnsureSpawnPointsReady(propsConfig);
+        }
+
+        // Garante que nenhuma tela de carregamento permaneça ativa ou visível
+        var loadingUIs = FindObjectsByType<WorldLoadingScreenUI>(FindObjectsInactive.Include);
+        foreach (var ui in loadingUIs)
+        {
+            if (ui != null)
+            {
+                ui.gameObject.SetActive(false);
+            }
+        }
+
+        IsGenerating = false;
+        IsWorldReady = true;
+        OnWorldGenerationComplete?.Invoke();
+
+        Debug.Log($"[ChunkGridManager] Terreno pré-gerado detectado na cena ({loadedChunks.Count} chunks). Carregamento e geração ignorados para teste instantâneo no Editor.");
     }
 
     private System.Collections.IEnumerator InitExistingSceneTerrainAsync(TerrainChunk[] existingChunks)

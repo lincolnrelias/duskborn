@@ -65,11 +65,21 @@ namespace Duskborn.Gameplay.Loot
         {
             if (next)
             {
-                if (openClip == null) openClip = Resources.Load<AudioClip>("SFX/chest_open");
+                float volume = 1.0f;
+                if (Duskborn.Audio.AudioDatabase.Instance != null)
+                {
+                    if (openClip == null) openClip = Duskborn.Audio.AudioDatabase.Instance.Loot.chestOpenClip;
+                    volume = Duskborn.Audio.AudioDatabase.Instance.Loot.chestVolume;
+                }
+                else if (openClip == null)
+                {
+                    openClip = Resources.Load<AudioClip>("SFX/chest_open");
+                }
+
                 if (openClip != null)
                 {
                     if (Duskborn.Audio.AudioManager.Instance != null)
-                        Duskborn.Audio.AudioManager.Instance.PlayAtPoint(openClip, transform.position, 1.0f);
+                        Duskborn.Audio.AudioManager.Instance.PlayAtPoint(openClip, transform.position, volume);
                     else
                         AudioSource.PlayClipAtPoint(openClip, transform.position);
                 }

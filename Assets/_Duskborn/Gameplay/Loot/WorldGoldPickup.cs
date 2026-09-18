@@ -78,11 +78,21 @@ namespace Duskborn.Gameplay.Loot
         [TargetRpc]
         private void PlayPickupSoundRpc(NetworkConnection conn, Vector3 pos)
         {
-            if (pickupClip == null) pickupClip = Resources.Load<AudioClip>("SFX/gold_pickup");
+            float volume = 1.0f;
+            if (Duskborn.Audio.AudioDatabase.Instance != null)
+            {
+                if (pickupClip == null) pickupClip = Duskborn.Audio.AudioDatabase.Instance.Loot.goldPickupClip;
+                volume = Duskborn.Audio.AudioDatabase.Instance.Loot.goldVolume;
+            }
+            else if (pickupClip == null)
+            {
+                pickupClip = Resources.Load<AudioClip>("SFX/gold_pickup");
+            }
+
             if (pickupClip != null)
             {
                 if (Duskborn.Audio.AudioManager.Instance != null)
-                    Duskborn.Audio.AudioManager.Instance.PlayAtPoint(pickupClip, pos, 1.0f);
+                    Duskborn.Audio.AudioManager.Instance.PlayAtPoint(pickupClip, pos, volume);
                 else
                     AudioSource.PlayClipAtPoint(pickupClip, pos);
             }

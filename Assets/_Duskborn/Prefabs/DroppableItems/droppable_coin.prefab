@@ -218,4 +218,4 @@ MonoBehaviour:
   _networkObjectCache: {fileID: 280288482714557162}
   outlineLayerName: GreenOutline
   outlineRenderer: {fileID: 0}
-  pickupClip: {fileID: 8300000, guid: c911a3b7361367b4e9e55032777b7701, type: 3}
+  pickupClip: {fileID: 8300000, guid: 3ab3935b050a9f0401b342bc7d51fa6b, type: 3}

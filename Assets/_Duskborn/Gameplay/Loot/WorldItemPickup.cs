@@ -91,11 +91,22 @@ namespace Duskborn.Gameplay.Loot
         private void DeliverResourceRpc(NetworkConnection conn, NetworkObject playerNob, string resourceId, int amount)
         {
             playerNob.GetComponent<ResourceInventory>()?.Add(resourceId, amount);
-            if (pickupClip == null) pickupClip = Resources.Load<AudioClip>("SFX/item_pickup");
+
+            float volume = 1.0f;
+            if (Duskborn.Audio.AudioDatabase.Instance != null)
+            {
+                if (pickupClip == null) pickupClip = Duskborn.Audio.AudioDatabase.Instance.Loot.itemPickupClip;
+                volume = Duskborn.Audio.AudioDatabase.Instance.Loot.itemVolume;
+            }
+            else if (pickupClip == null)
+            {
+                pickupClip = Resources.Load<AudioClip>("SFX/item_pickup");
+            }
+
             if (pickupClip != null)
             {
                 if (Duskborn.Audio.AudioManager.Instance != null)
-                    Duskborn.Audio.AudioManager.Instance.PlayAtPoint(pickupClip, playerNob.transform.position, 1.0f);
+                    Duskborn.Audio.AudioManager.Instance.PlayAtPoint(pickupClip, playerNob.transform.position, volume);
                 else
                     AudioSource.PlayClipAtPoint(pickupClip, playerNob.transform.position);
             }

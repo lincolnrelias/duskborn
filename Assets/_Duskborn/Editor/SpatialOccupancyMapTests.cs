@@ -23,6 +23,8 @@ namespace Duskborn.Editor
             RunTest(Test_FoliageDensityPresets, ref passed, ref total);
             RunTest(Test_WildflowerPaletteVariety, ref passed, ref total);
             RunTest(Test_NewFoliageArchetypes, ref passed, ref total);
+            RunTest(Test_RockArchetypeMeshes, ref passed, ref total);
+            RunTest(Test_WeedAndWaterArchetypeMeshes, ref passed, ref total);
             RunTest(Test_GenerationBudget, ref passed, ref total);
 
             Debug.Log($"<color=#55FF55><b>[SpatialOccupancyMapTests] {passed}/{total} testes passaram com sucesso!</b></color>");
@@ -219,25 +221,32 @@ namespace Duskborn.Editor
                 // High (Padrão)
                 placer.SetDensityPreset(Gameplay.World.Foliage.FoliageDensityPreset.High);
                 Assert(placer.GrassTuftsPerChunk == 1800, $"High preset deve ter 1800 gramas. Obtido: {placer.GrassTuftsPerChunk}");
-                Assert(placer.BushesPerChunk == 32, $"High preset deve ter 32 arbustos. Obtido: {placer.BushesPerChunk}");
+                Assert(placer.LittleRocksPerChunk == 85, $"High preset deve ter 85 pedras. Obtido: {placer.LittleRocksPerChunk}");
+                Assert(placer.BushesPerChunk == 0, $"High preset deve ter 0 arbustos. Obtido: {placer.BushesPerChunk}");
 
                 // Ultra Genshin
                 placer.SetDensityPreset(Gameplay.World.Foliage.FoliageDensityPreset.Ultra_Genshin);
                 Assert(placer.GrassTuftsPerChunk == 3200, $"Ultra_Genshin preset deve ter 3200 gramas. Obtido: {placer.GrassTuftsPerChunk}");
-                Assert(placer.BushesPerChunk == 48, $"Ultra_Genshin preset deve ter 48 arbustos. Obtido: {placer.BushesPerChunk}");
+                Assert(placer.LittleRocksPerChunk == 140, $"Ultra_Genshin preset deve ter 140 pedras. Obtido: {placer.LittleRocksPerChunk}");
+                Assert(placer.BushesPerChunk == 0, $"Ultra_Genshin preset deve ter 0 arbustos. Obtido: {placer.BushesPerChunk}");
 
                 // Cinematic Lush
                 placer.SetDensityPreset(Gameplay.World.Foliage.FoliageDensityPreset.Cinematic_Lush);
                 Assert(placer.GrassTuftsPerChunk == 5000, $"Cinematic_Lush preset deve ter 5000 gramas. Obtido: {placer.GrassTuftsPerChunk}");
-                Assert(placer.BushesPerChunk == 64, $"Cinematic_Lush preset deve ter 64 arbustos. Obtido: {placer.BushesPerChunk}");
+                Assert(placer.LittleRocksPerChunk == 200, $"Cinematic_Lush preset deve ter 200 pedras. Obtido: {placer.LittleRocksPerChunk}");
+                Assert(placer.BushesPerChunk == 0, $"Cinematic_Lush preset deve ter 0 arbustos. Obtido: {placer.BushesPerChunk}");
 
                 // Medium
                 placer.SetDensityPreset(Gameplay.World.Foliage.FoliageDensityPreset.Medium);
                 Assert(placer.GrassTuftsPerChunk == 950, $"Medium preset deve ter 950 gramas. Obtido: {placer.GrassTuftsPerChunk}");
+                Assert(placer.LittleRocksPerChunk == 45, $"Medium preset deve ter 45 pedras. Obtido: {placer.LittleRocksPerChunk}");
+                Assert(placer.BushesPerChunk == 0, $"Medium preset deve ter 0 arbustos. Obtido: {placer.BushesPerChunk}");
 
                 // Low
                 placer.SetDensityPreset(Gameplay.World.Foliage.FoliageDensityPreset.Low);
                 Assert(placer.GrassTuftsPerChunk == 400, $"Low preset deve ter 400 gramas. Obtido: {placer.GrassTuftsPerChunk}");
+                Assert(placer.LittleRocksPerChunk == 20, $"Low preset deve ter 20 pedras. Obtido: {placer.LittleRocksPerChunk}");
+                Assert(placer.BushesPerChunk == 0, $"Low preset deve ter 0 arbustos. Obtido: {placer.BushesPerChunk}");
             }
             finally
             {
@@ -298,6 +307,87 @@ namespace Duskborn.Editor
             Mesh groundShrub = Gameplay.World.Foliage.FoliageMeshUtility.CreateGroundShrubMesh(lobes: 5);
             Assert(groundShrub != null, "Malha CreateGroundShrubMesh não deve ser nula.");
             Assert(groundShrub.vertexCount >= 40, $"GroundShrub deve conter pelo menos 40 vértices. Obtido: {groundShrub.vertexCount}");
+        }
+
+        public static void Test_RockArchetypeMeshes()
+        {
+            Mesh[] rockMeshes = new Mesh[]
+            {
+                Gameplay.World.Foliage.FoliageMeshUtility.CreateLittlePebbleMesh(),
+                Gameplay.World.Foliage.FoliageMeshUtility.CreatePebbleClusterMesh(),
+                Gameplay.World.Foliage.FoliageMeshUtility.CreateRiverStoneMesh(),
+                Gameplay.World.Foliage.FoliageMeshUtility.CreateScreeRockMesh()
+            };
+
+            string[] rockNames = new string[] { "LittlePebble", "PebbleCluster", "RiverStone", "ScreeRock" };
+
+            for (int r = 0; r < rockMeshes.Length; r++)
+            {
+                Mesh rock = rockMeshes[r];
+                string name = rockNames[r];
+
+                Assert(rock != null, $"Malha de rocha {name} não deve ser nula.");
+                Assert(rock.vertexCount >= 4, $"Rocha {name} deve ter pelo menos 4 vértices. Obtido: {rock.vertexCount}");
+                Assert(rock.triangles.Length > 0, $"Rocha {name} deve conter triângulos.");
+
+                Color[] colors = rock.colors;
+                Assert(colors != null && colors.Length == rock.vertexCount, $"Rocha {name} deve possuir cores de vértice válidas.");
+
+                // Todas as rochas devem ter alpha <= 0.001f (peso de vento estritamente nulo e preservação de normais duras no shader)
+                for (int i = 0; i < colors.Length; i++)
+                {
+                    Assert(colors[i].a <= 0.001f, $"Vértice {i} de {name} deve ter alpha 0 (sem vento). Obtido: {colors[i].a}");
+                }
+
+                Vector3[] normals = rock.normals;
+                Assert(normals != null && normals.Length == rock.vertexCount, $"Rocha {name} deve ter normais válidas.");
+            }
+        }
+
+        public static void Test_WeedAndWaterArchetypeMeshes()
+        {
+            // 1. Wild Weed Tuft
+            Mesh wildWeed = Gameplay.World.Foliage.FoliageMeshUtility.CreateWildWeedTuftMesh(leafCount: 6);
+            Assert(wildWeed != null, "Malha CreateWildWeedTuftMesh não deve ser nula.");
+            Assert(wildWeed.vertexCount >= 20, $"WildWeedTuft deve ter pelo menos 20 vértices. Obtido: {wildWeed.vertexCount}");
+
+            // 2. Broadleaf Weed
+            Mesh broadleaf = Gameplay.World.Foliage.FoliageMeshUtility.CreateBroadleafWeedMesh(leafCount: 5);
+            Assert(broadleaf != null, "Malha CreateBroadleafWeedMesh não deve ser nula.");
+            Assert(broadleaf.vertexCount >= 20, $"BroadleafWeed deve ter pelo menos 20 vértices. Obtido: {broadleaf.vertexCount}");
+
+            // 3. Tall Stalk Weed
+            Mesh tallStalk = Gameplay.World.Foliage.FoliageMeshUtility.CreateTallStalkWeedMesh(stalkCount: 3);
+            Assert(tallStalk != null, "Malha CreateTallStalkWeedMesh não deve ser nula.");
+            Assert(tallStalk.vertexCount >= 24, $"TallStalkWeed deve ter pelo menos 24 vértices. Obtido: {tallStalk.vertexCount}");
+
+            // 4. Clover Patch
+            Mesh clover = Gameplay.World.Foliage.FoliageMeshUtility.CreateCloverPatchMesh(cloverCount: 4);
+            Assert(clover != null, "Malha CreateCloverPatchMesh não deve ser nula.");
+            Assert(clover.vertexCount >= 30, $"CloverPatch deve ter pelo menos 30 vértices. Obtido: {clover.vertexCount}");
+
+            // 5. Water Cattail Bed
+            Mesh cattail = Gameplay.World.Foliage.FoliageMeshUtility.CreateWaterCattailBedMesh(reedCount: 6, cattailCount: 3);
+            Assert(cattail != null, "Malha CreateWaterCattailBedMesh não deve ser nula.");
+            Assert(cattail.vertexCount >= 40, $"WaterCattailBed deve ter pelo menos 40 vértices. Obtido: {cattail.vertexCount}");
+
+            // Verifica que todas as ervas e juncos possuem vértices dinâmicos ao vento (alpha > 0.05f)
+            Mesh[] weedMeshes = new Mesh[] { wildWeed, broadleaf, tallStalk, clover, cattail };
+            string[] weedNames = new string[] { "WildWeed", "Broadleaf", "TallStalk", "Clover", "CattailBed" };
+
+            for (int w = 0; w < weedMeshes.Length; w++)
+            {
+                Mesh m = weedMeshes[w];
+                Color[] colors = m.colors;
+                Assert(colors != null && colors.Length == m.vertexCount, $"Erva {weedNames[w]} deve ter cores de vértice.");
+
+                int windyVerts = 0;
+                for (int i = 0; i < colors.Length; i++)
+                {
+                    if (colors[i].a > 0.05f) windyVerts++;
+                }
+                Assert(windyVerts > 0, $"Erva {weedNames[w]} deve ter vértices afetados pelo vento (alpha > 0.05). Obtido: {windyVerts}");
+            }
         }
 
         public static void Test_GenerationBudget()

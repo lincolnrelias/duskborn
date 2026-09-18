@@ -159,8 +159,8 @@ Shader "Duskborn/StylizedFoliage"
                 float3 posWS = TransformObjectToWorld(input.positionOS.xyz);
                 float3 normWS = TransformObjectToWorldNormal(input.normalOS);
 
-                // Ancoragem do vento: usa canal alpha da cor do vértice se disponível, senão uv.y
-                float windWeight = input.color.a > 0.01 ? input.color.a : input.uv.y;
+                // Ancoragem do vento: canal alpha da cor do vértice é o peso autoritativo (0 = estático/pedras, >0 = balanço de folhagem)
+                float windWeight = input.color.a;
                 posWS = ApplyFoliageWind(posWS, windWeight);
 
                 output.positionWS = posWS;
@@ -187,10 +187,14 @@ Shader "Duskborn/StylizedFoliage"
                 // Inverte a normal caso a face seja traseira (Two-Sided foliage)
                 float3 rawNormalWS = normalize(input.normalWS) * (facing > 0 ? 1.0 : -1.0);
 
+                // Identifica se este elemento é um objeto rígido estático (ex: pequenas pedras, seixos)
+                // Pedras têm alpha <= 0.001, mantendo 100% das normais facetadas para sombreamento low-poly perfeito
+                float isRigid = step(input.color.a, 0.001);
+                float effectiveUpBlend = lerp(_NormalUpBlend, 0.0, isRigid);
+
                 // Alinhamento de Normal para o Topo (Homogenous Anime Lighting estilo Genshin / Zelda)
-                // Faz com que toda a vegetação reflita luz de forma homogênea como o terreno, eliminando o ruído lâmina-a-lâmina
                 float3 upNormal = float3(0.0, 1.0, 0.0);
-                float3 normalWS = normalize(lerp(rawNormalWS, upNormal, _NormalUpBlend));
+                float3 normalWS = normalize(lerp(rawNormalWS, upNormal, effectiveUpBlend));
 
                 // 1. Gradiente Base -> Ponta do Material
                 half3 matGradient = lerp(_RootColor.rgb, _TipColor.rgb, saturate(input.uv.y));
@@ -199,7 +203,7 @@ Shader "Duskborn/StylizedFoliage"
                 half3 foliageBase = lerp(matGradient, input.color.rgb, _VertexColorBlend) * texColor.rgb;
 
                 // 3. Mescla de Contato com o Terreno e Oclusão de Raiz (Root AO)
-                // Garante que o pé da planta se funda organicamente com o relevo sem criar costuras visuais secas
+                // Garante que o pé da planta/pedra se funda organicamente com o relevo sem criar costuras visuais secas
                 float rootBlend = saturate(1.0 - input.uv.y / max(0.01, _TerrainBlendHeight));
                 float rootAO = lerp(1.0, 1.0 - _RootAOIntensity, rootBlend);
                 foliageBase *= rootAO;
@@ -219,10 +223,10 @@ Shader "Duskborn/StylizedFoliage"
                 half3 litLight = mainLight.color * _SunlightBoost;
                 half3 directLight = lerp(shadowColor, litLight, lightFactor);
 
-                // 4. Subsurface Scattering (Translucidez da Luz Atravessando a Folhagem)
+                // 4. Subsurface Scattering (Translucidez da Luz Atravessando a Folhagem - desativado em pedras)
                 float3 viewDirWS = normalize(GetCameraPositionWS() - input.positionWS);
                 half backlight = saturate(dot(viewDirWS, -mainLight.direction));
-                half sssVal = pow(backlight, _SSSPower) * _SSSIntensity * saturate(input.uv.y * 1.4);
+                half sssVal = pow(backlight, _SSSPower) * _SSSIntensity * saturate(input.uv.y * 1.4) * (1.0 - isRigid);
                 half3 sssHighlight = _SSSColor.rgb * (sssVal * mainLight.color * shadowSoft);
 
                 // 5. Rim Light Estilizado na Borda (apenas em áreas expostas à luz)
@@ -296,7 +300,7 @@ Shader "Duskborn/StylizedFoliage"
                 float3 posWS = TransformObjectToWorld(input.positionOS.xyz);
                 float3 normWS = TransformObjectToWorldNormal(input.normalOS);
 
-                float windWeight = input.color.a > 0.01 ? input.color.a : input.uv.y;
+                float windWeight = input.color.a;
                 posWS = ApplyFoliageWind(posWS, windWeight);
 
                 output.positionCS = TransformWorldToHClip(ApplyShadowBias(posWS, normWS, _LightDirection));
@@ -355,7 +359,7 @@ Shader "Duskborn/StylizedFoliage"
                 UNITY_TRANSFER_INSTANCE_ID(input, output);
 
                 float3 posWS = TransformObjectToWorld(input.positionOS.xyz);
-                float windWeight = input.color.a > 0.01 ? input.color.a : input.uv.y;
+                float windWeight = input.color.a;
                 posWS = ApplyFoliageWind(posWS, windWeight);
 
                 output.positionCS = TransformWorldToHClip(posWS);
@@ -405,6 +409,7 @@ Shader "Duskborn/StylizedFoliage"
                 float4 positionCS : SV_POSITION;
                 float3 normalWS   : TEXCOORD0;
                 float2 uv         : TEXCOORD1;
+                float4 color      : COLOR;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
@@ -415,12 +420,13 @@ Shader "Duskborn/StylizedFoliage"
                 UNITY_TRANSFER_INSTANCE_ID(input, output);
 
                 float3 posWS = TransformObjectToWorld(input.positionOS.xyz);
-                float windWeight = input.color.a > 0.01 ? input.color.a : input.uv.y;
+                float windWeight = input.color.a;
                 posWS = ApplyFoliageWind(posWS, windWeight);
 
                 output.positionCS = TransformWorldToHClip(posWS);
                 output.normalWS   = TransformObjectToWorldNormal(input.normalOS);
                 output.uv         = TRANSFORM_TEX(input.uv, _BaseMap);
+                output.color      = input.color;
                 return output;
             }
 
@@ -433,7 +439,9 @@ Shader "Duskborn/StylizedFoliage"
                     clip(texColor.a - _Cutoff);
                 }
                 float3 rawNorm = normalize(input.normalWS);
-                float3 normWS = normalize(lerp(rawNorm, float3(0.0, 1.0, 0.0), _NormalUpBlend));
+                float isRigid = step(input.color.a, 0.001);
+                float effectiveUpBlend = lerp(_NormalUpBlend, 0.0, isRigid);
+                float3 normWS = normalize(lerp(rawNorm, float3(0.0, 1.0, 0.0), effectiveUpBlend));
                 return half4(NormalizeNormalPerPixel(normWS), 0.0);
             }
             ENDHLSL

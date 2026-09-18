@@ -44,6 +44,10 @@ namespace Duskborn.Gameplay.World.Foliage
         [Range(0, 6000)]
         [SerializeField] private int grassTuftsPerChunk = 1800;
 
+        [Tooltip("Quantidade de pequenas pedras e seixos gerados por chunk.")]
+        [Range(0, 500)]
+        [SerializeField] private int littleRocksPerChunk = 85;
+
         [Tooltip("Quantidade de arbustos gerados por chunk (desativado por padrão).")]
         [Range(0, 100)]
         [SerializeField] private int bushesPerChunk = 0;
@@ -51,23 +55,66 @@ namespace Duskborn.Gameplay.World.Foliage
         [Header("Distribuição de Arquétipos de Grama")]
         [Tooltip("Proporção de grama carpete densa para cobertura contínua de solo (Dense Carpet Grass).")]
         [Range(0f, 1f)]
-        [SerializeField] private float carpetGrassRatio = 0.38f;
+        [SerializeField] private float carpetGrassRatio = 0.32f;
 
         [Tooltip("Proporção de tufos de grama alta e viçosa anime (Lush Grass Clumps).")]
         [Range(0f, 1f)]
-        [SerializeField] private float lushGrassRatio = 0.26f;
+        [SerializeField] private float lushGrassRatio = 0.22f;
 
         [Tooltip("Proporção de tufos de flores silvestres em colônias (Wildflowers).")]
         [Range(0f, 1f)]
-        [SerializeField] private float wildflowerRatio = 0.16f;
+        [SerializeField] private float wildflowerRatio = 0.14f;
 
         [Tooltip("Proporção de grama fina de pradaria nas orlas e transições (Prairie Grass).")]
         [Range(0f, 1f)]
-        [SerializeField] private float prairieGrassRatio = 0.14f;
+        [SerializeField] private float prairieGrassRatio = 0.12f;
 
         [Tooltip("Proporção de juncos de várzea em depressões úmidas e margens (Reed Grass).")]
         [Range(0f, 1f)]
-        [SerializeField] private float reedGrassRatio = 0.06f;
+        [SerializeField] private float reedGrassRatio = 0.05f;
+
+        [Header("Distribuição de Ervas Daninhas Silvestres (Weeds & Undergrowth)")]
+        [Tooltip("Proporção de ervas daninhas com roseta basal e botões florais (Wild Weed Tufts).")]
+        [Range(0f, 1f)]
+        [SerializeField] private float wildWeedRatio = 0.10f;
+
+        [Tooltip("Proporção de plantas rasteiras de folhas largas de sombra (Broadleaf Weeds).")]
+        [Range(0f, 1f)]
+        [SerializeField] private float broadleafWeedRatio = 0.08f;
+
+        [Tooltip("Proporção de hastes altas selvagens com plumas que oscilam no vento (Tall Stalk Weeds).")]
+        [Range(0f, 1f)]
+        [SerializeField] private float tallStalkRatio = 0.07f;
+
+        [Tooltip("Proporção de canteiros de trevos miúdos (Clover Patches).")]
+        [Range(0f, 1f)]
+        [SerializeField] private float cloverPatchRatio = 0.06f;
+
+        [Header("Ecologia de Margem e Água (Water Spots)")]
+        [Tooltip("Proporção de canteiros de taboa e juncos aquáticos na orla (Water Cattail Beds).")]
+        [Range(0f, 1f)]
+        [SerializeField] private float cattailBedRatio = 0.08f;
+
+        [Tooltip("Faixa de altura acima do nível da água considerada margem aquática / orla.")]
+        [Range(0.1f, 2.5f)]
+        [SerializeField] private float waterMarginBand = 0.85f;
+
+        [Header("Distribuição de Pequenas Pedras (Little Rocks)")]
+        [Tooltip("Proporção de aglomerados de seixos (Pebble Clusters).")]
+        [Range(0f, 1f)]
+        [SerializeField] private float pebbleClusterRatio = 0.42f;
+
+        [Tooltip("Proporção de pedras de rio achatadas em margens (Smooth River Stones).")]
+        [Range(0f, 1f)]
+        [SerializeField] private float riverStoneRatio = 0.28f;
+
+        [Tooltip("Proporção de seixos individuais facetados (Single Pebbles).")]
+        [Range(0f, 1f)]
+        [SerializeField] private float singlePebbleRatio = 0.18f;
+
+        [Tooltip("Proporção de rochas lascadas de encosta (Scree / Talus Rocks).")]
+        [Range(0f, 1f)]
+        [SerializeField] private float screeRockRatio = 0.12f;
 
         [Header("Distribuição de Arquétipos de Arbustos")]
         [Tooltip("Proporção de samambaias/arbustos em leque (Fern Bushes).")]
@@ -104,14 +151,30 @@ namespace Duskborn.Gameplay.World.Foliage
             new Color(0.72f, 0.48f, 0.95f, 1f)  // Roxo lavanda / Wild Lavender
         };
 
+        // Paleta de destaques botânicos (Taboas, Dente-de-Leão, Cardos)
+        public static readonly Color CattailAccentColor = new Color(0.32f, 0.18f, 0.10f, 1.0f); // Marrom espiga
+        public static readonly Color DandelionAccentColor = new Color(0.96f, 0.82f, 0.14f, 1.0f); // Amarelo ouro
+        public static readonly Color ThistleAccentColor = new Color(0.78f, 0.52f, 0.88f, 1.0f); // Lilás cardo
+
         public FoliageDensityPreset DensityPreset => densityPreset;
         public int GrassTuftsPerChunk => grassTuftsPerChunk;
+        public int LittleRocksPerChunk => littleRocksPerChunk;
         public int BushesPerChunk => bushesPerChunk;
         public float CarpetGrassRatio => carpetGrassRatio;
         public float LushGrassRatio => lushGrassRatio;
         public float WildflowerRatio => wildflowerRatio;
         public float PrairieGrassRatio => prairieGrassRatio;
         public float ReedGrassRatio => reedGrassRatio;
+        public float WildWeedRatio => wildWeedRatio;
+        public float BroadleafWeedRatio => broadleafWeedRatio;
+        public float TallStalkRatio => tallStalkRatio;
+        public float CloverPatchRatio => cloverPatchRatio;
+        public float CattailBedRatio => cattailBedRatio;
+        public float WaterMarginBand => waterMarginBand;
+        public float PebbleClusterRatio => pebbleClusterRatio;
+        public float RiverStoneRatio => riverStoneRatio;
+        public float SinglePebbleRatio => singlePebbleRatio;
+        public float ScreeRockRatio => screeRockRatio;
         public float FernBushRatio => fernBushRatio;
         public float FloweringBushRatio => floweringBushRatio;
         public float GroundShrubRatio => groundShrubRatio;
@@ -135,11 +198,12 @@ namespace Duskborn.Gameplay.World.Foliage
             }
         }
 
-        public void SetFoliageCounts(int grassCount, int bushCount)
+        public void SetFoliageCounts(int grassCount, int bushCount, int rockCount = -1)
         {
             densityPreset = FoliageDensityPreset.Custom;
             grassTuftsPerChunk = Mathf.Max(0, grassCount);
             bushesPerChunk = Mathf.Max(0, bushCount);
+            if (rockCount >= 0) littleRocksPerChunk = Mathf.Max(0, rockCount);
         }
 
         public void ApplyDensityPreset()
@@ -148,22 +212,27 @@ namespace Duskborn.Gameplay.World.Foliage
             {
                 case FoliageDensityPreset.Low:
                     grassTuftsPerChunk = 400;
+                    littleRocksPerChunk = 20;
                     bushesPerChunk = 0;
                     break;
                 case FoliageDensityPreset.Medium:
                     grassTuftsPerChunk = 950;
+                    littleRocksPerChunk = 45;
                     bushesPerChunk = 0;
                     break;
                 case FoliageDensityPreset.High:
                     grassTuftsPerChunk = 1800;
+                    littleRocksPerChunk = 85;
                     bushesPerChunk = 0;
                     break;
                 case FoliageDensityPreset.Ultra_Genshin:
                     grassTuftsPerChunk = 3200;
+                    littleRocksPerChunk = 140;
                     bushesPerChunk = 0;
                     break;
                 case FoliageDensityPreset.Cinematic_Lush:
                     grassTuftsPerChunk = 5000;
+                    littleRocksPerChunk = 200;
                     bushesPerChunk = 0;
                     break;
             }
@@ -336,6 +405,48 @@ namespace Duskborn.Gameplay.World.Foliage
             return n1 * 0.65f + n2 * 0.35f;
         }
 
+        private float EvaluateWeedPatch(float worldX, float worldZ, int activeSeed)
+        {
+            float w1 = Mathf.PerlinNoise((worldX + activeSeed * 43.17f + 312.4f) * 0.035f, (worldZ + activeSeed * 59.83f + 149.2f) * 0.035f);
+            float w2 = Mathf.PerlinNoise((worldX - 173.5f) * 0.075f, (worldZ + 381.1f) * 0.075f);
+            return w1 * 0.70f + w2 * 0.30f;
+        }
+
+        private Color EvaluateRockColor(float worldX, float worldZ, float groundY, float slope, LowPolyTerrainConfig config)
+        {
+            float stoneNoise = Mathf.PerlinNoise((worldX + 283.1f) * 0.022f, (worldZ + 419.7f) * 0.022f);
+
+            // 1. Margem de água / seixos de praia
+            if (groundY <= config.waterLevel + waterMarginBand + 0.35f)
+            {
+                Color wetSlate = new Color(0.30f, 0.33f, 0.38f);
+                Color smoothGray = new Color(0.44f, 0.46f, 0.48f);
+                Color sandPebble = new Color(0.56f, 0.52f, 0.44f);
+
+                if (stoneNoise > 0.55f) return Color.Lerp(smoothGray, sandPebble, (stoneNoise - 0.55f) / 0.45f);
+                return Color.Lerp(wetSlate, smoothGray, stoneNoise / 0.55f);
+            }
+
+            // 2. Encostas rochosas íngremes / cascalho de escarpa
+            if (slope > 18f)
+            {
+                Color cliffStone = config.cliffColor;
+                Color darkGranite = new Color(0.38f, 0.37f, 0.40f);
+                return Color.Lerp(cliffStone, darkGranite, stoneNoise * 0.5f);
+            }
+
+            // 3. Campo aberto / planície
+            Color granite = new Color(0.48f, 0.47f, 0.46f);
+            Color mossyStone = new Color(0.38f, 0.45f, 0.35f);
+            Color slate = new Color(0.40f, 0.42f, 0.46f);
+
+            if (stoneNoise > 0.60f)
+            {
+                return Color.Lerp(granite, mossyStone, (stoneNoise - 0.60f) / 0.40f);
+            }
+            return Color.Lerp(slate, granite, stoneNoise / 0.60f);
+        }
+
         private void BuildGrassBatch(
             LowPolyTerrainConfig config,
             int activeSeed,
@@ -359,13 +470,29 @@ namespace Duskborn.Gameplay.World.Foliage
             SpatialOccupancyMap occupancyMap,
             GenerationBudget budget)
         {
-            if (grassTuftsPerChunk <= 0 || grassMaterial == null) yield break;
+            if ((grassTuftsPerChunk <= 0 && littleRocksPerChunk <= 0) || grassMaterial == null) yield break;
 
+            // 1. Arquétipos de Grama e Flores Silvestres
             Mesh carpetMesh = FoliageMeshUtility.CreateDenseCarpetMesh(bladeCount: 18, radius: 0.85f, height: 0.90f, baseWidth: 0.28f);
             Mesh lushMesh = FoliageMeshUtility.CreateLushGrassClumpMesh(bladeCount: 15, radius: 0.75f, height: 1.30f, baseWidth: 0.22f);
             Mesh prairieMesh = FoliageMeshUtility.CreatePrairieGrassMesh(bladeCount: 10, radius: 0.55f, height: 0.70f, baseWidth: 0.14f);
             Mesh reedMesh = FoliageMeshUtility.CreateReedGrassMesh(bladeCount: 8, height: 1.45f, baseWidth: 0.12f);
             Mesh flowerMesh = FoliageMeshUtility.CreateWildflowerTuftMesh(bladeCount: 14, flowerCount: 4, radius: 0.75f, height: 0.90f, flowerHeight: 1.15f);
+
+            // 2. Arquétipos de Ervas Daninhas Silvestres (Weeds & Undergrowth)
+            Mesh wildWeedMesh = FoliageMeshUtility.CreateWildWeedTuftMesh(leafCount: 6, radius: 0.48f, height: 0.42f);
+            Mesh broadleafMesh = FoliageMeshUtility.CreateBroadleafWeedMesh(leafCount: 5, radius: 0.42f, height: 0.22f);
+            Mesh tallStalkMesh = FoliageMeshUtility.CreateTallStalkWeedMesh(stalkCount: 4, height: 1.35f, baseWidth: 0.10f);
+            Mesh cloverMesh = FoliageMeshUtility.CreateCloverPatchMesh(cloverCount: 7, radius: 0.38f);
+
+            // 3. Arquétipos de Margem e Água (Water Spots)
+            Mesh cattailBedMesh = FoliageMeshUtility.CreateWaterCattailBedMesh(reedCount: 10, cattailCount: 3, radius: 0.65f, height: 1.55f);
+
+            // 4. Arquétipos de Pequenas Pedras (Little Rocks)
+            Mesh singlePebbleMesh = FoliageMeshUtility.CreateLittlePebbleMesh(radius: 0.18f, height: 0.12f);
+            Mesh pebbleClusterMesh = FoliageMeshUtility.CreatePebbleClusterMesh(pebbleCount: 4, radius: 0.42f);
+            Mesh riverStoneMesh = FoliageMeshUtility.CreateRiverStoneMesh(radiusX: 0.30f, radiusZ: 0.20f, height: 0.08f);
+            Mesh screeRockMesh = FoliageMeshUtility.CreateScreeRockMesh(size: 0.26f);
 
             List<Vector3> combinedVerts = new List<Vector3>();
             List<Vector3> combinedNormals = new List<Vector3>();
@@ -374,206 +501,381 @@ namespace Duskborn.Gameplay.World.Foliage
             List<int> combinedTris = new List<int>();
 
             float chunkWorldLength = maxX - minX;
-            // Distribuição em malha hexagonal (triangular packing) para eliminar padrões de grade e canais visuais
-            // Área por ponto em malha hexagonal: Area = stepX * stepZ = stepX * (stepX * sin(60°)) = stepX^2 * 0.8660254
-            float hexAreaPerPoint = (chunkWorldLength * chunkWorldLength) / (float)grassTuftsPerChunk;
-            float stepX = Mathf.Sqrt(hexAreaPerPoint / 0.8660254f);
-            float stepZ = stepX * 0.8660254f;
 
-            int gridResX = Mathf.CeilToInt(chunkWorldLength / stepX) + 1;
-            int gridResZ = Mathf.CeilToInt(chunkWorldLength / stepZ) + 1;
-
-            float maxFoliageH = config.heightMultiplier * 0.72f;
-            float minGroundH = config.waterLevel + waterClearance;
-
-            // Percorre a malha hexagonal com amostragem orgânica estratificada
-            for (int gz = 0; gz <= gridResZ; gz++)
+            if (grassTuftsPerChunk > 0)
             {
-                float rowOffset = (gz % 2 == 1) ? stepX * 0.5f : 0f;
+                // Distribuição em malha hexagonal (triangular packing) para eliminar padrões de grade e canais visuais
+                float hexAreaPerPoint = (chunkWorldLength * chunkWorldLength) / (float)grassTuftsPerChunk;
+                float stepX = Mathf.Sqrt(hexAreaPerPoint / 0.8660254f);
+                float stepZ = stepX * 0.8660254f;
 
-                for (int gx = -1; gx <= gridResX; gx++)
+                int gridResX = Mathf.CeilToInt(chunkWorldLength / stepX) + 1;
+                int gridResZ = Mathf.CeilToInt(chunkWorldLength / stepZ) + 1;
+
+                float maxFoliageH = config.heightMultiplier * 0.72f;
+                float minGroundH = config.waterLevel + waterClearance;
+
+                // Percorre a malha hexagonal com amostragem orgânica estratificada
+                for (int gz = 0; gz <= gridResZ; gz++)
                 {
-                    // Amostragem com jitter orgânico de ±42% do espaçamento
-                    // Elimina qualquer alinhamento cartesiano sem produzir aglomerações anômalas ou clareiras
-                    float jitterX = rng.Range(-0.42f, 0.42f) * stepX;
-                    float jitterZ = rng.Range(-0.42f, 0.42f) * stepZ;
-                    float worldX = minX + gx * stepX + rowOffset + jitterX;
-                    float worldZ = minZ + gz * stepZ + jitterZ;
+                    float rowOffset = (gz % 2 == 1) ? stepX * 0.5f : 0f;
 
-                    // Restringe estritamente aos limites do chunk
-                    if (worldX < minX || worldX > maxX || worldZ < minZ || worldZ > maxZ) continue;
-
-                    Vector2 worldXZ = new Vector2(worldX, worldZ);
-
-                    float distSqr = worldX * worldX + worldZ * worldZ;
-                    if (distSqr < centerRadiusSqr * 0.75f) continue;
-
-                    // 1. Verificação com SpatialOccupancyMap
-                    float canopyWeight = 0f;
-                    bool inSanctuaryClearing = false;
-                    bool inCombatClearing = false;
-
-                    if (occupancyMap != null)
+                    for (int gx = -1; gx <= gridResX; gx++)
                     {
-                        if (occupancyMap.IsSolidOccupied(worldXZ, clearanceRadius: 0.18f))
-                        {
-                            continue;
-                        }
+                        // Amostragem com jitter orgânico de ±42% do espaçamento
+                        float jitterX = rng.Range(-0.42f, 0.42f) * stepX;
+                        float jitterZ = rng.Range(-0.42f, 0.42f) * stepZ;
+                        float worldX = minX + gx * stepX + rowOffset + jitterX;
+                        float worldZ = minZ + gz * stepZ + jitterZ;
 
-                        if (occupancyMap.IsInClearing(worldXZ, out OccupancyType clType))
+                        // Restringe estritamente aos limites do chunk
+                        if (worldX < minX || worldX > maxX || worldZ < minZ || worldZ > maxZ) continue;
+
+                        Vector2 worldXZ = new Vector2(worldX, worldZ);
+
+                        float distSqr = worldX * worldX + worldZ * worldZ;
+                        if (distSqr < centerRadiusSqr * 0.75f) continue;
+
+                        // 1. Verificação com SpatialOccupancyMap
+                        float canopyWeight = 0f;
+                        bool inSanctuaryClearing = false;
+                        bool inCombatClearing = false;
+
+                        if (occupancyMap != null)
                         {
-                            if (clType == OccupancyType.Player_Sanctuary)
+                            if (occupancyMap.IsSolidOccupied(worldXZ, clearanceRadius: 0.18f))
                             {
-                                inSanctuaryClearing = true;
-                                if (rng.Range(0f, 1f) > 0.18f) continue;
+                                continue;
                             }
-                            else if (clType == OccupancyType.Combat_Clearing)
+
+                            if (occupancyMap.IsInClearing(worldXZ, out OccupancyType clType))
                             {
-                                inCombatClearing = true;
-                                if (rng.Range(0f, 1f) > 0.35f) continue;
+                                if (clType == OccupancyType.Player_Sanctuary)
+                                {
+                                    inSanctuaryClearing = true;
+                                    if (rng.Range(0f, 1f) > 0.18f) continue;
+                                }
+                                else if (clType == OccupancyType.Combat_Clearing)
+                                {
+                                    inCombatClearing = true;
+                                    if (rng.Range(0f, 1f) > 0.35f) continue;
+                                }
                             }
+
+                            occupancyMap.IsUnderCanopy(worldXZ, out canopyWeight);
                         }
 
-                        occupancyMap.IsUnderCanopy(worldXZ, out canopyWeight);
-                    }
+                        // 2. Amostra relevo, concavidade de vale e inclinação
+                        float groundY = TerrainNoise.SampleHeight(worldX, worldZ, config, activeSeed, halfMapX, halfMapZ);
+                        if (groundY < minGroundH || groundY > maxFoliageH) continue;
 
-                    // 2. Amostra relevo, concavidade de vale e inclinação
-                    float groundY = TerrainNoise.SampleHeight(worldX, worldZ, config, activeSeed, halfMapX, halfMapZ);
-                    if (groundY < minGroundH || groundY > maxFoliageH) continue;
+                        const float eps = 0.35f;
+                        float hX1 = TerrainNoise.SampleHeight(worldX + eps, worldZ, config, activeSeed, halfMapX, halfMapZ);
+                        float hX0 = TerrainNoise.SampleHeight(worldX - eps, worldZ, config, activeSeed, halfMapX, halfMapZ);
+                        float hZ1 = TerrainNoise.SampleHeight(worldX, worldZ + eps, config, activeSeed, halfMapX, halfMapZ);
+                        float hZ0 = TerrainNoise.SampleHeight(worldX, worldZ - eps, config, activeSeed, halfMapX, halfMapZ);
 
-                    const float eps = 0.35f;
-                    float hX1 = TerrainNoise.SampleHeight(worldX + eps, worldZ, config, activeSeed, halfMapX, halfMapZ);
-                    float hX0 = TerrainNoise.SampleHeight(worldX - eps, worldZ, config, activeSeed, halfMapX, halfMapZ);
-                    float hZ1 = TerrainNoise.SampleHeight(worldX, worldZ + eps, config, activeSeed, halfMapX, halfMapZ);
-                    float hZ0 = TerrainNoise.SampleHeight(worldX, worldZ - eps, config, activeSeed, halfMapX, halfMapZ);
+                        Vector3 normalWS = new Vector3(-(hX1 - hX0) / (2f * eps), 1f, -(hZ1 - hZ0) / (2f * eps)).normalized;
+                        float slope = Vector3.Angle(normalWS, Vector3.up);
 
-                    Vector3 normalWS = new Vector3(-(hX1 - hX0) / (2f * eps), 1f, -(hZ1 - hZ0) / (2f * eps)).normalized;
-                    float slope = Vector3.Angle(normalWS, Vector3.up);
+                        // Rejeição estrita em encostas rochosas íngremes
+                        if (slope > config.steepSlopeThreshold * 0.85f) continue;
 
-                    // Rejeição estrita em encostas rochosas íngremes
-                    if (slope > config.steepSlopeThreshold * 0.85f) continue;
+                        float slopeFactor = slope <= 14f ? 1.0f : Mathf.Clamp01((config.steepSlopeThreshold * 0.85f - slope) / (config.steepSlopeThreshold * 0.85f - 14f));
 
-                    float slopeFactor = slope <= 14f ? 1.0f : Mathf.Clamp01((config.steepSlopeThreshold * 0.85f - slope) / (config.steepSlopeThreshold * 0.85f - 14f));
-
-                    // Fator de elevação (planícies e vales exuberantes, rarefeito nos cumes)
-                    float elevFactor = 1.0f;
-                    float midMountain = config.heightMultiplier * 0.55f;
-                    if (groundY > midMountain)
-                    {
-                        elevFactor = Mathf.Clamp01(1.0f - (groundY - midMountain) / (config.heightMultiplier * 0.20f));
-                    }
-                    else if (groundY < config.waterLevel + 1.2f)
-                    {
-                        elevFactor = Mathf.Clamp01((groundY - minGroundH) / 0.8f);
-                    }
-
-                    if (slopeFactor * elevFactor < 0.12f) continue;
-
-                    // Concavidade (depressões que acumulam umidade e formam tapetes mais verdes)
-                    float concavity = ((hX1 + hX0 + hZ1 + hZ0) * 0.25f) - groundY;
-
-                    // 3. Campo de Manchas de Campina (Meadow Patch Waves - Pintura Homogênea estilo Genshin / Zelda)
-                    float patchDensity = EvaluateMeadowPatch(worldX, worldZ, activeSeed);
-                    float patchThreshold = macroDensityThreshold;
-                    float edgeWidth = 0.10f;
-                    float patchWeight = Mathf.Clamp01((patchDensity - (patchThreshold - edgeWidth * 0.5f)) / edgeWidth);
-
-                    // Fora das campinas: trilhas de terra limpas com tufos raros de pradaria
-                    if (patchWeight < 0.05f)
-                    {
-                        if (rng.Range(0f, 1f) > 0.04f * elevFactor) continue;
-                    }
-
-                    // 4. Seleção de Arquétipo com foco em Cobertura Homogênea
-                    Mesh chosenMesh;
-                    bool hasAccent = false;
-                    Color accentColor = Color.white;
-
-                    bool isInsideMeadow = patchWeight >= 0.30f;
-
-                    if (!isInsideMeadow)
-                    {
-                        chosenMesh = prairieMesh;
-                    }
-                    else
-                    {
-                        bool isWetland = (groundY < config.waterLevel + 1.6f || concavity > 0.15f);
-                        if (isWetland && rng.Range(0f, 1f) < (reedGrassRatio * 2.5f))
+                        // Fator de elevação (planícies e vales exuberantes, rarefeito nos cumes)
+                        float elevFactor = 1.0f;
+                        float midMountain = config.heightMultiplier * 0.55f;
+                        if (groundY > midMountain)
                         {
-                            chosenMesh = reedMesh;
+                            elevFactor = Mathf.Clamp01(1.0f - (groundY - midMountain) / (config.heightMultiplier * 0.20f));
                         }
-                        else
+                        else if (groundY < config.waterLevel + 1.2f)
                         {
-                            float roll = rng.Range(0f, 1f);
-                            if (roll < wildflowerRatio && !inCombatClearing && !inSanctuaryClearing)
+                            elevFactor = Mathf.Clamp01((groundY - minGroundH) / 0.8f);
+                        }
+
+                        if (slopeFactor * elevFactor < 0.12f) continue;
+
+                        // Concavidade (depressões que acumulam umidade e formam tapetes mais verdes)
+                        float concavity = ((hX1 + hX0 + hZ1 + hZ0) * 0.25f) - groundY;
+
+                        // 3. Campo de Manchas de Campina & Colônias de Ervas Daninhas
+                        float patchDensity = EvaluateMeadowPatch(worldX, worldZ, activeSeed);
+                        float patchThreshold = macroDensityThreshold;
+                        float edgeWidth = 0.10f;
+                        float patchWeight = Mathf.Clamp01((patchDensity - (patchThreshold - edgeWidth * 0.5f)) / edgeWidth);
+
+                        float weedColony = EvaluateWeedPatch(worldX, worldZ, activeSeed);
+
+                        // Fora das campinas: trilhas de terra com vegetação rasteira resistente
+                        if (patchWeight < 0.05f)
+                        {
+                            if (rng.Range(0f, 1f) > 0.05f * elevFactor) continue;
+                        }
+
+                        // 4. Seleção Ecológica de Arquétipo
+                        Mesh chosenMesh;
+                        bool hasAccent = false;
+                        Color accentColor = Color.white;
+
+                        bool isInsideMeadow = patchWeight >= 0.30f;
+                        bool isWaterMargin = (groundY <= config.waterLevel + waterMarginBand + 0.35f);
+
+                        if (isWaterMargin)
+                        {
+                            // Faixa de orla aquática e várzea úmida (Water Spots)
+                            float waterRoll = rng.Range(0f, 1f);
+                            if (waterRoll < cattailBedRatio * 3.5f)
                             {
-                                chosenMesh = flowerMesh;
+                                chosenMesh = cattailBedMesh;
                                 hasAccent = true;
-
-                                // Colônias de flores com harmonia de cores espacial macro (estilo campinas floridas de anime)
-                                float flowerColonyNoise = Mathf.PerlinNoise((worldX + activeSeed * 5.1f) * 0.016f, (worldZ + activeSeed * 7.7f) * 0.016f);
-                                int colonyIndex = Mathf.Clamp(Mathf.FloorToInt(flowerColonyNoise * WildflowerPalettes.Length), 0, WildflowerPalettes.Length - 1);
-                                accentColor = (rng.Range(0f, 1f) < 0.85f)
-                                    ? WildflowerPalettes[colonyIndex]
-                                    : WildflowerPalettes[rng.Range(0, WildflowerPalettes.Length)];
+                                accentColor = CattailAccentColor;
                             }
-                            else if (roll < (wildflowerRatio + lushGrassRatio * 0.40f) && !inCombatClearing && !inSanctuaryClearing)
+                            else if (waterRoll < (cattailBedRatio + reedGrassRatio) * 3.5f)
                             {
-                                chosenMesh = lushMesh;
+                                chosenMesh = reedMesh;
+                            }
+                            else if (waterRoll < 0.70f)
+                            {
+                                chosenMesh = broadleafMesh; // Planta ribeirinha de folhas largas
                             }
                             else
                             {
-                                // Base homogênea predominante no estilo Genshin/Zelda: tapete contínuo denso
                                 chosenMesh = carpetMesh;
                             }
                         }
+                        else if (!isInsideMeadow)
+                        {
+                            // Fora das campinas: trilhas e bordas
+                            float trailRoll = rng.Range(0f, 1f);
+                            if (trailRoll < wildWeedRatio * 1.8f)
+                            {
+                                chosenMesh = wildWeedMesh;
+                                hasAccent = true;
+                                accentColor = (rng.Range(0f, 1f) < 0.65f) ? DandelionAccentColor : ThistleAccentColor;
+                            }
+                            else if (trailRoll < (wildWeedRatio + tallStalkRatio) * 1.5f)
+                            {
+                                chosenMesh = tallStalkMesh;
+                            }
+                            else
+                            {
+                                chosenMesh = prairieMesh;
+                            }
+                        }
+                        else
+                        {
+                            // Dentro das campinas (Meadow)
+                            if (canopyWeight > 0.15f)
+                            {
+                                // Vegetação de sombra sob copa de árvores
+                                float canopyRoll = rng.Range(0f, 1f);
+                                if (canopyRoll < 0.42f)
+                                {
+                                    chosenMesh = broadleafMesh;
+                                }
+                                else if (canopyRoll < 0.75f)
+                                {
+                                    chosenMesh = cloverMesh;
+                                }
+                                else
+                                {
+                                    chosenMesh = carpetMesh;
+                                }
+                            }
+                            else if (weedColony > 0.48f && !inCombatClearing && !inSanctuaryClearing)
+                            {
+                                // Colônia de ervas daninhas silvestres e plumas
+                                float weedRoll = rng.Range(0f, 1f);
+                                if (weedRoll < 0.38f)
+                                {
+                                    chosenMesh = wildWeedMesh;
+                                    hasAccent = true;
+                                    accentColor = (rng.Range(0f, 1f) < 0.60f) ? DandelionAccentColor : ThistleAccentColor;
+                                }
+                                else if (weedRoll < 0.65f)
+                                {
+                                    chosenMesh = tallStalkMesh;
+                                }
+                                else if (weedRoll < 0.85f)
+                                {
+                                    chosenMesh = cloverMesh;
+                                }
+                                else
+                                {
+                                    chosenMesh = broadleafMesh;
+                                }
+                            }
+                            else
+                            {
+                                // Campina principal viçosa (Genshin / Zelda)
+                                float roll = rng.Range(0f, 1f);
+                                if (roll < wildflowerRatio && !inCombatClearing && !inSanctuaryClearing)
+                                {
+                                    chosenMesh = flowerMesh;
+                                    hasAccent = true;
+                                    float flowerColonyNoise = Mathf.PerlinNoise((worldX + activeSeed * 5.1f) * 0.016f, (worldZ + activeSeed * 7.7f) * 0.016f);
+                                    int colonyIndex = Mathf.Clamp(Mathf.FloorToInt(flowerColonyNoise * WildflowerPalettes.Length), 0, WildflowerPalettes.Length - 1);
+                                    accentColor = (rng.Range(0f, 1f) < 0.85f)
+                                        ? WildflowerPalettes[colonyIndex]
+                                        : WildflowerPalettes[rng.Range(0, WildflowerPalettes.Length)];
+                                }
+                                else if (roll < (wildflowerRatio + cloverPatchRatio) && !inCombatClearing && !inSanctuaryClearing)
+                                {
+                                    chosenMesh = cloverMesh;
+                                }
+                                else if (roll < (wildflowerRatio + cloverPatchRatio + lushGrassRatio * 0.40f) && !inCombatClearing && !inSanctuaryClearing)
+                                {
+                                    chosenMesh = lushMesh;
+                                }
+                                else
+                                {
+                                    chosenMesh = carpetMesh;
+                                }
+                            }
+                        }
+
+                        Color terrainColor = EvaluateTerrainColor(groundY, slope, normalWS, config);
+                        if (canopyWeight > 0.05f)
+                        {
+                            terrainColor = Color.Lerp(terrainColor, config.deepGrassColor, canopyWeight * 0.45f);
+                        }
+
+                        // Cor da ponta contínua no espaço de mundo (sem jitter aleatório por tufo)
+                        Color tipColor = EvaluateFoliageTipColor(worldX, worldZ, canopyWeight, config);
+
+                        // Escala base com transição suave (smoothstep) na borda da campina para fusão orgânica
+                        float edgeScale = isInsideMeadow ? Mathf.SmoothStep(0.65f, 1.15f, patchWeight) : 0.65f;
+                        float scale = edgeScale * (1.0f + rng.Range(-0.06f, 0.06f));
+
+                        if (chosenMesh == lushMesh) scale *= 1.10f;
+                        if (chosenMesh == carpetMesh) scale *= 1.08f;
+                        if (chosenMesh == cattailBedMesh) scale *= 1.05f;
+                        if (canopyWeight > 0.1f) scale *= (1.0f + canopyWeight * 0.15f);
+                        if (inCombatClearing) scale *= 0.70f;
+
+                        float yRot = rng.Range(0f, 360f);
+                        Quaternion rot = Quaternion.Euler(0f, yRot, 0f);
+
+                        Vector3 instanceLocalPos = transform.InverseTransformPoint(new Vector3(worldX, groundY, worldZ));
+
+                        AppendMeshInstance(
+                            chosenMesh,
+                            instanceLocalPos,
+                            rot,
+                            scale,
+                            terrainColor,
+                            tipColor,
+                            normalWS,
+                            true, // isGrass
+                            hasAccent,
+                            accentColor,
+                            combinedVerts,
+                            combinedNormals,
+                            combinedUVs,
+                            combinedColors,
+                            combinedTris
+                        );
                     }
 
-                    Color terrainColor = EvaluateTerrainColor(groundY, slope, normalWS, config);
-                    if (canopyWeight > 0.05f)
+                    if (budget != null && budget.ShouldYield())
                     {
-                        terrainColor = Color.Lerp(terrainColor, config.deepGrassColor, canopyWeight * 0.45f);
+                        yield return null;
+                    }
+                }
+            }
+
+            // 5. Aglomerados e Dispersão de Pequenas Pedras e Seixos (Little Rocks Pass)
+            if (littleRocksPerChunk > 0)
+            {
+                int rocksToPlace = littleRocksPerChunk;
+                int placedRocks = 0;
+                int maxAttempts = rocksToPlace * 4;
+
+                for (int a = 0; a < maxAttempts && placedRocks < rocksToPlace; a++)
+                {
+                    float rx = rng.Range(minX + 0.5f, maxX - 0.5f);
+                    float rz = rng.Range(minZ + 0.5f, maxZ - 0.5f);
+                    Vector2 rXZ = new Vector2(rx, rz);
+
+                    float distSqr = rx * rx + rz * rz;
+                    if (distSqr < centerRadiusSqr * 0.6f) continue;
+
+                    if (occupancyMap != null)
+                    {
+                        if (occupancyMap.IsSolidOccupied(rXZ, clearanceRadius: 0.15f)) continue;
                     }
 
-                    // Cor da ponta contínua no espaço de mundo (sem jitter aleatório por tufo)
-                    Color tipColor = EvaluateFoliageTipColor(worldX, worldZ, canopyWeight, config);
+                    float ry = TerrainNoise.SampleHeight(rx, rz, config, activeSeed, halfMapX, halfMapZ);
+                    // Pedras podem ficar na margem de água (até waterLevel + 0.05m)
+                    if (ry < config.waterLevel + 0.05f || ry > (config.heightMultiplier * 0.75f) + 6f) continue;
 
-                    // Escala base com transição suave (smoothstep) na borda da campina para fusão orgânica
-                    float edgeScale = isInsideMeadow ? Mathf.SmoothStep(0.65f, 1.15f, patchWeight) : 0.65f;
-                    float scale = edgeScale * (1.0f + rng.Range(-0.06f, 0.06f));
+                    const float eps = 0.35f;
+                    float hX1 = TerrainNoise.SampleHeight(rx + eps, rz, config, activeSeed, halfMapX, halfMapZ);
+                    float hX0 = TerrainNoise.SampleHeight(rx - eps, rz, config, activeSeed, halfMapX, halfMapZ);
+                    float hZ1 = TerrainNoise.SampleHeight(rx, rz + eps, config, activeSeed, halfMapX, halfMapZ);
+                    float hZ0 = TerrainNoise.SampleHeight(rx, rz - eps, config, activeSeed, halfMapX, halfMapZ);
 
-                    if (chosenMesh == lushMesh) scale *= 1.10f;
-                    if (chosenMesh == carpetMesh) scale *= 1.08f;
-                    if (canopyWeight > 0.1f) scale *= (1.0f + canopyWeight * 0.15f);
-                    if (inCombatClearing) scale *= 0.70f;
+                    Vector3 rNormal = new Vector3(-(hX1 - hX0) / (2f * eps), 1f, -(hZ1 - hZ0) / (2f * eps)).normalized;
+                    float rSlope = Vector3.Angle(rNormal, Vector3.up);
 
-                    float yRot = rng.Range(0f, 360f);
-                    Quaternion rot = Quaternion.Euler(0f, yRot, 0f);
+                    // Rejeição apenas em penhascos quase verticais (> 70°)
+                    if (rSlope > 70f) continue;
 
-                    Vector3 instanceLocalPos = transform.InverseTransformPoint(new Vector3(worldX, groundY, worldZ));
+                    // Seleção do arquétipo de pedra conforme o contexto ecológico
+                    Mesh rockMesh;
+                    bool isWaterEdge = (ry <= config.waterLevel + waterMarginBand + 0.20f);
+
+                    if (isWaterEdge)
+                    {
+                        // Pedras de rio lisas na orla aquática
+                        rockMesh = (rng.Range(0f, 1f) < 0.65f) ? riverStoneMesh : pebbleClusterMesh;
+                    }
+                    else if (rSlope > 18f)
+                    {
+                        // Cascalho lascado em declives e base de escarpas
+                        rockMesh = (rng.Range(0f, 1f) < 0.68f) ? screeRockMesh : singlePebbleMesh;
+                    }
+                    else
+                    {
+                        // Seixos e aglomerados de campo
+                        rockMesh = (rng.Range(0f, 1f) < pebbleClusterRatio) ? pebbleClusterMesh : singlePebbleMesh;
+                    }
+
+                    Color stoneCol = EvaluateRockColor(rx, rz, ry, rSlope, config);
+                    float rScale = rng.Range(0.85f, 1.35f);
+                    float rRotY = rng.Range(0f, 360f);
+                    Quaternion rRot = Quaternion.Euler(0f, rRotY, 0f);
+
+                    Vector3 rLocalPos = transform.InverseTransformPoint(new Vector3(rx, ry, rz));
 
                     AppendMeshInstance(
-                        chosenMesh,
-                        instanceLocalPos,
-                        rot,
-                        scale,
-                        terrainColor,
-                        tipColor,
-                        normalWS,
-                        true, // isGrass
-                        hasAccent,
-                        accentColor,
+                        rockMesh,
+                        rLocalPos,
+                        rRot,
+                        rScale,
+                        Color.white,
+                        Color.white,
+                        rNormal,
+                        false, // isGrass = false
+                        false,
+                        Color.white,
                         combinedVerts,
                         combinedNormals,
                         combinedUVs,
                         combinedColors,
-                        combinedTris
+                        combinedTris,
+                        isRock: true,
+                        rockColor: stoneCol
                     );
-                }
 
-                if (budget != null && budget.ShouldYield())
-                {
-                    yield return null;
+                    placedRocks++;
+
+                    if (budget != null && placedRocks % 20 == 0 && budget.ShouldYield())
+                    {
+                        yield return null;
+                    }
                 }
             }
 
@@ -785,7 +1087,9 @@ namespace Duskborn.Gameplay.World.Foliage
             List<Vector3> combinedNormals,
             List<Vector2> combinedUVs,
             List<Color> combinedColors,
-            List<int> combinedTris)
+            List<int> combinedTris,
+            bool isRock = false,
+            Color rockColor = default)
         {
             Vector3[] baseVerts = templateMesh.vertices;
             Vector3[] baseNormals = templateMesh.normals;
@@ -806,7 +1110,12 @@ namespace Duskborn.Gameplay.World.Foliage
                 Vector3 lv = rot * (baseVerts[v] * scale) + localPos;
 
                 Vector3 ln;
-                if (isGrass)
+                if (isRock)
+                {
+                    // Pedras preservam estritamente suas normais geométricas facetadas para cel-shading low-poly
+                    ln = rot * baseNormals[v];
+                }
+                else if (isGrass)
                 {
                     // Alinha predominantemente com a normal do relevo / Vector3.up (estilo Genshin / Zelda)
                     Vector3 baseRotNormal = rot * baseNormals[v];
@@ -826,11 +1135,23 @@ namespace Duskborn.Gameplay.World.Foliage
                 float rawU = baseUVs[v].x;
                 float rawV = baseUVs[v].y;
 
-                if (hasAccent && rawU >= 2.0f)
+                if (isRock)
+                {
+                    // Pedras: cor de rocha com contact AO na base e alpha rigorosamente 0.0 (zero vento no shader)
+                    combinedUVs.Add(new Vector2(0.5f, 0.0f));
+                    Color stoneCol = (rockColor != default) ? rockColor : new Color(0.48f, 0.47f, 0.46f);
+                    float contactAO = Mathf.Lerp(0.70f, 1.0f, Mathf.Clamp01(baseVerts[v].y / 0.12f));
+                    stoneCol.r *= contactAO;
+                    stoneCol.g *= contactAO;
+                    stoneCol.b *= contactAO;
+                    stoneCol.a = 0.0f; // Rigorosamente zero vento
+                    combinedColors.Add(stoneCol);
+                }
+                else if (hasAccent && rawU >= 2.0f)
                 {
                     combinedUVs.Add(new Vector2(rawU - 2.0f, rawV));
                     Color petColor = accentColor;
-                    petColor.a = baseColors[v].a;
+                    petColor.a = baseColors != null && v < baseColors.Length ? baseColors[v].a : 1.0f;
                     combinedColors.Add(petColor);
                 }
                 else
@@ -838,7 +1159,7 @@ namespace Duskborn.Gameplay.World.Foliage
                     combinedUVs.Add(baseUVs[v]);
                     float hFactor = rawV;
                     Color vertColor = Color.Lerp(terrainColor, tipColor, hFactor * 0.88f);
-                    vertColor.a = baseColors[v].a;
+                    vertColor.a = baseColors != null && v < baseColors.Length ? baseColors[v].a : hFactor;
                     combinedColors.Add(vertColor);
                 }
             }

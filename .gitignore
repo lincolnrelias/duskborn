@@ -44,6 +44,8 @@ ExportedObj/
 *.suo
 *.tmp
 *.user
+*.bak
+*.bak.meta
 
 # ===========================
 # OS generated files

@@ -70,6 +70,28 @@ namespace Duskborn.Gameplay.Loot
             OnHealthChanged?.Invoke(next, maxHP);
         }
 
+        public string GetSurfaceTag()
+        {
+            if (materialTypes.HasFlag(TargetType.Ore))
+                return "Metal";
+            if (materialTypes.HasFlag(TargetType.Tree))
+                return "Tree";
+            if (materialTypes.HasFlag(TargetType.MiningNode) || materialTypes.HasFlag(TargetType.Stone))
+            {
+                if (name.IndexOf("iron", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    name.IndexOf("ore", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    name.IndexOf("metal", StringComparison.OrdinalIgnoreCase) >= 0)
+                    return "Metal";
+                return "Stone";
+            }
+            if (name.IndexOf("tree", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                name.IndexOf("pine", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                name.IndexOf("birch", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                name.IndexOf("wood", StringComparison.OrdinalIgnoreCase) >= 0)
+                return "Tree";
+            return "Default";
+        }
+
         public void TakeDamage(float amount, bool isCrit = false)
         {
             if (!IsServerStarted || !IsAlive) return;
@@ -79,20 +101,29 @@ namespace Duskborn.Gameplay.Loot
             if (_currentHP.Value <= 0f)
             {
                 OnDepleted?.Invoke();
-                RpcPlayDepletedAudio(transform.position, materialTypes);
+                RpcPlayDepletedAudio(transform.position, materialTypes, GetSurfaceTag());
             }
         }
 
         [ObserversRpc(RunLocally = true)]
-        private void RpcPlayDepletedAudio(Vector3 pos, TargetType type)
+        private void RpcPlayDepletedAudio(Vector3 pos, TargetType type, string surfaceTag)
         {
-            AudioClip clip = type.HasFlag(TargetType.Tree)
-                ? (depletedClip != null ? depletedClip : Resources.Load<AudioClip>("SFX/tree_fall"))
-                : (depletedClip != null ? depletedClip : Resources.Load<AudioClip>("SFX/rock_shatter"));
+            AudioClip clip = depletedClip;
+            if (clip == null)
+            {
+                bool v2 = UnityEngine.Random.value < 0.5f;
+                if (surfaceTag == "Metal" || type.HasFlag(TargetType.Ore))
+                    clip = Resources.Load<AudioClip>(v2 ? "SFX/ore_shatter_02" : "SFX/ore_shatter") ?? Resources.Load<AudioClip>("SFX/ore_shatter") ?? Resources.Load<AudioClip>("SFX/rock_shatter");
+                else if (surfaceTag == "Tree" || type.HasFlag(TargetType.Tree))
+                    clip = Resources.Load<AudioClip>(v2 ? "SFX/tree_fall_02" : "SFX/tree_fall") ?? Resources.Load<AudioClip>("SFX/tree_fall");
+                else
+                    clip = Resources.Load<AudioClip>(v2 ? "SFX/rock_shatter_02" : "SFX/rock_shatter") ?? Resources.Load<AudioClip>("SFX/rock_shatter");
+            }
+
             if (clip != null)
             {
                 if (Duskborn.Audio.AudioManager.Instance != null)
-                    Duskborn.Audio.AudioManager.Instance.PlayAtPoint(clip, pos, 0.95f, 2f, 40f);
+                    Duskborn.Audio.AudioManager.Instance.PlayAtPoint(clip, pos, 1.0f, 2f, 45f);
                 else
                     AudioSource.PlayClipAtPoint(clip, pos);
             }

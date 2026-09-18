@@ -421,12 +421,19 @@ namespace Duskborn.Gameplay.Player
             if (node == null || !node.IsAlive) return;
 
             float damage = _stats.Damage * (_weaponHandler?.ActiveWeapon?.GetTypeDamageMultiplier(node.Types) ?? 1f);
+            string surfaceTag = node.GetSurfaceTag();
             node.TakeDamage(damage);
-            RpcOnHitAudio(Owner, nodeObj.gameObject.tag);
-            RpcOnHitEffect(nodeObj.gameObject.tag, nodeObj.transform.position);
 
-            if (!node.IsAlive)
+            if (node.IsAlive)
+            {
+                RpcOnHitAudio(Owner, surfaceTag);
+                RpcOnHitEffect(surfaceTag, nodeObj.transform.position);
+            }
+            else
+            {
+                RpcOnHitEffect(surfaceTag, nodeObj.transform.position);
                 nodeObj.Despawn();
+            }
         }
 
         // ─────────────────────────────────────────────────────────────────────

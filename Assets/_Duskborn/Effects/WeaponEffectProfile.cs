@@ -10,13 +10,15 @@ namespace Duskborn.Effects
         public GameObject PickEffect(string tag)
         {
             if (surfaces == null || surfaces.Length == 0) return null;
-            GameObject found = null;
+            GameObject defaultEffect = null;
             foreach (var e in surfaces)
             {
-                if (e.tag == tag)       { found = e.prefab; break; }
-                if (e.tag == "Default")   found ??= e.prefab;
+                if (string.Equals(e.tag, tag, System.StringComparison.OrdinalIgnoreCase))
+                    return e.prefab;
+                if (string.Equals(e.tag, "Default", System.StringComparison.OrdinalIgnoreCase))
+                    defaultEffect = e.prefab;
             }
-            return found;
+            return defaultEffect ?? surfaces[0].prefab;
         }
     }
 

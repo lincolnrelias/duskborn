@@ -12,15 +12,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8cbdf0ac35fbc84ea87265c60711004, type: 3}
   m_Name: HealthBarConfig
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Effects.HealthBarConfig
-  fullColor: {r: 0.12, g: 0.78, b: 0.12, a: 1}
-  midColor: {r: 1, g: 0.82, b: 0, a: 1}
-  lowColor: {r: 0.82, g: 0.1, b: 0.1, a: 1}
-  bgColor: {r: 0, g: 0, b: 0, a: 0.75}
-  ghostColor: {r: 1, g: 1, b: 1, a: 0.45}
+  fullColor: {r: 0.18, g: 0.8, b: 0.44, a: 1}
+  midColor: {r: 0.92, g: 0.62, b: 0.14, a: 1}
+  lowColor: {r: 0.85, g: 0.2, b: 0.18, a: 1}
+  bgColor: {r: 1, g: 1, b: 1, a: 1}
+  ghostColor: {r: 1, g: 0.58, b: 0.16, a: 0.85}
+  frameColor: {r: 1, g: 1, b: 1, a: 1}
+  ironColor: {r: 0.14, g: 0.16, b: 0.2, a: 1}
   midThreshold: 0.5
   lowThreshold: 0.25
-  drainSpeed: 10
-  ghostDrainSpeed: 1.5
+  drainSpeed: 12
+  ghostDrainSpeed: 2
   fadeDelay: 3.5
   fadeDuration: 0.6
-  yOffset: 0.2
+  yOffset: 0.35
+  forwardOffset: 0.35
+  maxHeightAboveBase: 3.2
+  clampToScreen: 1
+  maxViewportY: 0.88
+  minViewportY: 0.08
+  minViewportX: 0.06
+  maxViewportX: 0.94
+  showName: 1
+  nameTextColor: {r: 0.96, g: 0.88, b: 0.7, a: 0.95}
+  nameFontSize: 0.18

@@ -27,10 +27,10 @@ MonoBehaviour:
   enableOcclusion: 0
   occludedColor: {r: 1, g: 0, b: 0, a: 1}
   blendMode: 0
-  extrusionMethod: 0
-  scaling: 1
-  width: 22.4
-  minWidth: 12.7
+  extrusionMethod: 6
+  scaling: 0
+  width: 2
+  minWidth: 0
   scaleWithResolution: 0
   referenceResolution: 0
   customResolution: 0
@@ -117,10 +117,10 @@ MonoBehaviour:
   enableOcclusion: 0
   occludedColor: {r: 1, g: 0, b: 0, a: 1}
   blendMode: 0
-  extrusionMethod: 0
-  scaling: 1
-  width: 10.2
-  minWidth: 7.3
+  extrusionMethod: 6
+  scaling: 0
+  width: 2
+  minWidth: 0
   scaleWithResolution: 0
   referenceResolution: 2
   customResolution: 0

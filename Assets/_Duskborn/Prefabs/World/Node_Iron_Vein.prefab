@@ -135,7 +135,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 2002914817134659099}
   _networkObjectCache: {fileID: 2002914817134659099}
   maxHP: 180
-  materialTypes: 512
+  materialTypes: 1536
   _damageNumberConfig: {fileID: 11400000, guid: eb5a6de148f00fa47adfa4984d057943, type: 2}
   depletedClip: {fileID: 0}
   outlineLayerName: ResourceOutline

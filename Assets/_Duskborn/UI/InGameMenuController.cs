@@ -364,45 +364,54 @@ namespace Duskborn.UI
             return false;
         }
 
+        private const float RefHeight = 1080f;
+
         private void OnGUI()
         {
             if (!IsOpen) return;
 
             InitStyles();
 
-            float screenW = Screen.width;
-            float screenH = Screen.height;
+            Matrix4x4 origMatrix = GUI.matrix;
+            float scale = Screen.height / RefHeight;
+            if (scale <= 0.001f) scale = 1f;
+            float virtualW = Screen.width / scale;
+            float virtualH = RefHeight;
+
+            GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(scale, scale, 1f));
 
             // 1. Escurecimento do mundo 3D com ardósia semitransparente
-            GUI.DrawTexture(new Rect(0, 0, screenW, screenH), _backdropTexture, ScaleMode.StretchToFill);
+            GUI.DrawTexture(new Rect(0, 0, virtualW, virtualH), _backdropTexture, ScaleMode.StretchToFill);
 
             // 2. Brasas flutuantes
-            DrawEmbers(screenW, screenH);
+            DrawEmbers(virtualW, virtualH);
 
             // 3. Moldura medieval de tela
-            DrawMedievalScreenBorders(screenW, screenH);
+            DrawMedievalScreenBorders(virtualW, virtualH);
 
             // 4. Se algum modal estiver ativo, desenha sobreposto
             if (_showConfirmMainMenu)
             {
-                DrawConfirmMainMenuModal(screenW, screenH);
+                DrawConfirmMainMenuModal(virtualW, virtualH);
             }
             else if (_showConfirmQuit)
             {
-                DrawConfirmQuitModal(screenW, screenH);
+                DrawConfirmQuitModal(virtualW, virtualH);
             }
             else if (_showSettingsModal)
             {
-                DrawSettingsModal(screenW, screenH);
+                DrawSettingsModal(virtualW, virtualH);
             }
             else if (_showLoreModal)
             {
-                DrawLoreModal(screenW, screenH);
+                DrawLoreModal(virtualW, virtualH);
             }
             else
             {
-                DrawMainPausePlaque(screenW, screenH);
+                DrawMainPausePlaque(virtualW, virtualH);
             }
+
+            GUI.matrix = origMatrix;
         }
 
         private void DrawMainPausePlaque(float screenW, float screenH)
@@ -789,7 +798,7 @@ namespace Duskborn.UI
 
         private bool DrawStoneButton(Rect rect, string text, bool isPrimary, bool isDanger)
         {
-            Vector2 mousePos = Event.current.mousePosition;
+            Vector2 mousePos = Event.current != null ? GUI.matrix.inverse.MultiplyPoint(Event.current.mousePosition) : Vector2.zero;
             bool isHover = rect.Contains(mousePos);
 
             // Borda externa de ferro forjado

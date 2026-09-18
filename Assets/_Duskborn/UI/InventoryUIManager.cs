@@ -8,6 +8,7 @@ using Duskborn.Gameplay.Loot;
 using Duskborn.Gameplay.Player;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
@@ -57,13 +58,102 @@ namespace Duskborn.UI
                     if (def.Icon != null)
                         installer.RegisterIcon(def.Id, def.Icon);
                 }
+
+                // Registra ícones das receitas conhecidas
+                var recipes = Resources.LoadAll<Duskborn.Gameplay.Crafting.CraftingRecipe>("Crafting");
+                foreach (var r in recipes)
+                {
+                    if (r != null && r.OutputItem != null && r.OutputItem.Icon != null)
+                    {
+                        installer.RegisterIcon(r.OutputItem.Id, r.OutputItem.Icon);
+                        if (actionBarInstaller != null)
+                            actionBarInstaller.RegisterIcon(r.OutputItem.Id, r.OutputItem.Icon);
+                    }
+                }
             }
 
+            EnsureInventoryRoot();
+
             if (inventoryRoot != null)
+            {
                 inventoryRoot.SetActive(false);
+                SetupDraggableInventory();
+            }
 
             SubscribeSlotHoverEvents();
             SubscribeActionBarDrop();
+        }
+
+        private void EnsureInventoryRoot()
+        {
+            if (inventoryRoot != null) return;
+
+            if (installer != null)
+            {
+                var frame = installer.transform.Find("InventoryFrame");
+                if (frame != null)
+                {
+                    inventoryRoot = frame.gameObject;
+                    return;
+                }
+
+                var grid = installer.GetComponentInChildren<InventoryGridLayoutController>();
+                if (grid != null && grid.transform.parent != null)
+                {
+                    inventoryRoot = grid.transform.parent.gameObject;
+                    return;
+                }
+            }
+
+            var found = GameObject.Find("InventoryFrame");
+            if (found != null)
+                inventoryRoot = found;
+        }
+
+        private void SetupDraggableInventory()
+        {
+            if (inventoryRoot == null) return;
+
+            var rootRect = inventoryRoot.GetComponent<RectTransform>();
+            if (rootRect == null) return;
+
+            var drag = inventoryRoot.GetComponent<DraggablePanel>();
+            if (drag == null)
+                drag = inventoryRoot.AddComponent<DraggablePanel>();
+            drag.TargetPanel = rootRect;
+
+            // Adiciona área dedicada para arraste no topo da moldura do inventário
+            var handleTransform = inventoryRoot.transform.Find("HeaderDragHandle");
+            if (handleTransform == null)
+            {
+                var handleGO = new GameObject("HeaderDragHandle", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+                handleGO.transform.SetParent(inventoryRoot.transform, false);
+
+                var hRect = handleGO.GetComponent<RectTransform>();
+                hRect.anchorMin = new Vector2(0, 1);
+                hRect.anchorMax = new Vector2(1, 1);
+                hRect.pivot = new Vector2(0.5f, 1);
+                hRect.anchoredPosition = Vector2.zero;
+                hRect.sizeDelta = new Vector2(0, 40);
+
+                var hImg = handleGO.GetComponent<Image>();
+                hImg.color = new Color(0, 0, 0, 0.001f);
+                hImg.raycastTarget = true;
+
+                var hDrag = handleGO.AddComponent<DraggablePanel>();
+                hDrag.TargetPanel = rootRect;
+            }
+        }
+
+        public InventoryInstaller Installer => installer;
+        public ActionBarInstaller ActionBarInstaller => actionBarInstaller;
+        public RectTransform InventoryFrameRect
+        {
+            get
+            {
+                EnsureInventoryRoot();
+                return inventoryRoot != null ? inventoryRoot.GetComponent<RectTransform>() : null;
+            }
         }
 
         private void Update()
@@ -260,8 +350,14 @@ namespace Duskborn.UI
             bool willShow = !inventoryRoot.activeSelf;
             inventoryRoot.SetActive(willShow);
 
+            if (!willShow && CraftingUIManager.Instance != null && CraftingUIManager.Instance.IsOpen)
+            {
+                CraftingUIManager.Instance.Close();
+            }
+
             // Libera o cursor e pausa a rotação da câmera quando o inventário estiver aberto
-            PlayerCameraController.LocalInstance?.SetRotationLocked(willShow);
+            bool shouldLock = willShow || (CraftingUIManager.Instance != null && CraftingUIManager.Instance.IsOpen);
+            PlayerCameraController.LocalInstance?.SetRotationLocked(shouldLock);
 
             if (willShow)
                 SyncResources();
@@ -281,6 +377,12 @@ namespace Duskborn.UI
         }
 
         public bool IsOpen => inventoryRoot != null && inventoryRoot.activeSelf;
+
+        public void Open()
+        {
+            if (!IsOpen)
+                Toggle();
+        }
 
         public void Close()
         {

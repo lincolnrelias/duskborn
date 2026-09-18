@@ -200,47 +200,56 @@ namespace Duskborn.UI
             SceneManager.LoadScene(targetGameScene);
         }
 
+        private const float RefHeight = 1080f;
+
         private void OnGUI()
         {
             InitStyles();
 
-            float screenW = Screen.width;
-            float screenH = Screen.height;
+            Matrix4x4 origMatrix = GUI.matrix;
+            float scale = Screen.height / RefHeight;
+            if (scale <= 0.001f) scale = 1f;
+            float virtualW = Screen.width / scale;
+            float virtualH = RefHeight;
+
+            GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(scale, scale, 1f));
 
             // 1. Fundo de Ardósia Gótica Profunda
-            GUI.DrawTexture(new Rect(0, 0, screenW, screenH), _slateTexture, ScaleMode.StretchToFill);
+            GUI.DrawTexture(new Rect(0, 0, virtualW, virtualH), _slateTexture, ScaleMode.StretchToFill);
 
             // 2. Brasas Místicas Flutuantes
-            DrawEmbers(screenW, screenH);
+            DrawEmbers(virtualW, virtualH);
 
             // 3. Moldura de Ferro Forjado e Frisos de Ouro
-            DrawMedievalScreenBorders(screenW, screenH);
+            DrawMedievalScreenBorders(virtualW, virtualH);
 
             // Se algum modal estiver aberto, desenha o modal sobreposto
             if (_showLoreModal)
             {
-                DrawLoreModal(screenW, screenH);
+                DrawLoreModal(virtualW, virtualH);
+                GUI.matrix = origMatrix;
                 return;
             }
 
             if (_showSettingsModal)
             {
-                DrawSettingsModal(screenW, screenH);
+                DrawSettingsModal(virtualW, virtualH);
+                GUI.matrix = origMatrix;
                 return;
             }
 
             // 4. Brasão & Título Heráldico
-            float centerY = screenH * 0.28f;
-            GUI.Label(new Rect(0, centerY - 80, screenW, 55), "⚔   D U S K B O R N   ⚔", _titleStyle);
-            GUI.Label(new Rect(0, centerY - 20, screenW, 25), "✦ ROGUELIKE CO-OP SURVIVAL · ERA DOS ERMOS ✦", _subTitleStyle);
+            float centerY = virtualH * 0.28f;
+            GUI.Label(new Rect(0, centerY - 80, virtualW, 55), "⚔   D U S K B O R N   ⚔", _titleStyle);
+            GUI.Label(new Rect(0, centerY - 20, virtualW, 25), "✦ ROGUELIKE CO-OP SURVIVAL · ERA DOS ERMOS ✦", _subTitleStyle);
 
-            DrawRunicDivider((screenW - 480f) * 0.5f, centerY + 12f, 480f);
-            GUI.Label(new Rect(0, centerY + 24f, screenW, 22), "\"Onde o aço e as runas decidem o destino dos homens.\"", _mottoStyle);
+            DrawRunicDivider((virtualW - 480f) * 0.5f, centerY + 12f, 480f);
+            GUI.Label(new Rect(0, centerY + 24f, virtualW, 22), "\"Onde o aço e as runas decidem o destino dos homens.\"", _mottoStyle);
 
             // 5. Botões de Laje de Pedra e Ouro
-            float btnW = Mathf.Min(screenW * 0.40f, 340f);
+            float btnW = Mathf.Min(virtualW * 0.40f, 340f);
             float btnH = 50f;
-            float btnX = (screenW - btnW) * 0.5f;
+            float btnX = (virtualW - btnW) * 0.5f;
             float startY = centerY + 75f;
             float spacing = 62f;
 
@@ -277,12 +286,14 @@ namespace Duskborn.UI
             }
 
             // 6. Rodapé do Reino
-            GUI.Label(new Rect(30, screenH - 35, screenW - 60, 22), "Duskborn v0.1-alpha · Forjado em Unity 6 · Mundo Procedural Sem Engasgos", _versionStyle);
+            GUI.Label(new Rect(30, virtualH - 35, virtualW - 60, 22), "Duskborn v0.1-alpha · Forjado em Unity 6 · Mundo Procedural Sem Engasgos", _versionStyle);
+
+            GUI.matrix = origMatrix;
         }
 
         private bool DrawStoneButton(Rect rect, string text, bool isPrimary)
         {
-            Vector2 mousePos = Event.current.mousePosition;
+            Vector2 mousePos = Event.current != null ? GUI.matrix.inverse.MultiplyPoint(Event.current.mousePosition) : Vector2.zero;
             bool isHover = rect.Contains(mousePos);
 
             // Borda externa de ferro forjado

@@ -68,15 +68,27 @@ namespace Duskborn.UI
             _stylesReady = true;
         }
 
+        private const float RefHeight = 1080f;
+
         private void OnGUI()
         {
             TryCacheLocalPlayer();
             if (!_stylesReady) BuildStyles();
 
+            Matrix4x4 origMatrix = GUI.matrix;
+            float scale = Screen.height / RefHeight;
+            if (scale <= 0.001f) scale = 1f;
+            float virtualW = Screen.width / scale;
+            float virtualH = RefHeight;
+
+            GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(scale, scale, 1f));
+
             DrawMainHUD();
 
             if (_showStats && _stats != null)
-                DrawStatPanel();
+                DrawStatPanel(virtualW, virtualH);
+
+            GUI.matrix = origMatrix;
         }
 
         private void DrawMainHUD()
@@ -128,7 +140,7 @@ namespace Duskborn.UI
             GUI.Label(new Rect(18, 14, w - 8, h - 4), sb.ToString(), _labelStyle);
         }
 
-        private void DrawStatPanel()
+        private void DrawStatPanel(float virtualW, float virtualH)
         {
             var sb = new StringBuilder();
             sb.AppendLine("── Player Stats ─────────");
@@ -151,8 +163,8 @@ namespace Duskborn.UI
             }
 
             const float w = 240f, h = 400f;
-            float x = Screen.width  - w - 10f;
-            float y = Screen.height - h - 10f;
+            float x = virtualW - w - 10f;
+            float y = virtualH - h - 10f;
 
             GUI.Box(new Rect(x, y, w, h), GUIContent.none, _boxStyle);
             GUI.Label(new Rect(x + 8f, y + 4f, w - 16f, h - 8f), sb.ToString(), _labelStyle);

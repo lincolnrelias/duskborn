@@ -211,59 +211,65 @@ namespace Duskborn.UI
 
             InitStyles();
 
+            Matrix4x4 origMatrix = GUI.matrix;
+            float scale = Screen.height / 1080f;
+            if (scale <= 0.001f) scale = 1f;
+            float virtualW = Screen.width / scale;
+            float virtualH = 1080f;
+
+            GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(scale, scale, 1f));
+
             Color prevGuiColor = GUI.color;
             GUI.color = new Color(1f, 1f, 1f, _currentAlpha);
 
-            float screenW = Screen.width;
-            float screenH = Screen.height;
-
             // 1. Fundo de Ardósia/Obsidiana Gótica
-            GUI.DrawTexture(new Rect(0, 0, screenW, screenH), _slateTexture, ScaleMode.StretchToFill);
+            GUI.DrawTexture(new Rect(0, 0, virtualW, virtualH), _slateTexture, ScaleMode.StretchToFill);
 
             // 2. Brasas Místicas Flutuantes
-            DrawEmbers(screenW, screenH);
+            DrawEmbers(virtualW, virtualH);
 
             // 3. Moldura Ornamental e Cantoneiras de Ferro & Ouro Low-Poly
-            DrawMedievalScreenBorders(screenW, screenH);
+            DrawMedievalScreenBorders(virtualW, virtualH);
 
             // 4. Brasão & Título Heraldico Principal
-            float centerY = screenH * 0.32f;
-            GUI.Label(new Rect(0, centerY - 80, screenW, 42), "❖  D U S K B O R N  ❖", _crestTitleStyle);
-            GUI.Label(new Rect(0, centerY - 32, screenW, 22), "✦ FORJANDO O REINO DO CREPÚSCULO ✦", _crestSubStyle);
+            float centerY = virtualH * 0.32f;
+            GUI.Label(new Rect(0, centerY - 80, virtualW, 42), "❖  D U S K B O R N  ❖", _crestTitleStyle);
+            GUI.Label(new Rect(0, centerY - 32, virtualW, 22), "✦ FORJANDO O REINO DO CREPÚSCULO ✦", _crestSubStyle);
 
             // 5. Linha divisória de ouro com runa central
-            DrawRunicDivider((screenW - 420f) * 0.5f, centerY - 4f, 420f);
+            DrawRunicDivider((virtualW - 420f) * 0.5f, centerY - 4f, 420f);
 
             // 6. Título da Fase Atual
-            GUI.Label(new Rect(0, centerY + 18, screenW, 30), stageTitle, _stageStyle);
+            GUI.Label(new Rect(0, centerY + 18, virtualW, 30), stageTitle, _stageStyle);
 
             // 7. Barra de Progresso em Ferro Forjado e Cristal de Âmbar
-            float barW = Mathf.Min(screenW * 0.65f, 620f);
+            float barW = Mathf.Min(virtualW * 0.65f, 620f);
             float barH = 32f;
-            float barX = (screenW - barW) * 0.5f;
+            float barX = (virtualW - barW) * 0.5f;
             float barY = centerY + 62f;
 
             DrawMedievalProgressBar(barX, barY, barW, barH, currentProgress);
 
             // 8. Percentual Rúnico Destacado
             int percentInt = Mathf.Clamp(Mathf.RoundToInt(currentProgress * 100f), 0, 100);
-            GUI.Label(new Rect(0, barY + barH + 10f, screenW, 28), $"◈  {percentInt}%  ◈", _percentStyle);
+            GUI.Label(new Rect(0, barY + barH + 10f, virtualW, 28), $"◈  {percentInt}%  ◈", _percentStyle);
 
             // 9. Detalhe Geológico / Operação Técnica
-            GUI.Label(new Rect(0, barY + barH + 42f, screenW, 22), stageDetail, _detailStyle);
+            GUI.Label(new Rect(0, barY + barH + 42f, virtualW, 22), stageDetail, _detailStyle);
 
             // 10. Bússola Rúnica Low-Poly Giratória no canto inferior direito
-            DrawLowPolyRunicStar(screenW - 85f, screenH - 85f, 54f);
+            DrawLowPolyRunicStar(virtualW - 85f, virtualH - 85f, 54f);
 
             // 11. Placa de Pergaminho com Ensinamento de Sobrevivência
-            float plaqueW = Mathf.Min(screenW * 0.85f, 780f);
+            float plaqueW = Mathf.Min(virtualW * 0.85f, 780f);
             float plaqueH = 46f;
-            float plaqueX = (screenW - plaqueW) * 0.5f;
-            float plaqueY = screenH - plaqueH - 22f;
+            float plaqueX = (virtualW - plaqueW) * 0.5f;
+            float plaqueY = virtualH - plaqueH - 22f;
 
             DrawLorePlaque(plaqueX, plaqueY, plaqueW, plaqueH, SurvivalTips[_currentTipIndex]);
 
             GUI.color = prevGuiColor;
+            GUI.matrix = origMatrix;
         }
 
         private void DrawEmbers(float w, float h)

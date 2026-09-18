@@ -8,6 +8,7 @@ using UnityEngine.UI;
 
 namespace Duskborn.Gameplay.ActionBar
 {
+    [ExecuteAlways]
     public sealed class ActionBarInstaller : MonoBehaviour
     {
         [Header("UI References")]
@@ -15,6 +16,12 @@ namespace Duskborn.Gameplay.ActionBar
         [SerializeField] private RectTransform                 actionBarRoot;
         [SerializeField] private InventoryGridLayoutController gridController;
         [SerializeField] private Image                         dragIcon;
+
+        [Header("Layout Settings (Consistência com Inventário)")]
+        [SerializeField] private Vector2                       slotCellSize = new(55f, 55f);
+        [SerializeField] private Vector2                       slotSpacing = new(4f, 4f);
+        [SerializeField] private float                         bottomOffset = 15f;
+        [SerializeField] private bool                          syncScalerWithInventory = true;
 
         [Header("Highlight")]
         [SerializeField] private Color selectedSlotColor = Color.white;
@@ -33,6 +40,21 @@ namespace Duskborn.Gameplay.ActionBar
 
         public event Action<IInventoryItem, int> OnItemDroppedOutside;
 
+        private void OnEnable()
+        {
+            ConfigureCanvasAndLayout();
+        }
+
+        private void OnValidate()
+        {
+            ConfigureCanvasAndLayout();
+        }
+
+        private void Start()
+        {
+            ConfigureCanvasAndLayout();
+        }
+
         private void Awake()
         {
             if (!ValidateReferences())
@@ -41,7 +63,23 @@ namespace Duskborn.Gameplay.ActionBar
                 return;
             }
 
+            ConfigureCanvasAndLayout();
+
+            if (!Application.isPlaying)
+            {
+                return;
+            }
+
             gridController.ApplyLayout();
+
+            // Re-assegura dimensões exatas de célula após ApplyLayout do gridController
+            var glg = gridController.GetComponent<GridLayoutGroup>();
+            if (glg != null)
+            {
+                float cellW = slotCellSize.x > 0f ? slotCellSize.x : 55f;
+                float cellH = slotCellSize.y > 0f ? slotCellSize.y : 55f;
+                glg.cellSize = new Vector2(cellW, cellH);
+            }
 
             _service = new ActionBarService(gridController.SlotCount);
 
@@ -128,6 +166,114 @@ namespace Duskborn.Gameplay.ActionBar
         {
             int stack = item is IStackable s ? s.StackSize : 0;
             return new ItemViewModel(item.DisplayName, item.Description, item.IconId, stack);
+        }
+
+        public void ConfigureCanvasAndLayout()
+        {
+            if (canvas == null)
+                canvas = GetComponentInParent<Canvas>();
+
+            if (canvas != null)
+            {
+                var scaler = canvas.GetComponent<CanvasScaler>();
+                if (scaler == null)
+                    scaler = canvas.gameObject.AddComponent<CanvasScaler>();
+
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+
+                CanvasScaler invScaler = syncScalerWithInventory ? FindInventoryCanvasScaler() : null;
+                if (invScaler != null)
+                {
+                    scaler.referenceResolution = invScaler.referenceResolution;
+                    scaler.screenMatchMode = invScaler.screenMatchMode;
+                    scaler.matchWidthOrHeight = invScaler.matchWidthOrHeight;
+                }
+                else
+                {
+                    scaler.referenceResolution = new Vector2(800f, 600f);
+                    scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+                    scaler.matchWidthOrHeight = 0f;
+                }
+            }
+
+            if (actionBarRoot != null)
+            {
+                // Âncora inferior central (Bottom-Center)
+                actionBarRoot.anchorMin = new Vector2(0.5f, 0f);
+                actionBarRoot.anchorMax = new Vector2(0.5f, 0f);
+                actionBarRoot.pivot = new Vector2(0.5f, 0f);
+
+                int cols = gridController != null ? gridController.Columns : 8;
+                float cellW = slotCellSize.x > 0f ? slotCellSize.x : 55f;
+                float cellH = slotCellSize.y > 0f ? slotCellSize.y : 55f;
+                float spacingX = slotSpacing.x >= 0f ? slotSpacing.x : 4f;
+                float spacingY = slotSpacing.y >= 0f ? slotSpacing.y : 4f;
+
+                if (gridController != null)
+                {
+                    var glg = gridController.GetComponent<GridLayoutGroup>();
+                    if (glg != null)
+                    {
+                        glg.cellSize = new Vector2(cellW, cellH);
+                        glg.spacing = new Vector2(spacingX, spacingY);
+                        glg.childAlignment = TextAnchor.MiddleCenter;
+                        glg.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+                        glg.constraintCount = cols;
+                    }
+                }
+
+                float totalW = cols * cellW + Mathf.Max(0, cols - 1) * spacingX;
+                float totalH = cellH;
+                actionBarRoot.sizeDelta = new Vector2(totalW, totalH);
+                actionBarRoot.anchoredPosition = new Vector2(0f, bottomOffset);
+
+                // Normaliza a escala e rotação de todos os slots filhos para evitar distorções
+                for (int i = 0; i < actionBarRoot.childCount; i++)
+                {
+                    var child = actionBarRoot.GetChild(i) as RectTransform;
+                    if (child != null)
+                    {
+                        child.localScale = Vector3.one;
+                        child.localRotation = Quaternion.identity;
+                    }
+                }
+            }
+        }
+
+        private CanvasScaler FindInventoryCanvasScaler()
+        {
+            var invInstaller = FindAnyObjectByType<InventorySystem.Bootstrap.InventoryInstaller>();
+            if (invInstaller != null)
+            {
+                var invCanvas = invInstaller.GetComponentInParent<Canvas>();
+                if (invCanvas != null)
+                {
+                    var scaler = invCanvas.GetComponent<CanvasScaler>();
+                    if (scaler != null && scaler.uiScaleMode == CanvasScaler.ScaleMode.ScaleWithScreenSize)
+                        return scaler;
+                }
+            }
+
+            foreach (var c in FindObjectsByType<Canvas>(FindObjectsSortMode.None))
+            {
+                if (c == canvas) continue;
+                if (c.renderMode == RenderMode.WorldSpace) continue;
+                var scaler = c.GetComponent<CanvasScaler>();
+                if (scaler != null && scaler.uiScaleMode == CanvasScaler.ScaleMode.ScaleWithScreenSize)
+                {
+                    return scaler;
+                }
+            }
+
+            return null;
+        }
+
+        private void OnRectTransformDimensionsChange()
+        {
+            if (isActiveAndEnabled)
+            {
+                ConfigureCanvasAndLayout();
+            }
         }
 
         private bool ValidateReferences()

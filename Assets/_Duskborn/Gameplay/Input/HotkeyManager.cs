@@ -34,7 +34,7 @@ namespace Duskborn.Gameplay.Hotkeys
             new() { actionId = Skill2,   key = KeyCode.E },
             new() { actionId = Skill3,   key = KeyCode.R },
             new() { actionId = Interact, key = KeyCode.F },
-            new() { actionId = Dodge,    key = KeyCode.Space },
+            new() { actionId = Dodge,    key = KeyCode.LeftAlt },
         };
 
         [SerializeField] private Binding[] bindings = (Binding[])DefaultBindings.Clone();
@@ -49,6 +49,31 @@ namespace Duskborn.Gameplay.Hotkeys
                 return;
             }
             Instance = this;
+            EnsureDefaultBindings();
+        }
+
+        private void EnsureDefaultBindings()
+        {
+            var dict = new Dictionary<string, KeyCode>();
+            if (bindings != null)
+            {
+                foreach (var b in bindings)
+                {
+                    // If Dodge was previously saved as Space, override it to LeftAlt so it doesn't conflict with Jump
+                    if (b.actionId == Dodge && b.key == KeyCode.Space)
+                        dict[b.actionId] = KeyCode.LeftAlt;
+                    else
+                        dict[b.actionId] = b.key;
+                }
+            }
+
+            var merged = new List<Binding>();
+            foreach (var def in DefaultBindings)
+            {
+                KeyCode key = dict.TryGetValue(def.actionId, out var existingKey) ? existingKey : def.key;
+                merged.Add(new Binding { actionId = def.actionId, key = key });
+            }
+            bindings = merged.ToArray();
         }
 
         private void OnDestroy()

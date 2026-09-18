@@ -13,17 +13,27 @@ namespace Duskborn.Gameplay.Player
         [SerializeField] private float rotationSpeed     = 720f;
         [SerializeField] private float accelTime         = 0.15f;
         [SerializeField] private float decelTime         = 0.08f;
+        [SerializeField] private float runMultiplier     = 1.0f;
+        [SerializeField] private float sprintMultiplier  = 1.5f;
+
+        [Header("Jump")]
+        [SerializeField] private float jumpHeight        = 1.6f;
+        [SerializeField] private float coyoteTime        = 0.15f;
+        [SerializeField] private float jumpBufferTime    = 0.15f;
 
         [Header("Animation")]
         [SerializeField] private Animator _animator;
 
-        private static readonly int HashVelocityX = Animator.StringToHash("VelocityX");
-        private static readonly int HashVelocityY = Animator.StringToHash("VelocityY");
+        private static readonly int HashVelocityX  = Animator.StringToHash("VelocityX");
+        private static readonly int HashVelocityY  = Animator.StringToHash("VelocityY");
+        private static readonly int HashJump       = Animator.StringToHash("Jump");
+        private static readonly int HashIsGrounded = Animator.StringToHash("IsGrounded");
 
-        private CharacterController    _cc;
-        private PlayerStats            _stats;
-        private PlayerCameraController _camController;
-        private PlayerWaterInteraction _waterInteraction;
+        private CharacterController             _cc;
+        private PlayerStats                     _stats;
+        private PlayerCameraController          _camController;
+        private PlayerWaterInteraction          _waterInteraction;
+        private Duskborn.Audio.FootstepAudio    _footstepAudio;
 
         private Vector2 _moveInput;
         private Vector2 _smoothedInput;
@@ -31,12 +41,20 @@ namespace Duskborn.Gameplay.Player
         private Vector3 _velocity;
         private bool    _inputEnabled    = true;
         private bool    _rotationEnabled = true;
+        private bool    _isSprinting;
+        private int     _lastToggleFrame = -1;
 
-        public bool  IsMoving  => _moveInput.sqrMagnitude > 0.01f;
-        public float CameraYaw => _camController != null ? _camController.CurrentYaw : transform.eulerAngles.y;
+        private float   _lastGroundedTimer;
+        private float   _jumpBufferTimer;
+        private bool    _hasJumpedInAir;
+
+        public bool  IsMoving    => _moveInput.sqrMagnitude > 0.01f;
+        public float CameraYaw   => _camController != null ? _camController.CurrentYaw : transform.eulerAngles.y;
+        public bool  IsSprinting => _isSprinting;
 
         private void Awake()
         {
+            _isSprinting   = false;
             _cc            = GetComponent<CharacterController>();
             _stats         = GetComponent<PlayerStats>();
             _camController = GetComponent<PlayerCameraController>();
@@ -51,10 +69,15 @@ namespace Duskborn.Gameplay.Player
                 _waterInteraction = gameObject.AddComponent<PlayerWaterInteraction>();
             }
 
-            if (GetComponent<Duskborn.Audio.FootstepAudio>() == null)
-                gameObject.AddComponent<Duskborn.Audio.FootstepAudio>();
+            _footstepAudio = GetComponent<Duskborn.Audio.FootstepAudio>();
+            if (_footstepAudio == null)
+                _footstepAudio = gameObject.AddComponent<Duskborn.Audio.FootstepAudio>();
+
             if (GetComponent<Duskborn.Audio.PlayerAudioFeedback>() == null)
                 gameObject.AddComponent<Duskborn.Audio.PlayerAudioFeedback>();
+
+            if (_animator == null)
+                _animator = GetComponentInChildren<Animator>();
         }
 
         public override void OnStartClient()
@@ -85,6 +108,37 @@ namespace Duskborn.Gameplay.Player
             _moveInput = value.Get<Vector2>();
         }
 
+        public void OnSprint(InputValue value)
+        {
+            if (!IsOwner) return;
+            if (value.isPressed)
+                ToggleSprint();
+        }
+
+        public void ToggleSprint()
+        {
+            if (Time.frameCount == _lastToggleFrame) return;
+            _lastToggleFrame = Time.frameCount;
+            _isSprinting = !_isSprinting;
+        }
+
+        public void OnJump(InputValue value)
+        {
+            if (!IsOwner) return;
+            if (value.isPressed)
+                QueueJump();
+        }
+
+        public void QueueJump()
+        {
+            if (!_inputEnabled || !_stats.IsAlive) return;
+
+            var dodge = GetComponent<PlayerDodge>();
+            if (dodge != null && dodge.IsRolling) return;
+
+            _jumpBufferTimer = jumpBufferTime;
+        }
+
         private void Update()
         {
             if (_waterInteraction != null)
@@ -95,6 +149,14 @@ namespace Duskborn.Gameplay.Player
 
             if (!IsOwner) return;
             if (!_inputEnabled || !_stats.IsAlive) return;
+
+            if (Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift))
+                ToggleSprint();
+
+            if (Input.GetKeyDown(KeyCode.Space))
+                QueueJump();
+
+            HandleJumpTimers();
             SmoothInput();
             HandleMovement();
             HandleGravity();
@@ -103,11 +165,58 @@ namespace Duskborn.Gameplay.Player
 
         // -------------------------------------------------------------------------
 
+        private void HandleJumpTimers()
+        {
+            if (_cc.isGrounded)
+            {
+                _lastGroundedTimer = coyoteTime;
+                if (_velocity.y <= 0f)
+                    _hasJumpedInAir = false;
+            }
+            else
+            {
+                _lastGroundedTimer -= Time.deltaTime;
+            }
+
+            if (_jumpBufferTimer > 0f)
+            {
+                _jumpBufferTimer -= Time.deltaTime;
+                if (_lastGroundedTimer > 0f && !_hasJumpedInAir)
+                {
+                    ExecuteJump();
+                }
+            }
+        }
+
+        private void ExecuteJump()
+        {
+            _jumpBufferTimer   = 0f;
+            _lastGroundedTimer = 0f;
+            _hasJumpedInAir    = true;
+
+            float effectiveGravity = Mathf.Abs(Physics.gravity.y * gravityMultiplier);
+            _velocity.y = Mathf.Sqrt(2f * jumpHeight * effectiveGravity);
+
+            if (_animator != null)
+            {
+                _animator.SetBool(HashIsGrounded, false);
+                _animator.ResetTrigger(HashJump);
+                _animator.SetTrigger(HashJump);
+                _animator.Play("BasicMotions@Jump01", 0, 0f);
+            }
+
+            if (_footstepAudio != null)
+                _footstepAudio.PlayJump();
+        }
+
         private void SmoothInput()
         {
+            float speedFactor = _isSprinting ? sprintMultiplier : runMultiplier;
+            Vector2 targetInput = _moveInput * speedFactor;
+
             float smoothTime = _moveInput.sqrMagnitude > 0.01f ? accelTime : decelTime;
             _smoothedInput = Vector2.SmoothDamp(
-                _smoothedInput, _moveInput, ref _inputSmoothVelocity, smoothTime);
+                _smoothedInput, targetInput, ref _inputSmoothVelocity, smoothTime);
         }
 
         private void HandleMovement()
@@ -127,7 +236,7 @@ namespace Duskborn.Gameplay.Player
             Vector3 camForward = _camController != null ? _camController.CameraForward : transform.forward;
             Vector3 camRight   = _camController != null ? _camController.CameraRight   : transform.right;
 
-            // Vetor de movimento relativo à orientação da câmera
+            // Vetor de movimento relativo à orientação da câmera (já escalonado pelo modo de caminhada/corrida)
             Vector3 moveDir = camForward * _smoothedInput.y + camRight * _smoothedInput.x;
             float waterMod = _waterInteraction != null ? _waterInteraction.SpeedModifier : 1f;
             _cc.Move(moveDir * (_stats.MoveSpeed * waterMod * Time.deltaTime));
@@ -135,8 +244,8 @@ namespace Duskborn.Gameplay.Player
 
         private void HandleGravity()
         {
-            if (_cc.isGrounded)
-                _velocity.y = -0.5f;
+            if (_cc.isGrounded && _velocity.y < 0f)
+                _velocity.y = -2f;
             else
                 _velocity.y += Physics.gravity.y * gravityMultiplier * Time.deltaTime;
 
@@ -151,6 +260,9 @@ namespace Duskborn.Gameplay.Player
             // Y = frente/trás, X = strafe lateral.
             _animator.SetFloat(HashVelocityX, _smoothedInput.x);
             _animator.SetFloat(HashVelocityY, _smoothedInput.y);
+
+            bool groundedForAnim = _cc.isGrounded && !_hasJumpedInAir;
+            _animator.SetBool(HashIsGrounded, groundedForAnim);
         }
 
         public void SetInputEnabled(bool enabled) => _inputEnabled = enabled;

@@ -66,6 +66,9 @@ namespace Duskborn.Gameplay.Player
         {
             if (!IsOwner) return;
 
+            if (Input.GetKeyDown(KeyCode.LeftAlt) || Input.GetKeyDown(KeyCode.LeftControl))
+                TryDodge();
+
             if (_cooldownTimer > 0f) _cooldownTimer -= Time.deltaTime;
 
             if (_facingTimer > 0f)
@@ -85,7 +88,7 @@ namespace Duskborn.Gameplay.Player
 
         private void TryDodge()
         {
-            if (!IsOwner || !_stats.IsAlive || IsRolling || _cooldownTimer > 0f) return;
+            if (!IsOwner || !_stats.IsAlive || IsRolling || _cooldownTimer > 0f || !_cc.isGrounded) return;
 
             _rollDir       = _controller.GetMoveDirectionWorld();
             _rollTimer     = dodgeDuration;

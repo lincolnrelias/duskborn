@@ -4,8 +4,10 @@ using FishNet;
 using FishNet.Object;
 using UnityEngine;
 using Duskborn.Core;
+using Duskborn.Gameplay.Crafting;
 using Duskborn.Gameplay.Hotkeys;
 using Duskborn.Gameplay.Loot;
+using Duskborn.UI;
 
 namespace Duskborn.Gameplay.Player
 {
@@ -16,11 +18,14 @@ namespace Duskborn.Gameplay.Player
         [SerializeField] private float     pickupRange = 2f;
         [SerializeField] private float     dropScatter = 0.4f;
 
-        private readonly HashSet<Chest> _chestsInRange = new();
-        private readonly Collider[]     _overlapBuffer = new Collider[16];
+        private readonly HashSet<Chest>     _chestsInRange      = new();
+        private readonly HashSet<Workbench> _workbenchesInRange = new();
+        private readonly Collider[]         _overlapBuffer      = new Collider[16];
 
         private Chest           _linked;
         private Chest           _prevLinked;
+        private Workbench       _linkedWorkbench;
+        private Workbench       _prevLinkedWorkbench;
         private WorldItemPickup _linkedPickup;
         private WorldItemPickup _prevLinkedPickup;
         private WorldItemPickup _pendingCollect;
@@ -35,7 +40,7 @@ namespace Duskborn.Gameplay.Player
             base.OnStartClient();
             if (!IsOwner) return;
 
-            _onInteract = TryOpenLinkedChest;
+            _onInteract = HandleInteract;
             var hk = HotkeyManager.Instance;
             if (hk != null)
                 hk.Register(HotkeyManager.Interact, _onInteract);
@@ -55,13 +60,54 @@ namespace Duskborn.Gameplay.Player
             if (!IsOwner) return;
 
             RefreshLinkedChest();
+            RefreshLinkedWorkbench();
             RefreshLinkedPickups();
 
-            if (_linked != _prevLinked)
+            bool targetWorkbench = _linkedWorkbench != null && (_linked == null || SqDist(_linkedWorkbench) <= SqDist(_linked));
+
+            if (targetWorkbench)
             {
-                _prevLinked?.SetOutline(false);
-                _linked?.SetOutline(true);
-                _prevLinked = _linked;
+                if (_prevLinked != null)
+                {
+                    _prevLinked.SetOutline(false);
+                    _prevLinked = null;
+                }
+
+                if (_linkedWorkbench != _prevLinkedWorkbench)
+                {
+                    _prevLinkedWorkbench?.SetOutline(false);
+                    _linkedWorkbench.SetOutline(true);
+                    _prevLinkedWorkbench = _linkedWorkbench;
+                }
+            }
+            else if (_linked != null)
+            {
+                if (_prevLinkedWorkbench != null)
+                {
+                    _prevLinkedWorkbench.SetOutline(false);
+                    _prevLinkedWorkbench = null;
+                }
+
+                if (_linked != _prevLinked)
+                {
+                    _prevLinked?.SetOutline(false);
+                    _linked.SetOutline(true);
+                    _prevLinked = _linked;
+                }
+            }
+            else
+            {
+                if (_prevLinked != null)
+                {
+                    _prevLinked.SetOutline(false);
+                    _prevLinked = null;
+                }
+
+                if (_prevLinkedWorkbench != null)
+                {
+                    _prevLinkedWorkbench.SetOutline(false);
+                    _prevLinkedWorkbench = null;
+                }
             }
 
             if (_linkedPickup != _prevLinkedPickup)
@@ -97,10 +143,32 @@ namespace Duskborn.Gameplay.Player
                 _pendingGoldCollect = null;
         }
 
-        private void TryOpenLinkedChest()
+        private void HandleInteract()
         {
-            if (_linked != null)
+            bool targetWorkbench = _linkedWorkbench != null && (_linked == null || SqDist(_linkedWorkbench) <= SqDist(_linked));
+            if (targetWorkbench)
+            {
+                InteractWithWorkbench(_linkedWorkbench);
+            }
+            else if (_linked != null)
+            {
                 RequestOpenChestRpc(_linked.GetComponent<NetworkObject>());
+            }
+        }
+
+        private void InteractWithWorkbench(Workbench wb)
+        {
+            if (wb == null) return;
+            RequestInteractWorkbenchRpc(wb.GetComponent<NetworkObject>());
+            CraftingUIManager.EnsureInstance().Toggle(wb);
+        }
+
+        [ServerRpc]
+        private void RequestInteractWorkbenchRpc(NetworkObject wbNob)
+        {
+            if (wbNob == null) return;
+            var wb = wbNob.GetComponent<Workbench>();
+            wb?.ServerInteract(Owner);
         }
 
         public void DropResource(string resourceId, int amount)
@@ -170,6 +238,32 @@ namespace Duskborn.Gameplay.Player
             }
         }
 
+        private void RefreshLinkedWorkbench()
+        {
+            _linkedWorkbench = null;
+            float best = float.MaxValue;
+            foreach (var wb in _workbenchesInRange)
+            {
+                if (wb == null || !wb.gameObject.activeSelf) continue;
+                float sq = SqDist(wb);
+                if (sq < best) { best = sq; _linkedWorkbench = wb; }
+            }
+
+            if (_linkedWorkbench == null)
+            {
+                int count = Physics.OverlapSphereNonAlloc(transform.position, pickupRange + 1.2f, _overlapBuffer);
+                for (int i = 0; i < count; i++)
+                {
+                    var wb = _overlapBuffer[i].GetComponentInParent<Workbench>();
+                    if (wb != null && wb.gameObject.activeSelf)
+                    {
+                        float sq = SqDist(wb);
+                        if (sq < best) { best = sq; _linkedWorkbench = wb; }
+                    }
+                }
+            }
+        }
+
         private void RefreshLinkedPickups()
         {
             _linkedPickup     = null;
@@ -202,6 +296,9 @@ namespace Duskborn.Gameplay.Player
             if (!IsOwner) return;
             var chest = other.GetComponentInParent<Chest>();
             if (chest != null) _chestsInRange.Add(chest);
+
+            var wb = other.GetComponentInParent<Workbench>();
+            if (wb != null) _workbenchesInRange.Add(wb);
         }
 
         private void OnTriggerExit(Collider other)
@@ -209,6 +306,9 @@ namespace Duskborn.Gameplay.Player
             if (!IsOwner) return;
             var chest = other.GetComponentInParent<Chest>();
             if (chest != null) _chestsInRange.Remove(chest);
+
+            var wb = other.GetComponentInParent<Workbench>();
+            if (wb != null) _workbenchesInRange.Remove(wb);
         }
 
         private void OnDrawGizmosSelected()

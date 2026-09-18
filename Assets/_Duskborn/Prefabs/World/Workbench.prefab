@@ -31,8 +31,8 @@ Transform:
   m_GameObject: {fileID: 606149192729443004}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.5, z: 0}
-  m_LocalScale: {x: 1.6, y: 0.9, z: 1.1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -44,7 +44,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 606149192729443004}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 4300000, guid: 4ea48fd7a2f94055a85b7eb06e8a5667, type: 3}
 --- !u!23 &8399161928399641455
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -71,6 +71,8 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 76a7bab969c316e4bb67d23d55402b77, type: 2}
+  - {fileID: 2100000, guid: 6a8fe210d2e74542b4a1192744238b23, type: 2}
+  - {fileID: 2100000, guid: 69ddd65e7ae958b47bee8761046067d0, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -113,8 +115,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 1.74, y: 1.16, z: 1.07}
+  m_Center: {x: 0.01, y: 0.58, z: -0.1}
 --- !u!54 &1966359041473638540
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -177,9 +179,9 @@ MonoBehaviour:
   <AssetPathHash>k__BackingField: 3824231328303994059
   SceneId: 0
   SerializedTransformProperties:
-    Position: {x: 0, y: 0.5, z: 0}
+    Position: {x: 0, y: 0, z: 0}
     Rotation: {x: 0, y: 0, z: 0, w: 1}
-    Scale: {x: 1.6, y: 0.9, z: 1.1}
+    Scale: {x: 1, y: 1, z: 1}
     IsValid: 1
   <IsNested>k__BackingField: 0
   WasActiveDuringEdit: 0
@@ -217,3 +219,6 @@ MonoBehaviour:
   _networkObjectCache: {fileID: 8058475873678479222}
   outlineLayerName: GreenOutline
   outlineRenderer: {fileID: 8399161928399641455}
+  recipes:
+  - {fileID: 11400000, guid: 199aff6451814704ae8603601e565a50, type: 2}
+  - {fileID: 11400000, guid: 984c5aa42ae149c6a0f78baaf107e2a4, type: 2}

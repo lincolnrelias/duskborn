@@ -203,13 +203,13 @@
 - [x] ResourceNode prefabs: add NetworkObject component to each node in scene (manual Unity step)
 
 ### 3.5 Workbench & Crafting
-- [ ] `Workbench.cs` — interactable, opens crafting panel
-- [ ] `CraftingRecipe.cs` (ScriptableObject) — required resources, output item
-- [ ] Tier 1 recipes (Wood, Stone, Fiber)
+- [x] `Workbench.cs` — interactable, opens crafting panel
+- [x] `CraftingRecipe.cs` (ScriptableObject) — required resources, output item
+- [x] Tier 1 recipes (Stone Axe & Stone Pickaxe using Wood & Stone)
 - [ ] Tier 2 recipes (Iron Ore required)
 - [ ] Tier 3 recipes (Thornbark Core required — unlocked post-boss)
 - [ ] Gear slots: Weapon (1), Armor (1), Accessory (1)
-- [ ] Crafting UI panel
+- [x] Crafting UI panel (`CraftingUIManager.cs` — dual-panel layout, pixel art styling, live ingredient counts, craft button and audio)
 
 ---
 

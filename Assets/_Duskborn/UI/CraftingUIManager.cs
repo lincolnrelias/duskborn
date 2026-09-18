@@ -1,0 +1,1091 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
+using Duskborn.Audio;
+using Duskborn.Core;
+using Duskborn.Gameplay.ActionBar;
+using Duskborn.Gameplay.Crafting;
+using Duskborn.Gameplay.Equipment;
+using Duskborn.Gameplay.Loot;
+using Duskborn.Gameplay.Player;
+using InventorySystem.Bootstrap;
+using InventorySystem.Core;
+using InventorySystem.Data;
+
+namespace Duskborn.UI
+{
+    /// <summary>
+    /// Gerenciador da interface de fabricação (Crafting UI) na Bancada de Trabalho (Workbench).
+    /// Integrado com o sistema de inventário (InventoryUIManager), sistema de recursos (ResourceInventory),
+    /// câmera (PlayerCameraController) e barra de ação (ActionBarInstaller).
+    /// </summary>
+    public class CraftingUIManager : MonoBehaviour
+    {
+        public static CraftingUIManager Instance { get; private set; }
+
+        [Header("Configuração de Áudio")]
+        [SerializeField] private AudioClip openSound;
+        [SerializeField] private AudioClip clickSound;
+        [SerializeField] private AudioClip craftSound;
+        [SerializeField] private AudioClip errorSound;
+
+        [Header("Sprites da Interface")]
+        [SerializeField] private Sprite panelFrameSprite;
+        [SerializeField] private Sprite slotFrameSprite;
+
+        // Estado do Sistema
+        public bool IsOpen { get; private set; }
+        public Workbench CurrentWorkbench { get; private set; }
+
+        private Canvas _canvas;
+        private RectTransform _craftingRoot;
+        private RectTransform _recipeListContainer;
+        private RectTransform _ingredientsContainer;
+
+        // Elementos de Detalhes
+        private Image _detailIcon;
+        private TextMeshProUGUI _detailTitle;
+        private TextMeshProUGUI _detailCategory;
+        private TextMeshProUGUI _detailStats;
+        private TextMeshProUGUI _detailDescription;
+        private TextMeshProUGUI _statusLabel;
+        private Button _craftButton;
+        private TextMeshProUGUI _craftButtonLabel;
+
+        // Lista de Receitas e Seleção
+        private readonly List<CraftingRecipe> _recipes = new();
+        private CraftingRecipe _selectedRecipe;
+        private readonly List<GameObject> _recipeEntryViews = new();
+        private readonly List<GameObject> _ingredientViews = new();
+
+        // Integrações com Jogador e Inventário
+        private ResourceInventory _playerResources;
+        private InventoryUIManager _inventoryUIManager;
+        private InventoryInstaller _inventoryInstaller;
+        private ActionBarInstaller _actionBarInstaller;
+        private Vector2 _originalInventoryPos = new Vector2(0, 25);
+        private bool _hasOriginalInventoryPos;
+        private bool _inventoryOpenedByCrafting;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        private static void AutoInitialize()
+        {
+            EnsureInstance();
+        }
+
+        public static CraftingUIManager EnsureInstance()
+        {
+            if (Instance != null) return Instance;
+
+            var existing = FindAnyObjectByType<CraftingUIManager>();
+            if (existing != null)
+            {
+                Instance = existing;
+                return Instance;
+            }
+
+            var go = new GameObject("CraftingUIManager");
+            Instance = go.AddComponent<CraftingUIManager>();
+            return Instance;
+        }
+
+        private void Awake()
+        {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            Instance = this;
+
+            LoadAudioClips();
+        }
+
+        private void Start()
+        {
+            LoadSprites();
+            LoadDefaultRecipes();
+            TryFindIntegrations();
+        }
+
+        private void Update()
+        {
+            if (!IsOpen) return;
+
+            // Fecha se pressionar ESC
+            if (IsEscapePressed())
+            {
+                Close();
+                return;
+            }
+
+            // Fecha automaticamente se o jogador se afastar da bancada
+            if (CurrentWorkbench != null && !IsLocalPlayerNearWorkbench(4.0f))
+            {
+                Close();
+                return;
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+            if (_playerResources != null)
+                _playerResources.ResourceChanged -= OnResourceChanged;
+        }
+
+        // ── Integrações e Cache ────────────────────────────────────────────────
+
+        private void TryFindIntegrations()
+        {
+            if (_inventoryUIManager == null)
+                _inventoryUIManager = FindAnyObjectByType<InventoryUIManager>();
+
+            if (_inventoryInstaller == null)
+                _inventoryInstaller = FindAnyObjectByType<InventoryInstaller>();
+
+            if (_actionBarInstaller == null)
+                _actionBarInstaller = FindAnyObjectByType<ActionBarInstaller>();
+
+            if (_canvas == null)
+            {
+                if (_inventoryInstaller != null && _inventoryInstaller.GetComponentInParent<Canvas>() != null)
+                {
+                    _canvas = _inventoryInstaller.GetComponentInParent<Canvas>();
+                }
+                else
+                {
+                    foreach (var c in FindObjectsByType<Canvas>(FindObjectsSortMode.None))
+                    {
+                        if (c.renderMode != RenderMode.WorldSpace)
+                        {
+                            _canvas = c;
+                            break;
+                        }
+                    }
+                    if (_canvas == null) _canvas = FindAnyObjectByType<Canvas>();
+                }
+
+                if (_canvas != null && _canvas.renderMode != RenderMode.WorldSpace)
+                {
+                    var scaler = _canvas.GetComponent<CanvasScaler>();
+                    if (scaler == null)
+                        scaler = _canvas.gameObject.AddComponent<CanvasScaler>();
+                    if (scaler.uiScaleMode != CanvasScaler.ScaleMode.ScaleWithScreenSize)
+                    {
+                        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                        scaler.referenceResolution = new Vector2(1920f, 1080f);
+                        scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+                        scaler.matchWidthOrHeight = 0f;
+                    }
+                }
+            }
+
+            // Cache do jogador local
+            if (_playerResources == null)
+            {
+                foreach (var combat in FindObjectsByType<PlayerCombat>())
+                {
+                    if (!combat.IsOwner) continue;
+                    _playerResources = combat.GetComponent<ResourceInventory>();
+                    if (_playerResources != null)
+                    {
+                        _playerResources.ResourceChanged -= OnResourceChanged;
+                        _playerResources.ResourceChanged += OnResourceChanged;
+                    }
+                    break;
+                }
+            }
+        }
+
+        private void OnResourceChanged(string resourceId, int newTotal)
+        {
+            if (IsOpen)
+            {
+                RefreshRecipeListStates();
+                RefreshDetailsView();
+            }
+        }
+
+        private bool IsLocalPlayerNearWorkbench(float maxDistance)
+        {
+            if (CurrentWorkbench == null) return false;
+            foreach (var combat in FindObjectsByType<PlayerCombat>())
+            {
+                if (combat.IsOwner)
+                    return CurrentWorkbench.IsInRange(combat.transform.position, maxDistance);
+            }
+            return false;
+        }
+
+        // ── Abertura e Fechamento ─────────────────────────────────────────────
+
+        public void Toggle(Workbench workbench)
+        {
+            if (IsOpen && CurrentWorkbench == workbench)
+                Close();
+            else
+                Open(workbench);
+        }
+
+        public void Open(Workbench workbench)
+        {
+            if (workbench == null) return;
+            TryFindIntegrations();
+
+            CurrentWorkbench = workbench;
+            CurrentWorkbench.OpenForLocalPlayer();
+
+            // Carrega receitas da bancada ou padrão
+            _recipes.Clear();
+            if (workbench.Recipes != null && workbench.Recipes.Count > 0)
+            {
+                foreach (var r in workbench.Recipes)
+                    if (r != null) _recipes.Add(r);
+            }
+
+            if (_recipes.Count == 0)
+                LoadDefaultRecipes();
+
+            EnsureUIHierarchy();
+
+            if (_craftingRoot != null)
+                _craftingRoot.gameObject.SetActive(true);
+
+            // Ajusta posição lado a lado com o inventário
+            AdjustDualPanelPositions(true);
+
+            // Seleciona a primeira receita por padrão
+            if (_recipes.Count > 0)
+                SelectRecipe(_recipes[0]);
+
+            RefreshRecipeList();
+
+            IsOpen = true;
+            PlaySound(openSound);
+
+            // Bloqueia rotação da câmera e libera cursor
+            PlayerCameraController.LocalInstance?.SetRotationLocked(true);
+        }
+
+        public void Close()
+        {
+            if (!IsOpen) return;
+
+            IsOpen = false;
+
+            if (CurrentWorkbench != null)
+            {
+                CurrentWorkbench.CloseForLocalPlayer();
+                CurrentWorkbench = null;
+            }
+
+            if (_craftingRoot != null)
+                _craftingRoot.gameObject.SetActive(false);
+
+            // Restaura posição do inventário
+            AdjustDualPanelPositions(false);
+
+            // Se o inventário foi aberto apenas pela bancada, fecha-o
+            if (_inventoryOpenedByCrafting && _inventoryUIManager != null && _inventoryUIManager.IsOpen)
+            {
+                _inventoryUIManager.Close();
+            }
+            _inventoryOpenedByCrafting = false;
+
+            // Restaura rotação da câmera e trava cursor (caso inventário também esteja fechado)
+            bool inventoryStillOpen = _inventoryUIManager != null && _inventoryUIManager.IsOpen;
+            if (!inventoryStillOpen)
+            {
+                PlayerCameraController.LocalInstance?.SetRotationLocked(false);
+            }
+        }
+
+        private void AdjustDualPanelPositions(bool opening)
+        {
+            if (_inventoryUIManager == null) return;
+
+            var invRect = _inventoryUIManager.InventoryFrameRect;
+            if (invRect != null)
+            {
+                if (!_hasOriginalInventoryPos)
+                {
+                    _originalInventoryPos = invRect.anchoredPosition;
+                    _hasOriginalInventoryPos = true;
+                }
+
+                if (opening)
+                {
+                    // Se o inventário estava fechado, abre-o
+                    if (!_inventoryUIManager.IsOpen)
+                    {
+                        _inventoryOpenedByCrafting = true;
+                        _inventoryUIManager.Open();
+                    }
+
+                    // Posiciona painéis lado a lado
+                    invRect.anchoredPosition = new Vector2(215f, _originalInventoryPos.y);
+                    if (_craftingRoot != null)
+                        _craftingRoot.anchoredPosition = new Vector2(-215f, _originalInventoryPos.y);
+                }
+                else
+                {
+                    // Retorna o inventário para a posição centralizada
+                    invRect.anchoredPosition = _originalInventoryPos;
+                }
+            }
+        }
+
+        // ── Seleção e Execução de Crafting ────────────────────────────────────
+
+        public void SelectRecipe(CraftingRecipe recipe)
+        {
+            if (recipe == null) return;
+            _selectedRecipe = recipe;
+            PlaySound(clickSound);
+            RefreshRecipeListStates();
+            RefreshDetailsView();
+        }
+
+        public void CraftSelectedRecipe()
+        {
+            if (_selectedRecipe == null) return;
+            TryFindIntegrations();
+
+            if (_playerResources == null)
+            {
+                ShowStatusFeedback("Inventário de recursos não encontrado!", true);
+                PlaySound(errorSound);
+                return;
+            }
+
+            if (!_selectedRecipe.CanCraft(_playerResources))
+            {
+                ShowStatusFeedback("Recursos insuficientes!", true);
+                PlaySound(errorSound);
+                return;
+            }
+
+            if (!HasFreeInventorySlot())
+            {
+                ShowStatusFeedback("Inventário cheio! Libere um espaço.", true);
+                PlaySound(errorSound);
+                return;
+            }
+
+            // Gasta os recursos
+            if (!_selectedRecipe.TrySpendIngredients(_playerResources))
+            {
+                ShowStatusFeedback("Erro ao consumir recursos.", true);
+                PlaySound(errorSound);
+                return;
+            }
+
+            // Cria e registra o item
+            var outputItem = _selectedRecipe.CreateOutputItem();
+            if (outputItem != null)
+            {
+                // Registra os ícones para que apareçam perfeitamente no inventário e na action bar
+                if (_selectedRecipe.OutputItem != null && _selectedRecipe.OutputItem.Icon != null)
+                {
+                    _inventoryInstaller?.RegisterIcon(_selectedRecipe.OutputItem.Id, _selectedRecipe.OutputItem.Icon);
+                    _actionBarInstaller?.RegisterIcon(_selectedRecipe.OutputItem.Id, _selectedRecipe.OutputItem.Icon);
+                }
+
+                // Insere no inventário do jogador
+                if (_inventoryInstaller != null && _inventoryInstaller.Inventory != null)
+                {
+                    _inventoryInstaller.Inventory.TryAddItem(outputItem, out _);
+                }
+            }
+
+            PlaySound(craftSound);
+            ShowStatusFeedback($"<b>{_selectedRecipe.RecipeName}</b> fabricado com sucesso!", false);
+            DuskLog.Log(LogChannel.Inventory, $"Crafted '{_selectedRecipe.RecipeName}' at Workbench.");
+
+            RefreshRecipeListStates();
+            RefreshDetailsView();
+        }
+
+        private bool HasFreeInventorySlot()
+        {
+            if (_inventoryInstaller?.Inventory == null) return true;
+            foreach (var slot in _inventoryInstaller.Inventory.GetSlots())
+            {
+                if (slot.IsEmpty) return true;
+            }
+            return false;
+        }
+
+        private void ShowStatusFeedback(string message, bool isError)
+        {
+            if (_statusLabel == null) return;
+            string colorHex = isError ? "#f87171" : "#4ade80";
+            _statusLabel.text = $"<color={colorHex}>{message}</color>";
+        }
+
+        // ── Atualização Visual dos Painéis ─────────────────────────────────────
+
+        private void RefreshRecipeList()
+        {
+            if (_recipeListContainer == null) return;
+
+            foreach (var go in _recipeEntryViews)
+                Destroy(go);
+            _recipeEntryViews.Clear();
+
+            foreach (var recipe in _recipes)
+            {
+                if (recipe == null) continue;
+                var itemGO = CreateRecipeEntryView(recipe, _recipeListContainer);
+                _recipeEntryViews.Add(itemGO);
+            }
+
+            RefreshRecipeListStates();
+        }
+
+        private void RefreshRecipeListStates()
+        {
+            for (int i = 0; i < _recipeEntryViews.Count; i++)
+            {
+                if (i >= _recipes.Count) break;
+                var view = _recipeEntryViews[i];
+                var recipe = _recipes[i];
+                if (view == null || recipe == null) continue;
+
+                bool isSelected = recipe == _selectedRecipe;
+                bool canCraft = _playerResources != null && recipe.CanCraft(_playerResources);
+
+                var bg = view.GetComponent<Image>();
+                if (bg != null)
+                {
+                    if (isSelected)
+                        bg.color = new Color(0.22f, 0.30f, 0.42f, 1f); // Destaque azul/cinza
+                    else
+                        bg.color = new Color(0.12f, 0.14f, 0.18f, 0.95f);
+                }
+
+                // Borda de seleção
+                var outline = view.GetComponent<Outline>();
+                if (outline != null)
+                {
+                    outline.enabled = isSelected;
+                    outline.effectColor = new Color(0.96f, 0.72f, 0.22f, 1f); // Ouro brilhante
+                }
+
+                // Indicador de craftabilidade (filho "Indicator")
+                var indicator = view.transform.Find("Indicator")?.GetComponent<TextMeshProUGUI>();
+                if (indicator != null)
+                {
+                    indicator.text = canCraft ? "<color=#4ade80>● Pronto</color>" : "<color=#64748b>Falta</color>";
+                }
+            }
+        }
+
+        private void RefreshDetailsView()
+        {
+            if (_selectedRecipe == null)
+            {
+                if (_detailTitle != null) _detailTitle.text = "Selecione uma receita";
+                if (_detailStats != null) _detailStats.text = string.Empty;
+                if (_detailDescription != null) _detailDescription.text = string.Empty;
+                if (_craftButton != null) _craftButton.interactable = false;
+                return;
+            }
+
+            // Título e Categoria
+            if (_detailTitle != null)
+                _detailTitle.text = _selectedRecipe.RecipeName;
+
+            if (_detailCategory != null)
+                _detailCategory.text = $"{_selectedRecipe.Category} • Nível 1";
+
+            // Ícone grande
+            if (_detailIcon != null)
+            {
+                var iconTex = _selectedRecipe.Icon;
+                if (iconTex != null)
+                {
+                    _detailIcon.sprite = Sprite.Create(iconTex, new Rect(0, 0, iconTex.width, iconTex.height), new Vector2(0.5f, 0.5f));
+                    _detailIcon.color = Color.white;
+                }
+                else
+                {
+                    _detailIcon.color = Color.clear;
+                }
+            }
+
+            // Estatísticas e Descrição
+            if (_detailStats != null)
+            {
+                _detailStats.text = BuildStatsString(_selectedRecipe);
+            }
+
+            if (_detailDescription != null)
+            {
+                _detailDescription.text = _selectedRecipe.Description;
+            }
+
+            // Lista de Ingredientes Requeridos
+            RefreshIngredientsList(_selectedRecipe);
+
+            // Botão Fabricar e Status
+            bool canCraft = _playerResources != null && _selectedRecipe.CanCraft(_playerResources);
+            bool hasSpace = HasFreeInventorySlot();
+
+            if (_craftButton != null)
+                _craftButton.interactable = canCraft && hasSpace;
+
+            if (!canCraft)
+                ShowStatusFeedback("Recursos insuficientes", true);
+            else if (!hasSpace)
+                ShowStatusFeedback("Inventário cheio", true);
+            else
+                ShowStatusFeedback("Pronto para fabricar!", false);
+        }
+
+        private string BuildStatsString(CraftingRecipe recipe)
+        {
+            if (recipe.OutputItem is WeaponDefinition weapon)
+            {
+                var lines = new List<string>();
+
+                // Bônus gerais de stats
+                foreach (var b in weapon.Bonuses)
+                {
+                    string sign = b.Value >= 0 ? "+" : "";
+                    lines.Add($"<color=#86efac>{sign}{b.Value * 100:F0}% {b.Type}</color>");
+                }
+
+                // Modificadores de dano por tipo (ex: +300% contra Árvores ou Rocha)
+                foreach (var mod in weapon.TypeModifiers)
+                {
+                    string sign = mod.Bonus >= 0 ? "+" : "";
+                    string targetName = mod.Type.ToString();
+                    if (mod.Type == Duskborn.Gameplay.TargetType.Tree) targetName = "Árvores (Madeira)";
+                    else if (mod.Type == Duskborn.Gameplay.TargetType.MiningNode || (int)mod.Type == 512) targetName = "Rochas / Minérios";
+                    else if (mod.Type == Duskborn.Gameplay.TargetType.Humanoid) targetName = "Humanoides";
+
+                    lines.Add($"<color=#fde047>{sign}{mod.Bonus * 100:F0}% Dano vs {targetName}</color>");
+                }
+
+                return string.Join("\n", lines);
+            }
+
+            return "<color=#94a3b8>Item padrão</color>";
+        }
+
+        private void RefreshIngredientsList(CraftingRecipe recipe)
+        {
+            if (_ingredientsContainer == null) return;
+
+            foreach (var go in _ingredientViews)
+                Destroy(go);
+            _ingredientViews.Clear();
+
+            foreach (var ing in recipe.Ingredients)
+            {
+                if (ing.material == null) continue;
+                int current = _playerResources != null ? _playerResources.GetCount(ing.material.Id) : 0;
+                var view = CreateIngredientRowView(ing.material, current, ing.amount, _ingredientsContainer);
+                _ingredientViews.Add(view);
+            }
+        }
+
+        // ── Construção Dinâmica da Hierarquia UI ───────────────────────────────
+
+        private void EnsureUIHierarchy()
+        {
+            if (_craftingRoot != null) return;
+
+            if (_canvas == null)
+            {
+                TryFindIntegrations();
+                if (_canvas == null)
+                {
+                    DuskLog.Error(LogChannel.Inventory, "CraftingUIManager: Nenhum Canvas encontrado para renderizar a UI.");
+                    return;
+                }
+            }
+
+            // 1. Painel Principal (Moldura de Pedra/Ferro Medieval)
+            var frameGO = new GameObject("CraftingFrame", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            frameGO.transform.SetParent(_canvas.transform, false);
+
+            _craftingRoot = frameGO.GetComponent<RectTransform>();
+            _craftingRoot.anchorMin = new Vector2(0.5f, 0.5f);
+            _craftingRoot.anchorMax = new Vector2(0.5f, 0.5f);
+            _craftingRoot.pivot = new Vector2(0.5f, 0.5f);
+            _craftingRoot.sizeDelta = new Vector2(430f, 520f);
+            _craftingRoot.anchoredPosition = new Vector2(-215f, 20f);
+
+            var frameImg = frameGO.GetComponent<Image>();
+            frameImg.raycastTarget = true;
+            if (panelFrameSprite != null)
+            {
+                frameImg.sprite = panelFrameSprite;
+                frameImg.type = Image.Type.Sliced;
+                frameImg.color = new Color(0.95f, 0.95f, 0.95f, 1f);
+            }
+            else
+            {
+                frameImg.color = new Color(0.11f, 0.13f, 0.17f, 0.98f);
+            }
+
+            // Arraste pelo corpo da moldura
+            var frameDrag = frameGO.AddComponent<DraggablePanel>();
+            frameDrag.TargetPanel = _craftingRoot;
+
+            // 2. Barra de Cabeçalho / Título (Área dedicada para arrastar a janela)
+            var headerGO = new GameObject("HeaderBar", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            headerGO.transform.SetParent(frameGO.transform, false);
+
+            var headerRect = headerGO.GetComponent<RectTransform>();
+            headerRect.anchorMin = new Vector2(0, 1);
+            headerRect.anchorMax = new Vector2(1, 1);
+            headerRect.pivot = new Vector2(0.5f, 1);
+            headerRect.anchoredPosition = Vector2.zero;
+            headerRect.sizeDelta = new Vector2(0, 42);
+
+            var headerImg = headerGO.GetComponent<Image>();
+            headerImg.color = new Color(0, 0, 0, 0.001f); // Invisível, mas intercepta cliques para arrastar
+            headerImg.raycastTarget = true;
+
+            var headerDrag = headerGO.AddComponent<DraggablePanel>();
+            headerDrag.TargetPanel = _craftingRoot;
+
+            // Título dentro do Cabeçalho
+            var titleGO = CreateText("Title", headerGO.transform, "BANCADA DE TRABALHO", 15, FontStyles.Bold, new Color(0.98f, 0.82f, 0.38f, 1f), TextAlignmentOptions.Left);
+            var titleRect = titleGO.GetComponent<RectTransform>();
+            titleRect.anchorMin = new Vector2(0, 0);
+            titleRect.anchorMax = new Vector2(1, 1);
+            titleRect.pivot = new Vector2(0, 0.5f);
+            titleRect.anchoredPosition = new Vector2(24, 0);
+            titleRect.sizeDelta = new Vector2(-70, 0);
+
+            // Botão Fechar (X) dentro do Cabeçalho
+            var closeBtnGO = CreateButton("CloseButton", headerGO.transform, "✕", new Vector2(28, 28), new Color(0.7f, 0.2f, 0.2f, 1f));
+            var closeRect = closeBtnGO.GetComponent<RectTransform>();
+            closeRect.anchorMin = new Vector2(1, 0.5f);
+            closeRect.anchorMax = new Vector2(1, 0.5f);
+            closeRect.pivot = new Vector2(1, 0.5f);
+            closeRect.anchoredPosition = new Vector2(-16, 0);
+            closeBtnGO.GetComponent<Button>().onClick.AddListener(Close);
+
+            // Divisória do Cabeçalho
+            var headerDiv = CreatePanel("HeaderDivider", frameGO.transform, new Color(0.24f, 0.28f, 0.36f, 0.8f));
+            headerDiv.anchorMin = new Vector2(0, 1);
+            headerDiv.anchorMax = new Vector2(1, 1);
+            headerDiv.pivot = new Vector2(0.5f, 1);
+            headerDiv.sizeDelta = new Vector2(-32, 2);
+            headerDiv.anchoredPosition = new Vector2(0, -42);
+
+            // 3. Coluna Esquerda: Lista de Receitas
+            var leftCol = CreatePanel("LeftColumn", frameGO.transform, new Color(0.08f, 0.09f, 0.12f, 0.7f));
+            leftCol.anchorMin = new Vector2(0, 0);
+            leftCol.anchorMax = new Vector2(0, 1);
+            leftCol.pivot = new Vector2(0, 0.5f);
+            leftCol.sizeDelta = new Vector2(165f, -64f);
+            leftCol.anchoredPosition = new Vector2(16f, -14f);
+
+            var recipesTitle = CreateText("RecipesHeader", leftCol.transform, "RECEITAS", 11, FontStyles.Bold, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
+            var rTitleRect = recipesTitle.GetComponent<RectTransform>();
+            rTitleRect.anchorMin = new Vector2(0, 1);
+            rTitleRect.anchorMax = new Vector2(1, 1);
+            rTitleRect.pivot = new Vector2(0, 1);
+            rTitleRect.anchoredPosition = new Vector2(8, -6);
+            rTitleRect.sizeDelta = new Vector2(-16, 20);
+
+            var listContainerGO = new GameObject("RecipeList", typeof(RectTransform), typeof(VerticalLayoutGroup));
+            listContainerGO.transform.SetParent(leftCol.transform, false);
+            _recipeListContainer = listContainerGO.GetComponent<RectTransform>();
+            _recipeListContainer.anchorMin = new Vector2(0, 0);
+            _recipeListContainer.anchorMax = new Vector2(1, 1);
+            _recipeListContainer.pivot = new Vector2(0.5f, 1);
+            _recipeListContainer.anchoredPosition = new Vector2(0, -16);
+            _recipeListContainer.sizeDelta = new Vector2(-12, -40);
+
+            var vlg = listContainerGO.GetComponent<VerticalLayoutGroup>();
+            vlg.spacing = 6f;
+            vlg.childAlignment = TextAnchor.UpperCenter;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = false;
+            vlg.childForceExpandWidth = true;
+            vlg.childForceExpandHeight = false;
+
+            // 4. Coluna Direita: Detalhes da Receita Selecionada
+            var rightCol = CreatePanel("RightColumn", frameGO.transform, new Color(0.08f, 0.09f, 0.12f, 0.7f));
+            rightCol.anchorMin = new Vector2(1, 0);
+            rightCol.anchorMax = new Vector2(1, 1);
+            rightCol.pivot = new Vector2(1, 0.5f);
+            rightCol.sizeDelta = new Vector2(225f, -64f);
+            rightCol.anchoredPosition = new Vector2(-16f, -14f);
+
+            var detailsTitle = CreateText("DetailsHeader", rightCol.transform, "DETALHES DA ARMA", 11, FontStyles.Bold, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
+            var dTitleRect = detailsTitle.GetComponent<RectTransform>();
+            dTitleRect.anchorMin = new Vector2(0, 1);
+            dTitleRect.anchorMax = new Vector2(1, 1);
+            dTitleRect.pivot = new Vector2(0, 1);
+            dTitleRect.anchoredPosition = new Vector2(8, -6);
+            dTitleRect.sizeDelta = new Vector2(-16, 20);
+
+            // Caixa de Preview (Ícone + Título + Categoria)
+            var previewBox = CreatePanel("PreviewBox", rightCol.transform, new Color(0.12f, 0.14f, 0.18f, 0.85f));
+            previewBox.anchorMin = new Vector2(0, 1);
+            previewBox.anchorMax = new Vector2(1, 1);
+            previewBox.pivot = new Vector2(0.5f, 1);
+            previewBox.anchoredPosition = new Vector2(0, -28);
+            previewBox.sizeDelta = new Vector2(-16, 60);
+
+            // Slot do Ícone Grande
+            var iconSlot = CreatePanel("IconSlot", previewBox.transform, new Color(0.06f, 0.07f, 0.09f, 1f));
+            iconSlot.anchorMin = new Vector2(0, 0.5f);
+            iconSlot.anchorMax = new Vector2(0, 0.5f);
+            iconSlot.pivot = new Vector2(0, 0.5f);
+            iconSlot.anchoredPosition = new Vector2(6, 0);
+            iconSlot.sizeDelta = new Vector2(48, 48);
+            if (slotFrameSprite != null)
+            {
+                var sImg = iconSlot.GetComponent<Image>();
+                sImg.sprite = slotFrameSprite;
+                sImg.type = Image.Type.Sliced;
+            }
+
+            var iconInnerGO = new GameObject("Icon", typeof(RectTransform), typeof(Image));
+            iconInnerGO.transform.SetParent(iconSlot.transform, false);
+            var iconInnerRect = iconInnerGO.GetComponent<RectTransform>();
+            iconInnerRect.anchorMin = Vector2.zero;
+            iconInnerRect.anchorMax = Vector2.one;
+            iconInnerRect.sizeDelta = new Vector2(-6, -6);
+            _detailIcon = iconInnerGO.GetComponent<Image>();
+            _detailIcon.preserveAspect = true;
+
+            // Título do Item
+            var itemTitleGO = CreateText("ItemTitle", previewBox.transform, "Machado de Pedra", 14, FontStyles.Bold, Color.white, TextAlignmentOptions.Left);
+            var itemTitleRect = itemTitleGO.GetComponent<RectTransform>();
+            itemTitleRect.anchorMin = new Vector2(0, 0.5f);
+            itemTitleRect.anchorMax = new Vector2(1, 0.5f);
+            itemTitleRect.pivot = new Vector2(0, 0);
+            itemTitleRect.anchoredPosition = new Vector2(60, 4);
+            itemTitleRect.sizeDelta = new Vector2(-66, 20);
+            _detailTitle = itemTitleGO.GetComponent<TextMeshProUGUI>();
+
+            // Categoria do Item
+            var itemCatGO = CreateText("ItemCategory", previewBox.transform, "Ferramenta • Nível 1", 10, FontStyles.Normal, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
+            var itemCatRect = itemCatGO.GetComponent<RectTransform>();
+            itemCatRect.anchorMin = new Vector2(0, 0.5f);
+            itemCatRect.anchorMax = new Vector2(1, 0.5f);
+            itemCatRect.pivot = new Vector2(0, 1);
+            itemCatRect.anchoredPosition = new Vector2(60, 0);
+            itemCatRect.sizeDelta = new Vector2(-66, 16);
+            _detailCategory = itemCatGO.GetComponent<TextMeshProUGUI>();
+
+            // Caixa de Atributos & Bônus
+            var statsBox = CreatePanel("StatsBox", rightCol.transform, new Color(0.05f, 0.06f, 0.08f, 0.9f));
+            statsBox.anchorMin = new Vector2(0, 1);
+            statsBox.anchorMax = new Vector2(1, 1);
+            statsBox.pivot = new Vector2(0.5f, 1);
+            statsBox.anchoredPosition = new Vector2(0, -94);
+            statsBox.sizeDelta = new Vector2(-16, 95);
+
+            var statsTextGO = CreateText("StatsText", statsBox.transform, "+15% Dano\n+300% Dano vs Árvores", 11, FontStyles.Normal, new Color(0.85f, 0.9f, 0.95f, 1f), TextAlignmentOptions.TopLeft);
+            var statsTextRect = statsTextGO.GetComponent<RectTransform>();
+            statsTextRect.anchorMin = Vector2.zero;
+            statsTextRect.anchorMax = Vector2.one;
+            statsTextRect.sizeDelta = new Vector2(-12, -12);
+            statsTextRect.anchoredPosition = Vector2.zero;
+            _detailStats = statsTextGO.GetComponent<TextMeshProUGUI>();
+
+            // Descrição Flavour
+            var descGO = CreateText("Description", rightCol.transform, "Descrição da ferramenta...", 10, FontStyles.Italic, new Color(0.55f, 0.60f, 0.68f, 1f), TextAlignmentOptions.TopLeft);
+            var descRect = descGO.GetComponent<RectTransform>();
+            descRect.anchorMin = new Vector2(0, 1);
+            descRect.anchorMax = new Vector2(1, 1);
+            descRect.pivot = new Vector2(0.5f, 1);
+            descRect.anchoredPosition = new Vector2(0, -196);
+            descRect.sizeDelta = new Vector2(-16, 36);
+            _detailDescription = descGO.GetComponent<TextMeshProUGUI>();
+
+            // Seção de Ingredientes
+            var reqHeader = CreateText("ReqHeader", rightCol.transform, "MATERIAIS NECESSÁRIOS", 11, FontStyles.Bold, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
+            var reqHeaderRect = reqHeader.GetComponent<RectTransform>();
+            reqHeaderRect.anchorMin = new Vector2(0, 1);
+            reqHeaderRect.anchorMax = new Vector2(1, 1);
+            reqHeaderRect.pivot = new Vector2(0, 1);
+            reqHeaderRect.anchoredPosition = new Vector2(8, -238);
+            reqHeaderRect.sizeDelta = new Vector2(-16, 18);
+
+            var ingContainerGO = new GameObject("IngredientsContainer", typeof(RectTransform), typeof(VerticalLayoutGroup));
+            ingContainerGO.transform.SetParent(rightCol.transform, false);
+            _ingredientsContainer = ingContainerGO.GetComponent<RectTransform>();
+            _ingredientsContainer.anchorMin = new Vector2(0, 1);
+            _ingredientsContainer.anchorMax = new Vector2(1, 1);
+            _ingredientsContainer.pivot = new Vector2(0.5f, 1);
+            _ingredientsContainer.anchoredPosition = new Vector2(0, -260);
+            _ingredientsContainer.sizeDelta = new Vector2(-16, 75);
+
+            var ingVlg = ingContainerGO.GetComponent<VerticalLayoutGroup>();
+            ingVlg.spacing = 4f;
+            ingVlg.childAlignment = TextAnchor.UpperCenter;
+            ingVlg.childControlWidth = true;
+            ingVlg.childControlHeight = false;
+            ingVlg.childForceExpandWidth = true;
+            ingVlg.childForceExpandHeight = false;
+
+            // Status de Fabricação
+            var statusGO = CreateText("StatusLabel", rightCol.transform, string.Empty, 11, FontStyles.Bold, Color.white, TextAlignmentOptions.Center);
+            var statusRect = statusGO.GetComponent<RectTransform>();
+            statusRect.anchorMin = new Vector2(0, 0);
+            statusRect.anchorMax = new Vector2(1, 0);
+            statusRect.pivot = new Vector2(0.5f, 0);
+            statusRect.anchoredPosition = new Vector2(0, 52);
+            statusRect.sizeDelta = new Vector2(-16, 20);
+            _statusLabel = statusGO.GetComponent<TextMeshProUGUI>();
+
+            // Botão Fabricar
+            var craftBtnGO = CreateButton("CraftButton", rightCol.transform, "FABRICAR", new Vector2(-24, 38), new Color(0.85f, 0.55f, 0.12f, 1f));
+            var craftBtnRect = craftBtnGO.GetComponent<RectTransform>();
+            craftBtnRect.anchorMin = new Vector2(0, 0);
+            craftBtnRect.anchorMax = new Vector2(1, 0);
+            craftBtnRect.pivot = new Vector2(0.5f, 0);
+            craftBtnRect.anchoredPosition = new Vector2(0, 10);
+            _craftButton = craftBtnGO.GetComponent<Button>();
+            _craftButton.onClick.AddListener(CraftSelectedRecipe);
+            _craftButtonLabel = craftBtnGO.GetComponentInChildren<TextMeshProUGUI>();
+
+            // Cores do Botão Fabricar
+            var btnColors = _craftButton.colors;
+            btnColors.normalColor = new Color(0.85f, 0.55f, 0.12f, 1f);
+            btnColors.highlightedColor = new Color(0.98f, 0.72f, 0.22f, 1f);
+            btnColors.pressedColor = new Color(0.70f, 0.42f, 0.08f, 1f);
+            btnColors.disabledColor = new Color(0.25f, 0.28f, 0.35f, 0.7f);
+            _craftButton.colors = btnColors;
+        }
+
+        private GameObject CreateRecipeEntryView(CraftingRecipe recipe, Transform parent)
+        {
+            var go = new GameObject($"Recipe_{recipe.RecipeId}", typeof(RectTransform), typeof(Image), typeof(Button), typeof(Outline));
+            go.transform.SetParent(parent, false);
+
+            var rect = go.GetComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(150, 44);
+
+            var img = go.GetComponent<Image>();
+            img.color = new Color(0.12f, 0.14f, 0.18f, 0.95f);
+
+            var outline = go.GetComponent<Outline>();
+            outline.effectDistance = new Vector2(1.5f, -1.5f);
+            outline.enabled = false;
+
+            // Ícone do Item
+            var iconGO = new GameObject("Icon", typeof(RectTransform), typeof(Image));
+            iconGO.transform.SetParent(go.transform, false);
+            var iconRect = iconGO.GetComponent<RectTransform>();
+            iconRect.anchorMin = new Vector2(0, 0.5f);
+            iconRect.anchorMax = new Vector2(0, 0.5f);
+            iconRect.pivot = new Vector2(0, 0.5f);
+            iconRect.anchoredPosition = new Vector2(6, 0);
+            iconRect.sizeDelta = new Vector2(32, 32);
+
+            var iconImg = iconGO.GetComponent<Image>();
+            var iconTex = recipe.Icon;
+            if (iconTex != null)
+                iconImg.sprite = Sprite.Create(iconTex, new Rect(0, 0, iconTex.width, iconTex.height), new Vector2(0.5f, 0.5f));
+            iconImg.preserveAspect = true;
+
+            // Nome da Receita
+            var labelGO = CreateText("Name", go.transform, recipe.RecipeName, 12, FontStyles.Bold, Color.white, TextAlignmentOptions.Left);
+            var labelRect = labelGO.GetComponent<RectTransform>();
+            labelRect.anchorMin = new Vector2(0, 0.5f);
+            labelRect.anchorMax = new Vector2(1, 0.5f);
+            labelRect.pivot = new Vector2(0, 0.5f);
+            labelRect.anchoredPosition = new Vector2(44, 4);
+            labelRect.sizeDelta = new Vector2(-48, 18);
+
+            // Indicador de Status (Pronto / Falta)
+            var indGO = CreateText("Indicator", go.transform, "Pronto", 9, FontStyles.Normal, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
+            var indRect = indGO.GetComponent<RectTransform>();
+            indRect.anchorMin = new Vector2(0, 0.5f);
+            indRect.anchorMax = new Vector2(1, 0.5f);
+            indRect.pivot = new Vector2(0, 0.5f);
+            indRect.anchoredPosition = new Vector2(44, -10);
+            indRect.sizeDelta = new Vector2(-48, 14);
+
+            var btn = go.GetComponent<Button>();
+            btn.onClick.AddListener(() => SelectRecipe(recipe));
+
+            return go;
+        }
+
+        private GameObject CreateIngredientRowView(MaterialDefinition mat, int current, int required, Transform parent)
+        {
+            var rowGO = new GameObject($"Ingredient_{mat.Id}", typeof(RectTransform), typeof(Image));
+            rowGO.transform.SetParent(parent, false);
+
+            var rect = rowGO.GetComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(200, 26);
+
+            var img = rowGO.GetComponent<Image>();
+            img.color = new Color(0.12f, 0.14f, 0.18f, 0.6f);
+
+            // Ícone do Material
+            var iconGO = new GameObject("Icon", typeof(RectTransform), typeof(Image));
+            iconGO.transform.SetParent(rowGO.transform, false);
+            var iconRect = iconGO.GetComponent<RectTransform>();
+            iconRect.anchorMin = new Vector2(0, 0.5f);
+            iconRect.anchorMax = new Vector2(0, 0.5f);
+            iconRect.pivot = new Vector2(0, 0.5f);
+            iconRect.anchoredPosition = new Vector2(4, 0);
+            iconRect.sizeDelta = new Vector2(20, 20);
+
+            var iconImg = iconGO.GetComponent<Image>();
+            if (mat.Icon != null)
+                iconImg.sprite = Sprite.Create(mat.Icon, new Rect(0, 0, mat.Icon.width, mat.Icon.height), new Vector2(0.5f, 0.5f));
+            iconImg.preserveAspect = true;
+
+            // Nome do Material
+            var nameGO = CreateText("Name", rowGO.transform, mat.DisplayName, 11, FontStyles.Normal, Color.white, TextAlignmentOptions.Left);
+            var nameRect = nameGO.GetComponent<RectTransform>();
+            nameRect.anchorMin = new Vector2(0, 0.5f);
+            nameRect.anchorMax = new Vector2(0.6f, 0.5f);
+            nameRect.pivot = new Vector2(0, 0.5f);
+            nameRect.anchoredPosition = new Vector2(28, 0);
+            nameRect.sizeDelta = new Vector2(0, 20);
+
+            // Quantidade (Verde se tem o suficiente, Vermelho se não)
+            bool enough = current >= required;
+            string countColor = enough ? "#4ade80" : "#f87171";
+            string countText = $"<color={countColor}>{current}</color> / {required}";
+
+            var countGO = CreateText("Count", rowGO.transform, countText, 11, FontStyles.Bold, Color.white, TextAlignmentOptions.Right);
+            var countRect = countGO.GetComponent<RectTransform>();
+            countRect.anchorMin = new Vector2(0.6f, 0.5f);
+            countRect.anchorMax = new Vector2(1, 0.5f);
+            countRect.pivot = new Vector2(1, 0.5f);
+            countRect.anchoredPosition = new Vector2(-6, 0);
+            countRect.sizeDelta = new Vector2(0, 20);
+
+            return rowGO;
+        }
+
+        // ── Utilitários UI Básicos ─────────────────────────────────────────────
+
+        private static RectTransform CreatePanel(string name, Transform parent, Color color)
+        {
+            var go = new GameObject(name, typeof(RectTransform), typeof(Image));
+            go.transform.SetParent(parent, false);
+            var rect = go.GetComponent<RectTransform>();
+            var img = go.GetComponent<Image>();
+            img.color = color;
+            return rect;
+        }
+
+        private static GameObject CreateText(string name, Transform parent, string content, float size, FontStyles style, Color color, TextAlignmentOptions alignment)
+        {
+            var go = new GameObject(name, typeof(RectTransform), typeof(TextMeshProUGUI));
+            go.transform.SetParent(parent, false);
+            var tmp = go.GetComponent<TextMeshProUGUI>();
+            if (TMP_Settings.defaultFontAsset != null)
+                tmp.font = TMP_Settings.defaultFontAsset;
+            tmp.text = content;
+            tmp.fontSize = size;
+            tmp.fontStyle = style;
+            tmp.color = color;
+            tmp.alignment = alignment;
+            tmp.raycastTarget = false;
+            return go;
+        }
+
+        private static GameObject CreateButton(string name, Transform parent, string label, Vector2 sizeDelta, Color color)
+        {
+            var go = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button));
+            go.transform.SetParent(parent, false);
+            var rect = go.GetComponent<RectTransform>();
+            rect.sizeDelta = sizeDelta;
+
+            var img = go.GetComponent<Image>();
+            img.color = color;
+
+            var labelGO = CreateText("Label", go.transform, label, 13, FontStyles.Bold, Color.white, TextAlignmentOptions.Center);
+            var labelRect = labelGO.GetComponent<RectTransform>();
+            labelRect.anchorMin = Vector2.zero;
+            labelRect.anchorMax = Vector2.one;
+            labelRect.sizeDelta = Vector2.zero;
+
+            return go;
+        }
+
+        // ── Recursos Padrão e Áudio ───────────────────────────────────────────
+
+        private void LoadDefaultRecipes()
+        {
+            var loaded = Resources.LoadAll<CraftingRecipe>("Crafting");
+            foreach (var r in loaded)
+            {
+                if (r != null && !_recipes.Contains(r))
+                    _recipes.Add(r);
+            }
+        }
+
+        private void LoadSprites()
+        {
+            if (panelFrameSprite == null && _inventoryUIManager != null)
+            {
+                var invImg = _inventoryUIManager.InventoryFrameRect?.GetComponent<Image>();
+                if (invImg != null && invImg.sprite != null)
+                    panelFrameSprite = invImg.sprite;
+            }
+
+            if (panelFrameSprite == null)
+            {
+                panelFrameSprite = Resources.Load<Sprite>("Textures/frame_classic");
+            }
+
+            if (slotFrameSprite == null && _inventoryInstaller != null && _inventoryInstaller.SlotViews != null && _inventoryInstaller.SlotViews.Count > 0)
+            {
+                var slotView = _inventoryInstaller.SlotViews[0];
+                var slotImg = slotView.GetComponent<Image>();
+                if (slotImg != null && slotImg.sprite != null)
+                    slotFrameSprite = slotImg.sprite;
+            }
+
+            if (slotFrameSprite == null)
+            {
+                slotFrameSprite = Resources.Load<Sprite>("Textures/inventory_slot");
+            }
+        }
+
+        private void LoadAudioClips()
+        {
+            if (openSound == null) openSound = Resources.Load<AudioClip>("SFX/ui_modal_open");
+            if (clickSound == null) clickSound = Resources.Load<AudioClip>("SFX/ui_button_click");
+            if (craftSound == null) craftSound = Resources.Load<AudioClip>("SFX/hit_stone_01");
+            if (errorSound == null) errorSound = Resources.Load<AudioClip>("SFX/ui_error");
+        }
+
+        private void PlaySound(AudioClip clip)
+        {
+            if (clip == null) return;
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PlayAtPoint(clip, Camera.main != null ? Camera.main.transform.position : transform.position, 1.0f);
+            else
+                AudioSource.PlayClipAtPoint(clip, Camera.main != null ? Camera.main.transform.position : transform.position);
+        }
+
+        private static bool IsEscapePressed()
+        {
+#if ENABLE_INPUT_SYSTEM
+            return Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame;
+#else
+            return Input.GetKeyDown(KeyCode.Escape);
+#endif
+        }
+    }
+}

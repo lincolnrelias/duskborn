@@ -1132,12 +1132,11 @@ def gen_music_night_combat():
 # ==========================================
 
 def main():
-    sfx_dirs = ["Assets/_Duskborn/Art/SFX", "Assets/_Duskborn/Resources/SFX"]
+    sfx_dir = "Assets/_Duskborn/Art/SFX"
     music_dir = "Assets/_Duskborn/Audio/Music"
     
     def save_both(rel_path, audio_data, normalize_db=-0.8):
-        for d in sfx_dirs:
-            save_wav(f"{d}/{rel_path}", audio_data, normalize_db)
+        save_wav(f"{sfx_dir}/{rel_path}", audio_data, normalize_db)
             
     print("=== Generating Duskborn Release-Quality Audio Assets ===")
     
@@ -1214,9 +1213,7 @@ def main():
     save_both("ore_shatter.wav", gen_ore_shatter(1))
     save_both("ore_shatter_02.wav", gen_ore_shatter(2))
     save_both("gold_pickup.wav", gen_gold_pickup())
-    save_both("gold_sfx.wav", gen_gold_pickup())
     save_both("item_pickup.wav", gen_item_pickup())
-    save_both("pickup_sfx.wav", gen_item_pickup())
     
     # 6. UI & Stingers
     save_both("ui_button_click.wav", gen_ui_button_click())
@@ -1231,7 +1228,6 @@ def main():
         save_wav(f"{music_dir}/music_main_menu.wav", gen_music_main_menu())
         day_music = gen_music_day_exploration()
         save_wav(f"{music_dir}/music_day_exploration.wav", day_music)
-        save_wav("Assets/_Duskborn/Resources/Music/music_day_exploration.wav", day_music)
         save_wav(f"{music_dir}/music_night_combat.wav", gen_music_night_combat())
     else:
         print("Skipping music tracks (pass --music to generate).")

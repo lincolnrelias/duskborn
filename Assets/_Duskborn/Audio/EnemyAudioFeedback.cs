@@ -43,31 +43,47 @@ namespace Duskborn.Audio
 
         private void LoadClipsIfNull()
         {
-            if (attackClips == null || attackClips.Length == 0)
+            var db = AudioDatabase.Instance?.Enemies;
+            if (db != null)
             {
-                attackClips = new AudioClip[]
-                {
-                    Resources.Load<AudioClip>("SFX/enemy_swarmer_attack_01"),
-                    Resources.Load<AudioClip>("SFX/enemy_swarmer_attack_02")
-                };
-            }
+                if (attackClips == null || attackClips.Length == 0) attackClips = db.swarmerAttackClips;
+                if (hurtClips == null || hurtClips.Length == 0) hurtClips = db.swarmerHurtClips;
+                if (deathClips == null || deathClips.Length == 0) deathClips = db.swarmerDeathClips;
 
-            if (hurtClips == null || hurtClips.Length == 0)
-            {
-                hurtClips = new AudioClip[]
-                {
-                    Resources.Load<AudioClip>("SFX/enemy_swarmer_hurt_01"),
-                    Resources.Load<AudioClip>("SFX/enemy_swarmer_hurt_02")
-                };
+                attackVolume = db.attackVolume;
+                hurtVolume = db.hurtVolume;
+                deathVolume = db.deathVolume;
+                minDistance = db.minDistance;
+                maxDistance = db.maxDistance;
             }
-
-            if (deathClips == null || deathClips.Length == 0)
+            else
             {
-                deathClips = new AudioClip[]
+                if (attackClips == null || attackClips.Length == 0)
                 {
-                    Resources.Load<AudioClip>("SFX/enemy_swarmer_death_01"),
-                    Resources.Load<AudioClip>("SFX/enemy_swarmer_death_02")
-                };
+                    attackClips = new AudioClip[]
+                    {
+                        Resources.Load<AudioClip>("SFX/enemy_swarmer_attack_01"),
+                        Resources.Load<AudioClip>("SFX/enemy_swarmer_attack_02")
+                    };
+                }
+
+                if (hurtClips == null || hurtClips.Length == 0)
+                {
+                    hurtClips = new AudioClip[]
+                    {
+                        Resources.Load<AudioClip>("SFX/enemy_swarmer_hurt_01"),
+                        Resources.Load<AudioClip>("SFX/enemy_swarmer_hurt_02")
+                    };
+                }
+
+                if (deathClips == null || deathClips.Length == 0)
+                {
+                    deathClips = new AudioClip[]
+                    {
+                        Resources.Load<AudioClip>("SFX/enemy_swarmer_death_01"),
+                        Resources.Load<AudioClip>("SFX/enemy_swarmer_death_02")
+                    };
+                }
             }
         }
 

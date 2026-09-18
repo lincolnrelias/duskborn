@@ -54,29 +54,43 @@ namespace Duskborn.Audio
 
         private void LoadClipsIfNull()
         {
-            if (grassSteps == null || grassSteps.Length == 0)
+            var db = AudioDatabase.Instance?.Player;
+            if (db != null)
             {
-                grassSteps = new AudioClip[]
-                {
-                    Resources.Load<AudioClip>("SFX/footstep_grass_01"),
-                    Resources.Load<AudioClip>("SFX/footstep_grass_02"),
-                    Resources.Load<AudioClip>("SFX/footstep_grass_03"),
-                    Resources.Load<AudioClip>("SFX/footstep_grass_04")
-                };
-            }
+                if (grassSteps == null || grassSteps.Length == 0) grassSteps = db.grassSteps;
+                if (stoneSteps == null || stoneSteps.Length == 0) stoneSteps = db.stoneSteps;
+                if (jumpClip == null) jumpClip = db.jumpClip;
+                if (landClip == null) landClip = db.landClip;
 
-            if (stoneSteps == null || stoneSteps.Length == 0)
+                footstepVolume = db.footstepVolume;
+                pitchVariation = db.pitchVariation;
+            }
+            else
             {
-                stoneSteps = new AudioClip[]
+                if (grassSteps == null || grassSteps.Length == 0)
                 {
-                    Resources.Load<AudioClip>("SFX/footstep_stone_01"),
-                    Resources.Load<AudioClip>("SFX/footstep_stone_02"),
-                    Resources.Load<AudioClip>("SFX/footstep_stone_03")
-                };
-            }
+                    grassSteps = new AudioClip[]
+                    {
+                        Resources.Load<AudioClip>("SFX/footstep_grass_01"),
+                        Resources.Load<AudioClip>("SFX/footstep_grass_02"),
+                        Resources.Load<AudioClip>("SFX/footstep_grass_03"),
+                        Resources.Load<AudioClip>("SFX/footstep_grass_04")
+                    };
+                }
 
-            if (jumpClip == null) jumpClip = Resources.Load<AudioClip>("SFX/jump_takeoff");
-            if (landClip == null) landClip = Resources.Load<AudioClip>("SFX/jump_land");
+                if (stoneSteps == null || stoneSteps.Length == 0)
+                {
+                    stoneSteps = new AudioClip[]
+                    {
+                        Resources.Load<AudioClip>("SFX/footstep_stone_01"),
+                        Resources.Load<AudioClip>("SFX/footstep_stone_02"),
+                        Resources.Load<AudioClip>("SFX/footstep_stone_03")
+                    };
+                }
+
+                if (jumpClip == null) jumpClip = Resources.Load<AudioClip>("SFX/jump_takeoff");
+                if (landClip == null) landClip = Resources.Load<AudioClip>("SFX/jump_land");
+            }
         }
 
         private void Update()

@@ -47,10 +47,24 @@ namespace Duskborn.Audio
 
         private void LoadClipsIfNull()
         {
-            if (dayMusic == null)   dayMusic   = Resources.Load<AudioClip>("Music/music_day_exploration");
-            if (nightMusic == null) nightMusic = Resources.Load<AudioClip>("Music/music_night_combat");
-            if (dawnHorn == null)   dawnHorn   = Resources.Load<AudioClip>("SFX/dawn_horn");
-            if (nightHorn == null)  nightHorn  = Resources.Load<AudioClip>("SFX/night_horn");
+            var db = AudioDatabase.Instance?.Music;
+            if (db != null)
+            {
+                if (dayMusic == null)   dayMusic   = db.dayMusic;
+                if (nightMusic == null) nightMusic = db.nightMusic;
+                if (dawnHorn == null)   dawnHorn   = db.dawnHorn;
+                if (nightHorn == null)  nightHorn  = db.nightHorn;
+
+                musicFadeTime = db.musicFadeDuration;
+                hornVolume = db.hornVolume;
+            }
+            else
+            {
+                if (dayMusic == null)   dayMusic   = Resources.Load<AudioClip>("Music/music_day_exploration");
+                if (nightMusic == null) nightMusic = Resources.Load<AudioClip>("Music/music_night_combat");
+                if (dawnHorn == null)   dawnHorn   = Resources.Load<AudioClip>("SFX/dawn_horn");
+                if (nightHorn == null)  nightHorn  = Resources.Load<AudioClip>("SFX/night_horn");
+            }
         }
 
         private void OnDestroy()

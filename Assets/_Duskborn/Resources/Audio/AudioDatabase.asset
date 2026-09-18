@@ -1,0 +1,129 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4a2d81f9b37496cb8394e1d57201c10, type: 3}
+  m_Name: AudioDatabase
+  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Audio.AudioDatabase
+  resources:
+    rockShatterClips:
+    - {fileID: 8300000, guid: 962144448df6c676f9f6b5c70f979a49, type: 3}
+    - {fileID: 8300000, guid: d2b281fa9b0d46e28ae4583fd8357cdf, type: 3}
+    oreShatterClips:
+    - {fileID: 8300000, guid: ca4a3f8e53d3469ab9b6f8c92ee5b564, type: 3}
+    - {fileID: 8300000, guid: 58b5714abcf24da59163d1a8e7866237, type: 3}
+    treeFallClips:
+    - {fileID: 8300000, guid: d13c5a7c803aca192a14e96aab0563c2, type: 3}
+    - {fileID: 8300000, guid: 5e33e26347e94fc3a1c5bb7ddd5c6fad, type: 3}
+    depletedVolume: 1
+    minDistance: 2
+    maxDistance: 45
+  player:
+    grassSteps:
+    - {fileID: 8300000, guid: bde063287a19e8ed7f6045ce02e732ff, type: 3}
+    - {fileID: 8300000, guid: cf5e5ad87905b8860965e65954b8cc57, type: 3}
+    - {fileID: 8300000, guid: 8d22dac8d4d44741eca5558289dc0010, type: 3}
+    - {fileID: 8300000, guid: 388f50545e6cd7856d2d32f297e75ea4, type: 3}
+    stoneSteps:
+    - {fileID: 8300000, guid: 52b6042698cf0cc9e788b51512a58f17, type: 3}
+    - {fileID: 8300000, guid: 78ec0cfcbbcdb84e3c022c507c88e833, type: 3}
+    - {fileID: 8300000, guid: 966c4ed89fee17700e1d49a9531d3ebc, type: 3}
+    jumpClip: {fileID: 8300000, guid: a0e88e5a9594a3450ed7873edf584adb, type: 3}
+    landClip: {fileID: 8300000, guid: 966b4bf60bb7d23db07651c71329b326, type: 3}
+    hurtClips:
+    - {fileID: 8300000, guid: 018c25bfcf736a90028089d30448bd7b, type: 3}
+    - {fileID: 8300000, guid: 59a9c6468d321bce0dd4853923c33561, type: 3}
+    deathClip: {fileID: 8300000, guid: 833af5e0c2d1d67880888053cae01885, type: 3}
+    heartbeatLoopClip: {fileID: 8300000, guid: 9ae79d3a05b0a5d218f5abf4cddad386, type: 3}
+    footstepVolume: 0.65
+    jumpVolume: 0.6
+    landVolume: 0.75
+    hurtVolume: 0.85
+    deathVolume: 1
+    lowHpThreshold: 0.3
+    pitchVariation: 0.08
+  enemies:
+    swarmerAttackClips:
+    - {fileID: 8300000, guid: 5d6d9de884d38ce6d710edfadaa1319c, type: 3}
+    - {fileID: 8300000, guid: 6b8139fdcce82b7599a18721249baa6f, type: 3}
+    swarmerHurtClips:
+    - {fileID: 8300000, guid: 483d8da55c8ab213b1c1e0a136b778fa, type: 3}
+    - {fileID: 8300000, guid: b501b2d124e3b1160e124c3088f523f6, type: 3}
+    swarmerDeathClips:
+    - {fileID: 8300000, guid: c37d2b959a40c5c04f33072ad7efef2b, type: 3}
+    - {fileID: 8300000, guid: 895e6b6233370d040e9cf5234ec1d923, type: 3}
+    attackVolume: 0.8
+    hurtVolume: 0.75
+    deathVolume: 0.9
+    minDistance: 2
+    maxDistance: 30
+  combat:
+    woodHitClips:
+    - {fileID: 8300000, guid: 92931fa3b00ab1bca30373337ad96609, type: 3}
+    - {fileID: 8300000, guid: 4e83f09ad9c0fbf8bb9593ae495ad810, type: 3}
+    - {fileID: 8300000, guid: 0b6b0c9b65edc797e849cb0ce5ec2bd8, type: 3}
+    - {fileID: 8300000, guid: 9af62a927c7cc5a4fb40b5808e97ec59, type: 3}
+    stoneHitClips:
+    - {fileID: 8300000, guid: 51acb640ae3084b84aa3d881e2d15b77, type: 3}
+    - {fileID: 8300000, guid: bfbccb06c263dae155cf6a4989912512, type: 3}
+    - {fileID: 8300000, guid: d4c0a63070c5f853db8d86f45a4c260f, type: 3}
+    metalHitClips:
+    - {fileID: 8300000, guid: 2f88ac29995e2cb8bab18ab74f7e7772, type: 3}
+    - {fileID: 8300000, guid: a49454b3707d88e55cf50dfb0958a631, type: 3}
+    - {fileID: 8300000, guid: c233de10320ddd0c921867c208f098da, type: 3}
+    - {fileID: 8300000, guid: 372ddaefe4f64a2aace1c88a70a5eef7, type: 3}
+    - {fileID: 8300000, guid: e82b1aa4ff744cb48fc850a285ea5954, type: 3}
+    - {fileID: 8300000, guid: 3de8e39ca2994c64b1f6d99f89c193ba, type: 3}
+    fleshHitClips:
+    - {fileID: 8300000, guid: f78a753bbdea3a62f5cd329b65a49625, type: 3}
+    - {fileID: 8300000, guid: 663220863f5ab6fcc3d79439bab147bd, type: 3}
+    - {fileID: 8300000, guid: b50e3c1997ff07e4799d8eecedf9f36c, type: 3}
+    - {fileID: 8300000, guid: 5e5a4d5bc6187fb41b5271bee452d365, type: 3}
+    defaultHitClips:
+    - {fileID: 8300000, guid: fef273983342a0d2320bc2fd2301a650, type: 3}
+    - {fileID: 8300000, guid: 9ef9ccb7a48dea2785f33dd1b6415819, type: 3}
+    lightSwingClips:
+    - {fileID: 8300000, guid: 478b08c7ad9c006038d248663540320d, type: 3}
+    - {fileID: 8300000, guid: 133f874279a0f1f6dd2aa9975039ee25, type: 3}
+    - {fileID: 8300000, guid: 7756b7b89d365dd82ba6b10988eca6dc, type: 3}
+    - {fileID: 8300000, guid: a564a29bea7d0204f0347d7d92022727, type: 3}
+    - {fileID: 8300000, guid: aa99e3d23916399bb5331196435ab23b, type: 3}
+    - {fileID: 8300000, guid: e33461e16be93ef09125dd5e2dc17303, type: 3}
+    heavySwingClips:
+    - {fileID: 8300000, guid: 1346b3be44b72bf4cc5573958dcd86a2, type: 3}
+    - {fileID: 8300000, guid: c7b365c1127453de95c8901897023eab, type: 3}
+    - {fileID: 8300000, guid: 46388047391b0c00cd521a8d6e9a588e, type: 3}
+    registeredProfiles:
+    - {fileID: 11400000, guid: 658caad55867c5d41829bba0cc8ead5b, type: 2}
+    - {fileID: 11400000, guid: 680adbe36b624e849670c9fa793d8602, type: 2}
+  loot:
+    goldPickupClip: {fileID: 8300000, guid: 3ab3935b050a9f0401b342bc7d51fa6b, type: 3}
+    itemPickupClip: {fileID: 8300000, guid: 452769a2c783fded9ca057e50ed7b6cf, type: 3}
+    chestOpenClip: {fileID: 8300000, guid: bbbc145b703e933a44cbd951229b9c59, type: 3}
+    goldVolume: 1
+    itemVolume: 1
+    chestVolume: 1
+  ui:
+    buttonClickClip: {fileID: 8300000, guid: 0dea8811701f065b71c1aee7bd1063d1, type: 3}
+    modalOpenClip: {fileID: 8300000, guid: 51fcd39d4b80b95ca7482e1e1dc220ed, type: 3}
+    craftSuccessClip: {fileID: 8300000, guid: 51acb640ae3084b84aa3d881e2d15b77, type: 3}
+    errorClip: {fileID: 8300000, guid: bb4a491256909f1bebab02b5b7823f79, type: 3}
+    buttonClickVolume: 1
+    modalOpenVolume: 1
+    craftSuccessVolume: 1
+    errorVolume: 1
+  music:
+    menuMusic: {fileID: 8300000, guid: e2f1b4ca90b5005741059780a0626e1d, type: 3}
+    dayMusic: {fileID: 8300000, guid: 696a44c7af8c82f91982e99b90fe74a9, type: 3}
+    nightMusic: {fileID: 8300000, guid: a4691fa7c363d54b7d744c71c14fd60d, type: 3}
+    dawnHorn: {fileID: 8300000, guid: 91313658d5225a6944fcffac0b6347a0, type: 3}
+    nightHorn: {fileID: 8300000, guid: b423b5d870959e4348eb5adf61a8f8ad, type: 3}
+    musicFadeDuration: 2.5
+    hornVolume: 0.9

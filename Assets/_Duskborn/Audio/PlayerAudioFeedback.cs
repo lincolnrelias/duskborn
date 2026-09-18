@@ -44,17 +44,31 @@ namespace Duskborn.Audio
 
         private void LoadClipsIfNull()
         {
-            if (hurtClips == null || hurtClips.Length == 0)
+            var db = AudioDatabase.Instance?.Player;
+            if (db != null)
             {
-                hurtClips = new AudioClip[]
-                {
-                    Resources.Load<AudioClip>("SFX/player_hurt_01"),
-                    Resources.Load<AudioClip>("SFX/player_hurt_02")
-                };
-            }
+                if (hurtClips == null || hurtClips.Length == 0) hurtClips = db.hurtClips;
+                if (deathClip == null) deathClip = db.deathClip;
+                if (heartbeatLoopClip == null) heartbeatLoopClip = db.heartbeatLoopClip;
 
-            if (deathClip == null) deathClip = Resources.Load<AudioClip>("SFX/player_death");
-            if (heartbeatLoopClip == null) heartbeatLoopClip = Resources.Load<AudioClip>("SFX/heartbeat_loop");
+                hurtVolume = db.hurtVolume;
+                deathVolume = db.deathVolume;
+                lowHpThreshold = db.lowHpThreshold;
+            }
+            else
+            {
+                if (hurtClips == null || hurtClips.Length == 0)
+                {
+                    hurtClips = new AudioClip[]
+                    {
+                        Resources.Load<AudioClip>("SFX/player_hurt_01"),
+                        Resources.Load<AudioClip>("SFX/player_hurt_02")
+                    };
+                }
+
+                if (deathClip == null) deathClip = Resources.Load<AudioClip>("SFX/player_death");
+                if (heartbeatLoopClip == null) heartbeatLoopClip = Resources.Load<AudioClip>("SFX/heartbeat_loop");
+            }
         }
 
         private void Start()

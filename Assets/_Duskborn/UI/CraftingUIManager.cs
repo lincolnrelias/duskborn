@@ -46,6 +46,7 @@ namespace Duskborn.UI
 
         private Canvas _canvas;
         private RectTransform _craftingRoot;
+        public RectTransform CraftingRoot => _craftingRoot;
         private RectTransform _recipeListContainer;
         private RectTransform _ingredientsContainer;
 
@@ -172,20 +173,18 @@ namespace Duskborn.UI
                     }
                     if (_canvas == null) _canvas = FindAnyObjectByType<Canvas>();
                 }
+            }
 
-                if (_canvas != null && _canvas.renderMode != RenderMode.WorldSpace)
-                {
-                    var scaler = _canvas.GetComponent<CanvasScaler>();
-                    if (scaler == null)
-                        scaler = _canvas.gameObject.AddComponent<CanvasScaler>();
-                    if (scaler.uiScaleMode != CanvasScaler.ScaleMode.ScaleWithScreenSize)
-                    {
-                        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-                        scaler.referenceResolution = new Vector2(1920f, 1080f);
-                        scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-                        scaler.matchWidthOrHeight = 0f;
-                    }
-                }
+            if (_canvas != null && _canvas.renderMode != RenderMode.WorldSpace)
+            {
+                var scaler = _canvas.GetComponent<CanvasScaler>();
+                if (scaler == null)
+                    scaler = _canvas.gameObject.AddComponent<CanvasScaler>();
+
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(800f, 600f);
+                scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+                scaler.matchWidthOrHeight = 0f;
             }
 
             // Cache do jogador local
@@ -331,9 +330,9 @@ namespace Duskborn.UI
                     }
 
                     // Posiciona painéis lado a lado
-                    invRect.anchoredPosition = new Vector2(215f, _originalInventoryPos.y);
+                    invRect.anchoredPosition = new Vector2(195f, _originalInventoryPos.y);
                     if (_craftingRoot != null)
-                        _craftingRoot.anchoredPosition = new Vector2(-215f, _originalInventoryPos.y);
+                        _craftingRoot.anchoredPosition = new Vector2(-195f, _originalInventoryPos.y);
                 }
                 else
                 {
@@ -601,7 +600,7 @@ namespace Duskborn.UI
 
         // ── Construção Dinâmica da Hierarquia UI ───────────────────────────────
 
-        private void EnsureUIHierarchy()
+        public void EnsureUIHierarchy()
         {
             if (_craftingRoot != null) return;
 
@@ -623,8 +622,8 @@ namespace Duskborn.UI
             _craftingRoot.anchorMin = new Vector2(0.5f, 0.5f);
             _craftingRoot.anchorMax = new Vector2(0.5f, 0.5f);
             _craftingRoot.pivot = new Vector2(0.5f, 0.5f);
-            _craftingRoot.sizeDelta = new Vector2(430f, 520f);
-            _craftingRoot.anchoredPosition = new Vector2(-215f, 20f);
+            _craftingRoot.sizeDelta = new Vector2(380f, 365f);
+            _craftingRoot.anchoredPosition = new Vector2(-195f, 0f);
 
             var frameImg = frameGO.GetComponent<Image>();
             frameImg.raycastTarget = true;
@@ -652,7 +651,7 @@ namespace Duskborn.UI
             headerRect.anchorMax = new Vector2(1, 1);
             headerRect.pivot = new Vector2(0.5f, 1);
             headerRect.anchoredPosition = Vector2.zero;
-            headerRect.sizeDelta = new Vector2(0, 42);
+            headerRect.sizeDelta = new Vector2(0, 36);
 
             var headerImg = headerGO.GetComponent<Image>();
             headerImg.color = new Color(0, 0, 0, 0.001f); // Invisível, mas intercepta cliques para arrastar
@@ -662,21 +661,21 @@ namespace Duskborn.UI
             headerDrag.TargetPanel = _craftingRoot;
 
             // Título dentro do Cabeçalho
-            var titleGO = CreateText("Title", headerGO.transform, "BANCADA DE TRABALHO", 15, FontStyles.Bold, new Color(0.98f, 0.82f, 0.38f, 1f), TextAlignmentOptions.Left);
+            var titleGO = CreateText("Title", headerGO.transform, "BANCADA DE TRABALHO", 13, FontStyles.Bold, new Color(0.98f, 0.82f, 0.38f, 1f), TextAlignmentOptions.Left);
             var titleRect = titleGO.GetComponent<RectTransform>();
             titleRect.anchorMin = new Vector2(0, 0);
             titleRect.anchorMax = new Vector2(1, 1);
             titleRect.pivot = new Vector2(0, 0.5f);
-            titleRect.anchoredPosition = new Vector2(24, 0);
-            titleRect.sizeDelta = new Vector2(-70, 0);
+            titleRect.anchoredPosition = new Vector2(16, 0);
+            titleRect.sizeDelta = new Vector2(-60, 0);
 
             // Botão Fechar (X) dentro do Cabeçalho
-            var closeBtnGO = CreateButton("CloseButton", headerGO.transform, "✕", new Vector2(28, 28), new Color(0.7f, 0.2f, 0.2f, 1f));
+            var closeBtnGO = CreateButton("CloseButton", headerGO.transform, "X", new Vector2(24, 24), new Color(0.7f, 0.2f, 0.2f, 1f));
             var closeRect = closeBtnGO.GetComponent<RectTransform>();
             closeRect.anchorMin = new Vector2(1, 0.5f);
             closeRect.anchorMax = new Vector2(1, 0.5f);
             closeRect.pivot = new Vector2(1, 0.5f);
-            closeRect.anchoredPosition = new Vector2(-16, 0);
+            closeRect.anchoredPosition = new Vector2(-12, 0);
             closeBtnGO.GetComponent<Button>().onClick.AddListener(Close);
 
             // Divisória do Cabeçalho
@@ -684,24 +683,24 @@ namespace Duskborn.UI
             headerDiv.anchorMin = new Vector2(0, 1);
             headerDiv.anchorMax = new Vector2(1, 1);
             headerDiv.pivot = new Vector2(0.5f, 1);
-            headerDiv.sizeDelta = new Vector2(-32, 2);
-            headerDiv.anchoredPosition = new Vector2(0, -42);
+            headerDiv.sizeDelta = new Vector2(-24, 2);
+            headerDiv.anchoredPosition = new Vector2(0, -36);
 
             // 3. Coluna Esquerda: Lista de Receitas
             var leftCol = CreatePanel("LeftColumn", frameGO.transform, new Color(0.08f, 0.09f, 0.12f, 0.7f));
             leftCol.anchorMin = new Vector2(0, 0);
             leftCol.anchorMax = new Vector2(0, 1);
             leftCol.pivot = new Vector2(0, 0.5f);
-            leftCol.sizeDelta = new Vector2(165f, -64f);
-            leftCol.anchoredPosition = new Vector2(16f, -14f);
+            leftCol.sizeDelta = new Vector2(146f, -48f);
+            leftCol.anchoredPosition = new Vector2(12f, -18f);
 
-            var recipesTitle = CreateText("RecipesHeader", leftCol.transform, "RECEITAS", 11, FontStyles.Bold, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
+            var recipesTitle = CreateText("RecipesHeader", leftCol.transform, "RECEITAS", 10, FontStyles.Bold, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
             var rTitleRect = recipesTitle.GetComponent<RectTransform>();
             rTitleRect.anchorMin = new Vector2(0, 1);
             rTitleRect.anchorMax = new Vector2(1, 1);
             rTitleRect.pivot = new Vector2(0, 1);
             rTitleRect.anchoredPosition = new Vector2(8, -6);
-            rTitleRect.sizeDelta = new Vector2(-16, 20);
+            rTitleRect.sizeDelta = new Vector2(-16, 18);
 
             var listContainerGO = new GameObject("RecipeList", typeof(RectTransform), typeof(VerticalLayoutGroup));
             listContainerGO.transform.SetParent(leftCol.transform, false);
@@ -709,11 +708,11 @@ namespace Duskborn.UI
             _recipeListContainer.anchorMin = new Vector2(0, 0);
             _recipeListContainer.anchorMax = new Vector2(1, 1);
             _recipeListContainer.pivot = new Vector2(0.5f, 1);
-            _recipeListContainer.anchoredPosition = new Vector2(0, -16);
-            _recipeListContainer.sizeDelta = new Vector2(-12, -40);
+            _recipeListContainer.anchoredPosition = new Vector2(0, -14);
+            _recipeListContainer.sizeDelta = new Vector2(-10, -32);
 
             var vlg = listContainerGO.GetComponent<VerticalLayoutGroup>();
-            vlg.spacing = 6f;
+            vlg.spacing = 4f;
             vlg.childAlignment = TextAnchor.UpperCenter;
             vlg.childControlWidth = true;
             vlg.childControlHeight = false;
@@ -725,24 +724,24 @@ namespace Duskborn.UI
             rightCol.anchorMin = new Vector2(1, 0);
             rightCol.anchorMax = new Vector2(1, 1);
             rightCol.pivot = new Vector2(1, 0.5f);
-            rightCol.sizeDelta = new Vector2(225f, -64f);
-            rightCol.anchoredPosition = new Vector2(-16f, -14f);
+            rightCol.sizeDelta = new Vector2(200f, -48f);
+            rightCol.anchoredPosition = new Vector2(-12f, -18f);
 
-            var detailsTitle = CreateText("DetailsHeader", rightCol.transform, "DETALHES DA ARMA", 11, FontStyles.Bold, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
+            var detailsTitle = CreateText("DetailsHeader", rightCol.transform, "DETALHES DA ARMA", 10, FontStyles.Bold, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
             var dTitleRect = detailsTitle.GetComponent<RectTransform>();
             dTitleRect.anchorMin = new Vector2(0, 1);
             dTitleRect.anchorMax = new Vector2(1, 1);
             dTitleRect.pivot = new Vector2(0, 1);
             dTitleRect.anchoredPosition = new Vector2(8, -6);
-            dTitleRect.sizeDelta = new Vector2(-16, 20);
+            dTitleRect.sizeDelta = new Vector2(-16, 18);
 
             // Caixa de Preview (Ícone + Título + Categoria)
             var previewBox = CreatePanel("PreviewBox", rightCol.transform, new Color(0.12f, 0.14f, 0.18f, 0.85f));
             previewBox.anchorMin = new Vector2(0, 1);
             previewBox.anchorMax = new Vector2(1, 1);
             previewBox.pivot = new Vector2(0.5f, 1);
-            previewBox.anchoredPosition = new Vector2(0, -28);
-            previewBox.sizeDelta = new Vector2(-16, 60);
+            previewBox.anchoredPosition = new Vector2(0, -24);
+            previewBox.sizeDelta = new Vector2(-14, 48);
 
             // Slot do Ícone Grande
             var iconSlot = CreatePanel("IconSlot", previewBox.transform, new Color(0.06f, 0.07f, 0.09f, 1f));
@@ -750,7 +749,7 @@ namespace Duskborn.UI
             iconSlot.anchorMax = new Vector2(0, 0.5f);
             iconSlot.pivot = new Vector2(0, 0.5f);
             iconSlot.anchoredPosition = new Vector2(6, 0);
-            iconSlot.sizeDelta = new Vector2(48, 48);
+            iconSlot.sizeDelta = new Vector2(38, 38);
             if (slotFrameSprite != null)
             {
                 var sImg = iconSlot.GetComponent<Image>();
@@ -763,28 +762,28 @@ namespace Duskborn.UI
             var iconInnerRect = iconInnerGO.GetComponent<RectTransform>();
             iconInnerRect.anchorMin = Vector2.zero;
             iconInnerRect.anchorMax = Vector2.one;
-            iconInnerRect.sizeDelta = new Vector2(-6, -6);
+            iconInnerRect.sizeDelta = new Vector2(-4, -4);
             _detailIcon = iconInnerGO.GetComponent<Image>();
             _detailIcon.preserveAspect = true;
 
             // Título do Item
-            var itemTitleGO = CreateText("ItemTitle", previewBox.transform, "Machado de Pedra", 14, FontStyles.Bold, Color.white, TextAlignmentOptions.Left);
+            var itemTitleGO = CreateText("ItemTitle", previewBox.transform, "Machado de Pedra", 12, FontStyles.Bold, Color.white, TextAlignmentOptions.Left);
             var itemTitleRect = itemTitleGO.GetComponent<RectTransform>();
             itemTitleRect.anchorMin = new Vector2(0, 0.5f);
             itemTitleRect.anchorMax = new Vector2(1, 0.5f);
             itemTitleRect.pivot = new Vector2(0, 0);
-            itemTitleRect.anchoredPosition = new Vector2(60, 4);
-            itemTitleRect.sizeDelta = new Vector2(-66, 20);
+            itemTitleRect.anchoredPosition = new Vector2(50, 2);
+            itemTitleRect.sizeDelta = new Vector2(-54, 18);
             _detailTitle = itemTitleGO.GetComponent<TextMeshProUGUI>();
 
             // Categoria do Item
-            var itemCatGO = CreateText("ItemCategory", previewBox.transform, "Ferramenta • Nível 1", 10, FontStyles.Normal, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
+            var itemCatGO = CreateText("ItemCategory", previewBox.transform, "Ferramenta • Nível 1", 9, FontStyles.Normal, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
             var itemCatRect = itemCatGO.GetComponent<RectTransform>();
             itemCatRect.anchorMin = new Vector2(0, 0.5f);
             itemCatRect.anchorMax = new Vector2(1, 0.5f);
             itemCatRect.pivot = new Vector2(0, 1);
-            itemCatRect.anchoredPosition = new Vector2(60, 0);
-            itemCatRect.sizeDelta = new Vector2(-66, 16);
+            itemCatRect.anchoredPosition = new Vector2(50, -2);
+            itemCatRect.sizeDelta = new Vector2(-54, 14);
             _detailCategory = itemCatGO.GetComponent<TextMeshProUGUI>();
 
             // Caixa de Atributos & Bônus
@@ -792,35 +791,35 @@ namespace Duskborn.UI
             statsBox.anchorMin = new Vector2(0, 1);
             statsBox.anchorMax = new Vector2(1, 1);
             statsBox.pivot = new Vector2(0.5f, 1);
-            statsBox.anchoredPosition = new Vector2(0, -94);
-            statsBox.sizeDelta = new Vector2(-16, 95);
+            statsBox.anchoredPosition = new Vector2(0, -76);
+            statsBox.sizeDelta = new Vector2(-14, 60);
 
-            var statsTextGO = CreateText("StatsText", statsBox.transform, "+15% Dano\n+300% Dano vs Árvores", 11, FontStyles.Normal, new Color(0.85f, 0.9f, 0.95f, 1f), TextAlignmentOptions.TopLeft);
+            var statsTextGO = CreateText("StatsText", statsBox.transform, "+15% Dano\n+300% Dano vs Árvores", 9.5f, FontStyles.Normal, new Color(0.85f, 0.9f, 0.95f, 1f), TextAlignmentOptions.TopLeft);
             var statsTextRect = statsTextGO.GetComponent<RectTransform>();
             statsTextRect.anchorMin = Vector2.zero;
             statsTextRect.anchorMax = Vector2.one;
-            statsTextRect.sizeDelta = new Vector2(-12, -12);
+            statsTextRect.sizeDelta = new Vector2(-10, -10);
             statsTextRect.anchoredPosition = Vector2.zero;
             _detailStats = statsTextGO.GetComponent<TextMeshProUGUI>();
 
             // Descrição Flavour
-            var descGO = CreateText("Description", rightCol.transform, "Descrição da ferramenta...", 10, FontStyles.Italic, new Color(0.55f, 0.60f, 0.68f, 1f), TextAlignmentOptions.TopLeft);
+            var descGO = CreateText("Description", rightCol.transform, "Descrição da ferramenta...", 9, FontStyles.Italic, new Color(0.55f, 0.60f, 0.68f, 1f), TextAlignmentOptions.TopLeft);
             var descRect = descGO.GetComponent<RectTransform>();
             descRect.anchorMin = new Vector2(0, 1);
             descRect.anchorMax = new Vector2(1, 1);
             descRect.pivot = new Vector2(0.5f, 1);
-            descRect.anchoredPosition = new Vector2(0, -196);
-            descRect.sizeDelta = new Vector2(-16, 36);
+            descRect.anchoredPosition = new Vector2(0, -140);
+            descRect.sizeDelta = new Vector2(-14, 28);
             _detailDescription = descGO.GetComponent<TextMeshProUGUI>();
 
             // Seção de Ingredientes
-            var reqHeader = CreateText("ReqHeader", rightCol.transform, "MATERIAIS NECESSÁRIOS", 11, FontStyles.Bold, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
+            var reqHeader = CreateText("ReqHeader", rightCol.transform, "MATERIAIS NECESSÁRIOS", 9.5f, FontStyles.Bold, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
             var reqHeaderRect = reqHeader.GetComponent<RectTransform>();
             reqHeaderRect.anchorMin = new Vector2(0, 1);
             reqHeaderRect.anchorMax = new Vector2(1, 1);
             reqHeaderRect.pivot = new Vector2(0, 1);
-            reqHeaderRect.anchoredPosition = new Vector2(8, -238);
-            reqHeaderRect.sizeDelta = new Vector2(-16, 18);
+            reqHeaderRect.anchoredPosition = new Vector2(8, -170);
+            reqHeaderRect.sizeDelta = new Vector2(-16, 16);
 
             var ingContainerGO = new GameObject("IngredientsContainer", typeof(RectTransform), typeof(VerticalLayoutGroup));
             ingContainerGO.transform.SetParent(rightCol.transform, false);
@@ -828,11 +827,11 @@ namespace Duskborn.UI
             _ingredientsContainer.anchorMin = new Vector2(0, 1);
             _ingredientsContainer.anchorMax = new Vector2(1, 1);
             _ingredientsContainer.pivot = new Vector2(0.5f, 1);
-            _ingredientsContainer.anchoredPosition = new Vector2(0, -260);
-            _ingredientsContainer.sizeDelta = new Vector2(-16, 75);
+            _ingredientsContainer.anchoredPosition = new Vector2(0, -188);
+            _ingredientsContainer.sizeDelta = new Vector2(-14, 52);
 
             var ingVlg = ingContainerGO.GetComponent<VerticalLayoutGroup>();
-            ingVlg.spacing = 4f;
+            ingVlg.spacing = 3f;
             ingVlg.childAlignment = TextAnchor.UpperCenter;
             ingVlg.childControlWidth = true;
             ingVlg.childControlHeight = false;
@@ -840,25 +839,26 @@ namespace Duskborn.UI
             ingVlg.childForceExpandHeight = false;
 
             // Status de Fabricação
-            var statusGO = CreateText("StatusLabel", rightCol.transform, string.Empty, 11, FontStyles.Bold, Color.white, TextAlignmentOptions.Center);
+            var statusGO = CreateText("StatusLabel", rightCol.transform, string.Empty, 9.5f, FontStyles.Bold, Color.white, TextAlignmentOptions.Center);
             var statusRect = statusGO.GetComponent<RectTransform>();
             statusRect.anchorMin = new Vector2(0, 0);
             statusRect.anchorMax = new Vector2(1, 0);
             statusRect.pivot = new Vector2(0.5f, 0);
-            statusRect.anchoredPosition = new Vector2(0, 52);
-            statusRect.sizeDelta = new Vector2(-16, 20);
+            statusRect.anchoredPosition = new Vector2(0, 42);
+            statusRect.sizeDelta = new Vector2(-14, 18);
             _statusLabel = statusGO.GetComponent<TextMeshProUGUI>();
 
             // Botão Fabricar
-            var craftBtnGO = CreateButton("CraftButton", rightCol.transform, "FABRICAR", new Vector2(-24, 38), new Color(0.85f, 0.55f, 0.12f, 1f));
+            var craftBtnGO = CreateButton("CraftButton", rightCol.transform, "FABRICAR", new Vector2(-20, 30), new Color(0.85f, 0.55f, 0.12f, 1f));
             var craftBtnRect = craftBtnGO.GetComponent<RectTransform>();
             craftBtnRect.anchorMin = new Vector2(0, 0);
             craftBtnRect.anchorMax = new Vector2(1, 0);
             craftBtnRect.pivot = new Vector2(0.5f, 0);
-            craftBtnRect.anchoredPosition = new Vector2(0, 10);
+            craftBtnRect.anchoredPosition = new Vector2(0, 8);
             _craftButton = craftBtnGO.GetComponent<Button>();
             _craftButton.onClick.AddListener(CraftSelectedRecipe);
             _craftButtonLabel = craftBtnGO.GetComponentInChildren<TextMeshProUGUI>();
+            if (_craftButtonLabel != null) _craftButtonLabel.fontSize = 11.5f;
 
             // Cores do Botão Fabricar
             var btnColors = _craftButton.colors;
@@ -867,6 +867,9 @@ namespace Duskborn.UI
             btnColors.pressedColor = new Color(0.70f, 0.42f, 0.08f, 1f);
             btnColors.disabledColor = new Color(0.25f, 0.28f, 0.35f, 0.7f);
             _craftButton.colors = btnColors;
+
+            // Inicia oculto até ser ativado explicitamente via Open()
+            frameGO.SetActive(false);
         }
 
         private GameObject CreateRecipeEntryView(CraftingRecipe recipe, Transform parent)
@@ -875,7 +878,7 @@ namespace Duskborn.UI
             go.transform.SetParent(parent, false);
 
             var rect = go.GetComponent<RectTransform>();
-            rect.sizeDelta = new Vector2(150, 44);
+            rect.sizeDelta = new Vector2(136, 36);
 
             var img = go.GetComponent<Image>();
             img.color = new Color(0.12f, 0.14f, 0.18f, 0.95f);
@@ -891,8 +894,8 @@ namespace Duskborn.UI
             iconRect.anchorMin = new Vector2(0, 0.5f);
             iconRect.anchorMax = new Vector2(0, 0.5f);
             iconRect.pivot = new Vector2(0, 0.5f);
-            iconRect.anchoredPosition = new Vector2(6, 0);
-            iconRect.sizeDelta = new Vector2(32, 32);
+            iconRect.anchoredPosition = new Vector2(4, 0);
+            iconRect.sizeDelta = new Vector2(28, 28);
 
             var iconImg = iconGO.GetComponent<Image>();
             var iconTex = recipe.Icon;
@@ -901,22 +904,22 @@ namespace Duskborn.UI
             iconImg.preserveAspect = true;
 
             // Nome da Receita
-            var labelGO = CreateText("Name", go.transform, recipe.RecipeName, 12, FontStyles.Bold, Color.white, TextAlignmentOptions.Left);
+            var labelGO = CreateText("Name", go.transform, recipe.RecipeName, 11, FontStyles.Bold, Color.white, TextAlignmentOptions.Left);
             var labelRect = labelGO.GetComponent<RectTransform>();
             labelRect.anchorMin = new Vector2(0, 0.5f);
             labelRect.anchorMax = new Vector2(1, 0.5f);
             labelRect.pivot = new Vector2(0, 0.5f);
-            labelRect.anchoredPosition = new Vector2(44, 4);
-            labelRect.sizeDelta = new Vector2(-48, 18);
+            labelRect.anchoredPosition = new Vector2(36, 4);
+            labelRect.sizeDelta = new Vector2(-40, 16);
 
             // Indicador de Status (Pronto / Falta)
-            var indGO = CreateText("Indicator", go.transform, "Pronto", 9, FontStyles.Normal, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
+            var indGO = CreateText("Indicator", go.transform, "Pronto", 8.5f, FontStyles.Normal, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
             var indRect = indGO.GetComponent<RectTransform>();
             indRect.anchorMin = new Vector2(0, 0.5f);
             indRect.anchorMax = new Vector2(1, 0.5f);
             indRect.pivot = new Vector2(0, 0.5f);
-            indRect.anchoredPosition = new Vector2(44, -10);
-            indRect.sizeDelta = new Vector2(-48, 14);
+            indRect.anchoredPosition = new Vector2(36, -8);
+            indRect.sizeDelta = new Vector2(-40, 12);
 
             var btn = go.GetComponent<Button>();
             btn.onClick.AddListener(() => SelectRecipe(recipe));
@@ -930,7 +933,7 @@ namespace Duskborn.UI
             rowGO.transform.SetParent(parent, false);
 
             var rect = rowGO.GetComponent<RectTransform>();
-            rect.sizeDelta = new Vector2(200, 26);
+            rect.sizeDelta = new Vector2(180, 22);
 
             var img = rowGO.GetComponent<Image>();
             img.color = new Color(0.12f, 0.14f, 0.18f, 0.6f);
@@ -942,8 +945,8 @@ namespace Duskborn.UI
             iconRect.anchorMin = new Vector2(0, 0.5f);
             iconRect.anchorMax = new Vector2(0, 0.5f);
             iconRect.pivot = new Vector2(0, 0.5f);
-            iconRect.anchoredPosition = new Vector2(4, 0);
-            iconRect.sizeDelta = new Vector2(20, 20);
+            iconRect.anchoredPosition = new Vector2(3, 0);
+            iconRect.sizeDelta = new Vector2(16, 16);
 
             var iconImg = iconGO.GetComponent<Image>();
             if (mat.Icon != null)
@@ -951,26 +954,26 @@ namespace Duskborn.UI
             iconImg.preserveAspect = true;
 
             // Nome do Material
-            var nameGO = CreateText("Name", rowGO.transform, mat.DisplayName, 11, FontStyles.Normal, Color.white, TextAlignmentOptions.Left);
+            var nameGO = CreateText("Name", rowGO.transform, mat.DisplayName, 9.5f, FontStyles.Normal, Color.white, TextAlignmentOptions.Left);
             var nameRect = nameGO.GetComponent<RectTransform>();
             nameRect.anchorMin = new Vector2(0, 0.5f);
             nameRect.anchorMax = new Vector2(0.6f, 0.5f);
             nameRect.pivot = new Vector2(0, 0.5f);
-            nameRect.anchoredPosition = new Vector2(28, 0);
-            nameRect.sizeDelta = new Vector2(0, 20);
+            nameRect.anchoredPosition = new Vector2(24, 0);
+            nameRect.sizeDelta = new Vector2(0, 18);
 
             // Quantidade (Verde se tem o suficiente, Vermelho se não)
             bool enough = current >= required;
             string countColor = enough ? "#4ade80" : "#f87171";
             string countText = $"<color={countColor}>{current}</color> / {required}";
 
-            var countGO = CreateText("Count", rowGO.transform, countText, 11, FontStyles.Bold, Color.white, TextAlignmentOptions.Right);
+            var countGO = CreateText("Count", rowGO.transform, countText, 9.5f, FontStyles.Bold, Color.white, TextAlignmentOptions.Right);
             var countRect = countGO.GetComponent<RectTransform>();
             countRect.anchorMin = new Vector2(0.6f, 0.5f);
             countRect.anchorMax = new Vector2(1, 0.5f);
             countRect.pivot = new Vector2(1, 0.5f);
-            countRect.anchoredPosition = new Vector2(-6, 0);
-            countRect.sizeDelta = new Vector2(0, 20);
+            countRect.anchoredPosition = new Vector2(-4, 0);
+            countRect.sizeDelta = new Vector2(0, 18);
 
             return rowGO;
         }
@@ -1064,10 +1067,21 @@ namespace Duskborn.UI
 
         private void LoadAudioClips()
         {
-            if (openSound == null) openSound = Resources.Load<AudioClip>("SFX/ui_modal_open");
-            if (clickSound == null) clickSound = Resources.Load<AudioClip>("SFX/ui_button_click");
-            if (craftSound == null) craftSound = Resources.Load<AudioClip>("SFX/hit_stone_01");
-            if (errorSound == null) errorSound = Resources.Load<AudioClip>("SFX/ui_error");
+            var db = Duskborn.Audio.AudioDatabase.Instance?.UI;
+            if (db != null)
+            {
+                if (openSound == null) openSound = db.modalOpenClip;
+                if (clickSound == null) clickSound = db.buttonClickClip;
+                if (craftSound == null) craftSound = db.craftSuccessClip;
+                if (errorSound == null) errorSound = db.errorClip;
+            }
+            else
+            {
+                if (openSound == null) openSound = Resources.Load<AudioClip>("SFX/ui_modal_open");
+                if (clickSound == null) clickSound = Resources.Load<AudioClip>("SFX/ui_button_click");
+                if (craftSound == null) craftSound = Resources.Load<AudioClip>("SFX/hit_stone_01");
+                if (errorSound == null) errorSound = Resources.Load<AudioClip>("SFX/ui_error");
+            }
         }
 
         private void PlaySound(AudioClip clip)

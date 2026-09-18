@@ -162,6 +162,12 @@ namespace Duskborn.UI
 
         private void TryLoadAudio()
         {
+            if (Duskborn.Audio.AudioDatabase.Instance != null)
+            {
+                if (clickSfx == null) clickSfx = Duskborn.Audio.AudioDatabase.Instance.UI.buttonClickClip;
+                if (modalOpenSfx == null) modalOpenSfx = Duskborn.Audio.AudioDatabase.Instance.UI.modalOpenClip;
+            }
+
             if (clickSfx == null) clickSfx = Resources.Load<AudioClip>("SFX/ui_button_click");
             if (modalOpenSfx == null) modalOpenSfx = Resources.Load<AudioClip>("SFX/ui_modal_open");
 

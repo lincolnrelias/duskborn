@@ -12,7 +12,7 @@ namespace Duskborn.Gameplay.Loot
                 id: def.name,
                 displayName: def.ItemName,
                 description: BuildDescription(def),
-                iconId: string.Empty)
+                iconId: def.Icon != null ? def.Icon.name : string.Empty)
         {
             Source = def;
         }

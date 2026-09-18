@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: item_berserk_talisman
   m_EditorClassIdentifier: 
   ItemName: Berserk Talisman
+  Icon: {fileID: 2800000, guid: 2ecf0d4ceab3562280b1834aed508f19, type: 3}
   Rarity: 2
   EffectType: 0
   EffectMode: 1

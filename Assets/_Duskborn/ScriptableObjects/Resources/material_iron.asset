@@ -15,6 +15,6 @@ MonoBehaviour:
   id: material_iron
   displayName: Iron
   description: Crude iron ore
-  icon: {fileID: 2800000, guid: 79542d6b7702c4e4890f697c8fdc0dd4, type: 3}
+  icon: {fileID: 2800000, guid: cf204c5253025a8fa531011cb933bd0c, type: 3}
   dropPrefab: {fileID: 5752967656333843250, guid: ba3bcaa1283194641bd6f71a89595265, type: 3}
   category: common

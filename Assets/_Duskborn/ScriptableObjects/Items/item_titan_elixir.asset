@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: item_titan_elixir
   m_EditorClassIdentifier: 
   ItemName: Titan Elixir
+  Icon: {fileID: 2800000, guid: b1b00fa4504752ff8f8b1976927ad60c, type: 3}
   Rarity: 3
   EffectType: 1
   EffectMode: 1

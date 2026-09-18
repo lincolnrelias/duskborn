@@ -19,6 +19,7 @@ namespace Duskborn.Gameplay.Loot
     public class ItemDefinition : ScriptableObject
     {
         public string       ItemName;
+        public Texture2D    Icon;
         public ItemRarity   Rarity;
         public ItemEffectType EffectType;
         // Multiplicative = 0, so existing assets that have no EffectMode field default to Multiplicative.

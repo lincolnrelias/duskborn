@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: item_steroids
   m_EditorClassIdentifier: 
   ItemName: Steroids
+  Icon: {fileID: 2800000, guid: 5c867df5cf91543fb076617923607142, type: 3}
   Rarity: 0
   EffectType: 3
   EffectMode: 1

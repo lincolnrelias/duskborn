@@ -35,6 +35,7 @@ MonoBehaviour:
     clips:
     - {fileID: 8300000, guid: 92931fa3b00ab1bca30373337ad96609, type: 3}
     - {fileID: 8300000, guid: 4e83f09ad9c0fbf8bb9593ae495ad810, type: 3}
+    - {fileID: 8300000, guid: 0b6b0c9b65edc797e849cb0ce5ec2bd8, type: 3}
   - tag: Enemy
     clips:
     - {fileID: 8300000, guid: f78a753bbdea3a62f5cd329b65a49625, type: 3}

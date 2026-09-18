@@ -189,78 +189,127 @@ def gen_hit_flesh(variation=1):
     return simple_reverb(create_stereo(left, right), decay=0.2, wet=0.15)
 
 def gen_hit_wood(variation=1):
+    # Punchy axe chop with wood fiber bite and resonant timber thud
     duration = 0.32
     n = int(SR * duration)
     t = np.linspace(0, duration, n)
     
-    click = np.zeros(n)
-    click_len = 100
-    click[:click_len] = np.sin(np.linspace(0, np.pi*4, click_len)) * np.linspace(1, 0, click_len)
+    # Sharp axe edge bite transient: fast pitched down swept click + noise burst
+    click_n = int(SR * 0.015)
+    t_click = t[:click_n]
+    f_click = np.linspace(600 + variation * 50, 120, click_n)
+    click = np.sin(2 * np.pi * np.cumsum(f_click / SR)) * np.exp(-180 * t_click)
+    bite = bandpass_filter(white_noise(click_n), 2600 + variation * 200, q=2.0) * np.exp(-140 * t_click)
     
-    modes = [180 + variation*15, 340 + variation*20, 680 + variation*30, 1150]
+    # Solid acoustic timber resonance (inharmonic modes with rapid wood internal damping)
+    f0 = 145 + variation * 18
+    modes = [f0, f0 * 2.15, f0 * 3.6, f0 * 5.2]
+    decays = [22.0, 32.0, 48.0, 65.0]
     wood_body = np.zeros(n)
-    for idx, f in enumerate(modes):
-        wood_body += np.sin(2 * np.pi * f * t) * np.exp(-(16 + idx * 8) * t) * (1.0 / (idx + 1))
+    for idx, (f, dec) in enumerate(zip(modes, decays)):
+        amp = 1.0 / (idx + 1.2)
+        f_env = f * (1.0 + 0.25 * np.exp(-60 * t))
+        phase = 2 * np.pi * np.cumsum(f_env / SR)
+        wood_body += np.sin(phase) * np.exp(-dec * t) * amp
         
-    splinters = np.zeros(n)
-    for _ in range(8 + variation * 2):
-        pos = np.random.randint(50, int(SR * 0.12))
-        splinters[pos:pos+40] += white_noise(40) * np.exp(-np.linspace(0, 5, 40)) * 0.5
-    splinters = highpass_filter(splinters, 1200)
+    # Low-end punch (tactile weight of a heavy log hit)
+    sub = np.sin(2 * np.pi * (85 + variation * 8) * t) * np.exp(-28 * t) * 0.7
     
-    mono = click * 0.9 + wood_body * 1.1 + splinters * 0.7
-    mono = np.tanh(mono * 1.7)
+    # Wood fiber crunch / splinter scatter
+    splinter_noise = highpass_filter(white_noise(n), 1800) * np.exp(-32 * t) * 0.6
+    for _ in range(6 + variation * 2):
+        pos = np.random.randint(int(SR * 0.005), int(SR * 0.08))
+        s_len = np.random.randint(60, 180)
+        if pos + s_len < n:
+            splinter_noise[pos:pos+s_len] += white_noise(s_len) * np.linspace(0.8, 0, s_len) * 0.4
+            
+    mono = np.zeros(n)
+    mono[:click_n] += (click * 1.3 + bite * 1.1)
+    mono += wood_body * 1.4 + sub + splinter_noise * 0.8
+    mono = np.tanh(mono * 1.8)
     
     left = mono
-    right = np.roll(mono, 6)
-    return simple_reverb(create_stereo(left, right), decay=0.25, wet=0.18)
+    right = np.roll(mono, 5) * 0.95
+    return simple_reverb(create_stereo(left, right), decay=0.22, wet=0.15)
 
 def gen_hit_stone(variation=1):
+    # Heavy, solid pickaxe strike on dense mineral rock with gravel scatter
     duration = 0.30
     n = int(SR * duration)
     t = np.linspace(0, duration, n)
     
-    click = np.zeros(n)
-    click_len = 80
-    click[:click_len] = white_noise(click_len) * np.linspace(1, 0, click_len)
+    # Sharp pick transient
+    click_n = int(SR * 0.012)
+    t_click = t[:click_n]
+    f_click = np.linspace(2200 + variation * 100, 320, click_n)
+    click = np.sin(2 * np.pi * np.cumsum(f_click / SR)) * np.exp(-220 * t_click)
+    crack_spike = highpass_filter(white_noise(click_n), 3000) * np.exp(-200 * t_click) * 1.2
     
-    pings = [820 + variation * 40, 1420 + variation * 60, 2650, 4200]
-    mineral_tone = np.zeros(n)
-    for idx, f in enumerate(pings):
-        decay = 25 + idx * 12
-        mineral_tone += np.sin(2 * np.pi * f * t) * np.exp(-decay * t) * (0.8 / (idx + 1))
+    # Dense mineral body (heavy rock density, fast acoustic damping)
+    f0 = 175 + variation * 25
+    modes = [f0, f0 * 2.8, f0 * 4.9, 1650, 2900]
+    decays = [26.0, 38.0, 52.0, 68.0, 85.0]
+    mineral_body = np.zeros(n)
+    for idx, (f, dec) in enumerate(zip(modes, decays)):
+        amp = 1.0 / (idx + 1.1)
+        phase = 2 * np.pi * f * t
+        mineral_body += np.sin(phase) * np.exp(-dec * t) * amp
         
-    gravel = bandpass_filter(white_noise(n), 2800, q=2.0) * np.exp(-30 * t) * 0.6
+    # Heavy stone mass thump
+    thud = np.sin(2 * np.pi * (110 - 20 * t/duration) * t) * np.exp(-35 * t) * 0.9
     
-    mono = click * 1.0 + mineral_tone * 1.3 + gravel * 0.7
-    mono = np.tanh(mono * 1.8)
+    # Gritty gravel / rock chip crunch
+    gravel = bandpass_filter(white_noise(n), 2400 + variation * 200, q=2.2) * np.exp(-32 * t) * 0.85
+    for _ in range(8):
+        pos = np.random.randint(int(SR * 0.008), int(SR * 0.10))
+        g_len = np.random.randint(40, 140)
+        if pos + g_len < n:
+            gravel[pos:pos+g_len] += white_noise(g_len) * np.linspace(0.6, 0, g_len) * 0.5
+            
+    mono = np.zeros(n)
+    mono[:click_n] += (click * 1.2 + crack_spike)
+    mono += mineral_body * 1.3 + thud + gravel
+    mono = np.tanh(mono * 1.9)
     
     left = mono
     right = np.roll(mono, 4)
-    return simple_reverb(create_stereo(left, right), decay=0.3, wet=0.22)
+    return simple_reverb(create_stereo(left, right), decay=0.25, wet=0.18)
 
 def gen_hit_metal(variation=1):
-    duration = 0.55
+    # Pickaxe strike on metallic iron ore vein: heavy mineral impact + crisp metallic ring
+    duration = 0.38
     n = int(SR * duration)
     t = np.linspace(0, duration, n)
     
-    strike = np.zeros(n)
-    strike[:120] = white_noise(120) * np.linspace(1, 0, 120)
-    strike = highpass_filter(strike, 3000)
+    # Sharp pick-on-metal transient
+    click_n = int(SR * 0.01)
+    t_click = t[:click_n]
+    spark = highpass_filter(white_noise(click_n), 4200) * np.exp(-240 * t_click) * 1.4
     
-    base_f = 920 + variation * 80
-    modes = [base_f, base_f * 1.78, base_f * 2.45, base_f * 3.32, base_f * 4.6]
-    bell_decay = [8.0, 12.0, 16.0, 22.0, 30.0]
+    # Resonant metallic ping (embedded in rock, so crisper and faster damped than free bell)
+    base_f = 1350 + variation * 120
+    metal_modes = [base_f, base_f * 1.62, base_f * 2.38, base_f * 3.45, 5200]
+    metal_decays = [15.0, 20.0, 28.0, 36.0, 50.0]
     metal_ring = np.zeros(n)
-    for idx, (f, dec) in enumerate(zip(modes, bell_decay)):
-        metal_ring += np.sin(2 * np.pi * f * t + np.random.uniform(0, math.pi)) * np.exp(-dec * t) * (0.7 / (idx + 1))
+    for idx, (f, dec) in enumerate(zip(metal_modes, metal_decays)):
+        amp = 1.0 / (idx + 1.2)
+        metal_ring += np.sin(2 * np.pi * f * t) * np.exp(-dec * t) * amp
         
-    mono = strike * 1.1 + metal_ring * 1.4
-    mono = np.tanh(mono * 1.6)
+    # Stone underlayer thump (dense host rock holding the ore vein)
+    stone_thump = np.sin(2 * np.pi * (135 + variation * 15) * t) * np.exp(-30 * t) * 1.1
+    sub = np.sin(2 * np.pi * 75 * t) * np.exp(-25 * t) * 0.6
+    
+    # Metallic abrasive scrape / mineral crunch
+    crunch = bandpass_filter(white_noise(n), 3200, q=2.5) * np.exp(-34 * t) * 0.75
+    
+    mono = np.zeros(n)
+    mono[:click_n] += spark
+    mono += metal_ring * 1.5 + stone_thump + sub + crunch
+    mono = np.tanh(mono * 1.8)
     
     left = mono
-    right = np.roll(mono, 10)
-    return simple_reverb(create_stereo(left, right), decay=0.45, wet=0.28)
+    right = np.roll(mono, 6) * 0.95
+    return simple_reverb(create_stereo(left, right), decay=0.32, wet=0.22)
 
 def gen_hit_default(variation=1):
     duration = 0.25
@@ -460,50 +509,176 @@ def gen_chest_open():
     right = np.roll(audio, 12)
     return simple_reverb(create_stereo(left, right), decay=0.45, wet=0.35)
 
-def gen_tree_fall():
-    duration = 1.4
+def gen_tree_fall(variation=1):
+    # Short, punchy Palworld-style tree break / timber burst (~0.55s):
+    # Immediate sharp wood snap + crunchy splinter pop + quick rustle burst
+    duration = 0.52 + variation * 0.04
     n = int(SR * duration)
     t = np.linspace(0, duration, n)
     
-    creak = bandpass_filter(pink_noise(n), 320, q=2.0) * (t < 0.4) * np.sin(np.pi * t / 0.4) * 0.8
+    # 1. Immediate structural trunk SNAP (0.0s - 0.02s)
+    click_n = int(SR * 0.02)
+    t_c = t[:click_n]
+    f_snap = np.linspace(800 + variation * 80, 160, click_n)
+    snap = np.sin(2 * np.pi * np.cumsum(f_snap / SR)) * np.exp(-160 * t_c) * 1.6
+    snap_noise = bandpass_filter(white_noise(click_n), 2400, q=1.5) * np.exp(-140 * t_c) * 1.4
     
-    crack = np.zeros(n)
-    crack_start = int(SR * 0.35)
-    crack_len = int(SR * 0.15)
-    crack[crack_start:crack_start+crack_len] = white_noise(crack_len) * np.linspace(1, 0, crack_len)
-    crack = bandpass_filter(crack, 1100, q=1.5) * 1.5
+    # Tactile wood body thump
+    sub = np.sin(2 * np.pi * (80 - 20 * t/0.2) * t) * np.exp(-20 * t) * 1.5
+    wood_pop = np.sin(2 * np.pi * (150 + variation * 15) * t) * np.exp(-24 * t) * 1.3
     
-    impact_start = int(SR * 0.7)
-    impact_len = n - impact_start
-    t_imp = np.linspace(0, impact_len/SR, impact_len)
-    impact = np.sin(2 * np.pi * 55 * t_imp) * np.exp(-9 * t_imp) * 1.3
-    leaves = bandpass_filter(white_noise(impact_len), 2200, q=1.8) * np.exp(-6 * t_imp) * 0.6
-    
-    audio = creak + crack
-    audio[impact_start:] += impact + leaves
-    audio = np.tanh(audio * 1.6)
-    return simple_reverb(create_stereo(audio, np.roll(audio, 10)), decay=0.4, wet=0.25)
-
-def gen_rock_shatter():
-    duration = 1.1
-    n = int(SR * duration)
-    t = np.linspace(0, duration, n)
-    
-    crack = np.zeros(n)
-    crack[:int(SR*0.08)] = white_noise(int(SR*0.08)) * np.linspace(1, 0, int(SR*0.08))
-    crack = highpass_filter(crack, 2200) * 1.2
-    
-    boom = np.sin(2 * np.pi * 70 * t) * np.exp(-12 * t) * 1.3
-    
-    debris = np.zeros(n)
-    for _ in range(12):
-        pos = np.random.randint(int(SR*0.1), int(SR*0.8))
-        d_len = np.random.randint(500, 1500)
-        if pos + d_len < n:
-            debris[pos:pos+d_len] += np.sin(2 * np.pi * np.random.uniform(300, 1200) * np.linspace(0, d_len/SR, d_len)) * np.linspace(1, 0, d_len) * 0.3
+    # 2. Crunchy wood splinter burst (0.02s - 0.25s)
+    splinter_burst = highpass_filter(white_noise(n), 1600) * np.exp(-15 * t) * 1.2
+    for _ in range(8):
+        pos = np.random.randint(int(SR * 0.01), int(SR * 0.18))
+        s_len = np.random.randint(60, 200)
+        if pos + s_len < n:
+            splinter_burst[pos:pos+s_len] += white_noise(s_len) * np.linspace(1, 0, s_len) * 0.7
             
-    mono = np.tanh((crack + boom + debris) * 1.6)
-    return simple_reverb(create_stereo(mono, np.roll(mono, 8)), decay=0.35, wet=0.25)
+    # 3. Quick leafy rustle swoosh (0.05s - 0.45s)
+    foliage_len = int(SR * 0.4)
+    t_f = t[:foliage_len]
+    foliage_env = np.sin(np.pi * (t_f / 0.4)) ** 1.8
+    foliage = bandpass_filter(pink_noise(foliage_len), 1800, q=1.3) * foliage_env * 0.75
+    
+    mono = np.zeros(n)
+    mono[:click_n] += (snap + snap_noise)
+    mono += sub + wood_pop + splinter_burst
+    mono[:foliage_len] += foliage
+    mono = np.tanh(mono * 1.8)
+    
+    left = mono
+    right = np.roll(mono, 6) * 0.95
+    return simple_reverb(create_stereo(left, right), decay=0.18, wet=0.14)
+
+def gen_rock_shatter(variation=1):
+    # Organic physical rock fracture (~0.52s - 0.56s):
+    # Pure non-tonal acoustic model: brittle cleavage crack, heavy crumbling mineral mass,
+    # granular shear friction, micro-cracks, and noise-excited pebble debris. Zero synthetic sines.
+    duration = 0.52 + variation * 0.04
+    n = int(SR * duration)
+    t = np.linspace(0, duration, n)
+    
+    noise_w = white_noise(n)
+    noise_p = pink_noise(n)
+    
+    # 1. Immediate brittle cleavage crack (0.0s - 0.02s) - Pure acoustic crack, no sine chirp
+    crack_hi = highpass_filter(noise_w, 2200 + variation * 150, q=0.8) * np.exp(-130 * t) * 1.8
+    crack_mid = bandpass_filter(noise_w, 1100 + variation * 80, q=2.2) * np.exp(-90 * t) * 1.5
+    transient_snap = noise_w * np.exp(-320 * t) * 1.4
+    
+    # 2. Heavy crumbling mineral mass & low-end thud (Dense stone collapsing, NOT an 808 synth sine)
+    sub_thud = lowpass_filter(noise_p, 105 + variation * 10, q=1.4) * np.exp(-22 * t) * 2.4
+    body_mass = bandpass_filter(noise_p, 190 + variation * 15, q=2.0) * np.exp(-27 * t) * 1.8
+    punch_thud = bandpass_filter(noise_p, 80, q=2.2) * np.exp(-30 * t) * 1.5
+    
+    # 3. Granular cleavage crunch & internal shear friction (0.01s - 0.25s)
+    fracture_crunch = bandpass_filter(noise_w, 1350 + variation * 100, q=1.5) * np.exp(-16 * t) * 1.3
+    grit_layer = bandpass_filter(noise_p, 680, q=1.8) * np.exp(-14 * t) * 1.1
+    
+    # Micro-cracks (multiple internal stone cleavage snaps)
+    micro_buffer = np.zeros(n)
+    for _ in range(12):
+        pos = np.random.randint(int(SR * 0.005), int(SR * 0.14))
+        m_len = np.random.randint(80, 260)
+        if pos + m_len < n:
+            m_t = np.linspace(0, 1, m_len)
+            window = np.sin(np.pi * m_t) * np.exp(-4.0 * m_t)
+            micro_buffer[pos:pos+m_len] += white_noise(m_len) * window * np.random.uniform(0.6, 1.2)
+    micro_filtered = bandpass_filter(micro_buffer, 2200 + variation * 200, q=2.0) * 1.4
+    
+    # 4. Scattering rock chunks and pebble impacts (organic noise-excited pebble resonators)
+    pebble_exciter_lo = np.zeros(n)
+    pebble_exciter_hi = np.zeros(n)
+    for i in range(8):
+        pos = int(SR * (0.07 + i * 0.048 + np.random.uniform(0, 0.02)))
+        d_len = np.random.randint(int(SR * 0.008), int(SR * 0.025))
+        if pos + d_len < n:
+            d_t = np.linspace(0, 1, d_len)
+            impulse = white_noise(d_len) * np.exp(-8.0 * d_t) * np.random.uniform(0.5, 1.0)
+            if i % 2 == 0:
+                pebble_exciter_lo[pos:pos+d_len] += impulse
+            else:
+                pebble_exciter_hi[pos:pos+d_len] += impulse
+                
+    pebbles_lo = bandpass_filter(pebble_exciter_lo, 780 + variation * 50, q=4.5) * 1.5
+    pebbles_hi = bandpass_filter(pebble_exciter_hi, 1350 + variation * 80, q=4.0) * 1.3
+    
+    mono = (crack_hi + crack_mid + transient_snap + sub_thud + body_mass + punch_thud +
+            fracture_crunch + grit_layer + micro_filtered + pebbles_lo + pebbles_hi)
+    mono = np.tanh(mono * 1.4)
+    
+    left = mono
+    right = np.roll(mono, 4) * 0.95
+    return simple_reverb(create_stereo(left, right), decay=0.16, wet=0.12)
+
+def gen_ore_shatter(variation=1):
+    # Organic physical ore fracture (~0.54s - 0.58s):
+    # Dense mineralized rock fracture: heavy stone base + sharp flint/mineral cleavage spark +
+    # fast-damped inharmonic mineral resonance (ironstone flint impact) + scattering ore debris. Zero synth bells.
+    duration = 0.54 + variation * 0.04
+    n = int(SR * duration)
+    t = np.linspace(0, duration, n)
+    
+    noise_w = white_noise(n)
+    noise_p = pink_noise(n)
+    
+    # 1. Sharp flint/mineral cleavage transient
+    crack_spark = highpass_filter(noise_w, 3400 + variation * 200, q=0.9) * np.exp(-140 * t) * 1.9
+    crack_mid = bandpass_filter(noise_w, 1400 + variation * 100, q=2.5) * np.exp(-95 * t) * 1.4
+    transient_snap = noise_w * np.exp(-340 * t) * 1.5
+    
+    # 2. Organic low-frequency rock mass & thud (Dense stone foundation)
+    sub_thud = lowpass_filter(noise_p, 110 + variation * 10, q=1.4) * np.exp(-22 * t) * 2.2
+    body_mass = bandpass_filter(noise_p, 210 + variation * 20, q=2.2) * np.exp(-28 * t) * 1.7
+    punch_thud = bandpass_filter(noise_p, 85, q=2.2) * np.exp(-30 * t) * 1.4
+    
+    # 3. Dense inharmonic mineral resonance (excited by noise impulse, fast damped - NOT a pure synth bell)
+    mineral_exciter = noise_w * np.exp(-42 * t)
+    f_base = 1380 + variation * 120
+    m_res1 = bandpass_filter(mineral_exciter, f_base, q=6.0) * 1.2
+    m_res2 = bandpass_filter(mineral_exciter, f_base * 1.62, q=7.0) * 0.9
+    m_res3 = bandpass_filter(mineral_exciter, f_base * 2.45, q=8.0) * 0.6
+    mineral_resonance = m_res1 + m_res2 + m_res3
+    
+    # 4. Granular fracture & micro-cracks
+    fracture_crunch = bandpass_filter(noise_w, 1600 + variation * 100, q=1.6) * np.exp(-16 * t) * 1.2
+    grit_layer = bandpass_filter(noise_p, 720, q=1.8) * np.exp(-14 * t) * 1.0
+    
+    micro_buffer = np.zeros(n)
+    for _ in range(12):
+        pos = np.random.randint(int(SR * 0.005), int(SR * 0.14))
+        m_len = np.random.randint(70, 220)
+        if pos + m_len < n:
+            m_t = np.linspace(0, 1, m_len)
+            window = np.sin(np.pi * m_t) * np.exp(-4.0 * m_t)
+            micro_buffer[pos:pos+m_len] += white_noise(m_len) * window * np.random.uniform(0.6, 1.2)
+    micro_filtered = bandpass_filter(micro_buffer, 2600 + variation * 200, q=2.2) * 1.4
+    
+    # 5. Ore chunk clatter & scattering
+    pebble_exciter_lo = np.zeros(n)
+    pebble_exciter_hi = np.zeros(n)
+    for i in range(8):
+        pos = int(SR * (0.07 + i * 0.048 + np.random.uniform(0, 0.02)))
+        d_len = np.random.randint(int(SR * 0.008), int(SR * 0.025))
+        if pos + d_len < n:
+            d_t = np.linspace(0, 1, d_len)
+            impulse = white_noise(d_len) * np.exp(-8.0 * d_t) * np.random.uniform(0.5, 1.0)
+            if i % 2 == 0:
+                pebble_exciter_lo[pos:pos+d_len] += impulse
+            else:
+                pebble_exciter_hi[pos:pos+d_len] += impulse
+                
+    pebbles_lo = bandpass_filter(pebble_exciter_lo, 950 + variation * 60, q=4.5) * 1.5
+    pebbles_hi = bandpass_filter(pebble_exciter_hi, 1850 + variation * 100, q=4.5) * 1.3
+    
+    mono = (crack_spark + crack_mid + transient_snap + sub_thud + body_mass + punch_thud +
+            mineral_resonance * 1.1 + fracture_crunch + grit_layer + micro_filtered + pebbles_lo + pebbles_hi)
+    mono = np.tanh(mono * 1.4)
+    
+    left = mono
+    right = np.roll(mono, 5) * 0.95
+    return simple_reverb(create_stereo(left, right), decay=0.18, wet=0.12)
 
 def gen_gold_pickup():
     duration = 0.38
@@ -957,96 +1132,111 @@ def gen_music_night_combat():
 # ==========================================
 
 def main():
-    sfx_dir = "Assets/_Duskborn/Art/SFX"
+    sfx_dirs = ["Assets/_Duskborn/Art/SFX", "Assets/_Duskborn/Resources/SFX"]
     music_dir = "Assets/_Duskborn/Audio/Music"
     
+    def save_both(rel_path, audio_data, normalize_db=-0.8):
+        for d in sfx_dirs:
+            save_wav(f"{d}/{rel_path}", audio_data, normalize_db)
+            
     print("=== Generating Duskborn Release-Quality Audio Assets ===")
     
     # 1. Weapon Swings
-    save_wav(f"{sfx_dir}/swing_light_01.wav", gen_swing_light(1))
-    save_wav(f"{sfx_dir}/swing_light_02.wav", gen_swing_light(2))
-    save_wav(f"{sfx_dir}/swing_light_03.wav", gen_swing_light(3))
+    save_both("swing_light_01.wav", gen_swing_light(1))
+    save_both("swing_light_02.wav", gen_swing_light(2))
+    save_both("swing_light_03.wav", gen_swing_light(3))
     
-    save_wav(f"{sfx_dir}/swing_heavy_01.wav", gen_swing_heavy(1))
-    save_wav(f"{sfx_dir}/swing_heavy_02.wav", gen_swing_heavy(2))
-    save_wav(f"{sfx_dir}/swing_heavy_03.wav", gen_swing_heavy(3))
+    save_both("swing_heavy_01.wav", gen_swing_heavy(1))
+    save_both("swing_heavy_02.wav", gen_swing_heavy(2))
+    save_both("swing_heavy_03.wav", gen_swing_heavy(3))
     
-    save_wav(f"{sfx_dir}/axe_swing.wav", gen_swing_light(1))
-    save_wav(f"{sfx_dir}/weapon_swing_1.wav", gen_swing_light(2))
-    save_wav(f"{sfx_dir}/weapon_swing_2.wav", gen_swing_light(3))
+    save_both("axe_swing.wav", gen_swing_light(1))
+    save_both("weapon_swing_1.wav", gen_swing_light(2))
+    save_both("weapon_swing_2.wav", gen_swing_light(3))
     
-    # 2. Impacts & Surface Hits
-    save_wav(f"{sfx_dir}/hit_flesh_01.wav", gen_hit_flesh(1))
-    save_wav(f"{sfx_dir}/hit_flesh_02.wav", gen_hit_flesh(2))
-    save_wav(f"{sfx_dir}/hit_flesh_03.wav", gen_hit_flesh(3))
-    save_wav(f"{sfx_dir}/punch_3.wav", gen_hit_flesh(1))
+    # 2. Impacts & Surface Hits (Wood, Stone, Ore/Metal, Flesh)
+    save_both("hit_flesh_01.wav", gen_hit_flesh(1))
+    save_both("hit_flesh_02.wav", gen_hit_flesh(2))
+    save_both("hit_flesh_03.wav", gen_hit_flesh(3))
+    save_both("punch_3.wav", gen_hit_flesh(1))
     
-    save_wav(f"{sfx_dir}/hit_wood_01.wav", gen_hit_wood(1))
-    save_wav(f"{sfx_dir}/hit_wood_02.wav", gen_hit_wood(2))
-    save_wav(f"{sfx_dir}/hit_wood_03.wav", gen_hit_wood(3))
-    save_wav(f"{sfx_dir}/axe_hit_wood.wav", gen_hit_wood(1))
+    save_both("hit_wood_01.wav", gen_hit_wood(1))
+    save_both("hit_wood_02.wav", gen_hit_wood(2))
+    save_both("hit_wood_03.wav", gen_hit_wood(3))
+    save_both("axe_hit_wood.wav", gen_hit_wood(1))
     
-    save_wav(f"{sfx_dir}/hit_stone_01.wav", gen_hit_stone(1))
-    save_wav(f"{sfx_dir}/hit_stone_02.wav", gen_hit_stone(2))
-    save_wav(f"{sfx_dir}/hit_stone_03.wav", gen_hit_stone(3))
+    save_both("hit_stone_01.wav", gen_hit_stone(1))
+    save_both("hit_stone_02.wav", gen_hit_stone(2))
+    save_both("hit_stone_03.wav", gen_hit_stone(3))
     
-    save_wav(f"{sfx_dir}/hit_metal_01.wav", gen_hit_metal(1))
-    save_wav(f"{sfx_dir}/hit_metal_02.wav", gen_hit_metal(2))
-    save_wav(f"{sfx_dir}/hit_metal_03.wav", gen_hit_metal(3))
+    save_both("hit_metal_01.wav", gen_hit_metal(1))
+    save_both("hit_metal_02.wav", gen_hit_metal(2))
+    save_both("hit_metal_03.wav", gen_hit_metal(3))
+    save_both("hit_ore_01.wav", gen_hit_metal(1))
+    save_both("hit_ore_02.wav", gen_hit_metal(2))
+    save_both("hit_ore_03.wav", gen_hit_metal(3))
     
-    save_wav(f"{sfx_dir}/hit_default_01.wav", gen_hit_default(1))
-    save_wav(f"{sfx_dir}/hit_default_02.wav", gen_hit_default(2))
+    save_both("hit_default_01.wav", gen_hit_default(1))
+    save_both("hit_default_02.wav", gen_hit_default(2))
     
     # 3. Locomotion & Vitals
-    save_wav(f"{sfx_dir}/footstep_grass_01.wav", gen_footstep_grass(1))
-    save_wav(f"{sfx_dir}/footstep_grass_02.wav", gen_footstep_grass(2))
-    save_wav(f"{sfx_dir}/footstep_grass_03.wav", gen_footstep_grass(3))
-    save_wav(f"{sfx_dir}/footstep_grass_04.wav", gen_footstep_grass(4))
+    save_both("footstep_grass_01.wav", gen_footstep_grass(1))
+    save_both("footstep_grass_02.wav", gen_footstep_grass(2))
+    save_both("footstep_grass_03.wav", gen_footstep_grass(3))
+    save_both("footstep_grass_04.wav", gen_footstep_grass(4))
     
-    save_wav(f"{sfx_dir}/footstep_stone_01.wav", gen_footstep_stone(1))
-    save_wav(f"{sfx_dir}/footstep_stone_02.wav", gen_footstep_stone(2))
-    save_wav(f"{sfx_dir}/footstep_stone_03.wav", gen_footstep_stone(3))
+    save_both("footstep_stone_01.wav", gen_footstep_stone(1))
+    save_both("footstep_stone_02.wav", gen_footstep_stone(2))
+    save_both("footstep_stone_03.wav", gen_footstep_stone(3))
     
-    save_wav(f"{sfx_dir}/jump_takeoff.wav", gen_jump_takeoff())
-    save_wav(f"{sfx_dir}/jump_land.wav", gen_jump_land())
+    save_both("jump_takeoff.wav", gen_jump_takeoff())
+    save_both("jump_land.wav", gen_jump_land())
     
-    save_wav(f"{sfx_dir}/player_hurt_01.wav", gen_player_hurt(1))
-    save_wav(f"{sfx_dir}/player_hurt_02.wav", gen_player_hurt(2))
-    save_wav(f"{sfx_dir}/player_death.wav", gen_player_death())
-    save_wav(f"{sfx_dir}/heartbeat_loop.wav", gen_heartbeat_loop())
+    save_both("player_hurt_01.wav", gen_player_hurt(1))
+    save_both("player_hurt_02.wav", gen_player_hurt(2))
+    save_both("player_death.wav", gen_player_death())
+    save_both("heartbeat_loop.wav", gen_heartbeat_loop())
     
     # 4. Enemies (Swarmer)
-    save_wav(f"{sfx_dir}/enemy_swarmer_attack_01.wav", gen_swarmer_attack(1))
-    save_wav(f"{sfx_dir}/enemy_swarmer_attack_02.wav", gen_swarmer_attack(2))
-    save_wav(f"{sfx_dir}/enemy_swarmer_hurt_01.wav", gen_swarmer_hurt(1))
-    save_wav(f"{sfx_dir}/enemy_swarmer_hurt_02.wav", gen_swarmer_hurt(2))
-    save_wav(f"{sfx_dir}/enemy_swarmer_death_01.wav", gen_swarmer_death(1))
-    save_wav(f"{sfx_dir}/enemy_swarmer_death_02.wav", gen_swarmer_death(2))
+    save_both("enemy_swarmer_attack_01.wav", gen_swarmer_attack(1))
+    save_both("enemy_swarmer_attack_02.wav", gen_swarmer_attack(2))
+    save_both("enemy_swarmer_hurt_01.wav", gen_swarmer_hurt(1))
+    save_both("enemy_swarmer_hurt_02.wav", gen_swarmer_hurt(2))
+    save_both("enemy_swarmer_death_01.wav", gen_swarmer_death(1))
+    save_both("enemy_swarmer_death_02.wav", gen_swarmer_death(2))
     
-    # 5. Environment & Loot
-    save_wav(f"{sfx_dir}/chest_open.wav", gen_chest_open())
-    save_wav(f"{sfx_dir}/tree_fall.wav", gen_tree_fall())
-    save_wav(f"{sfx_dir}/rock_shatter.wav", gen_rock_shatter())
-    save_wav(f"{sfx_dir}/gold_pickup.wav", gen_gold_pickup())
-    save_wav(f"{sfx_dir}/gold_sfx.wav", gen_gold_pickup())
-    save_wav(f"{sfx_dir}/item_pickup.wav", gen_item_pickup())
-    save_wav(f"{sfx_dir}/pickup_sfx.wav", gen_item_pickup())
+    # 5. Environment & Breaking Sounds (Tree Cut/Fall, Rock Shatter, Ore Shatter, Chest)
+    save_both("chest_open.wav", gen_chest_open())
+    save_both("tree_fall.wav", gen_tree_fall(1))
+    save_both("tree_fall_02.wav", gen_tree_fall(2))
+    save_both("rock_shatter.wav", gen_rock_shatter(1))
+    save_both("rock_shatter_02.wav", gen_rock_shatter(2))
+    save_both("ore_shatter.wav", gen_ore_shatter(1))
+    save_both("ore_shatter_02.wav", gen_ore_shatter(2))
+    save_both("gold_pickup.wav", gen_gold_pickup())
+    save_both("gold_sfx.wav", gen_gold_pickup())
+    save_both("item_pickup.wav", gen_item_pickup())
+    save_both("pickup_sfx.wav", gen_item_pickup())
     
     # 6. UI & Stingers
-    save_wav(f"{sfx_dir}/ui_button_click.wav", gen_ui_button_click())
-    save_wav(f"{sfx_dir}/ui_modal_open.wav", gen_ui_modal_open())
-    save_wav(f"{sfx_dir}/ui_error.wav", gen_ui_error())
-    save_wav(f"{sfx_dir}/dawn_horn.wav", gen_dawn_horn())
-    save_wav(f"{sfx_dir}/night_horn.wav", gen_night_horn())
+    save_both("ui_button_click.wav", gen_ui_button_click())
+    save_both("ui_modal_open.wav", gen_ui_modal_open())
+    save_both("ui_error.wav", gen_ui_error())
+    save_both("dawn_horn.wav", gen_dawn_horn())
+    save_both("night_horn.wav", gen_night_horn())
     
-    # 7. Adaptive Music & Ambience Tracks
-    save_wav(f"{music_dir}/music_main_menu.wav", gen_music_main_menu())
-    day_music = gen_music_day_exploration()
-    save_wav(f"{music_dir}/music_day_exploration.wav", day_music)
-    save_wav("Assets/_Duskborn/Resources/Music/music_day_exploration.wav", day_music)
-    save_wav(f"{music_dir}/music_night_combat.wav", gen_music_night_combat())
+    # 7. Adaptive Music & Ambience Tracks (only if --music flag is passed)
+    import sys
+    if "--music" in sys.argv:
+        save_wav(f"{music_dir}/music_main_menu.wav", gen_music_main_menu())
+        day_music = gen_music_day_exploration()
+        save_wav(f"{music_dir}/music_day_exploration.wav", day_music)
+        save_wav("Assets/_Duskborn/Resources/Music/music_day_exploration.wav", day_music)
+        save_wav(f"{music_dir}/music_night_combat.wav", gen_music_night_combat())
+    else:
+        print("Skipping music tracks (pass --music to generate).")
     
-    print("\nAll Duskborn audio assets generated successfully!")
+    print("\nAll Duskborn SFX assets generated successfully!")
 
 if __name__ == "__main__":
     main()

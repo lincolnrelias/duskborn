@@ -14,7 +14,6 @@ namespace Duskborn.Editor
     /// </summary>
     public static class UIResolutionScalingTests
     {
-        [InitializeOnLoadMethod]
         [MenuItem("Duskborn/Tests/Run UI Resolution Scaling Tests", false, 105)]
         public static void RunAllTests()
         {
@@ -26,6 +25,7 @@ namespace Duskborn.Editor
             RunTest(Test_ActionBarAndInventory_ScaleRatioConsistencyAcrossResolutions, ref passed, ref total);
             RunTest(Test_GUIMatrix_ScalingAndInverseMouseMath, ref passed, ref total);
             RunTest(Test_CraftingUIManager_CanvasScalerScreenSpaceCheck, ref passed, ref total);
+            RunTest(Test_CraftingUIManager_DimensionsAndScreenBoundsConsistency, ref passed, ref total);
 
             Debug.Log($"<color=#55FF55><b>[UIResolutionScalingTests] {passed}/{total} testes passaram com sucesso!</b></color>");
         }
@@ -58,72 +58,88 @@ namespace Duskborn.Editor
 
         private static void Test_ActionBarInstaller_CanvasScalerConfiguration()
         {
-            var canvasGO = new GameObject("Test_ActionBarCanvas", typeof(RectTransform), typeof(Canvas));
-            var installerGO = new GameObject("Test_ActionBarInstaller", typeof(ActionBarInstaller));
-            installerGO.transform.SetParent(canvasGO.transform);
+            var canvasGO = new GameObject("Test_ActionBarCanvas", typeof(RectTransform), typeof(Canvas)) { hideFlags = HideFlags.DontSave };
+            try
+            {
+                var installerGO = new GameObject("Test_ActionBarInstaller", typeof(ActionBarInstaller)) { hideFlags = HideFlags.DontSave };
+                installerGO.transform.SetParent(canvasGO.transform);
 
-            var installer = installerGO.GetComponent<ActionBarInstaller>();
+                var installer = installerGO.GetComponent<ActionBarInstaller>();
 
-            var canvasField = typeof(ActionBarInstaller).GetField("canvas", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            canvasField?.SetValue(installer, canvasGO.GetComponent<Canvas>());
+                var canvasField = typeof(ActionBarInstaller).GetField("canvas", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                canvasField?.SetValue(installer, canvasGO.GetComponent<Canvas>());
 
-            installer.ConfigureCanvasAndLayout();
+                var syncField = typeof(ActionBarInstaller).GetField("syncScalerWithInventory", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                syncField?.SetValue(installer, false);
 
-            var scaler = canvasGO.GetComponent<CanvasScaler>();
-            AssertTrue(scaler != null, "CanvasScaler deve ser criado automaticamente no Canvas da ActionBar.");
-            AssertTrue(scaler.uiScaleMode == CanvasScaler.ScaleMode.ScaleWithScreenSize, "CanvasScaler da ActionBar deve operar em ScaleWithScreenSize.");
-            AssertApproximately(scaler.referenceResolution.x, 800f, 0.01f, "Resolução de referência X da ActionBar deve ser 800 (idêntica ao inventário).");
-            AssertApproximately(scaler.referenceResolution.y, 600f, 0.01f, "Resolução de referência Y da ActionBar deve ser 600 (idêntica ao inventário).");
-            AssertApproximately(scaler.matchWidthOrHeight, 0f, 0.01f, "MatchWidthOrHeight deve ser 0 para manter consistência direta com o inventário.");
+                installer.ConfigureCanvasAndLayout();
 
-            UnityEngine.Object.DestroyImmediate(canvasGO);
+                var scaler = canvasGO.GetComponent<CanvasScaler>();
+                AssertTrue(scaler != null, "CanvasScaler deve ser criado automaticamente no Canvas da ActionBar.");
+                AssertTrue(scaler.uiScaleMode == CanvasScaler.ScaleMode.ScaleWithScreenSize, "CanvasScaler da ActionBar deve operar em ScaleWithScreenSize.");
+                AssertApproximately(scaler.referenceResolution.x, 800f, 0.01f, "Resolução de referência X da ActionBar deve ser 800 (idêntica ao inventário).");
+                AssertApproximately(scaler.referenceResolution.y, 600f, 0.01f, "Resolução de referência Y da ActionBar deve ser 600 (idêntica ao inventário).");
+                AssertApproximately(scaler.matchWidthOrHeight, 0f, 0.01f, "MatchWidthOrHeight deve ser 0 para manter consistência direta com o inventário.");
+            }
+            finally
+            {
+                if (canvasGO != null) UnityEngine.Object.DestroyImmediate(canvasGO);
+            }
         }
 
         private static void Test_ActionBarRoot_BottomCenterAnchoringAndSize()
         {
-            var canvasGO = new GameObject("Test_Canvas", typeof(RectTransform), typeof(Canvas));
-            var rootGO = new GameObject("Test_ActionBarRoot", typeof(RectTransform));
-            rootGO.transform.SetParent(canvasGO.transform);
-            var gridGO = new GameObject("Test_Grid", typeof(RectTransform), typeof(GridLayoutGroup), typeof(InventoryGridLayoutController));
-            gridGO.transform.SetParent(rootGO.transform);
+            var canvasGO = new GameObject("Test_Canvas", typeof(RectTransform), typeof(Canvas)) { hideFlags = HideFlags.DontSave };
+            try
+            {
+                var rootGO = new GameObject("Test_ActionBarRoot", typeof(RectTransform)) { hideFlags = HideFlags.DontSave };
+                rootGO.transform.SetParent(canvasGO.transform);
+                var gridGO = new GameObject("Test_Grid", typeof(RectTransform), typeof(GridLayoutGroup), typeof(InventoryGridLayoutController)) { hideFlags = HideFlags.DontSave };
+                gridGO.transform.SetParent(rootGO.transform);
 
-            var gridController = gridGO.GetComponent<InventoryGridLayoutController>();
+                var gridController = gridGO.GetComponent<InventoryGridLayoutController>();
 
-            var colField = typeof(InventoryGridLayoutController).GetField("columns", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            colField?.SetValue(gridController, 8);
+                var colField = typeof(InventoryGridLayoutController).GetField("columns", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                colField?.SetValue(gridController, 8);
 
-            var installerGO = new GameObject("Test_Installer", typeof(ActionBarInstaller));
-            installerGO.transform.SetParent(canvasGO.transform);
-            var installer = installerGO.GetComponent<ActionBarInstaller>();
+                var installerGO = new GameObject("Test_Installer", typeof(ActionBarInstaller)) { hideFlags = HideFlags.DontSave };
+                installerGO.transform.SetParent(canvasGO.transform);
+                var installer = installerGO.GetComponent<ActionBarInstaller>();
 
-            var canvasField = typeof(ActionBarInstaller).GetField("canvas", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            canvasField?.SetValue(installer, canvasGO.GetComponent<Canvas>());
+                var canvasField = typeof(ActionBarInstaller).GetField("canvas", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                canvasField?.SetValue(installer, canvasGO.GetComponent<Canvas>());
 
-            var rootField = typeof(ActionBarInstaller).GetField("actionBarRoot", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            rootField?.SetValue(installer, rootGO.GetComponent<RectTransform>());
+                var rootField = typeof(ActionBarInstaller).GetField("actionBarRoot", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                rootField?.SetValue(installer, rootGO.GetComponent<RectTransform>());
 
-            var gridField = typeof(ActionBarInstaller).GetField("gridController", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            gridField?.SetValue(installer, gridController);
+                var gridField = typeof(ActionBarInstaller).GetField("gridController", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                gridField?.SetValue(installer, gridController);
 
-            installer.ConfigureCanvasAndLayout();
+                var syncField = typeof(ActionBarInstaller).GetField("syncScalerWithInventory", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                syncField?.SetValue(installer, false);
 
-            var rect = rootGO.GetComponent<RectTransform>();
-            var glg = gridGO.GetComponent<GridLayoutGroup>();
+                installer.ConfigureCanvasAndLayout();
 
-            AssertApproximately(rect.anchorMin.x, 0.5f, 0.001f, "anchorMin.x deve ser 0.5 (centro)");
-            AssertApproximately(rect.anchorMin.y, 0f, 0.001f, "anchorMin.y deve ser 0 (base)");
-            AssertApproximately(rect.anchorMax.x, 0.5f, 0.001f, "anchorMax.x deve ser 0.5 (centro)");
-            AssertApproximately(rect.anchorMax.y, 0f, 0.001f, "anchorMax.y deve ser 0 (base)");
-            AssertApproximately(rect.pivot.x, 0.5f, 0.001f, "pivot.x deve ser 0.5");
-            AssertApproximately(rect.pivot.y, 0f, 0.001f, "pivot.y deve ser 0");
+                var rect = rootGO.GetComponent<RectTransform>();
+                var glg = gridGO.GetComponent<GridLayoutGroup>();
 
-            // 8 slots de 55px com 4px de espaçamento = 8 * 55 + 7 * 4 = 440 + 28 = 468px
-            AssertApproximately(rect.sizeDelta.x, 468f, 0.01f, "Largura total deve ser 468px para 8 slots de 55px com 4px de espaçamento.");
-            AssertApproximately(rect.sizeDelta.y, 55f, 0.01f, "Altura total deve ser 55px.");
-            AssertApproximately(rect.anchoredPosition.y, 15f, 0.01f, "anchoredPosition.y deve ter margem inferior de 15px.");
-            AssertTrue(glg.childAlignment == TextAnchor.MiddleCenter, "childAlignment do GridLayoutGroup deve ser MiddleCenter.");
+                AssertApproximately(rect.anchorMin.x, 0.5f, 0.001f, "anchorMin.x deve ser 0.5 (centro)");
+                AssertApproximately(rect.anchorMin.y, 0f, 0.001f, "anchorMin.y deve ser 0 (base)");
+                AssertApproximately(rect.anchorMax.x, 0.5f, 0.001f, "anchorMax.x deve ser 0.5 (centro)");
+                AssertApproximately(rect.anchorMax.y, 0f, 0.001f, "anchorMax.y deve ser 0 (base)");
+                AssertApproximately(rect.pivot.x, 0.5f, 0.001f, "pivot.x deve ser 0.5");
+                AssertApproximately(rect.pivot.y, 0f, 0.001f, "pivot.y deve ser 0");
 
-            UnityEngine.Object.DestroyImmediate(canvasGO);
+                // 8 slots de 55px com 4px de espaçamento = 8 * 55 + 7 * 4 = 440 + 28 = 468px
+                AssertApproximately(rect.sizeDelta.x, 468f, 0.01f, "Largura total deve ser 468px para 8 slots de 55px com 4px de espaçamento.");
+                AssertApproximately(rect.sizeDelta.y, 55f, 0.01f, "Altura total deve ser 55px.");
+                AssertApproximately(rect.anchoredPosition.y, 15f, 0.01f, "anchoredPosition.y deve ter margem inferior de 15px.");
+                AssertTrue(glg.childAlignment == TextAnchor.MiddleCenter, "childAlignment do GridLayoutGroup deve ser MiddleCenter.");
+            }
+            finally
+            {
+                if (canvasGO != null) UnityEngine.Object.DestroyImmediate(canvasGO);
+            }
         }
 
         private static void Test_ActionBarAndInventory_ScaleRatioConsistencyAcrossResolutions()
@@ -193,33 +209,115 @@ namespace Duskborn.Editor
 
         private static void Test_CraftingUIManager_CanvasScalerScreenSpaceCheck()
         {
-            var worldCanvasGO = new GameObject("Test_WorldCanvas", typeof(Canvas));
-            var worldCanvas = worldCanvasGO.GetComponent<Canvas>();
-            worldCanvas.renderMode = RenderMode.WorldSpace;
+            var worldCanvasGO = new GameObject("Test_WorldCanvas", typeof(Canvas)) { hideFlags = HideFlags.DontSave };
+            var screenCanvasGO = new GameObject("Test_ScreenCanvas", typeof(Canvas)) { hideFlags = HideFlags.DontSave };
+            var craftingManagerGO = new GameObject("Test_CraftingManager", typeof(CraftingUIManager)) { hideFlags = HideFlags.DontSave };
 
-            var screenCanvasGO = new GameObject("Test_ScreenCanvas", typeof(Canvas));
-            var screenCanvas = screenCanvasGO.GetComponent<Canvas>();
-            screenCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            try
+            {
+                var worldCanvas = worldCanvasGO.GetComponent<Canvas>();
+                worldCanvas.renderMode = RenderMode.WorldSpace;
 
-            var craftingManagerGO = new GameObject("Test_CraftingManager", typeof(CraftingUIManager));
-            var manager = craftingManagerGO.GetComponent<CraftingUIManager>();
+                var screenCanvas = screenCanvasGO.GetComponent<Canvas>();
+                screenCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
 
-            var tryFind = typeof(CraftingUIManager).GetMethod("TryFindIntegrations", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            tryFind?.Invoke(manager, null);
+                var manager = craftingManagerGO.GetComponent<CraftingUIManager>();
 
-            var canvasField = typeof(CraftingUIManager).GetField("_canvas", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var assignedCanvas = canvasField?.GetValue(manager) as Canvas;
+                var tryFind = typeof(CraftingUIManager).GetMethod("TryFindIntegrations", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                tryFind?.Invoke(manager, null);
 
-            AssertTrue(assignedCanvas != null, "CraftingUIManager deve encontrar um Canvas.");
-            AssertTrue(assignedCanvas.renderMode != RenderMode.WorldSpace, "CraftingUIManager não pode se conectar a um Canvas WorldSpace.");
+                var canvasField = typeof(CraftingUIManager).GetField("_canvas", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var assignedCanvas = canvasField?.GetValue(manager) as Canvas;
 
-            var scaler = assignedCanvas.GetComponent<CanvasScaler>();
-            AssertTrue(scaler != null, "O Canvas selecionado deve possuir CanvasScaler.");
-            AssertTrue(scaler.uiScaleMode == CanvasScaler.ScaleMode.ScaleWithScreenSize, "O CanvasScaler selecionado deve operar em ScaleWithScreenSize.");
+                AssertTrue(assignedCanvas != null, "CraftingUIManager deve encontrar um Canvas.");
+                AssertTrue(assignedCanvas.renderMode != RenderMode.WorldSpace, "CraftingUIManager não pode se conectar a um Canvas WorldSpace.");
 
-            UnityEngine.Object.DestroyImmediate(worldCanvasGO);
-            UnityEngine.Object.DestroyImmediate(screenCanvasGO);
-            UnityEngine.Object.DestroyImmediate(craftingManagerGO);
+                var scaler = assignedCanvas.GetComponent<CanvasScaler>();
+                AssertTrue(scaler != null, "O Canvas selecionado deve possuir CanvasScaler.");
+                AssertTrue(scaler.uiScaleMode == CanvasScaler.ScaleMode.ScaleWithScreenSize, "O CanvasScaler selecionado deve operar em ScaleWithScreenSize.");
+                AssertApproximately(scaler.referenceResolution.x, 800f, 0.01f, "Resolução de referência X do Crafting deve ser 800.");
+                AssertApproximately(scaler.referenceResolution.y, 600f, 0.01f, "Resolução de referência Y do Crafting deve ser 600.");
+                AssertApproximately(scaler.matchWidthOrHeight, 0f, 0.01f, "MatchWidthOrHeight deve ser 0 (Match Width).");
+            }
+            finally
+            {
+                if (worldCanvasGO != null) UnityEngine.Object.DestroyImmediate(worldCanvasGO);
+                if (screenCanvasGO != null) UnityEngine.Object.DestroyImmediate(screenCanvasGO);
+                if (craftingManagerGO != null) UnityEngine.Object.DestroyImmediate(craftingManagerGO);
+            }
+        }
+
+        private static void Test_CraftingUIManager_DimensionsAndScreenBoundsConsistency()
+        {
+            var screenCanvasGO = new GameObject("Test_ScreenCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler)) { hideFlags = HideFlags.DontSave };
+            var craftingManagerGO = new GameObject("Test_CraftingManager", typeof(CraftingUIManager)) { hideFlags = HideFlags.DontSave };
+
+            try
+            {
+                var screenCanvas = screenCanvasGO.GetComponent<Canvas>();
+                screenCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+
+                var scaler = screenCanvasGO.GetComponent<CanvasScaler>();
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(800f, 600f);
+                scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+                scaler.matchWidthOrHeight = 0f;
+
+                var manager = craftingManagerGO.GetComponent<CraftingUIManager>();
+
+                var canvasField = typeof(CraftingUIManager).GetField("_canvas", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                canvasField?.SetValue(manager, screenCanvas);
+
+                manager.EnsureUIHierarchy();
+
+                var craftingRoot = manager.CraftingRoot;
+                AssertTrue(craftingRoot != null, "A raiz da interface de Crafting (CraftingFrame) deve ser instanciada.");
+
+                // Valida dimensões contidas na janela (máximo 380 de largura e 370 de altura)
+                AssertApproximately(craftingRoot.sizeDelta.x, 380f, 1f, "Largura da moldura de crafting deve ser 380 unidades de canvas.");
+                AssertApproximately(craftingRoot.sizeDelta.y, 365f, 1f, "Altura da moldura de crafting deve ser 365 unidades de canvas.");
+
+                // Valida que em qualquer resolução padrão (16:9, 16:10, 4:3) o painel não transborda a tela verticalmente
+                Vector2[] testResolutions = new Vector2[]
+                {
+                    new(1920, 1080), // 16:9 -> altura de canvas = 450
+                    new(1280, 720),  // 16:9 -> altura de canvas = 450
+                    new(2560, 1440), // 16:9 -> altura de canvas = 450
+                    new(3840, 2160), // 16:9 -> altura de canvas = 450
+                    new(1920, 1200), // 16:10 -> altura de canvas = 500
+                    new(1280, 800),  // 16:10 -> altura de canvas = 500
+                    new(800, 600),   // 4:3 -> altura de canvas = 600
+                    new(1024, 768)   // 4:3 -> altura de canvas = 600
+                };
+
+                foreach (var res in testResolutions)
+                {
+                    float scale = res.x / 800f;
+                    float canvasH = res.y / scale;
+
+                    // A altura do painel não pode exceder 85% da altura visível da tela
+                    float heightRatio = craftingRoot.sizeDelta.y / canvasH;
+                    AssertTrue(heightRatio <= 0.85f,
+                        $"A janela de crafting ocupa {heightRatio * 100f:F1}% da altura da tela na resolução {res.x}x{res.y}, o que é excessivo (limite: 85%).");
+
+                    // Valida margem livre no topo e na base (mínimo de 60 unidades totais de canvas)
+                    float remainingMarginY = canvasH - craftingRoot.sizeDelta.y;
+                    AssertTrue(remainingMarginY >= 60f,
+                        $"Margem vertical insuficiente ({remainingMarginY} units) na resolução {res.x}x{res.y}.");
+                }
+
+                // Valida posicionamento horizontal lado a lado (modo duplo com inventário)
+                // Crafting posicionado à esquerda em x = -195, Inventário à direita em x = +195
+                float craftingLeft = -195f - (craftingRoot.sizeDelta.x * 0.5f);
+                float craftingRight = -195f + (craftingRoot.sizeDelta.x * 0.5f);
+                AssertTrue(craftingLeft >= -400f, "A borda esquerda da janela de crafting não pode sair da tela (-400).");
+                AssertTrue(craftingRight <= 0f, "A borda direita da janela de crafting não pode cruzar o centro da tela (0).");
+            }
+            finally
+            {
+                if (screenCanvasGO != null) UnityEngine.Object.DestroyImmediate(screenCanvasGO);
+                if (craftingManagerGO != null) UnityEngine.Object.DestroyImmediate(craftingManagerGO);
+            }
         }
     }
 }

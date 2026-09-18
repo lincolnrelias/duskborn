@@ -57,16 +57,16 @@ namespace Duskborn.Gameplay.ActionBar
 
         private void Awake()
         {
-            if (!ValidateReferences())
-            {
-                enabled = false;
-                return;
-            }
-
             ConfigureCanvasAndLayout();
 
             if (!Application.isPlaying)
             {
+                return;
+            }
+
+            if (!ValidateReferences())
+            {
+                enabled = false;
                 return;
             }
 
@@ -245,7 +245,8 @@ namespace Duskborn.Gameplay.ActionBar
             var invInstaller = FindAnyObjectByType<InventorySystem.Bootstrap.InventoryInstaller>();
             if (invInstaller != null)
             {
-                var invCanvas = invInstaller.GetComponentInParent<Canvas>();
+                var canvasField = typeof(InventorySystem.Bootstrap.InventoryInstaller).GetField("canvas", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var invCanvas = (canvasField?.GetValue(invInstaller) as Canvas) ?? invInstaller.GetComponentInParent<Canvas>();
                 if (invCanvas != null)
                 {
                     var scaler = invCanvas.GetComponent<CanvasScaler>();
@@ -258,10 +259,13 @@ namespace Duskborn.Gameplay.ActionBar
             {
                 if (c == canvas) continue;
                 if (c.renderMode == RenderMode.WorldSpace) continue;
-                var scaler = c.GetComponent<CanvasScaler>();
-                if (scaler != null && scaler.uiScaleMode == CanvasScaler.ScaleMode.ScaleWithScreenSize)
+                if (c.gameObject.name.IndexOf("Inventory", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
-                    return scaler;
+                    var scaler = c.GetComponent<CanvasScaler>();
+                    if (scaler != null && scaler.uiScaleMode == CanvasScaler.ScaleMode.ScaleWithScreenSize)
+                    {
+                        return scaler;
+                    }
                 }
             }
 

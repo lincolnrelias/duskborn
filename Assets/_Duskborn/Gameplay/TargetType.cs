@@ -16,12 +16,13 @@ namespace Duskborn.Gameplay
         MiningNode = 1 << 9,
         Stone      = 1 << 9,
         Ore        = 1 << 10,
+        Bush       = 1 << 11,
     }
 
     public static class TargetTypeMasks
     {
         public const TargetType EnemyTypes = TargetType.Humanoid | TargetType.Beast;
-        public const TargetType NodeTypes  = TargetType.Tree | TargetType.MiningNode | TargetType.Ore;
+        public const TargetType NodeTypes  = TargetType.Tree | TargetType.MiningNode | TargetType.Ore | TargetType.Bush;
     }
 
     // Restricts which TargetType flags a field exposes in the inspector — see TargetTypeFilterDrawer.

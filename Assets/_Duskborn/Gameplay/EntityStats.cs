@@ -20,19 +20,25 @@ namespace Duskborn.Gameplay
         [HideInInspector] public float MoveSpeedMultiplier      = 1f;
         [HideInInspector] public float IncomingDamageMultiplier = 1f;
         [HideInInspector] public float CritChanceBonus          = 0f;
+        [HideInInspector] public float MiningResourceBonus      = 0f;
+        [HideInInspector] public float WoodcuttingResourceBonus = 0f;
 
         // Buff additive layer — flat additions after gear base (e.g. +20 HP literally).
-        [HideInInspector] public float HPBuffAdditive          = 0f;
-        [HideInInspector] public float DamageBuffAdditive      = 0f;
-        [HideInInspector] public float MoveSpeedBuffAdditive   = 0f;
-        [HideInInspector] public float AttackSpeedBuffAdditive = 0f;
+        [HideInInspector] public float HPBuffAdditive                   = 0f;
+        [HideInInspector] public float DamageBuffAdditive               = 0f;
+        [HideInInspector] public float MoveSpeedBuffAdditive            = 0f;
+        [HideInInspector] public float AttackSpeedBuffAdditive          = 0f;
+        [HideInInspector] public float MiningResourceBuffAdditive       = 0f;
+        [HideInInspector] public float WoodcuttingResourceBuffAdditive  = 0f;
 
         // Buff multiplicative layer — compound factor applied on top of (gear base + additive).
         // Starts at 1 (identity). Each multiplicative buff: Factor *= (1 + value).
-        [HideInInspector] public float HPBuffFactor          = 1f;
-        [HideInInspector] public float DamageBuffFactor      = 1f;
-        [HideInInspector] public float MoveSpeedBuffFactor   = 1f;
-        [HideInInspector] public float AttackSpeedBuffFactor = 1f;
+        [HideInInspector] public float HPBuffFactor                   = 1f;
+        [HideInInspector] public float DamageBuffFactor               = 1f;
+        [HideInInspector] public float MoveSpeedBuffFactor            = 1f;
+        [HideInInspector] public float AttackSpeedBuffFactor          = 1f;
+        [HideInInspector] public float MiningResourceBuffFactor       = 1f;
+        [HideInInspector] public float WoodcuttingResourceBuffFactor  = 1f;
 
         // CritChance buff layers — gear uses CritChanceBonus (flat).
         // Additive buffs add flat crit; multiplicative buffs scale the total.
@@ -59,6 +65,13 @@ namespace Duskborn.Gameplay
         public float EffectiveIncomingDamage => Mathf.Max(0.1f,
             (IncomingDamageMultiplier - IncomingDamageBuffAdditive) * IncomingDamageBuffFactor);
 
+        // (gear flat + additive buff) × multiplicative factor, floored at 0.
+        public float EffectiveMiningResourceBonus => Mathf.Max(0f,
+            (MiningResourceBonus + MiningResourceBuffAdditive) * MiningResourceBuffFactor);
+
+        public float EffectiveWoodcuttingResourceBonus => Mathf.Max(0f,
+            (WoodcuttingResourceBonus + WoodcuttingResourceBuffAdditive) * WoodcuttingResourceBuffFactor);
+
         public void ResetMultipliers()
         {
             HPMultiplier             = 1f;
@@ -67,16 +80,22 @@ namespace Duskborn.Gameplay
             MoveSpeedMultiplier      = 1f;
             IncomingDamageMultiplier = 1f;
             CritChanceBonus          = 0f;
+            MiningResourceBonus      = 0f;
+            WoodcuttingResourceBonus = 0f;
 
-            HPBuffAdditive          = 0f;
-            DamageBuffAdditive      = 0f;
-            MoveSpeedBuffAdditive   = 0f;
-            AttackSpeedBuffAdditive = 0f;
+            HPBuffAdditive                   = 0f;
+            DamageBuffAdditive               = 0f;
+            MoveSpeedBuffAdditive            = 0f;
+            AttackSpeedBuffAdditive          = 0f;
+            MiningResourceBuffAdditive       = 0f;
+            WoodcuttingResourceBuffAdditive  = 0f;
 
-            HPBuffFactor          = 1f;
-            DamageBuffFactor      = 1f;
-            MoveSpeedBuffFactor   = 1f;
-            AttackSpeedBuffFactor = 1f;
+            HPBuffFactor                   = 1f;
+            DamageBuffFactor               = 1f;
+            MoveSpeedBuffFactor            = 1f;
+            AttackSpeedBuffFactor          = 1f;
+            MiningResourceBuffFactor       = 1f;
+            WoodcuttingResourceBuffFactor  = 1f;
 
             CritChanceBuffAdditive    = 0f;
             CritChanceBuffFactor      = 1f;

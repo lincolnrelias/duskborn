@@ -8,6 +8,8 @@ namespace Duskborn.Gameplay.Equipment
         AttackSpeed,
         CritChance,
         DamageReduction,
+        MiningResourceBonus,
+        WoodcuttingResourceBonus,
     }
 
     // Multiplicative = 0 so existing serialised StatBonus assets default to Multiplicative.
@@ -34,13 +36,15 @@ namespace Duskborn.Gameplay.Equipment
 
         private static string Label(StatType type) => type switch
         {
-            StatType.HP              => "Max HP",
-            StatType.Damage          => "Damage",
-            StatType.MoveSpeed       => "Move Speed",
-            StatType.AttackSpeed     => "Attack Speed",
-            StatType.CritChance      => "Crit Chance",
-            StatType.DamageReduction => "Damage Reduction",
-            _                        => type.ToString()
+            StatType.HP                       => "Max HP",
+            StatType.Damage                   => "Damage",
+            StatType.MoveSpeed                => "Move Speed",
+            StatType.AttackSpeed              => "Attack Speed",
+            StatType.CritChance               => "Crit Chance",
+            StatType.DamageReduction          => "Damage Reduction",
+            StatType.MiningResourceBonus      => "Mining Resource Bonus",
+            StatType.WoodcuttingResourceBonus => "Woodcutting Resource Bonus",
+            _                                 => type.ToString()
         };
     }
 }

@@ -13,6 +13,8 @@ namespace Duskborn.Gameplay.Loot
         BonusAttackSpeed,
         BonusCritChance,
         DamageReduction,
+        BonusMiningResource,
+        BonusWoodcuttingResource,
     }
 
     [CreateAssetMenu(fileName = "Item_Name", menuName = "Duskborn/Item Definition")]

@@ -51,16 +51,22 @@ namespace Duskborn.Gameplay.Loot
             _stats.AttackSpeedMultiplier    = 1f;
             _stats.IncomingDamageMultiplier = 1f;
             _stats.CritChanceBonus          = 0f;
+            _stats.MiningResourceBonus      = 0f;
+            _stats.WoodcuttingResourceBonus = 0f;
 
-            _stats.HPBuffAdditive          = 0f;
-            _stats.DamageBuffAdditive      = 0f;
-            _stats.MoveSpeedBuffAdditive   = 0f;
-            _stats.AttackSpeedBuffAdditive = 0f;
+            _stats.HPBuffAdditive                   = 0f;
+            _stats.DamageBuffAdditive               = 0f;
+            _stats.MoveSpeedBuffAdditive            = 0f;
+            _stats.AttackSpeedBuffAdditive          = 0f;
+            _stats.MiningResourceBuffAdditive       = 0f;
+            _stats.WoodcuttingResourceBuffAdditive  = 0f;
 
-            _stats.HPBuffFactor          = 1f;
-            _stats.DamageBuffFactor      = 1f;
-            _stats.MoveSpeedBuffFactor   = 1f;
-            _stats.AttackSpeedBuffFactor = 1f;
+            _stats.HPBuffFactor                   = 1f;
+            _stats.DamageBuffFactor               = 1f;
+            _stats.MoveSpeedBuffFactor            = 1f;
+            _stats.AttackSpeedBuffFactor          = 1f;
+            _stats.MiningResourceBuffFactor       = 1f;
+            _stats.WoodcuttingResourceBuffFactor  = 1f;
 
             _stats.CritChanceBuffAdditive    = 0f;
             _stats.CritChanceBuffFactor      = 1f;
@@ -97,6 +103,12 @@ namespace Duskborn.Gameplay.Loot
                         // Flat reduction stacks additively with gear reduction.
                         _stats.IncomingDamageBuffAdditive += item.EffectValue;
                         break;
+                    case ItemEffectType.BonusMiningResource:
+                        _stats.MiningResourceBuffAdditive += item.EffectValue;
+                        break;
+                    case ItemEffectType.BonusWoodcuttingResource:
+                        _stats.WoodcuttingResourceBuffAdditive += item.EffectValue;
+                        break;
                 }
             }
 
@@ -125,6 +137,12 @@ namespace Duskborn.Gameplay.Loot
                     case ItemEffectType.DamageReduction:
                         // Reduces the remaining incoming-damage fraction: Factor *= (1 - value).
                         _stats.IncomingDamageBuffFactor *= (1f - item.EffectValue);
+                        break;
+                    case ItemEffectType.BonusMiningResource:
+                        _stats.MiningResourceBuffFactor *= (1f + item.EffectValue);
+                        break;
+                    case ItemEffectType.BonusWoodcuttingResource:
+                        _stats.WoodcuttingResourceBuffFactor *= (1f + item.EffectValue);
                         break;
                 }
             }

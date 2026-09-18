@@ -143,6 +143,12 @@ namespace Duskborn.Gameplay.Equipment
                     _stats.IncomingDamageMultiplier =
                         Mathf.Max(0.1f, _stats.IncomingDamageMultiplier - bonus.Value);
                     break;
+                case StatType.MiningResourceBonus:
+                    _stats.MiningResourceBonus += bonus.Value;
+                    break;
+                case StatType.WoodcuttingResourceBonus:
+                    _stats.WoodcuttingResourceBonus += bonus.Value;
+                    break;
                 default:
                     DuskLog.Warn(LogChannel.Inventory, $"Unhandled StatType: {bonus.Type}");
                     break;

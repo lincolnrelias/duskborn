@@ -36,18 +36,24 @@ namespace Duskborn.Gameplay.Player
         public float AttackSpeedMultiplier    { get => _entity.AttackSpeedMultiplier;    set => _entity.AttackSpeedMultiplier = value; }
         public float CritChanceBonus          { get => _entity.CritChanceBonus;          set => _entity.CritChanceBonus = value; }
         public float IncomingDamageMultiplier { get => _entity.IncomingDamageMultiplier; set => _entity.IncomingDamageMultiplier = value; }
+        public float MiningResourceBonus      { get => _entity.MiningResourceBonus;      set => _entity.MiningResourceBonus = value; }
+        public float WoodcuttingResourceBonus { get => _entity.WoodcuttingResourceBonus; set => _entity.WoodcuttingResourceBonus = value; }
 
         // ── Buff additive layer (flat additions after gear base) ──────────────
-        public float HPBuffAdditive          { get => _entity.HPBuffAdditive;          set => _entity.HPBuffAdditive = value; }
-        public float DamageBuffAdditive      { get => _entity.DamageBuffAdditive;      set => _entity.DamageBuffAdditive = value; }
-        public float MoveSpeedBuffAdditive   { get => _entity.MoveSpeedBuffAdditive;   set => _entity.MoveSpeedBuffAdditive = value; }
-        public float AttackSpeedBuffAdditive { get => _entity.AttackSpeedBuffAdditive; set => _entity.AttackSpeedBuffAdditive = value; }
+        public float HPBuffAdditive                   { get => _entity.HPBuffAdditive;                  set => _entity.HPBuffAdditive = value; }
+        public float DamageBuffAdditive               { get => _entity.DamageBuffAdditive;              set => _entity.DamageBuffAdditive = value; }
+        public float MoveSpeedBuffAdditive            { get => _entity.MoveSpeedBuffAdditive;           set => _entity.MoveSpeedBuffAdditive = value; }
+        public float AttackSpeedBuffAdditive          { get => _entity.AttackSpeedBuffAdditive;         set => _entity.AttackSpeedBuffAdditive = value; }
+        public float MiningResourceBuffAdditive       { get => _entity.MiningResourceBuffAdditive;      set => _entity.MiningResourceBuffAdditive = value; }
+        public float WoodcuttingResourceBuffAdditive  { get => _entity.WoodcuttingResourceBuffAdditive; set => _entity.WoodcuttingResourceBuffAdditive = value; }
 
         // ── Buff multiplicative layer (compound factor: Factor *= 1+value) ────
-        public float HPBuffFactor          { get => _entity.HPBuffFactor;          set => _entity.HPBuffFactor = value; }
-        public float DamageBuffFactor      { get => _entity.DamageBuffFactor;      set => _entity.DamageBuffFactor = value; }
-        public float MoveSpeedBuffFactor   { get => _entity.MoveSpeedBuffFactor;   set => _entity.MoveSpeedBuffFactor = value; }
-        public float AttackSpeedBuffFactor { get => _entity.AttackSpeedBuffFactor; set => _entity.AttackSpeedBuffFactor = value; }
+        public float HPBuffFactor                   { get => _entity.HPBuffFactor;                  set => _entity.HPBuffFactor = value; }
+        public float DamageBuffFactor               { get => _entity.DamageBuffFactor;              set => _entity.DamageBuffFactor = value; }
+        public float MoveSpeedBuffFactor            { get => _entity.MoveSpeedBuffFactor;           set => _entity.MoveSpeedBuffFactor = value; }
+        public float AttackSpeedBuffFactor          { get => _entity.AttackSpeedBuffFactor;         set => _entity.AttackSpeedBuffFactor = value; }
+        public float MiningResourceBuffFactor       { get => _entity.MiningResourceBuffFactor;      set => _entity.MiningResourceBuffFactor = value; }
+        public float WoodcuttingResourceBuffFactor  { get => _entity.WoodcuttingResourceBuffFactor; set => _entity.WoodcuttingResourceBuffFactor = value; }
 
         // ── CritChance buff layers ────────────────────────────────────────────
         public float CritChanceBuffAdditive { get => _entity.CritChanceBuffAdditive; set => _entity.CritChanceBuffAdditive = value; }
@@ -59,6 +65,10 @@ namespace Duskborn.Gameplay.Player
 
         // Final damage fraction actually applied; accounts for all three reduction layers.
         public float EffectiveIncomingDamage => _entity.EffectiveIncomingDamage;
+
+        // Effective resource gathering bonuses
+        public float EffectiveMiningResourceBonus      => _entity.EffectiveMiningResourceBonus;
+        public float EffectiveWoodcuttingResourceBonus => _entity.EffectiveWoodcuttingResourceBonus;
 
         // ── Buff container (for HP-delta tracking on stat changes) ───────────
         private PlayerBuffContainer _buffs;

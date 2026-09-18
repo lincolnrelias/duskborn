@@ -4,6 +4,8 @@ using FishNet;
 using FishNet.Object;
 using UnityEngine;
 using Duskborn.Core;
+using Duskborn.Gameplay.Player;
+using InventorySystem.Data;
 
 namespace Duskborn.Gameplay.Loot
 {
@@ -75,7 +77,11 @@ namespace Duskborn.Gameplay.Loot
                 Physics.IgnoreLayerCollision(resourceLayer, playerLayer, true);
         }
 
-        public void ServerDropLoot(DropLootTable table, Vector3 origin)
+        public void ServerDropLoot(
+            DropLootTable table,
+            Vector3 origin,
+            PlayerStats harvester = null,
+            TargetType targetType = TargetType.None)
         {
             if (!InstanceFinder.IsServerStarted || table == null) return;
 
@@ -103,9 +109,10 @@ namespace Duskborn.Gameplay.Loot
                         $"LootManager: entry '{entry.itemDefinition.name}' has no dropPrefab — skipping.");
                     continue;
                 }
-                int count = rng != null
-                    ? rng.Range(entry.minAmount, entry.maxAmount + 1)
-                    : UnityEngine.Random.Range(entry.minAmount, entry.maxAmount + 1);
+
+                float bonus = GetResourceBonus(harvester, targetType, entry.itemDefinition);
+                int count = CalculateDropCount(entry.minAmount, entry.maxAmount, bonus, rng);
+
                 for (int j = 0; j < count; j++)
                     spawnList.Add((prefab, entry.itemDefinition.Id));
             }
@@ -118,6 +125,50 @@ namespace Duskborn.Gameplay.Loot
 
             DuskLog.Log(LogChannel.Loot,
                 $"LootManager: dropping {spawnList.Count} item(s) at {origin} (night {currentNight}).");
+        }
+
+        public static float GetResourceBonus(PlayerStats harvester, TargetType targetType, ItemDefinitionBase itemDef)
+        {
+            if (harvester == null) return 0f;
+
+            // Never apply gathering bonus to enemy loot
+            if ((targetType & TargetTypeMasks.EnemyTypes) != 0) return 0f;
+
+            string id = itemDef != null && !string.IsNullOrEmpty(itemDef.Id) ? itemDef.Id.ToLowerInvariant() : string.Empty;
+
+            bool isStoneOrOre = id.Contains("stone") || id.Contains("ore") || id.Contains("iron");
+            bool isWoodOrFoliage = id.Contains("wood") || id.Contains("fiber") || id.Contains("bush") || id.Contains("herb");
+
+            bool isMiningNode = (targetType & (TargetType.MiningNode | TargetType.Stone | TargetType.Ore)) != 0;
+            bool isWoodcuttingNode = (targetType & (TargetType.Tree | TargetType.Bush)) != 0;
+
+            if (isMiningNode || isStoneOrOre)
+                return Mathf.Max(0f, harvester.EffectiveMiningResourceBonus);
+
+            if (isWoodcuttingNode || isWoodOrFoliage)
+                return Mathf.Max(0f, harvester.EffectiveWoodcuttingResourceBonus);
+
+            return 0f;
+        }
+
+        public static int CalculateDropCount(int minAmount, int maxAmount, float bonus, SeededRNG rng)
+        {
+            int baseCount = rng != null
+                ? rng.Range(minAmount, maxAmount + 1)
+                : UnityEngine.Random.Range(minAmount, maxAmount + 1);
+
+            if (bonus <= 0f)
+                return baseCount;
+
+            float extraFloat = baseCount * bonus;
+            int guaranteedExtra = (int)extraFloat;
+            float remainder = extraFloat - guaranteedExtra;
+
+            bool extraOne = rng != null
+                ? rng.Chance(remainder)
+                : (UnityEngine.Random.value < remainder);
+
+            return baseCount + guaranteedExtra + (extraOne ? 1 : 0);
         }
 
         private void SpawnAllLootInstant(

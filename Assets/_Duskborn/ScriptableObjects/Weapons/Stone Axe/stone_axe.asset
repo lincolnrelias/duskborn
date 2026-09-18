@@ -26,6 +26,9 @@ MonoBehaviour:
   - Type: 3
     Value: 0.05
     Mode: 0
+  - Type: 7
+    Value: 0.25
+    Mode: 0
   typeModifiers:
   - Type: 256
     Bonus: 3

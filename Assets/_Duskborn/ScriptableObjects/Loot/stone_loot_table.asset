@@ -16,7 +16,7 @@ MonoBehaviour:
   - itemDefinition: {fileID: 11400000, guid: 2a0acc988d7bb054889caff0a3472d3d, type: 2}
     baseChance: 1
     scalingBonus: 0
-    minAmount: 1
+    minAmount: 3
     maxAmount: 4
   goldMin: 0
   goldMax: 0

@@ -103,6 +103,22 @@ namespace Duskborn.Editor
                     => new Config(0.01f, 0.8f,
                         "Compound reduction: IncomingDamageBuffFactor *= (1−value). 0.2 = take 20% less of remaining."),
 
+                // MiningResource ─────────────────────────────────────────────
+                (ItemEffectType.BonusMiningResource, BonusMode.Additive)
+                    => new Config(0.05f, 2.0f,
+                        "Flat mining resource bonus added after gear base. 0.25 = +25% drops."),
+                (ItemEffectType.BonusMiningResource, BonusMode.Multiplicative)
+                    => new Config(0.05f, 2.0f,
+                        "Compound mining resource factor: 0.5 = ×1.5 mining drops."),
+
+                // WoodcuttingResource ────────────────────────────────────────
+                (ItemEffectType.BonusWoodcuttingResource, BonusMode.Additive)
+                    => new Config(0.05f, 2.0f,
+                        "Flat woodcutting resource bonus added after gear base. 0.25 = +25% drops."),
+                (ItemEffectType.BonusWoodcuttingResource, BonusMode.Multiplicative)
+                    => new Config(0.05f, 2.0f,
+                        "Compound woodcutting resource factor: 0.5 = ×1.5 woodcutting drops."),
+
                 _ => new Config(0f, 1f, "Value"),
             };
         }
@@ -142,6 +158,16 @@ namespace Duskborn.Editor
                     => $"−{v * 100f:0.#}% incoming damage (flat, stacks additively with gear)",
                 (ItemEffectType.DamageReduction, BonusMode.Multiplicative)
                     => $"Take {(1f - v) * 100f:0.#}% of remaining damage (compound reduction)",
+
+                (ItemEffectType.BonusMiningResource, BonusMode.Additive)
+                    => $"+{v * 100f:0.#}% mining drops (flat, stacks with gear)",
+                (ItemEffectType.BonusMiningResource, BonusMode.Multiplicative)
+                    => $"×{1f + v:0.00} mining drops — {v * 100f:0}% more mining drops",
+
+                (ItemEffectType.BonusWoodcuttingResource, BonusMode.Additive)
+                    => $"+{v * 100f:0.#}% woodcutting drops (flat, stacks with gear)",
+                (ItemEffectType.BonusWoodcuttingResource, BonusMode.Multiplicative)
+                    => $"×{1f + v:0.00} woodcutting drops — {v * 100f:0}% more woodcutting drops",
 
                 _ => $"Value: {v}",
             };

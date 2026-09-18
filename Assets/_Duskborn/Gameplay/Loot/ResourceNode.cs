@@ -5,6 +5,7 @@ using UnityEngine;
 using Duskborn.Core;
 using Duskborn.Effects;
 using Duskborn.Gameplay;
+using Duskborn.Gameplay.Player;
 
 namespace Duskborn.Gameplay.Loot
 {
@@ -31,13 +32,16 @@ namespace Duskborn.Gameplay.Loot
         private HitFlash _hitFlash;
         private uint _outlineMask;
         private uint _baseMask;
+        private PlayerStats _lastHarvester;
 
         public float CurrentHP => _currentHP.Value;
         public float MaxHP     => maxHP;
         public bool  IsAlive   => _currentHP.Value > 0f;
+        public PlayerStats LastHarvester => _lastHarvester;
 
         public event Action<float, float> OnHealthChanged;
         public event Action              OnDepleted;
+        public event Action<PlayerStats> OnDepletedByHarvester;
 
         private void Awake()
         {
@@ -74,7 +78,7 @@ namespace Duskborn.Gameplay.Loot
         {
             if (materialTypes.HasFlag(TargetType.Ore))
                 return "Metal";
-            if (materialTypes.HasFlag(TargetType.Tree))
+            if (materialTypes.HasFlag(TargetType.Tree) || materialTypes.HasFlag(TargetType.Bush))
                 return "Tree";
             if (materialTypes.HasFlag(TargetType.MiningNode) || materialTypes.HasFlag(TargetType.Stone))
             {
@@ -87,20 +91,26 @@ namespace Duskborn.Gameplay.Loot
             if (name.IndexOf("tree", StringComparison.OrdinalIgnoreCase) >= 0 ||
                 name.IndexOf("pine", StringComparison.OrdinalIgnoreCase) >= 0 ||
                 name.IndexOf("birch", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                name.IndexOf("wood", StringComparison.OrdinalIgnoreCase) >= 0)
+                name.IndexOf("wood", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                name.IndexOf("bush", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                name.IndexOf("fiber", StringComparison.OrdinalIgnoreCase) >= 0)
                 return "Tree";
             return "Default";
         }
 
-        public void TakeDamage(float amount, bool isCrit = false)
+        public void TakeDamage(float amount, bool isCrit = false) => TakeDamage(amount, null, isCrit);
+
+        public void TakeDamage(float amount, PlayerStats harvester, bool isCrit = false)
         {
             if (!IsServerStarted || !IsAlive) return;
+            if (harvester != null) _lastHarvester = harvester;
             _currentHP.Value = Mathf.Max(0f, _currentHP.Value - amount);
             RpcShowDamageNumber(transform.position, amount, isCrit);
             DuskLog.Log(LogChannel.Loot, $"{name}: -{amount:F1} HP → {_currentHP.Value:F1}/{maxHP}");
             if (_currentHP.Value <= 0f)
             {
                 OnDepleted?.Invoke();
+                OnDepletedByHarvester?.Invoke(_lastHarvester);
                 RpcPlayDepletedAudio(transform.position, materialTypes, GetSurfaceTag());
             }
         }
@@ -109,11 +119,24 @@ namespace Duskborn.Gameplay.Loot
         private void RpcPlayDepletedAudio(Vector3 pos, TargetType type, string surfaceTag)
         {
             AudioClip clip = depletedClip;
-            if (clip == null)
+            float volume = 1.0f;
+            float minDistance = 2f;
+            float maxDistance = 45f;
+
+            if (Duskborn.Audio.AudioDatabase.Instance != null)
+            {
+                if (clip == null)
+                    clip = Duskborn.Audio.AudioDatabase.Instance.GetDepletedClip(type, surfaceTag);
+
+                volume = Duskborn.Audio.AudioDatabase.Instance.ResourcesSettings.depletedVolume;
+                minDistance = Duskborn.Audio.AudioDatabase.Instance.ResourcesSettings.minDistance;
+                maxDistance = Duskborn.Audio.AudioDatabase.Instance.ResourcesSettings.maxDistance;
+            }
+            else if (clip == null)
             {
                 bool v2 = UnityEngine.Random.value < 0.5f;
                 if (surfaceTag == "Metal" || type.HasFlag(TargetType.Ore))
-                    clip = Resources.Load<AudioClip>(v2 ? "SFX/ore_shatter_02" : "SFX/ore_shatter") ?? Resources.Load<AudioClip>("SFX/ore_shatter") ?? Resources.Load<AudioClip>("SFX/rock_shatter");
+                    clip = Resources.Load<AudioClip>(v2 ? "SFX/ore_shatter_02" : "SFX/ore_shatter") ?? Resources.Load<AudioClip>("SFX/ore_shatter");
                 else if (surfaceTag == "Tree" || type.HasFlag(TargetType.Tree))
                     clip = Resources.Load<AudioClip>(v2 ? "SFX/tree_fall_02" : "SFX/tree_fall") ?? Resources.Load<AudioClip>("SFX/tree_fall");
                 else
@@ -123,7 +146,7 @@ namespace Duskborn.Gameplay.Loot
             if (clip != null)
             {
                 if (Duskborn.Audio.AudioManager.Instance != null)
-                    Duskborn.Audio.AudioManager.Instance.PlayAtPoint(clip, pos, 1.0f, 2f, 45f);
+                    Duskborn.Audio.AudioManager.Instance.PlayAtPoint(clip, pos, volume, minDistance, maxDistance);
                 else
                     AudioSource.PlayClipAtPoint(clip, pos);
             }

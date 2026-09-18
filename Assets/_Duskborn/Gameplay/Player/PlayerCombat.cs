@@ -422,7 +422,7 @@ namespace Duskborn.Gameplay.Player
 
             float damage = _stats.Damage * (_weaponHandler?.ActiveWeapon?.GetTypeDamageMultiplier(node.Types) ?? 1f);
             string surfaceTag = node.GetSurfaceTag();
-            node.TakeDamage(damage);
+            node.TakeDamage(damage, _stats);
 
             if (node.IsAlive)
             {

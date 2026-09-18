@@ -1,5 +1,6 @@
 using UnityEngine;
 using Duskborn.Gameplay.Enemies;
+using Duskborn.Gameplay.Player;
 
 namespace Duskborn.Gameplay.Loot
 {
@@ -39,7 +40,9 @@ namespace Duskborn.Gameplay.Loot
         {
             if (lootTable == null) return;
             // LootManager is server-only; Instance is null on clients, so no double-spawning.
-            LootManager.Instance?.ServerDropLoot(lootTable, GetDropPosition());
+            PlayerStats harvester = _node != null ? _node.LastHarvester : null;
+            TargetType nodeTypes = _node != null ? _node.Types : TargetType.None;
+            LootManager.Instance?.ServerDropLoot(lootTable, GetDropPosition(), harvester, nodeTypes);
         }
 
         private Vector3 GetDropPosition()

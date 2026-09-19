@@ -33,6 +33,7 @@ namespace Duskborn.UI
         public float fadeOutSpeed = 2.2f;
 
         private float _currentAlpha = 1f;
+        public float CurrentAlpha => _currentAlpha;
         private bool _isFadingOut = false;
         public bool IsFadingOut => _isFadingOut;
         private float _tipTimer = 0f;
@@ -153,6 +154,17 @@ namespace Duskborn.UI
             _isFadingOut = false;
             onFinished?.Invoke();
             gameObject.SetActive(false);
+
+            if (!Duskborn.Gameplay.Player.PlayerCameraController.IsAnyMenuOpen())
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+                if (Duskborn.Gameplay.Player.PlayerCameraController.LocalInstance != null)
+                {
+                    Duskborn.Gameplay.Player.PlayerCameraController.LocalInstance.SetRotationLocked(false);
+                    Duskborn.Gameplay.Player.PlayerCameraController.LocalInstance.SetCursorLocked(true);
+                }
+            }
         }
 
         private void InitEmbers()

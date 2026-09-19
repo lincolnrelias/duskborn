@@ -4,7 +4,9 @@ using UnityEngine.UI;
 using UnityEditor;
 using Duskborn.Gameplay.ActionBar;
 using Duskborn.UI;
+using InventorySystem.Core;
 using InventorySystem.UI;
+using UnityEngine.EventSystems;
 
 namespace Duskborn.Editor
 {
@@ -26,6 +28,9 @@ namespace Duskborn.Editor
             RunTest(Test_GUIMatrix_ScalingAndInverseMouseMath, ref passed, ref total);
             RunTest(Test_CraftingUIManager_CanvasScalerScreenSpaceCheck, ref passed, ref total);
             RunTest(Test_CraftingUIManager_DimensionsAndScreenBoundsConsistency, ref passed, ref total);
+            RunTest(Test_ItemIconRegistry_CrossRegistrationAndResolution, ref passed, ref total);
+            RunTest(Test_InventorySlotView_ImplementsDragHandlers, ref passed, ref total);
+            RunTest(Test_InventoryDragController_DragIconCanvasConfiguration, ref passed, ref total);
 
             Debug.Log($"<color=#55FF55><b>[UIResolutionScalingTests] {passed}/{total} testes passaram com sucesso!</b></color>");
         }
@@ -317,6 +322,83 @@ namespace Duskborn.Editor
             {
                 if (screenCanvasGO != null) UnityEngine.Object.DestroyImmediate(screenCanvasGO);
                 if (craftingManagerGO != null) UnityEngine.Object.DestroyImmediate(craftingManagerGO);
+            }
+        }
+
+        private static void Test_ItemIconRegistry_CrossRegistrationAndResolution()
+        {
+            var testTex = new Texture2D(32, 32);
+            testTex.name = "tex_test_icon";
+            try
+            {
+                ItemIconRegistry.Register("item_test_unique", testTex);
+                bool found = ItemIconRegistry.TryGetIcon("item_test_unique", out var resolved);
+                AssertTrue(found, "ItemIconRegistry deve encontrar o ícone registrado por id.");
+                AssertTrue(resolved == testTex, "O ícone retornado deve ser o mesmo registrado.");
+
+                var materialItem = new MaterialItem("item_test_unique", "Test Item", "", "tex_test_icon", "resource", 1);
+                var resolvedItem = ItemIconRegistry.Resolve(materialItem);
+                AssertTrue(resolvedItem == testTex, "ItemIconRegistry.Resolve deve resolver o ícone para IInventoryItem.");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(testTex);
+            }
+        }
+
+        private static void Test_InventorySlotView_ImplementsDragHandlers()
+        {
+            var slotGO = new GameObject("Test_Slot", typeof(RectTransform), typeof(InventorySlotView));
+            try
+            {
+                var slot = slotGO.GetComponent<InventorySlotView>();
+                AssertTrue(slot is IBeginDragHandler, "InventorySlotView deve implementar IBeginDragHandler para não bolhar eventos ao DraggablePanel da janela.");
+                AssertTrue(slot is IDragHandler, "InventorySlotView deve implementar IDragHandler.");
+                AssertTrue(slot is IEndDragHandler, "InventorySlotView deve implementar IEndDragHandler.");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(slotGO);
+            }
+        }
+
+        private static void Test_InventoryDragController_DragIconCanvasConfiguration()
+        {
+            var canvasGO = new GameObject("Test_Canvas", typeof(RectTransform), typeof(Canvas));
+            var iconGO = new GameObject("Test_DragIcon", typeof(RectTransform), typeof(Image));
+            iconGO.transform.SetParent(canvasGO.transform);
+            var slotTemplateGO = new GameObject("Slot_0", typeof(RectTransform), typeof(InventorySlotView));
+            slotTemplateGO.transform.SetParent(canvasGO.transform);
+            var slotTemplateGO2 = new GameObject("Slot_1", typeof(RectTransform), typeof(InventorySlotView));
+            slotTemplateGO2.transform.SetParent(canvasGO.transform);
+            var slotTemplateGO3 = new GameObject("Slot_2", typeof(RectTransform), typeof(InventorySlotView));
+            slotTemplateGO3.transform.SetParent(canvasGO.transform);
+            var slotTemplateGO4 = new GameObject("Slot_3", typeof(RectTransform), typeof(InventorySlotView));
+            slotTemplateGO4.transform.SetParent(canvasGO.transform);
+            try
+            {
+                var image = iconGO.GetComponent<Image>();
+                var service = new InventoryService(new InventoryGrid(2, 2));
+                var rootRect = canvasGO.GetComponent<RectTransform>();
+                var presenter = new InventoryPresenter(service, rootRect, item => new ItemViewModel(item.DisplayName, "", item.IconId));
+
+                var controller = new InventoryDragController(service, presenter, canvasGO.GetComponent<Canvas>(), image, 0.1f);
+                try
+                {
+                    var canvasComp = image.GetComponent<Canvas>();
+                    AssertTrue(canvasComp != null, "DragIcon deve possuir um componente Canvas dedicado.");
+                    AssertTrue(canvasComp.overrideSorting, "Canvas do DragIcon deve ter overrideSorting ativado.");
+                    AssertTrue(canvasComp.sortingOrder >= 999, "SortingOrder do DragIcon deve ser alto (>= 999) para sobrepor todas as janelas.");
+                }
+                finally
+                {
+                    controller.Dispose();
+                    presenter.Dispose();
+                }
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(canvasGO);
             }
         }
     }

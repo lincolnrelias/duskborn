@@ -1,6 +1,8 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using Duskborn.Effects;
+using Duskborn.UI;
 
 namespace Duskborn.Gameplay.Player
 {
@@ -177,6 +179,11 @@ namespace Duskborn.Gameplay.Player
                 _mainCam = FindAnyObjectByType<Camera>();
             }
 
+            if (_mainCam != null)
+            {
+                Duskborn.Core.EnvironmentVisualBootstrapper.EnsureCameraPostProcessing(_mainCam);
+            }
+
             _targetYaw        = transform.eulerAngles.y;
             _currentYaw       = _targetYaw;
             _targetPitch      = 20f;
@@ -334,13 +341,159 @@ namespace Duskborn.Gameplay.Player
             }
         }
 
+        private int  _justLockedCursorFrame = -1;
+        private bool _wasAnyMenuOpen;
+        private bool _isAltUnlocked;
+        public bool JustLockedCursorThisFrame => _justLockedCursorFrame == Time.frameCount;
+
+        /// <summary>
+        /// Verifica se qualquer menu de interface está atualmente aberto no jogo.
+        /// </summary>
+        public static bool IsAnyMenuOpen()
+        {
+            if (InGameMenuController.Instance != null && InGameMenuController.Instance.IsOpen)
+                return true;
+
+            if (CraftingUIManager.Instance != null && CraftingUIManager.Instance.IsOpen)
+                return true;
+
+            if (InventoryUIManager.Instance != null && InventoryUIManager.Instance.IsOpen)
+                return true;
+
+            var hud = GameHUD.Instance ?? UnityEngine.Object.FindAnyObjectByType<GameHUD>();
+            if (hud != null && hud.ShowStats)
+                return true;
+
+            if (WorldLoadingScreenUI.Instance != null &&
+                (WorldLoadingScreenUI.Instance.isGenerating ||
+                 (WorldLoadingScreenUI.Instance.gameObject.activeInHierarchy && WorldLoadingScreenUI.Instance.CurrentAlpha > 0.01f)))
+                return true;
+
+            return false;
+        }
+
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            if (!hasFocus) return;
+            if (_controller != null && !_controller.IsOwner) return;
+
+            // Ao recuperar o foco da janela do jogo, se nenhum menu estiver aberto, esconde e trava o cursor
+            if (!IsAnyMenuOpen())
+            {
+                _isAltUnlocked = false;
+                SetRotationLocked(false);
+                SetCursorLocked(true);
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+                _justLockedCursorFrame = Time.frameCount;
+            }
+        }
+
         private void UpdateCursorLock()
         {
             // Atalho de conveniência: pressionar Alt Esquerdo alterna temporariamente o cursor durante testes
             var kb = Keyboard.current;
             if (kb != null && kb.leftAltKey.wasPressedThisFrame && !_isRotationLocked)
             {
+                _isAltUnlocked = !_isCursorLocked;
                 SetCursorLocked(!_isCursorLocked);
+                return;
+            }
+
+            bool anyMenuOpen = IsAnyMenuOpen();
+
+            // Quando algo que estava aberto/visível é fechado/escondido, garante que o cursor desapareça imediatamente
+            if (_wasAnyMenuOpen && !anyMenuOpen)
+            {
+                _isAltUnlocked = false;
+                SetRotationLocked(false);
+                SetCursorLocked(true);
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+                _justLockedCursorFrame = Time.frameCount;
+            }
+            _wasAnyMenuOpen = anyMenuOpen;
+
+            // Se nenhum menu está aberto e o jogador não está usando Alt intencionalmente,
+            // garante que o cursor NUNCA fique visível durante a gameplay
+            if (!anyMenuOpen && !_isAltUnlocked && (!_isCursorLocked || Cursor.visible || Cursor.lockState != CursorLockMode.Locked))
+            {
+                SetRotationLocked(false);
+                SetCursorLocked(true);
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
+
+            // Detecta clique de mouse neste frame
+            bool mouseClicked = false;
+#if ENABLE_INPUT_SYSTEM
+            if (Mouse.current != null)
+            {
+                mouseClicked = Mouse.current.leftButton.wasPressedThisFrame ||
+                               Mouse.current.rightButton.wasPressedThisFrame;
+            }
+#endif
+            if (!mouseClicked)
+            {
+                mouseClicked = Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1);
+            }
+
+            if (!mouseClicked) return;
+
+            // Se o menu de pausa estiver aberto, o cursor é gerenciado pelo próprio menu OnGUI
+            if (InGameMenuController.Instance != null && InGameMenuController.Instance.IsOpen)
+            {
+                return;
+            }
+
+            // Se o jogador estiver arrastando um item de inventário, não fecha nem interfere
+            if (InventoryUIManager.Instance != null && InventoryUIManager.Instance.Installer != null &&
+                InventoryUIManager.Instance.Installer.IsDraggingItem)
+            {
+                return;
+            }
+
+            bool isOverUI = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
+
+            // Caso 1: NENHUM menu está aberto e o cursor estava visível/destravado.
+            // Clicar em qualquer área foca no jogo, esconde o cursor e trava a mira.
+            if (!anyMenuOpen)
+            {
+                _isAltUnlocked = false;
+                SetRotationLocked(false);
+                SetCursorLocked(true);
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+                _justLockedCursorFrame = Time.frameCount;
+                return;
+            }
+
+            // Caso 2: Um menu está aberto (Inventário, Crafting ou Stats).
+            // Se o jogador clicou em uma área vazia (fora de qualquer moldura ou botão de UI), fecha o menu e foca no jogo.
+            if (!isOverUI)
+            {
+                if (CraftingUIManager.Instance != null && CraftingUIManager.Instance.IsOpen)
+                {
+                    CraftingUIManager.Instance.Close();
+                }
+
+                if (InventoryUIManager.Instance != null && InventoryUIManager.Instance.IsOpen)
+                {
+                    InventoryUIManager.Instance.Close();
+                }
+
+                var hud = GameHUD.Instance ?? UnityEngine.Object.FindAnyObjectByType<GameHUD>();
+                if (hud != null && hud.ShowStats)
+                {
+                    hud.CloseStats();
+                }
+
+                _isAltUnlocked = false;
+                SetRotationLocked(false);
+                SetCursorLocked(true);
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+                _justLockedCursorFrame = Time.frameCount;
             }
         }
 
@@ -486,8 +639,7 @@ namespace Duskborn.Gameplay.Player
             }
             else
             {
-                if (autoLockCursor)
-                    SetCursorLocked(true);
+                SetCursorLocked(true);
             }
         }
 

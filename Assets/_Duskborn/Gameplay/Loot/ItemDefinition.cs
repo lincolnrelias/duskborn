@@ -3,7 +3,15 @@ using UnityEngine;
 
 namespace Duskborn.Gameplay.Loot
 {
-    public enum ItemRarity { Common, Uncommon, Rare, Legendary, Cursed }
+    public enum ItemRarity
+    {
+        Common = 0,
+        Uncommon = 1,
+        Rare = 2,
+        Epic = 3,
+        Legendary = 4,
+        Cursed = 5
+    }
 
     public enum ItemEffectType
     {

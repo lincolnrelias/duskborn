@@ -299,7 +299,8 @@ namespace Duskborn.Audio
         // ── Efeitos Sonoros 3D com Posicionamento ──────────────────────────────
 
         public AudioSource PlayAtPoint(AudioClip clip, Vector3 position, float volumeScale = 1.0f,
-                                      float minDistance = 2f, float maxDistance = 40f, float pitchJitter = 0.05f)
+                                      float minDistance = 2f, float maxDistance = 40f, float pitchJitter = 0.05f,
+                                      float spatialBlend = 1f)
         {
             if (clip == null) return null;
 
@@ -319,6 +320,7 @@ namespace Duskborn.Audio
             src.transform.position = position;
             src.minDistance = minDistance;
             src.maxDistance = maxDistance;
+            src.spatialBlend = spatialBlend;
             src.pitch = 1.0f + Random.Range(-pitchJitter, pitchJitter);
             src.volume = volumeScale * masterVolume * sfxVolume;
             src.clip = clip;

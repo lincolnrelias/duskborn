@@ -70,6 +70,31 @@ namespace Duskborn.Audio
             return player.GetFootstepClip(surfaceTag);
         }
 
+        public AudioClip GetFootstepClip(SurfaceType surfaceType)
+        {
+            return player.GetFootstepClip(surfaceType);
+        }
+
+        public AudioClip GetDropClip(Gameplay.Loot.ItemRarity rarity)
+        {
+            return loot.GetDropClip(rarity);
+        }
+
+        public float GetDropVolume(Gameplay.Loot.ItemRarity rarity)
+        {
+            return loot.GetDropVolume(rarity);
+        }
+
+        public AudioClip GetPickupClip(Gameplay.Loot.ItemRarity rarity)
+        {
+            return loot.GetPickupClip(rarity);
+        }
+
+        public float GetPickupVolume(Gameplay.Loot.ItemRarity rarity)
+        {
+            return loot.GetPickupVolume(rarity);
+        }
+
 #if UNITY_EDITOR
         public static AudioDatabase CreateDefaultAsset()
         {
@@ -187,6 +212,8 @@ namespace Duskborn.Audio
         [Header("Passos por Superfície")]
         public AudioClip[] grassSteps = Array.Empty<AudioClip>();
         public AudioClip[] stoneSteps = Array.Empty<AudioClip>();
+        public AudioClip[] dirtSteps  = Array.Empty<AudioClip>();
+        public AudioClip[] waterSteps = Array.Empty<AudioClip>();
 
         [Header("Locomoção e Salto")]
         public AudioClip jumpClip;
@@ -198,23 +225,61 @@ namespace Duskborn.Audio
         public AudioClip heartbeatLoopClip;
 
         [Header("Volumes e Parâmetros")]
-        [Range(0f, 1f)] public float footstepVolume = 0.65f;
-        [Range(0f, 1f)] public float jumpVolume     = 0.60f;
-        [Range(0f, 1f)] public float landVolume     = 0.75f;
-        [Range(0f, 1f)] public float hurtVolume     = 0.85f;
-        [Range(0f, 1f)] public float deathVolume    = 1.0f;
+        [Range(0f, 1f)] public float footstepVolume    = 0.65f;
+        [Range(0f, 1f)] public float jumpVolume        = 0.60f;
+        [Range(0f, 1f)] public float landVolume        = 0.75f;
+        [Range(0f, 1f)] public float hurtVolume        = 0.85f;
+        [Range(0f, 1f)] public float deathVolume       = 1.0f;
+        [Range(0f, 1f)] public float waterWadeVolume   = 0.70f;
+        [Range(0f, 1f)] public float waterSplashVolume = 0.80f;
         public float lowHpThreshold = 0.30f;
         public float pitchVariation = 0.08f;
 
+        [Header("Interação Contínua com Água")]
+        public AudioClip waterWadeLoop;
+        public AudioClip waterEnterSplashClip;
+
+        public AudioClip GetFootstepClip(SurfaceType surfaceType)
+        {
+            return surfaceType switch
+            {
+                SurfaceType.Grass => grassSteps.RandomOrNull(),
+                SurfaceType.Dirt  => (dirtSteps != null && dirtSteps.Length > 0 ? dirtSteps.RandomOrNull() : null) ?? grassSteps.RandomOrNull(),
+                SurfaceType.Rock  => (stoneSteps != null && stoneSteps.Length > 0 ? stoneSteps.RandomOrNull() : null) ?? grassSteps.RandomOrNull(),
+                SurfaceType.Water => (waterSteps != null && waterSteps.Length > 0 ? waterSteps.RandomOrNull() : null) ?? grassSteps.RandomOrNull(),
+                _                 => grassSteps.RandomOrNull()
+            };
+        }
+
         public AudioClip GetFootstepClip(string surfaceTag)
         {
+            if (string.IsNullOrEmpty(surfaceTag)) return grassSteps.RandomOrNull();
+
+            if (string.Equals(surfaceTag, "Water", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(surfaceTag, "River", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(surfaceTag, "Ocean", StringComparison.OrdinalIgnoreCase))
+            {
+                return GetFootstepClip(SurfaceType.Water);
+            }
+
+            if (string.Equals(surfaceTag, "Dirt", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(surfaceTag, "Sand", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(surfaceTag, "Gravel", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(surfaceTag, "Mud", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(surfaceTag, "Earth", StringComparison.OrdinalIgnoreCase))
+            {
+                return GetFootstepClip(SurfaceType.Dirt);
+            }
+
             if (string.Equals(surfaceTag, "Stone", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(surfaceTag, "Metal", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(surfaceTag, "Rock", StringComparison.OrdinalIgnoreCase))
+                string.Equals(surfaceTag, "Rock", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(surfaceTag, "Cliff", StringComparison.OrdinalIgnoreCase))
             {
-                return stoneSteps.RandomOrNull();
+                return GetFootstepClip(SurfaceType.Rock);
             }
-            return grassSteps.RandomOrNull();
+
+            return GetFootstepClip(SurfaceType.Grass);
         }
 
         public void AutoPopulate()
@@ -237,6 +302,29 @@ namespace Duskborn.Audio
                     AudioDatabase.LoadAsset("footstep_stone_03")
                 );
             }
+
+            if (dirtSteps == null || dirtSteps.Length == 0)
+            {
+                dirtSteps = FilterNotNull(
+                    AudioDatabase.LoadAsset("footstep_dirt_01"),
+                    AudioDatabase.LoadAsset("footstep_dirt_02"),
+                    AudioDatabase.LoadAsset("footstep_dirt_03"),
+                    AudioDatabase.LoadAsset("footstep_dirt_04")
+                );
+            }
+
+            if (waterSteps == null || waterSteps.Length == 0)
+            {
+                waterSteps = FilterNotNull(
+                    AudioDatabase.LoadAsset("footstep_water_01"),
+                    AudioDatabase.LoadAsset("footstep_water_02"),
+                    AudioDatabase.LoadAsset("footstep_water_03"),
+                    AudioDatabase.LoadAsset("footstep_water_04")
+                );
+            }
+
+            if (waterWadeLoop == null) waterWadeLoop = AudioDatabase.LoadAsset("water_wade_loop");
+            if (waterEnterSplashClip == null) waterEnterSplashClip = AudioDatabase.LoadAsset("water_splash_enter");
 
             if (jumpClip == null) jumpClip = AudioDatabase.LoadAsset("jump_takeoff");
             if (landClip == null) landClip = AudioDatabase.LoadAsset("jump_land");
@@ -447,10 +535,125 @@ namespace Duskborn.Audio
         public AudioClip itemPickupClip;
         public AudioClip chestOpenClip;
 
+        [Header("Clipes de Coleta por Tier / Raridade")]
+        public AudioClip commonPickupClip;
+        public AudioClip uncommonPickupClip;
+        public AudioClip rarePickupClip;
+        public AudioClip epicPickupClip;
+        public AudioClip legendaryPickupClip;
+
+        [Header("Clipes de Drop por Tier / Raridade")]
+        public AudioClip commonDropClip;
+        public AudioClip uncommonDropClip;
+        public AudioClip rareDropClip;
+        public AudioClip epicDropClip;
+        public AudioClip legendaryDropClip;
+
         [Header("Volumes")]
-        [Range(0f, 1f)] public float goldVolume  = 1.0f;
-        [Range(0f, 1f)] public float itemVolume  = 1.0f;
-        [Range(0f, 1f)] public float chestVolume = 1.0f;
+        [Range(0f, 1f)] public float goldVolume        = 1.0f;
+        [Range(0f, 1f)] public float itemVolume        = 1.0f;
+        [Range(0f, 1f)] public float chestVolume       = 1.0f;
+        [Range(0f, 1f)] public float commonPickupVolume    = 0.80f;
+        [Range(0f, 1f)] public float uncommonPickupVolume  = 0.85f;
+        [Range(0f, 1f)] public float rarePickupVolume      = 0.95f;
+        [Range(0f, 1f)] public float epicPickupVolume      = 1.0f;
+        [Range(0f, 1f)] public float legendaryPickupVolume = 1.0f;
+        [Range(0f, 1f)] public float commonDropVolume    = 0.75f;
+        [Range(0f, 1f)] public float uncommonDropVolume  = 0.85f;
+        [Range(0f, 1f)] public float rareDropVolume      = 0.95f;
+        [Range(0f, 1f)] public float epicDropVolume      = 1.0f;
+        [Range(0f, 1f)] public float legendaryDropVolume = 1.0f;
+
+        public AudioClip GetPickupClip(Gameplay.Loot.ItemRarity rarity)
+        {
+            AudioClip clip = rarity switch
+            {
+                Gameplay.Loot.ItemRarity.Common    => commonPickupClip,
+                Gameplay.Loot.ItemRarity.Uncommon  => uncommonPickupClip ?? commonPickupClip,
+                Gameplay.Loot.ItemRarity.Rare      => rarePickupClip ?? uncommonPickupClip ?? commonPickupClip,
+                Gameplay.Loot.ItemRarity.Epic      => epicPickupClip ?? rarePickupClip ?? commonPickupClip,
+                Gameplay.Loot.ItemRarity.Legendary => legendaryPickupClip ?? epicPickupClip ?? rarePickupClip,
+                _                                  => commonPickupClip
+            };
+
+            if (clip == null)
+            {
+                string clipName = rarity switch
+                {
+                    Gameplay.Loot.ItemRarity.Common    => "pickup_common",
+                    Gameplay.Loot.ItemRarity.Uncommon  => "pickup_uncommon",
+                    Gameplay.Loot.ItemRarity.Rare      => "pickup_rare",
+                    Gameplay.Loot.ItemRarity.Epic      => "pickup_epic",
+                    Gameplay.Loot.ItemRarity.Legendary => "pickup_legendary",
+                    _                                  => "pickup_common"
+                };
+
+                clip = AudioDatabase.LoadAsset(clipName)
+                    ?? Resources.Load<AudioClip>($"SFX/{clipName}")
+                    ?? Resources.Load<AudioClip>(clipName)
+                    ?? itemPickupClip;
+            }
+
+            return clip;
+        }
+
+        public float GetPickupVolume(Gameplay.Loot.ItemRarity rarity)
+        {
+            return rarity switch
+            {
+                Gameplay.Loot.ItemRarity.Common    => commonPickupVolume,
+                Gameplay.Loot.ItemRarity.Uncommon  => uncommonPickupVolume,
+                Gameplay.Loot.ItemRarity.Rare      => rarePickupVolume,
+                Gameplay.Loot.ItemRarity.Epic      => epicPickupVolume,
+                Gameplay.Loot.ItemRarity.Legendary => legendaryPickupVolume,
+                _                                  => itemVolume
+            };
+        }
+
+        public AudioClip GetDropClip(Gameplay.Loot.ItemRarity rarity)
+        {
+            AudioClip clip = rarity switch
+            {
+                Gameplay.Loot.ItemRarity.Common    => commonDropClip,
+                Gameplay.Loot.ItemRarity.Uncommon  => uncommonDropClip ?? commonDropClip,
+                Gameplay.Loot.ItemRarity.Rare      => rareDropClip ?? uncommonDropClip ?? commonDropClip,
+                Gameplay.Loot.ItemRarity.Epic      => epicDropClip ?? rareDropClip ?? commonDropClip,
+                Gameplay.Loot.ItemRarity.Legendary => legendaryDropClip ?? epicDropClip ?? rareDropClip,
+                _                                  => commonDropClip
+            };
+
+            if (clip == null)
+            {
+                string clipName = rarity switch
+                {
+                    Gameplay.Loot.ItemRarity.Common    => "drop_common",
+                    Gameplay.Loot.ItemRarity.Uncommon  => "drop_uncommon",
+                    Gameplay.Loot.ItemRarity.Rare      => "drop_rare",
+                    Gameplay.Loot.ItemRarity.Epic      => "drop_epic",
+                    Gameplay.Loot.ItemRarity.Legendary => "drop_legendary",
+                    _                                  => "drop_common"
+                };
+
+                clip = AudioDatabase.LoadAsset(clipName)
+                    ?? Resources.Load<AudioClip>($"SFX/{clipName}")
+                    ?? Resources.Load<AudioClip>(clipName);
+            }
+
+            return clip;
+        }
+
+        public float GetDropVolume(Gameplay.Loot.ItemRarity rarity)
+        {
+            return rarity switch
+            {
+                Gameplay.Loot.ItemRarity.Common    => commonDropVolume,
+                Gameplay.Loot.ItemRarity.Uncommon  => uncommonDropVolume,
+                Gameplay.Loot.ItemRarity.Rare      => rareDropVolume,
+                Gameplay.Loot.ItemRarity.Epic      => epicDropVolume,
+                Gameplay.Loot.ItemRarity.Legendary => legendaryDropVolume,
+                _                                  => commonDropVolume
+            };
+        }
 
         public void AutoPopulate()
         {
@@ -462,6 +665,36 @@ namespace Duskborn.Audio
 
             if (chestOpenClip == null)
                 chestOpenClip = AudioDatabase.LoadAsset("chest_open");
+
+            if (commonPickupClip == null)
+                commonPickupClip = AudioDatabase.LoadAsset("pickup_common");
+
+            if (uncommonPickupClip == null)
+                uncommonPickupClip = AudioDatabase.LoadAsset("pickup_uncommon");
+
+            if (rarePickupClip == null)
+                rarePickupClip = AudioDatabase.LoadAsset("pickup_rare");
+
+            if (epicPickupClip == null)
+                epicPickupClip = AudioDatabase.LoadAsset("pickup_epic");
+
+            if (legendaryPickupClip == null)
+                legendaryPickupClip = AudioDatabase.LoadAsset("pickup_legendary");
+
+            if (commonDropClip == null)
+                commonDropClip = AudioDatabase.LoadAsset("drop_common");
+
+            if (uncommonDropClip == null)
+                uncommonDropClip = AudioDatabase.LoadAsset("drop_uncommon");
+
+            if (rareDropClip == null)
+                rareDropClip = AudioDatabase.LoadAsset("drop_rare");
+
+            if (epicDropClip == null)
+                epicDropClip = AudioDatabase.LoadAsset("drop_epic");
+
+            if (legendaryDropClip == null)
+                legendaryDropClip = AudioDatabase.LoadAsset("drop_legendary");
         }
     }
 

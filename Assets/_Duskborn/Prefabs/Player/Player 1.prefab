@@ -162,7 +162,7 @@ CapsuleCollider:
   m_Radius: 0.5
   m_Height: 2
   m_Direction: 1
-  m_Center: {x: 0, y: 0.23, z: 0}
+  m_Center: {x: 0, y: 0.4, z: 0}
 --- !u!143 &4733055338495611918
 CharacterController:
   m_ObjectHideFlags: 0
@@ -182,12 +182,12 @@ CharacterController:
   m_Enabled: 1
   serializedVersion: 3
   m_Height: 2
-  m_Radius: 0.5
+  m_Radius: 0.35
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0.22, z: 0}
+  m_Center: {x: 0, y: 0.4, z: 0}
 --- !u!114 &4731265692595606875
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -217,14 +217,20 @@ MonoBehaviour:
     MoveSpeedMultiplier: 1
     IncomingDamageMultiplier: 1
     CritChanceBonus: 0
+    MiningResourceBonus: 0
+    WoodcuttingResourceBonus: 0
     HPBuffAdditive: 0
     DamageBuffAdditive: 0
     MoveSpeedBuffAdditive: 0
     AttackSpeedBuffAdditive: 0
+    MiningResourceBuffAdditive: 0
+    WoodcuttingResourceBuffAdditive: 0
     HPBuffFactor: 1
     DamageBuffFactor: 1
     MoveSpeedBuffFactor: 1
     AttackSpeedBuffFactor: 1
+    MiningResourceBuffFactor: 1
+    WoodcuttingResourceBuffFactor: 1
     CritChanceBuffAdditive: 0
     CritChanceBuffFactor: 1
     IncomingDamageBuffAdditive: 0
@@ -249,6 +255,11 @@ MonoBehaviour:
   rotationSpeed: 720
   accelTime: 0.15
   decelTime: 0.08
+  runMultiplier: 1
+  sprintMultiplier: 1.5
+  jumpHeight: 1.6
+  coyoteTime: 0.15
+  jumpBufferTime: 0.15
   _animator: {fileID: 7300167406293983611}
 --- !u!114 &7734906760495636806
 MonoBehaviour:
@@ -1211,6 +1222,18 @@ PrefabInstance:
     - target: {fileID: 1759088178253751756, guid: ad8f2195e34c420488c59f2507e2f042, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3032992319070278650, guid: ad8f2195e34c420488c59f2507e2f042, type: 3}
+      propertyPath: m_AdditionalShaderChannelsFlag
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 4100000000000000014, guid: ad8f2195e34c420488c59f2507e2f042, type: 3}
+      propertyPath: m_fontSize
+      value: 0.15
+      objectReference: {fileID: 0}
+    - target: {fileID: 4100000000000000014, guid: ad8f2195e34c420488c59f2507e2f042, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4074367986
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -32,6 +32,16 @@ namespace Duskborn.Gameplay.Player
         [Tooltip("Cor do anel de ondulação na água.")]
         [SerializeField] private Color rippleColor = new Color(0.88f, 0.96f, 1.0f, 0.46f);
 
+        [Header("Áudio de Deslocamento na Água")]
+        [Tooltip("Loop contínuo de fluido e deslocamento de água ao caminhar/correr.")]
+        [SerializeField] private AudioClip wadeLoopClip;
+
+        [Tooltip("Som de impacto e dispersão ao mergulhar/entrar na água.")]
+        [SerializeField] private AudioClip enterSplashClip;
+
+        [Range(0f, 1f)] [SerializeField] private float wadeVolume = 0.70f;
+        [Range(0f, 1f)] [SerializeField] private float enterSplashVolume = 0.80f;
+
         private static readonly int PlayerWaterDataId = Shader.PropertyToID("_PlayerWaterData");
         private static Mesh s_cachedRingMesh;
         private static Material s_cachedRingMaterial;
@@ -41,7 +51,13 @@ namespace Duskborn.Gameplay.Player
         private float _currentWadingStrength;
         private bool _isInWater;
         private bool _isInDeepWater;
+        private bool _wasInWater;
         private float _currentWaterLevel;
+        private float _targetWadeVolume;
+
+        private AudioSource _wadeAudioSource;
+        private AudioSource _splashAudioSource;
+        private PlayerController _playerController;
 
         // Pool de anéis de ondulação procedurais
         private readonly List<RippleInstance> _activeRipples = new List<RippleInstance>();
@@ -72,12 +88,15 @@ namespace Duskborn.Gameplay.Player
         {
             _characterController = GetComponent<CharacterController>();
             _mainCollider = GetComponent<Collider>();
+            _playerController = GetComponent<PlayerController>();
             EnsureResources();
+            SetupAudioSources();
         }
 
         private void Start()
         {
             _lastRipplePosition = transform.position;
+            LoadClipsIfNull();
         }
 
         private void OnDestroy()
@@ -91,8 +110,127 @@ namespace Duskborn.Gameplay.Player
         private void Update()
         {
             UpdateWaterState();
+            UpdateWaterAudio();
             UpdateShaderData();
             UpdateActiveRipples();
+        }
+
+        private void SetupAudioSources()
+        {
+            bool isLocalOwner = _playerController == null || _playerController.IsOwner;
+
+            _wadeAudioSource = gameObject.AddComponent<AudioSource>();
+            _wadeAudioSource.playOnAwake = false;
+            _wadeAudioSource.loop = true;
+            _wadeAudioSource.spatialBlend = isLocalOwner ? 0.15f : 1.0f;
+            _wadeAudioSource.minDistance = isLocalOwner ? 4.0f : 2.0f;
+            _wadeAudioSource.maxDistance = 25.0f;
+            _wadeAudioSource.volume = 0f;
+
+            _splashAudioSource = gameObject.AddComponent<AudioSource>();
+            _splashAudioSource.playOnAwake = false;
+            _splashAudioSource.loop = false;
+            _splashAudioSource.spatialBlend = isLocalOwner ? 0.20f : 1.0f;
+            _splashAudioSource.minDistance = isLocalOwner ? 3.0f : 2.0f;
+            _splashAudioSource.maxDistance = 25.0f;
+        }
+
+        public void LoadClipsIfNull()
+        {
+            var db = Duskborn.Audio.AudioDatabase.Instance?.Player;
+            if (db != null)
+            {
+                if (wadeLoopClip == null) wadeLoopClip = db.waterWadeLoop;
+                if (enterSplashClip == null) enterSplashClip = db.waterEnterSplashClip;
+                wadeVolume = db.waterWadeVolume;
+                enterSplashVolume = db.waterSplashVolume;
+            }
+            else
+            {
+                if (wadeLoopClip == null) wadeLoopClip = Resources.Load<AudioClip>("SFX/water_wade_loop");
+                if (enterSplashClip == null) enterSplashClip = Resources.Load<AudioClip>("SFX/water_splash_enter");
+            }
+
+            if (wadeLoopClip != null && _wadeAudioSource != null)
+            {
+                _wadeAudioSource.clip = wadeLoopClip;
+            }
+        }
+
+        private void UpdateWaterAudio()
+        {
+            if (_wadeAudioSource == null) return;
+
+            // Transição de entrada na água (splash)
+            if (!_wasInWater && _isInWater)
+            {
+                PlayEnterSplash();
+            }
+            _wasInWater = _isInWater;
+
+            if (!_isInWater)
+            {
+                _targetWadeVolume = 0f;
+            }
+            else
+            {
+                // Velocidade horizontal real do jogador
+                float speed = 0f;
+                if (_characterController != null)
+                {
+                    speed = new Vector2(_characterController.velocity.x, _characterController.velocity.z).magnitude;
+                }
+
+                if (_playerController != null && _playerController.IsMoving && speed < 0.5f)
+                {
+                    speed = _playerController.IsSprinting ? 6.5f : 4.5f;
+                }
+
+                if (speed > 0.35f)
+                {
+                    float normalizedSpeed = Mathf.Clamp01(speed / 6.0f);
+                    float deepBonus = _isInDeepWater ? 1.25f : 1.0f;
+                    float masterSfx = Duskborn.Audio.AudioManager.Instance != null
+                        ? Duskborn.Audio.AudioManager.Instance.MasterVolume * Duskborn.Audio.AudioManager.Instance.SfxVolume
+                        : 1f;
+
+                    _targetWadeVolume = Mathf.Clamp01(wadeVolume * Mathf.Lerp(0.35f, 1.0f, normalizedSpeed) * deepBonus) * masterSfx;
+
+                    // Pitch mais encorpado em água funda, e acelerado em corrida
+                    float basePitch = _isInDeepWater ? 0.90f : 1.0f;
+                    _wadeAudioSource.pitch = basePitch * Mathf.Lerp(0.95f, 1.18f, normalizedSpeed);
+
+                    if (!_wadeAudioSource.isPlaying && wadeLoopClip != null)
+                    {
+                        if (_wadeAudioSource.clip == null) _wadeAudioSource.clip = wadeLoopClip;
+                        _wadeAudioSource.Play();
+                    }
+                }
+                else
+                {
+                    _targetWadeVolume = 0f;
+                }
+            }
+
+            // Interpolação suave do volume para sensação orgânica de deslocamento de fluido
+            _wadeAudioSource.volume = Mathf.MoveTowards(_wadeAudioSource.volume, _targetWadeVolume, Time.deltaTime * 3.5f);
+
+            if (_wadeAudioSource.volume <= 0.001f && _wadeAudioSource.isPlaying)
+            {
+                _wadeAudioSource.Stop();
+            }
+        }
+
+        private void PlayEnterSplash()
+        {
+            if (enterSplashClip == null || _splashAudioSource == null) return;
+
+            float masterSfx = Duskborn.Audio.AudioManager.Instance != null
+                ? Duskborn.Audio.AudioManager.Instance.MasterVolume * Duskborn.Audio.AudioManager.Instance.SfxVolume
+                : 1f;
+
+            _splashAudioSource.pitch = Random.Range(0.95f, 1.05f);
+            _splashAudioSource.PlayOneShot(enterSplashClip, enterSplashVolume * masterSfx);
         }
 
         public void NotifyMovement(bool isMoving, Vector3 currentVelocity)

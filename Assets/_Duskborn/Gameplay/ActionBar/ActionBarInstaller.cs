@@ -122,7 +122,17 @@ namespace Duskborn.Gameplay.ActionBar
         public void RegisterIcon(string id, Texture2D icon)
         {
             if (!string.IsNullOrWhiteSpace(id) && icon != null)
+            {
                 _iconByItemId[id] = icon;
+                ItemIconRegistry.Register(id, icon);
+            }
+        }
+
+        public Texture2D GetIcon(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id)) return null;
+            if (_iconByItemId.TryGetValue(id, out var icon)) return icon;
+            return ItemIconRegistry.TryGetIcon(id, out icon) ? icon : null;
         }
 
         private void RefreshSelectionHighlight(int selectedIndex)
@@ -152,14 +162,19 @@ namespace Duskborn.Gameplay.ActionBar
             {
                 if (def == null || string.IsNullOrWhiteSpace(def.Id)) continue;
                 if (def.Icon != null)
+                {
                     _iconByItemId[def.Id] = def.Icon;
+                    ItemIconRegistry.Register(def.Id, def.Icon);
+                }
             }
         }
 
         private Texture2D ResolveIconTexture(IInventoryItem item)
         {
-            if (item == null || string.IsNullOrWhiteSpace(item.Id)) return null;
-            return _iconByItemId.TryGetValue(item.Id, out var tex) ? tex : null;
+            if (item == null) return null;
+            if (!string.IsNullOrWhiteSpace(item.Id) && _iconByItemId.TryGetValue(item.Id, out var tex))
+                return tex;
+            return ItemIconRegistry.Resolve(item);
         }
 
         private static ItemViewModel BuildViewModel(IInventoryItem item)

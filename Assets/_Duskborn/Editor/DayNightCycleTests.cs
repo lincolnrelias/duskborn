@@ -20,6 +20,8 @@ namespace Duskborn.Editor
             RunTest(Test_ClockTimeContinuity, ref passed, ref total);
             RunTest(Test_CelestialSunMoonDayNightSanity, ref passed, ref total);
             RunTest(Test_DirectionalLightAndShadowSanity, ref passed, ref total);
+            RunTest(Test_DynamicAtmosphericFogAndDensitySanity, ref passed, ref total);
+            RunTest(Test_EnvironmentVisualBootstrapperPipeline, ref passed, ref total);
 
             Debug.Log($"<color=#55FF55><b>[DayNightCycleTests] {passed}/{total} testes passaram com sucesso!</b></color>");
         }
@@ -293,6 +295,83 @@ namespace Duskborn.Editor
                 if (progress < 0.95f)
                     return Color.Lerp(nightColor, preDawnColor, Mathf.SmoothStep(0f, 1f, (progress - 0.80f) / 0.15f));
                 return Color.Lerp(preDawnColor, dawnColor, Mathf.SmoothStep(0f, 1f, (progress - 0.95f) / 0.05f));
+            }
+        }
+
+        private static void Test_DynamicAtmosphericFogAndDensitySanity()
+        {
+            // Cria um GameObject temporário com DayNightCycle para testar modulação de neblina e atmosfera
+            GameObject go = new GameObject("Test_DayNightCycle_Atmosphere");
+            try
+            {
+                var cycle = go.AddComponent<DayNightCycle>();
+                var lightGO = new GameObject("Test_Sun");
+                var dirLight = lightGO.AddComponent<Light>();
+                dirLight.type = LightType.Directional;
+
+                // Teste 1: Meio-dia (visibilidade aberta e névoa mínima límpida)
+                cycle.SetPhaseAndProgressForEditor(true, 0.5f, 1);
+                float dayFog = cycle.CurrentFogDensity;
+                AssertTrue(dayFog > 0.002f && dayFog < 0.005f, $"Névoa ao meio-dia deve ser límpida (obtido: {dayFog})");
+
+                // Teste 2: Crepúsculo (bruma âmbar/dourada atmosférica deve ser mais densa que o meio-dia)
+                cycle.SetPhaseAndProgressForEditor(true, 0.90f, 1);
+                float duskFog = cycle.CurrentFogDensity;
+                AssertTrue(duskFog > dayFog, $"Névoa no crepúsculo ({duskFog}) DEVE ser mais densa que no meio-dia ({dayFog})");
+
+                // Teste 3: Meia-noite (névoa enluarada densa)
+                cycle.SetPhaseAndProgressForEditor(false, 0.5f, 1);
+                float nightFog = cycle.CurrentFogDensity;
+                AssertTrue(nightFog > duskFog, $"Névoa da noite ({nightFog}) DEVE ser mais densa que o crepúsculo ({duskFog})");
+
+                // Teste 4: Noite 7 do Chefe (bruma carmesim mais opressiva de todas)
+                cycle.SetPhaseAndProgressForEditor(false, 0.5f, 7);
+                float bossFog = cycle.CurrentFogDensity;
+                AssertTrue(bossFog > nightFog, $"Névoa da Noite 7 ({bossFog}) DEVE ser a mais densa de todas (maior que {nightFog})");
+
+                // Teste 5: Remoção de partículas da atmosfera
+                var atmoGO = new GameObject("WorldAtmosphere");
+                atmoGO.AddComponent<Duskborn.Gameplay.World.WorldAtmosphereController>();
+                EnvironmentVisualBootstrapper.RemoveWorldAtmosphere();
+                AssertTrue(GameObject.Find("WorldAtmosphere") == null, "WorldAtmosphere deve ser removido com sucesso");
+
+                UnityEngine.Object.DestroyImmediate(lightGO);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(go);
+            }
+        }
+
+        private static void Test_EnvironmentVisualBootstrapperPipeline()
+        {
+            var camGO = new GameObject("TestCamera");
+            var cam = camGO.AddComponent<Camera>();
+            try
+            {
+                EnvironmentVisualBootstrapper.EnsureCameraPostProcessing(cam);
+                var camData = cam.GetComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>();
+                AssertTrue(camData != null && camData.renderPostProcessing, "Câmera deve ter renderPostProcessing ativado.");
+
+                EnvironmentVisualBootstrapper.EnsureGlobalVolume();
+                var volume = UnityEngine.Object.FindAnyObjectByType<UnityEngine.Rendering.Volume>();
+                AssertTrue(volume != null, "Volume global deve ser criado/assegurado.");
+                AssertTrue(volume.isGlobal, "Volume deve ser global.");
+                AssertTrue(volume.sharedProfile != null || volume.profile != null, "Volume deve ter perfil atribuído.");
+
+                EnvironmentVisualBootstrapper.EnsureDayNightFog();
+                AssertTrue(RenderSettings.fog, "RenderSettings.fog deve estar ativado.");
+
+                EnvironmentVisualBootstrapper.EnsureVisualPipeline();
+                AssertTrue(GameObject.Find("WorldAtmosphere") == null, "WorldAtmosphere não deve existir após o pipeline ser assegurado.");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(camGO);
+                var vol = GameObject.Find("Global Volume");
+                if (vol != null) UnityEngine.Object.DestroyImmediate(vol);
+                var atmo = GameObject.Find("WorldAtmosphere");
+                if (atmo != null) UnityEngine.Object.DestroyImmediate(atmo);
             }
         }
     }

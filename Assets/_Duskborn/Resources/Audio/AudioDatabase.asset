@@ -35,6 +35,16 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 52b6042698cf0cc9e788b51512a58f17, type: 3}
     - {fileID: 8300000, guid: 78ec0cfcbbcdb84e3c022c507c88e833, type: 3}
     - {fileID: 8300000, guid: 966c4ed89fee17700e1d49a9531d3ebc, type: 3}
+    dirtSteps:
+    - {fileID: 8300000, guid: 52b84e15bbd24948b64c78ff59bd5cef, type: 3}
+    - {fileID: 8300000, guid: 834b7ac50738494c85586dc1c11982a9, type: 3}
+    - {fileID: 8300000, guid: df15179eacf74012a0a784beba443b66, type: 3}
+    - {fileID: 8300000, guid: 1673baa966a9422199259ea9347f60ac, type: 3}
+    waterSteps:
+    - {fileID: 8300000, guid: dda506022f9b4a96a9b582a71c443708, type: 3}
+    - {fileID: 8300000, guid: c5127057400a44798c76db738e4a0e47, type: 3}
+    - {fileID: 8300000, guid: 1069f17e3b6a4f4eb593ad3cf1a03ab6, type: 3}
+    - {fileID: 8300000, guid: 77add866e6db4519a11543eb2049ae75, type: 3}
     jumpClip: {fileID: 8300000, guid: a0e88e5a9594a3450ed7873edf584adb, type: 3}
     landClip: {fileID: 8300000, guid: 966b4bf60bb7d23db07651c71329b326, type: 3}
     hurtClips:
@@ -47,8 +57,12 @@ MonoBehaviour:
     landVolume: 0.75
     hurtVolume: 0.85
     deathVolume: 1
+    waterWadeVolume: 0.7
+    waterSplashVolume: 0.8
     lowHpThreshold: 0.3
     pitchVariation: 0.08
+    waterWadeLoop: {fileID: 8300000, guid: f5604235f6ae4c5d9b5990e4a6535433, type: 3}
+    waterEnterSplashClip: {fileID: 8300000, guid: fc3b3b228b284b49a5ccc0ae77e0c989, type: 3}
   enemies:
     swarmerAttackClips:
     - {fileID: 8300000, guid: 5d6d9de884d38ce6d710edfadaa1319c, type: 3}
@@ -107,9 +121,29 @@ MonoBehaviour:
     goldPickupClip: {fileID: 8300000, guid: 3ab3935b050a9f0401b342bc7d51fa6b, type: 3}
     itemPickupClip: {fileID: 8300000, guid: 452769a2c783fded9ca057e50ed7b6cf, type: 3}
     chestOpenClip: {fileID: 8300000, guid: bbbc145b703e933a44cbd951229b9c59, type: 3}
+    commonPickupClip: {fileID: 8300000, guid: 38b71d9a0d2a45a38a7e02b3c10a0101, type: 3}
+    uncommonPickupClip: {fileID: 8300000, guid: 49c82eab1e3b56b49b8f13c4d21b0202, type: 3}
+    rarePickupClip: {fileID: 8300000, guid: 5ad93fbc2f4c67c5ac9024d5e32c0303, type: 3}
+    epicPickupClip: {fileID: 8300000, guid: 6be040cd305d78d6bd0135e6f43d0404, type: 3}
+    legendaryPickupClip: {fileID: 8300000, guid: 7cf151de416e89e7ce1246f7054e0505, type: 3}
+    commonDropClip: {fileID: 8300000, guid: 4188a2e3d8854e02a0b821653ab8b2c3, type: 3}
+    uncommonDropClip: {fileID: 8300000, guid: 7b94539aabf74713b05c8f0b9f11f0f0, type: 3}
+    rareDropClip: {fileID: 8300000, guid: 482bf7f96343404b9789ee5c7ffc514e, type: 3}
+    epicDropClip: {fileID: 8300000, guid: abbdd7f5ca764fa8b5358bd64259142c, type: 3}
+    legendaryDropClip: {fileID: 8300000, guid: cf594d140a444a949ca3728f2a21eb11, type: 3}
     goldVolume: 1
     itemVolume: 1
     chestVolume: 1
+    commonPickupVolume: 0.8
+    uncommonPickupVolume: 0.85
+    rarePickupVolume: 0.95
+    epicPickupVolume: 1
+    legendaryPickupVolume: 1
+    commonDropVolume: 0.85
+    uncommonDropVolume: 0.9
+    rareDropVolume: 0.95
+    epicDropVolume: 1
+    legendaryDropVolume: 1
   ui:
     buttonClickClip: {fileID: 8300000, guid: 0dea8811701f065b71c1aee7bd1063d1, type: 3}
     modalOpenClip: {fileID: 8300000, guid: 51fcd39d4b80b95ca7482e1e1dc220ed, type: 3}

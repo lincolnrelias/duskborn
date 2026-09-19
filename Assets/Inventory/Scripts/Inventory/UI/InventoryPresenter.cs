@@ -86,6 +86,11 @@ namespace InventorySystem.UI
             var vm = _viewModelBuilder(item);
             var hasIconTexture = false;
             var resolvedTexture = _iconResolver?.Invoke(item);
+            if (resolvedTexture == null)
+            {
+                resolvedTexture = ItemIconRegistry.Resolve(item);
+            }
+
             if (resolvedTexture != null)
             {
                 hasIconTexture = true;
@@ -102,6 +107,7 @@ namespace InventorySystem.UI
                 {
                     resolvedTexture = texture;
                     hasIconTexture = true;
+                    ItemIconRegistry.Register(item.Id, texture);
                 }
             }
 

@@ -44,6 +44,8 @@ namespace InventorySystem.Bootstrap
         public InventoryService Service => _service;
         public IInventory Inventory => _service;
         public IReadOnlyList<InventorySlotView> SlotViews => _presenter?.SlotElements;
+        public InventoryDragController DragController => _dragController;
+        public bool IsDraggingItem => _dragController != null && _dragController.IsDragging;
 
         public event Action<IInventoryItem, int> OnItemDroppedOutside;
 
@@ -229,24 +231,40 @@ namespace InventorySystem.Bootstrap
                 if (definition.Icon != null)
                 {
                     _iconByItemId[definition.Id] = definition.Icon;
+                    ItemIconRegistry.Register(definition.Id, definition.Icon);
                 }
             }
         }
 
         private Texture2D ResolveIconTexture(IInventoryItem item)
         {
-            if (item == null || string.IsNullOrWhiteSpace(item.Id))
+            if (item == null)
             {
                 return null;
             }
 
-            return _iconByItemId.TryGetValue(item.Id, out var texture) ? texture : null;
+            if (!string.IsNullOrWhiteSpace(item.Id) && _iconByItemId.TryGetValue(item.Id, out var texture))
+            {
+                return texture;
+            }
+
+            return ItemIconRegistry.Resolve(item);
         }
 
         public void RegisterIcon(string id, Texture2D icon)
         {
             if (!string.IsNullOrWhiteSpace(id) && icon != null)
+            {
                 _iconByItemId[id] = icon;
+                ItemIconRegistry.Register(id, icon);
+            }
+        }
+
+        public Texture2D GetIcon(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id)) return null;
+            if (_iconByItemId.TryGetValue(id, out var icon)) return icon;
+            return ItemIconRegistry.TryGetIcon(id, out icon) ? icon : null;
         }
 
         public bool TryAddMaterial()

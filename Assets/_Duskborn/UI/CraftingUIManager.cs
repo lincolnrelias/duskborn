@@ -42,6 +42,7 @@ namespace Duskborn.UI
 
         // Estado do Sistema
         public bool IsOpen { get; private set; }
+        public int LastClosedFrame { get; private set; } = -1;
         public Workbench CurrentWorkbench { get; private set; }
 
         private Canvas _canvas;
@@ -279,6 +280,7 @@ namespace Duskborn.UI
             if (!IsOpen) return;
 
             IsOpen = false;
+            LastClosedFrame = Time.frameCount;
 
             if (CurrentWorkbench != null)
             {
@@ -303,7 +305,13 @@ namespace Duskborn.UI
             bool inventoryStillOpen = _inventoryUIManager != null && _inventoryUIManager.IsOpen;
             if (!inventoryStillOpen)
             {
-                PlayerCameraController.LocalInstance?.SetRotationLocked(false);
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+                if (PlayerCameraController.LocalInstance != null)
+                {
+                    PlayerCameraController.LocalInstance.SetRotationLocked(false);
+                    PlayerCameraController.LocalInstance.SetCursorLocked(true);
+                }
             }
         }
 

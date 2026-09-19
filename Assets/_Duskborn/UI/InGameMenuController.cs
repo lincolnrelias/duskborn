@@ -256,20 +256,9 @@ namespace Duskborn.UI
 
         private void HandleEscapeKey()
         {
-            // Se o inventário estiver aberto no mesmo momento, deixa o inventário fechar primeiro
-            var inv = FindAnyObjectByType<InventoryUIManager>();
-            if (inv != null && inv.IsOpen)
+            // 1. Se o próprio menu de pausa estiver aberto: fecha submodais ou fecha o menu de pausa
+            if (IsOpen)
             {
-                return;
-            }
-
-            if (!IsOpen)
-            {
-                OpenMenu();
-            }
-            else
-            {
-                // Hierarquia defensiva de fechamento de modais
                 if (_showConfirmMainMenu)
                 {
                     _showConfirmMainMenu = false;
@@ -294,7 +283,50 @@ namespace Duskborn.UI
                 {
                     CloseMenu();
                 }
+                return;
             }
+
+            // 2. Se algum outro menu estiver aberto (ou acabou de ser fechado neste mesmo frame pelo ESC):
+            // Fecha o menu em questão e NÃO abre o menu de pausa!
+            bool closedOtherMenu = false;
+
+            // Bancada de Trabalho / Crafting
+            var crafting = CraftingUIManager.Instance ?? FindAnyObjectByType<CraftingUIManager>();
+            if (crafting != null && (crafting.IsOpen || crafting.LastClosedFrame == Time.frameCount))
+            {
+                if (crafting.IsOpen)
+                {
+                    crafting.Close();
+                }
+                closedOtherMenu = true;
+            }
+
+            // Mochila / Inventário
+            var inv = InventoryUIManager.Instance ?? FindAnyObjectByType<InventoryUIManager>();
+            if (inv != null && (inv.IsOpen || inv.LastClosedFrame == Time.frameCount))
+            {
+                if (inv.IsOpen)
+                {
+                    inv.Close();
+                }
+                closedOtherMenu = true;
+            }
+
+            // Ficha de Atributos do HUD
+            var hud = GameHUD.Instance ?? FindAnyObjectByType<GameHUD>();
+            if (hud != null && hud.ShowStats)
+            {
+                hud.CloseStats();
+                closedOtherMenu = true;
+            }
+
+            if (closedOtherMenu)
+            {
+                return;
+            }
+
+            // 3. Nenhum outro menu aberto: agora sim abre o menu de pausa da expedição!
+            OpenMenu();
         }
 
         public void OpenMenu()
@@ -333,7 +365,14 @@ namespace Duskborn.UI
 
             Time.timeScale = 1f;
 
-            PlayerCameraController.LocalInstance?.SetRotationLocked(false);
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+
+            if (PlayerCameraController.LocalInstance != null)
+            {
+                PlayerCameraController.LocalInstance.SetRotationLocked(false);
+                PlayerCameraController.LocalInstance.SetCursorLocked(true);
+            }
 
             if (playSound)
             {

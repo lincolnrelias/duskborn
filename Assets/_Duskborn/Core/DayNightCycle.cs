@@ -43,6 +43,22 @@ namespace Duskborn.Core
         [Tooltip("Curva de transição Dia -> Noite (0 = Dia, 1 = Noite). Se vazia, utiliza transição suave automática.")]
         [SerializeField] private AnimationCurve skyboxNightBlendCurve;
 
+        [Header("Neblina Atmosférica Dinâmica")]
+        [Tooltip("Ativa a modulação contínua da densidade da neblina de acordo com a fase do dia/noite.")]
+        [SerializeField] private bool           dynamicFogDensity = true;
+        [Tooltip("Densidade da neblina durante o dia claro (visibilidade ampla e límpida).")]
+        [Range(0.001f, 0.03f)]
+        [SerializeField] private float          dayFogDensity = 0.0038f;
+        [Tooltip("Densidade da neblina no alvorecer e crepúsculo (névoa atmosférica dourada/âmbar).")]
+        [Range(0.001f, 0.03f)]
+        [SerializeField] private float          duskDawnFogDensity = 0.0068f;
+        [Tooltip("Densidade da neblina à noite (profundidade misteriosa e atmosfera enluarada).")]
+        [Range(0.001f, 0.04f)]
+        [SerializeField] private float          nightFogDensity = 0.0095f;
+        [Tooltip("Densidade da neblina na Noite 7 do Chefe (bruma carmesim opressiva).")]
+        [Range(0.001f, 0.05f)]
+        [SerializeField] private float          bossNightFogDensity = 0.0145f;
+
         [Header("Elevação Solar & Lunar (Anti-Sombras Esticadas)")]
         [Tooltip("Ângulo mínimo de elevação do Sol (evita sombras esticadas e distorcidas no amanhecer/entardecer).")]
         [Range(15f, 60f)]
@@ -78,6 +94,8 @@ namespace Duskborn.Core
         public bool        IsNight            => Phase == DayPhase.Night;
         public bool        IsDusk             => CurrentPeriod == CyclePeriod.Dusk;
         public bool        IsDawn             => CurrentPeriod == CyclePeriod.Dawn;
+        public float       CurrentFogDensity  => RenderSettings.fogDensity;
+        public Color       CurrentFogColor    => RenderSettings.fogColor;
 
         public event Action              OnDayStart;
         public event Action<int>         OnNightStart;
@@ -379,74 +397,87 @@ namespace Duskborn.Core
                 skyboxMaterial.SetFloat("_BossNightBlend", isBossNight ? 1.0f : 0.0f);
                 skyboxMaterial.SetVector("_SunDirection", sunSkyDir);
                 skyboxMaterial.SetVector("_MoonDirection", moonSkyDir);
+            }
 
-                // 5. Sincronização Contínua de Neblina com o Horizonte e Alvorada/Crepúsculo
-                if (syncFogWithHorizon)
+            // 5. Sincronização Contínua de Neblina com o Horizonte e Alvorada/Crepúsculo
+            if (syncFogWithHorizon)
+            {
+                Color dayHoriz = (skyboxMaterial != null && skyboxMaterial.HasProperty("_DayHorizonColor")) 
+                    ? skyboxMaterial.GetColor("_DayHorizonColor") 
+                    : new Color(0.72f, 0.88f, 0.98f);
+                Color nightHoriz = (skyboxMaterial != null && skyboxMaterial.HasProperty("_NightHorizonColor")) 
+                    ? skyboxMaterial.GetColor("_NightHorizonColor") 
+                    : new Color(0.12f, 0.18f, 0.32f);
+                Color duskCol = (skyboxMaterial != null && skyboxMaterial.HasProperty("_DuskDawnColor")) 
+                    ? skyboxMaterial.GetColor("_DuskDawnColor") 
+                    : new Color(1.0f, 0.48f, 0.22f);
+
+                if (isBossNight)
                 {
-                    Color dayHoriz = skyboxMaterial.HasProperty("_DayHorizonColor") 
-                        ? skyboxMaterial.GetColor("_DayHorizonColor") 
-                        : new Color(0.72f, 0.88f, 0.98f);
-                    Color nightHoriz = skyboxMaterial.HasProperty("_NightHorizonColor") 
-                        ? skyboxMaterial.GetColor("_NightHorizonColor") 
-                        : new Color(0.12f, 0.18f, 0.32f);
-                    Color duskCol = skyboxMaterial.HasProperty("_DuskDawnColor") 
-                        ? skyboxMaterial.GetColor("_DuskDawnColor") 
-                        : new Color(1.0f, 0.48f, 0.22f);
-
-                    if (isBossNight)
-                    {
-                        nightHoriz = Color.Lerp(nightHoriz, new Color(0.55f, 0.12f, 0.10f), 0.85f);
-                    }
-
-                    Color horizonCol = Color.Lerp(dayHoriz, nightHoriz, nightBlend);
-
-                    // Realce de Crepúsculo e Alvorecer na névoa com curva parabólica contínua
-                    float twilightFactor = 0f;
-                    if (isDay)
-                    {
-                        if (progress > 0.80f)
-                            twilightFactor = Mathf.Sin((progress - 0.80f) / 0.20f * Mathf.PI);
-                        else if (progress < 0.15f)
-                            twilightFactor = Mathf.Sin(progress / 0.15f * Mathf.PI);
-                    }
-                    else
-                    {
-                        if (progress > 0.82f)
-                            twilightFactor = Mathf.Sin((progress - 0.82f) / 0.18f * Mathf.PI) * 0.45f;
-                    }
-
-                    horizonCol = Color.Lerp(horizonCol, duskCol, twilightFactor * 0.55f);
-
-                    RenderSettings.fog = true;
-                    RenderSettings.fogMode = FogMode.ExponentialSquared;
-                    RenderSettings.fogColor = horizonCol;
-                    if (RenderSettings.fogDensity <= 0.0001f)
-                    {
-                        RenderSettings.fogDensity = 0.0055f;
-                    }
-
-                    // Iluminação Ambiente Trilight Coerente e Suave
-                    Color dayZenith = skyboxMaterial.HasProperty("_DayZenithColor") ? skyboxMaterial.GetColor("_DayZenithColor") : new Color(0.28f, 0.58f, 0.95f);
-                    Color nightZenith = skyboxMaterial.HasProperty("_NightZenithColor") ? skyboxMaterial.GetColor("_NightZenithColor") : new Color(0.04f, 0.06f, 0.16f);
-                    Color dayGround = skyboxMaterial.HasProperty("_DayGroundColor") ? skyboxMaterial.GetColor("_DayGroundColor") : new Color(0.35f, 0.45f, 0.38f);
-                    Color nightGround = skyboxMaterial.HasProperty("_NightGroundColor") ? skyboxMaterial.GetColor("_NightGroundColor") : new Color(0.03f, 0.04f, 0.08f);
-
-                    if (isBossNight)
-                    {
-                        nightZenith = Color.Lerp(nightZenith, new Color(0.25f, 0.05f, 0.07f), 0.85f);
-                        nightGround = Color.Lerp(nightGround, new Color(0.12f, 0.02f, 0.03f), 0.85f);
-                    }
-
-                    RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
-                    RenderSettings.ambientSkyColor = Color.Lerp(dayZenith * 0.65f, nightZenith * 0.45f, nightBlend);
-                    RenderSettings.ambientEquatorColor = Color.Lerp(horizonCol * 0.55f, nightHoriz * 0.35f, nightBlend);
-                    RenderSettings.ambientGroundColor = Color.Lerp(dayGround * 0.45f, nightGround * 0.25f, nightBlend);
-
-                    // Sincronização da cor de sombra subtrativa
-                    Color dayShadowColor = new Color(0.42f, 0.48f, 0.63f, 1.0f);
-                    Color nightShadowColor = isBossNight ? new Color(0.35f, 0.10f, 0.12f, 1.0f) : new Color(0.12f, 0.14f, 0.25f, 1.0f);
-                    RenderSettings.subtractiveShadowColor = Color.Lerp(dayShadowColor, nightShadowColor, nightBlend);
+                    nightHoriz = Color.Lerp(nightHoriz, new Color(0.55f, 0.12f, 0.10f), 0.85f);
                 }
+
+                Color horizonCol = Color.Lerp(dayHoriz, nightHoriz, nightBlend);
+
+                // Realce de Crepúsculo e Alvorecer na névoa com curva parabólica contínua
+                float twilightFactor = 0f;
+                if (isDay)
+                {
+                    if (progress > 0.80f)
+                        twilightFactor = Mathf.Sin((progress - 0.80f) / 0.20f * Mathf.PI);
+                    else if (progress < 0.15f)
+                        twilightFactor = Mathf.Sin(progress / 0.15f * Mathf.PI);
+                }
+                else
+                {
+                    if (progress > 0.82f)
+                        twilightFactor = Mathf.Sin((progress - 0.82f) / 0.18f * Mathf.PI) * 0.45f;
+                }
+
+                horizonCol = Color.Lerp(horizonCol, duskCol, twilightFactor * 0.55f);
+
+                RenderSettings.fog = true;
+                RenderSettings.fogMode = FogMode.ExponentialSquared;
+                RenderSettings.fogColor = horizonCol;
+                if (dynamicFogDensity)
+                {
+                    float baseDensity = Mathf.Lerp(dayFogDensity, nightFogDensity, nightBlend);
+                    if (twilightFactor > 0.001f)
+                    {
+                        baseDensity = Mathf.Lerp(baseDensity, duskDawnFogDensity, twilightFactor);
+                    }
+                    if (isBossNight)
+                    {
+                        baseDensity = Mathf.Lerp(baseDensity, bossNightFogDensity, 0.85f);
+                    }
+                    RenderSettings.fogDensity = baseDensity;
+                }
+                else if (RenderSettings.fogDensity <= 0.0001f)
+                {
+                    RenderSettings.fogDensity = 0.0055f;
+                }
+
+                // Iluminação Ambiente Trilight Coerente e Suave
+                Color dayZenith = (skyboxMaterial != null && skyboxMaterial.HasProperty("_DayZenithColor")) ? skyboxMaterial.GetColor("_DayZenithColor") : new Color(0.28f, 0.58f, 0.95f);
+                Color nightZenith = (skyboxMaterial != null && skyboxMaterial.HasProperty("_NightZenithColor")) ? skyboxMaterial.GetColor("_NightZenithColor") : new Color(0.04f, 0.06f, 0.16f);
+                Color dayGround = (skyboxMaterial != null && skyboxMaterial.HasProperty("_DayGroundColor")) ? skyboxMaterial.GetColor("_DayGroundColor") : new Color(0.35f, 0.45f, 0.38f);
+                Color nightGround = (skyboxMaterial != null && skyboxMaterial.HasProperty("_NightGroundColor")) ? skyboxMaterial.GetColor("_NightGroundColor") : new Color(0.03f, 0.04f, 0.08f);
+
+                if (isBossNight)
+                {
+                    nightZenith = Color.Lerp(nightZenith, new Color(0.25f, 0.05f, 0.07f), 0.85f);
+                    nightGround = Color.Lerp(nightGround, new Color(0.12f, 0.02f, 0.03f), 0.85f);
+                }
+
+                RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
+                RenderSettings.ambientSkyColor = Color.Lerp(dayZenith * 0.65f, nightZenith * 0.45f, nightBlend);
+                RenderSettings.ambientEquatorColor = Color.Lerp(horizonCol * 0.55f, nightHoriz * 0.35f, nightBlend);
+                RenderSettings.ambientGroundColor = Color.Lerp(dayGround * 0.45f, nightGround * 0.25f, nightBlend);
+
+                // Sincronização da cor de sombra subtrativa
+                Color dayShadowColor = new Color(0.42f, 0.48f, 0.63f, 1.0f);
+                Color nightShadowColor = isBossNight ? new Color(0.35f, 0.10f, 0.12f, 1.0f) : new Color(0.12f, 0.14f, 0.25f, 1.0f);
+                RenderSettings.subtractiveShadowColor = Color.Lerp(dayShadowColor, nightShadowColor, nightBlend);
             }
         }
 

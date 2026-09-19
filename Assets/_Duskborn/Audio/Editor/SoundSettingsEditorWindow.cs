@@ -204,7 +204,9 @@ namespace Duskborn.Audio.Editor
             if (pProp == null) return;
 
             DrawClipArray(pProp.FindPropertyRelative("grassSteps"), "🌱 Passos na Grama (Grass)");
-            DrawClipArray(pProp.FindPropertyRelative("stoneSteps"), "🧱 Passos na Pedra/Metal (Stone/Metal)");
+            DrawClipArray(pProp.FindPropertyRelative("dirtSteps"),  "🍂 Passos na Terra/Areia (Dirt/Sand)");
+            DrawClipArray(pProp.FindPropertyRelative("stoneSteps"), "🧱 Passos na Rocha/Pedra/Metal (Rock/Stone)");
+            DrawClipArray(pProp.FindPropertyRelative("waterSteps"), "🌊 Passos na Água (Water)");
 
             EditorGUILayout.Space(6);
             DrawSectionBox("Salto e Queda", () =>
@@ -214,6 +216,15 @@ namespace Duskborn.Audio.Editor
                 EditorGUILayout.Slider(pProp.FindPropertyRelative("footstepVolume"), 0f, 1f, "Volume dos Passos");
                 EditorGUILayout.Slider(pProp.FindPropertyRelative("jumpVolume"), 0f, 1f, "Volume do Salto");
                 EditorGUILayout.Slider(pProp.FindPropertyRelative("landVolume"), 0f, 1f, "Volume da Queda");
+            });
+
+            EditorGUILayout.Space(6);
+            DrawSectionBox("🌊 Interação com Água (Deslocamento & Splash)", () =>
+            {
+                DrawSingleClipWithPreview(pProp.FindPropertyRelative("waterWadeLoop"), "Loop de Movimento na Água (Wade Loop)");
+                DrawSingleClipWithPreview(pProp.FindPropertyRelative("waterEnterSplashClip"), "Splash ao Entrar na Água");
+                EditorGUILayout.Slider(pProp.FindPropertyRelative("waterWadeVolume"), 0f, 1f, "Volume do Deslocamento na Água");
+                EditorGUILayout.Slider(pProp.FindPropertyRelative("waterSplashVolume"), 0f, 1f, "Volume do Splash na Água");
             });
 
             EditorGUILayout.Space(6);
@@ -291,19 +302,65 @@ namespace Duskborn.Audio.Editor
         private void DrawLootTab()
         {
             DrawSectionHeader("Loot, Baús & Coletáveis",
-                "Configura os sons de abertura de baús e coleta de ouro e recursos no chão.");
+                "Configura os sons de coleta e drop por raridade (Comum até Lendário), ouro e abertura de baús.");
 
             var lProp = _serializedDb.FindProperty("loot");
             if (lProp == null) return;
 
-            DrawSectionBox("Efeitos de Coleta", () =>
+            DrawSectionBox("Coleta de Itens por Raridade (Pickup SFX)", () =>
+            {
+                DrawSingleClipWithPreview(lProp.FindPropertyRelative("commonPickupClip"), "⚪ Coleta: Comum (Common)");
+                EditorGUILayout.Slider(lProp.FindPropertyRelative("commonPickupVolume"), 0f, 1f, "Volume Comum");
+
+                EditorGUILayout.Space(6);
+                DrawSingleClipWithPreview(lProp.FindPropertyRelative("uncommonPickupClip"), "🟢 Coleta: Incomum (Uncommon)");
+                EditorGUILayout.Slider(lProp.FindPropertyRelative("uncommonPickupVolume"), 0f, 1f, "Volume Incomum");
+
+                EditorGUILayout.Space(6);
+                DrawSingleClipWithPreview(lProp.FindPropertyRelative("rarePickupClip"), "🔵 Coleta: Raro (Rare)");
+                EditorGUILayout.Slider(lProp.FindPropertyRelative("rarePickupVolume"), 0f, 1f, "Volume Raro");
+
+                EditorGUILayout.Space(6);
+                DrawSingleClipWithPreview(lProp.FindPropertyRelative("epicPickupClip"), "🟣 Coleta: Épico (Epic)");
+                EditorGUILayout.Slider(lProp.FindPropertyRelative("epicPickupVolume"), 0f, 1f, "Volume Épico");
+
+                EditorGUILayout.Space(6);
+                DrawSingleClipWithPreview(lProp.FindPropertyRelative("legendaryPickupClip"), "🟠 Coleta: Lendário (Legendary)");
+                EditorGUILayout.Slider(lProp.FindPropertyRelative("legendaryPickupVolume"), 0f, 1f, "Volume Lendário");
+            });
+
+            EditorGUILayout.Space(10);
+            DrawSectionBox("Impacto / Drop no Chão por Raridade (Drop SFX)", () =>
+            {
+                DrawSingleClipWithPreview(lProp.FindPropertyRelative("commonDropClip"), "⚪ Drop: Comum (Common)");
+                EditorGUILayout.Slider(lProp.FindPropertyRelative("commonDropVolume"), 0f, 1f, "Volume Drop Comum");
+
+                EditorGUILayout.Space(6);
+                DrawSingleClipWithPreview(lProp.FindPropertyRelative("uncommonDropClip"), "🟢 Drop: Incomum (Uncommon)");
+                EditorGUILayout.Slider(lProp.FindPropertyRelative("uncommonDropVolume"), 0f, 1f, "Volume Drop Incomum");
+
+                EditorGUILayout.Space(6);
+                DrawSingleClipWithPreview(lProp.FindPropertyRelative("rareDropClip"), "🔵 Drop: Raro (Rare)");
+                EditorGUILayout.Slider(lProp.FindPropertyRelative("rareDropVolume"), 0f, 1f, "Volume Drop Raro");
+
+                EditorGUILayout.Space(6);
+                DrawSingleClipWithPreview(lProp.FindPropertyRelative("epicDropClip"), "🟣 Drop: Épico (Epic)");
+                EditorGUILayout.Slider(lProp.FindPropertyRelative("epicDropVolume"), 0f, 1f, "Volume Drop Épico");
+
+                EditorGUILayout.Space(6);
+                DrawSingleClipWithPreview(lProp.FindPropertyRelative("legendaryDropClip"), "🟠 Drop: Lendário (Legendary)");
+                EditorGUILayout.Slider(lProp.FindPropertyRelative("legendaryDropVolume"), 0f, 1f, "Volume Drop Lendário");
+            });
+
+            EditorGUILayout.Space(10);
+            DrawSectionBox("Ouro, Baús & Coleta Geral", () =>
             {
                 DrawSingleClipWithPreview(lProp.FindPropertyRelative("goldPickupClip"), "🪙 Coleta de Ouro");
                 EditorGUILayout.Slider(lProp.FindPropertyRelative("goldVolume"), 0f, 1f, "Volume do Ouro");
 
                 EditorGUILayout.Space(6);
-                DrawSingleClipWithPreview(lProp.FindPropertyRelative("itemPickupClip"), "🎒 Coleta de Itens/Recursos");
-                EditorGUILayout.Slider(lProp.FindPropertyRelative("itemVolume"), 0f, 1f, "Volume do Item");
+                DrawSingleClipWithPreview(lProp.FindPropertyRelative("itemPickupClip"), "🎒 Coleta Padrão (Fallback)");
+                EditorGUILayout.Slider(lProp.FindPropertyRelative("itemVolume"), 0f, 1f, "Volume Padrão");
 
                 EditorGUILayout.Space(6);
                 DrawSingleClipWithPreview(lProp.FindPropertyRelative("chestOpenClip"), "📦 Abertura de Baú");

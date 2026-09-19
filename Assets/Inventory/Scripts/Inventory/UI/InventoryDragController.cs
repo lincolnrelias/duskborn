@@ -44,10 +44,22 @@ namespace InventorySystem.UI
             _dragIcon.raycastTarget = false;
             _dragIcon.gameObject.SetActive(false);
 
+            var canvasComp = _dragIcon.GetComponent<Canvas>();
+            if (canvasComp == null)
+            {
+                canvasComp = _dragIcon.gameObject.AddComponent<Canvas>();
+            }
+            canvasComp.overrideSorting = true;
+            canvasComp.sortingOrder = 1000;
+
             var rt = _dragIcon.rectTransform;
             rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
             rt.pivot = new Vector2(0.5f, 0.5f);
         }
+
+        private Camera TargetCamera => _canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : _canvas.worldCamera;
+
+        public bool IsDragging => _isDragging;
 
         public void Dispose()
         {
@@ -121,6 +133,7 @@ namespace InventorySystem.UI
                 dragSprite = _sourceSlot.DragGhostSprite != null
                     ? _sourceSlot.DragGhostSprite
                     : _sourceSlot.IconImage.sprite;
+                _dragIcon.rectTransform.sizeDelta = _sourceSlot.IconImage.rectTransform.rect.size;
             }
 
             _isDragging = true;
@@ -151,11 +164,11 @@ namespace InventorySystem.UI
             if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
                     parentRect,
                     pointerScreenPos,
-                    _canvas.worldCamera,
+                    TargetCamera,
                     out var local))
                 return;
 
-            dragRect.anchoredPosition = local;
+            dragRect.localPosition = new Vector3(local.x, local.y, 0f);
         }
 
         private void CompleteDrop(Vector2 pointerPanelPos)
@@ -168,7 +181,7 @@ namespace InventorySystem.UI
             if (!TryGetSlotAt(pointerPanelPos, out var targetSlotIndex) || targetSlotIndex == _sourceSlotIndex)
             {
                 if (_panelBoundsRect != null && _onDroppedOutside != null &&
-                    !RectTransformUtility.RectangleContainsScreenPoint(_panelBoundsRect, pointerPanelPos, _canvas.worldCamera))
+                    !RectTransformUtility.RectangleContainsScreenPoint(_panelBoundsRect, pointerPanelPos, TargetCamera))
                 {
                     var droppedItem = _service.GetItem(_sourceSlotIndex);
                     if (droppedItem != null)
@@ -240,7 +253,7 @@ namespace InventorySystem.UI
             {
                 var slotRect = _presenter.SlotElements[i].RectTransform;
                 if (slotRect != null &&
-                    RectTransformUtility.RectangleContainsScreenPoint(slotRect, pointerPanelPos, _canvas.worldCamera))
+                    RectTransformUtility.RectangleContainsScreenPoint(slotRect, pointerPanelPos, TargetCamera))
                 {
                     slotIndex = i;
                     return true;

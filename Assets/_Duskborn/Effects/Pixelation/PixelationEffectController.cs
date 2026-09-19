@@ -18,6 +18,12 @@ namespace Duskborn.Effects
                 return;
             }
 
+            if (VolumeManager.instance == null || VolumeManager.instance.stack == null)
+            {
+                pixelationMaterial.SetVector(PixelParamsId, new Vector4(Screen.width, Screen.height, 0f, 0f));
+                return;
+            }
+
             var pixelation = VolumeManager.instance.stack.GetComponent<PixelationVolume>();
             if (pixelation == null || !pixelation.IsActive())
             {

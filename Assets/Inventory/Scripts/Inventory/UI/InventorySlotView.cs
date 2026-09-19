@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace InventorySystem.UI
 {
-    public sealed class InventorySlotView : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
+    public sealed class InventorySlotView : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
         [SerializeField] private Image              iconImage;
         [SerializeField] private TextMeshProUGUI   fallbackLabel;
@@ -126,6 +126,21 @@ namespace InventorySystem.UI
         public void OnPointerClick(PointerEventData eventData)
         {
             PointerClicked?.Invoke(SlotIndex, eventData);
+        }
+
+        public void OnBeginDrag(PointerEventData eventData)
+        {
+            // Consome o evento de início de arraste na célula para impedir que bolheie para painéis móveis (DraggablePanel)
+        }
+
+        public void OnDrag(PointerEventData eventData)
+        {
+            // Consome o evento de arraste contínuo
+        }
+
+        public void OnEndDrag(PointerEventData eventData)
+        {
+            // Consome o término de arraste
         }
 
         private void OnDestroy()

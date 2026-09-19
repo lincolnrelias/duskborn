@@ -512,6 +512,14 @@ namespace Duskborn.Gameplay.World
                     // Pronto para interação
                 }
             }
+
+            // C) Posicionamento de Nós de Recursos de Teste de Tiers (Comum -> Incomum -> Raro -> Épico -> Lendário)
+            EnsureContainer();
+            StaticTierTestNodes.SpawnNodes(propsContainer, new Vector3(0f, centerGroundY, 0f), pos =>
+            {
+                Vector3 rayOrigin = new Vector3(pos.x, 150f, pos.z);
+                return RaycastGround(rayOrigin, out RaycastHit hit) ? hit.point : pos;
+            });
         }
 
         private void PlaceCombatClearings(LowPolyTerrainConfig terrainConfig, WorldPropsConfig propsConfig, SeededRNG rng)

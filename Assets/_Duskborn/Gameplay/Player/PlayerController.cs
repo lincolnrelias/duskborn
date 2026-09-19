@@ -231,25 +231,31 @@ namespace Duskborn.Gameplay.Player
                     transform.rotation, targetRot, rotationSpeed * Time.deltaTime);
             }
 
-            if (_smoothedInput.sqrMagnitude < 0.001f) return;
+            Vector3 horizontalMove = Vector3.zero;
+            if (_smoothedInput.sqrMagnitude >= 0.001f)
+            {
+                Vector3 camForward = _camController != null ? _camController.CameraForward : transform.forward;
+                Vector3 camRight   = _camController != null ? _camController.CameraRight   : transform.right;
 
-            Vector3 camForward = _camController != null ? _camController.CameraForward : transform.forward;
-            Vector3 camRight   = _camController != null ? _camController.CameraRight   : transform.right;
+                // Vetor de movimento relativo à orientação da câmera
+                Vector3 moveDir = camForward * _smoothedInput.y + camRight * _smoothedInput.x;
+                float waterMod = _waterInteraction != null ? _waterInteraction.SpeedModifier : 1f;
+                horizontalMove = moveDir * (_stats.MoveSpeed * waterMod);
+            }
 
-            // Vetor de movimento relativo à orientação da câmera (já escalonado pelo modo de caminhada/corrida)
-            Vector3 moveDir = camForward * _smoothedInput.y + camRight * _smoothedInput.x;
-            float waterMod = _waterInteraction != null ? _waterInteraction.SpeedModifier : 1f;
-            _cc.Move(moveDir * (_stats.MoveSpeed * waterMod * Time.deltaTime));
-        }
-
-        private void HandleGravity()
-        {
+            // Gravidade e velocidade vertical integradas em um único cálculo para manter _cc.velocity íntegro
             if (_cc.isGrounded && _velocity.y < 0f)
                 _velocity.y = -2f;
             else
                 _velocity.y += Physics.gravity.y * gravityMultiplier * Time.deltaTime;
 
-            _cc.Move(_velocity * Time.deltaTime);
+            Vector3 finalMove = (horizontalMove + _velocity) * Time.deltaTime;
+            _cc.Move(finalMove);
+        }
+
+        private void HandleGravity()
+        {
+            // Integrado atomicamente em HandleMovement()
         }
 
         private void UpdateAnimator()

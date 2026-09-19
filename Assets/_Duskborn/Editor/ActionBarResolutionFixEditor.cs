@@ -23,6 +23,8 @@ namespace Duskborn.Editor
         [MenuItem("Duskborn/UI/Sync ActionBar With Inventory", false, 100)]
         public static void ApplyFixToActiveScene()
         {
+            if (Application.isPlaying) return;
+
             var installer = Object.FindAnyObjectByType<ActionBarInstaller>();
             if (installer != null)
             {

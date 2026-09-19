@@ -11,7 +11,24 @@ namespace Duskborn.Gameplay.Loot
 {
     public class LootManager : MonoBehaviour
     {
-        public static LootManager Instance { get; private set; }
+        private static LootManager _instance;
+        public static LootManager Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = FindFirstObjectByType<LootManager>();
+                    if (_instance == null)
+                    {
+                        var go = new GameObject("[LootManager]");
+                        _instance = go.AddComponent<LootManager>();
+                    }
+                }
+                return _instance;
+            }
+            private set => _instance = value;
+        }
 
         [Header("Throw Physics")]
         [Tooltip("Launch speed magnitude — controls how far/high items fly.")]
@@ -42,15 +59,15 @@ namespace Duskborn.Gameplay.Loot
 
         private void Awake()
         {
-            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-            Instance = this;
+            if (_instance != null && _instance != this) { Destroy(gameObject); return; }
+            _instance = this;
 
             ConfigureCollisionLayers();
         }
 
         private void OnDestroy()
         {
-            if (Instance == this) Instance = null;
+            if (_instance == this) _instance = null;
         }
 
         private void ConfigureCollisionLayers()
@@ -92,10 +109,15 @@ namespace Duskborn.Gameplay.Loot
             int goldAmount = table.RollGold(rng);
             bool spawnGold = goldAmount > 0;
 
-            // Expand entries into individual physical items so each gets its own prefab.
-            var spawnList = new List<(GameObject prefab, string id)>();
+            // Expand entries into individual physical items so each gets its own prefab and rarity.
+            var spawnList = new List<(GameObject prefab, string id, ItemRarity rarity)>();
+            ItemRarity rarestItemRarity = ItemRarity.Common;
+            bool hasItems = false;
+
             foreach (var entry in hits)
             {
+                if (entry.itemDefinition == null) continue;
+
                 if (string.IsNullOrEmpty(entry.itemDefinition.Id))
                 {
                     DuskLog.Warn(LogChannel.Loot,
@@ -110,21 +132,39 @@ namespace Duskborn.Gameplay.Loot
                     continue;
                 }
 
+                ItemRarity itemRarity = entry.itemDefinition.Rarity;
+                if (!hasItems || itemRarity > rarestItemRarity)
+                {
+                    rarestItemRarity = itemRarity;
+                    hasItems = true;
+                }
+
                 float bonus = GetResourceBonus(harvester, targetType, entry.itemDefinition);
                 int count = CalculateDropCount(entry.minAmount, entry.maxAmount, bonus, rng);
 
                 for (int j = 0; j < count; j++)
-                    spawnList.Add((prefab, entry.itemDefinition.Id));
+                    spawnList.Add((prefab, entry.itemDefinition.Id, itemRarity));
             }
 
             int total = spawnList.Count + (spawnGold ? 1 : 0);
             if (total == 0) return;
 
+            // Encontra o índice do primeiro item com a maior raridade para tocar o som de drop exclusivamente nele
+            int rarestItemIndex = -1;
+            for (int i = 0; i < spawnList.Count; i++)
+            {
+                if (spawnList[i].rarity == rarestItemRarity)
+                {
+                    rarestItemIndex = i;
+                    break;
+                }
+            }
+
             // Instantly burst-throw all items from the body simultaneously
-            SpawnAllLootInstant(spawnList, spawnGold, goldAmount, origin, total, rng);
+            SpawnAllLootInstant(spawnList, spawnGold, goldAmount, origin, total, rng, rarestItemIndex, rarestItemRarity);
 
             DuskLog.Log(LogChannel.Loot,
-                $"LootManager: dropping {spawnList.Count} item(s) at {origin} (night {currentNight}).");
+                $"LootManager: dropping {spawnList.Count} item(s) at {origin} (rarest: {rarestItemRarity}, night {currentNight}).");
         }
 
         public static float GetResourceBonus(PlayerStats harvester, TargetType targetType, ItemDefinitionBase itemDef)
@@ -172,20 +212,23 @@ namespace Duskborn.Gameplay.Loot
         }
 
         private void SpawnAllLootInstant(
-            List<(GameObject prefab, string id)> spawnList,
+            List<(GameObject prefab, string id, ItemRarity rarity)> spawnList,
             bool spawnGold,
             int goldAmount,
             Vector3 origin,
             int total,
-            SeededRNG rng)
+            SeededRNG rng,
+            int rarestItemIndex,
+            ItemRarity rarestRarity)
         {
             float baseAngle = RandRange(rng, 0f, 360f);
             var spawnedColliders = new List<Collider>();
 
             for (int i = 0; i < spawnList.Count; i++)
             {
-                var (prefab, id) = spawnList[i];
-                var go = SpawnItem(prefab, id, origin, i, total, baseAngle, rng);
+                var (prefab, id, rarity) = spawnList[i];
+                bool isRarest = (i == rarestItemIndex);
+                var go = SpawnItem(prefab, id, rarity, origin, i, total, baseAngle, rng, isRarest);
                 if (go != null)
                     RegisterAndIgnoreCollisions(go, spawnedColliders);
             }
@@ -213,7 +256,16 @@ namespace Duskborn.Gameplay.Loot
             }
         }
 
-        private GameObject SpawnItem(GameObject prefab, string id, Vector3 origin, int index, int total, float baseAngle, SeededRNG rng)
+        private GameObject SpawnItem(
+            GameObject prefab,
+            string id,
+            ItemRarity rarity,
+            Vector3 origin,
+            int index,
+            int total,
+            float baseAngle,
+            SeededRNG rng,
+            bool isRarest)
         {
             Vector3 throwVelocity = ComputeThrowDirection(index, total, baseAngle, rng, out float azimuth);
             Vector3 spawnPos       = CalculateSpawnPosition(origin, azimuth, total);
@@ -223,8 +275,13 @@ namespace Duskborn.Gameplay.Loot
             var pickup = go.GetComponent<WorldItemPickup>();
             if (pickup != null)
             {
-                pickup.ServerInitialize(id, 1);
+                pickup.ServerInitialize(id, 1, rarity);
                 pickup.ServerThrow(throwVelocity, throwTorque);
+                if (isRarest)
+                {
+                    // O som emitido será sempre do item de maior raridade dropado por aquele objeto!
+                    pickup.RpcPlayDropSound(rarity);
+                }
             }
             return go;
         }

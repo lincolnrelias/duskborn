@@ -223,6 +223,7 @@ namespace Duskborn.Gameplay.Player
         private void TryPrimaryAction()
         {
             if (Cursor.lockState != CursorLockMode.Locked) return;
+            if (PlayerCameraController.LocalInstance != null && PlayerCameraController.LocalInstance.JustLockedCursorThisFrame) return;
             if (!_stats.IsAlive || _cooldown > 0f) return;
             if (IsActionLocked) { BufferAction(TryPrimaryAction); return; }
 
@@ -249,6 +250,7 @@ namespace Duskborn.Gameplay.Player
         private void TrySecondaryAction()
         {
             if (Cursor.lockState != CursorLockMode.Locked) return;
+            if (PlayerCameraController.LocalInstance != null && PlayerCameraController.LocalInstance.JustLockedCursorThisFrame) return;
             if (!_stats.IsAlive) return;
             if (IsActionLocked) { BufferAction(TrySecondaryAction); return; }
             var item = actionBarInstaller?.Service.GetSelectedItem();

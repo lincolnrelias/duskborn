@@ -10,6 +10,14 @@ namespace Duskborn.Gameplay.Loot
         [SerializeField] private Transform     dropOrigin;
         [SerializeField] private float         dropOriginUpOffset = 0.5f;
 
+        public DropLootTable LootTable
+        {
+            get => lootTable;
+            set => lootTable = value;
+        }
+
+        public void SetLootTable(DropLootTable table) => lootTable = table;
+
         private EnemyBase    _enemy;
         private ResourceNode _node;
 

@@ -1,3 +1,4 @@
+using Duskborn.Gameplay.Loot;
 using InventorySystem.Core;
 using UnityEngine;
 
@@ -10,11 +11,15 @@ namespace InventorySystem.Data
         [SerializeField] [TextArea] private string description;
         [SerializeField] private Texture2D icon;
         [SerializeField] public GameObject dropPrefab;
+        [SerializeField] private ItemRarity rarity = ItemRarity.Common;
 
         public string Id => id;
         public string DisplayName => displayName;
         public string Description => description;
         public Texture2D Icon => icon;
+        public ItemRarity Rarity => rarity;
+
+        public void SetRarity(ItemRarity newRarity) => rarity = newRarity;
 
         public abstract IInventoryItem CreateRuntimeItem();
     }

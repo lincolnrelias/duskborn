@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using Duskborn.Gameplay.World;
 using Duskborn.UI;
+using Duskborn.Core;
 using Unity.AI.Navigation;
 
 [RequireComponent(typeof(NavMeshSurface))]
@@ -112,7 +113,7 @@ public class ChunkGridManager : MonoBehaviour
 
     [Header("Atmosfera & FX do Mundo")]
     [Tooltip("Se ativado, cria ou atualiza um objeto com WorldAtmosphereController para partículas atmosféricas orgânicas.")]
-    public bool generateAtmosphereFX = true;
+    public bool generateAtmosphereFX = false;
 
     [Header("Vegetação Estilizada (Stylized Foliage)")]
     [Tooltip("Se ativado, gera automaticamente tufos de grama e arbustos com cores mescladas ao relevo por chunk.")]
@@ -279,6 +280,10 @@ public class ChunkGridManager : MonoBehaviour
         if (generateAtmosphereFX && transform.Find("WorldAtmosphere") == null)
         {
             EnsureAtmosphereFX();
+        }
+        else if (!generateAtmosphereFX)
+        {
+            RemoveAtmosphereFX();
         }
 
         if (propsPlacer != null)
@@ -1085,17 +1090,27 @@ public class ChunkGridManager : MonoBehaviour
 
     public void EnsureAtmosphereFX()
     {
+        EnvironmentVisualBootstrapper.EnsureVisualPipeline();
         Transform existing = transform.Find("WorldAtmosphere");
         if (existing == null)
         {
-            GameObject atmoGO = new GameObject("WorldAtmosphere");
-            atmoGO.transform.parent = transform;
-            atmoGO.AddComponent<WorldAtmosphereController>();
+            var atmo = Object.FindAnyObjectByType<WorldAtmosphereController>();
+            if (atmo != null)
+            {
+                atmo.transform.parent = transform;
+            }
+            else
+            {
+                GameObject atmoGO = new GameObject("WorldAtmosphere");
+                atmoGO.transform.parent = transform;
+                atmoGO.AddComponent<WorldAtmosphereController>();
+            }
         }
     }
 
     public void RemoveAtmosphereFX()
     {
+        EnvironmentVisualBootstrapper.RemoveWorldAtmosphere();
         Transform existing = transform.Find("WorldAtmosphere");
         if (existing != null)
         {

@@ -22,6 +22,7 @@ namespace Duskborn.Editor
             RunTest(Test_AudioDatabase_AutoPopulateAndCategories, ref passed, ref total);
             RunTest(Test_AudioDatabase_GetDepletedClip_OreAndStone, ref passed, ref total);
             RunTest(Test_AudioDatabase_GetFootstepClip_Surfaces, ref passed, ref total);
+            RunTest(Test_AudioDatabase_LootPickupAndDropClips, ref passed, ref total);
             RunTest(Test_AudioPreviewUtility_SafeExecution, ref passed, ref total);
 
             Debug.Log($"<color=#55FF55><b>[AudioDatabaseTests] {passed}/{total} testes passaram com sucesso!</b></color>");
@@ -96,6 +97,54 @@ namespace Duskborn.Editor
 
             var stoneStep = db.GetFootstepClip("Stone");
             if (stoneStep == null) throw new Exception("GetFootstepClip para Stone retornou nulo.");
+
+            var dirtStep = db.GetFootstepClip("Dirt");
+            if (dirtStep == null) throw new Exception("GetFootstepClip para Dirt retornou nulo.");
+
+            var waterStep = db.GetFootstepClip("Water");
+            if (waterStep == null) throw new Exception("GetFootstepClip para Water retornou nulo.");
+
+            // Testes com SurfaceType tipado
+            if (db.GetFootstepClip(SurfaceType.Grass) == null) throw new Exception("GetFootstepClip(SurfaceType.Grass) nulo.");
+            if (db.GetFootstepClip(SurfaceType.Dirt) == null)  throw new Exception("GetFootstepClip(SurfaceType.Dirt) nulo.");
+            if (db.GetFootstepClip(SurfaceType.Rock) == null)  throw new Exception("GetFootstepClip(SurfaceType.Rock) nulo.");
+            if (db.GetFootstepClip(SurfaceType.Water) == null) throw new Exception("GetFootstepClip(SurfaceType.Water) nulo.");
+        }
+
+        private static void Test_AudioDatabase_LootPickupAndDropClips()
+        {
+            var db = AudioDatabase.Instance;
+            if (db == null) throw new Exception("AudioDatabase.Instance nulo.");
+
+            db.AutoPopulateDefaults();
+
+            Gameplay.Loot.ItemRarity[] rarities = new[]
+            {
+                Gameplay.Loot.ItemRarity.Common,
+                Gameplay.Loot.ItemRarity.Uncommon,
+                Gameplay.Loot.ItemRarity.Rare,
+                Gameplay.Loot.ItemRarity.Epic,
+                Gameplay.Loot.ItemRarity.Legendary
+            };
+
+            foreach (var rarity in rarities)
+            {
+                var pickupClip = db.GetPickupClip(rarity);
+                if (pickupClip == null)
+                    throw new Exception($"GetPickupClip para {rarity} retornou nulo.");
+
+                float pickupVol = db.GetPickupVolume(rarity);
+                if (pickupVol <= 0f || pickupVol > 1f)
+                    throw new Exception($"GetPickupVolume para {rarity} fora dos limites válidos: {pickupVol}");
+
+                var dropClip = db.GetDropClip(rarity);
+                if (dropClip == null)
+                    throw new Exception($"GetDropClip para {rarity} retornou nulo.");
+
+                float dropVol = db.GetDropVolume(rarity);
+                if (dropVol <= 0f || dropVol > 1f)
+                    throw new Exception($"GetDropVolume para {rarity} fora dos limites válidos: {dropVol}");
+            }
         }
 
         private static void Test_AudioPreviewUtility_SafeExecution()

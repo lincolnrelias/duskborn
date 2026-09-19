@@ -26,6 +26,28 @@ namespace Duskborn.UI
         private GUIStyle _labelStyle;
         private bool     _stylesReady;
         private bool     _showStats;
+        public static GameHUD Instance { get; private set; }
+
+        public bool ShowStats
+        {
+            get => _showStats;
+            set => _showStats = value;
+        }
+
+        public void CloseStats()
+        {
+            _showStats = false;
+        }
+
+        private void Awake()
+        {
+            Instance = this;
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+        }
 
         private void Update()
         {

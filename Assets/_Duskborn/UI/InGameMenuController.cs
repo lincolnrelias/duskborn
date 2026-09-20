@@ -312,6 +312,17 @@ namespace Duskborn.UI
                 closedOtherMenu = true;
             }
 
+            // Painel de Personagem
+            var charUI = CharacterUIManager.Instance ?? FindAnyObjectByType<CharacterUIManager>();
+            if (charUI != null && (charUI.IsOpen || charUI.LastClosedFrame == Time.frameCount))
+            {
+                if (charUI.IsOpen)
+                {
+                    charUI.Close();
+                }
+                closedOtherMenu = true;
+            }
+
             // Ficha de Atributos do HUD
             var hud = GameHUD.Instance ?? FindAnyObjectByType<GameHUD>();
             if (hud != null && hud.ShowStats)

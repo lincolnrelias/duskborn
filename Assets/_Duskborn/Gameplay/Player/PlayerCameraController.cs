@@ -15,7 +15,7 @@ namespace Duskborn.Gameplay.Player
     [DisallowMultipleComponent]
     public class PlayerCameraController : MonoBehaviour
     {
-        public static PlayerCameraController LocalInstance { get; private set; }
+        public static PlayerCameraController LocalInstance { get; set; }
 
         [Header("Alvo e Posicionamento")]
         [Tooltip("Ponto pivô relativo ao jogador (altura do peito/olhos).")]
@@ -118,6 +118,7 @@ namespace Duskborn.Gameplay.Player
         private readonly RaycastHit[] _sphereCastHits = new RaycastHit[16];
 
         // Propriedades públicas para orientação e movimentação
+        public bool    IsRotationLocked => _isRotationLocked;
         public float   CurrentYaw    => _currentYaw;
         public float   CurrentPitch  => _currentPitch;
         public Camera  MainCamera    => _mainCam;
@@ -240,7 +241,7 @@ namespace Duskborn.Gameplay.Player
         public void OnLook(InputValue value)
         {
             if (_controller != null && !_controller.IsOwner) return;
-            if (_isRotationLocked) return;
+            if (_isRotationLocked || IsAnyMenuOpen()) return;
             _lookInput = value.Get<Vector2>();
         }
 
@@ -294,7 +295,7 @@ namespace Duskborn.Gameplay.Player
 
         private void HandleInput()
         {
-            if (_isRotationLocked)
+            if (_isRotationLocked || IsAnyMenuOpen())
             {
                 _lookInput = Vector2.zero;
                 return;
@@ -317,7 +318,7 @@ namespace Duskborn.Gameplay.Player
 
         private void HandleZoomInput()
         {
-            if (_isRotationLocked) return;
+            if (_isRotationLocked || IsAnyMenuOpen()) return;
 
             // Suporte a zoom segurando a tecla Alt ou via teclas específicas ([ e ])
             var kb = Keyboard.current;
@@ -358,6 +359,9 @@ namespace Duskborn.Gameplay.Player
                 return true;
 
             if (InventoryUIManager.Instance != null && InventoryUIManager.Instance.IsOpen)
+                return true;
+
+            if (CharacterUIManager.Instance != null && CharacterUIManager.Instance.IsOpen)
                 return true;
 
             var hud = GameHUD.Instance ?? UnityEngine.Object.FindAnyObjectByType<GameHUD>();
@@ -480,6 +484,11 @@ namespace Duskborn.Gameplay.Player
                 if (InventoryUIManager.Instance != null && InventoryUIManager.Instance.IsOpen)
                 {
                     InventoryUIManager.Instance.Close();
+                }
+
+                if (CharacterUIManager.Instance != null && CharacterUIManager.Instance.IsOpen)
+                {
+                    CharacterUIManager.Instance.Close();
                 }
 
                 var hud = GameHUD.Instance ?? UnityEngine.Object.FindAnyObjectByType<GameHUD>();

@@ -27,6 +27,7 @@ namespace Duskborn.UI
 
         private ResourceInventory _resourceInventory;
         private PlayerInteractor  _playerInteractor;
+        private Duskborn.Gameplay.Equipment.PlayerEquipmentContainer _playerEquipment;
         private bool              _dropEventSubscribed;
         private bool              _actionBarDropSubscribed;
 
@@ -38,7 +39,7 @@ namespace Duskborn.UI
         private int _hoveredActionBarSlot  = -1;
         private bool _slotEventsSubscribed = false;
 
-        private bool InstallerReady => installer != null && installer.Inventory != null;
+        public bool InstallerReady => installer != null && installer.Inventory != null;
 
         private void Awake()
         {
@@ -90,6 +91,7 @@ namespace Duskborn.UI
 
             SubscribeSlotHoverEvents();
             SubscribeActionBarDrop();
+            PopulatePlaceholderTestGear();
         }
 
         private void EnsureInventoryRoot()
@@ -205,12 +207,14 @@ namespace Duskborn.UI
             {
                 slot.PointerEntered += OnInventorySlotEntered;
                 slot.PointerExited  += OnInventorySlotExited;
+                slot.PointerClicked += OnInventorySlotClicked;
             }
 
             foreach (var slot in actionBarInstaller.SlotViews)
             {
                 slot.PointerEntered += OnActionBarSlotEntered;
                 slot.PointerExited  += OnActionBarSlotExited;
+                slot.PointerClicked += OnActionBarSlotClicked;
             }
 
             _slotEventsSubscribed = true;
@@ -226,6 +230,22 @@ namespace Duskborn.UI
         private void OnActionBarSlotExited(int index, PointerEventData _)
         {
             if (_hoveredActionBarSlot == index) _hoveredActionBarSlot = -1;
+        }
+
+        private void OnInventorySlotClicked(int index, PointerEventData eventData)
+        {
+            if (eventData.button == PointerEventData.InputButton.Right)
+            {
+                TryEquipFromInventory(index);
+            }
+        }
+
+        private void OnActionBarSlotClicked(int index, PointerEventData eventData)
+        {
+            if (eventData.button == PointerEventData.InputButton.Right)
+            {
+                TryEquipFromActionBar(index);
+            }
         }
 
         // ── Cross-inventory drop handling ─────────────────────────────────────
@@ -369,11 +389,16 @@ namespace Duskborn.UI
 
         private void TryCacheLocalPlayer()
         {
-            if (_resourceInventory != null && _playerInteractor != null) return;
+            if (_resourceInventory != null && _playerInteractor != null && _playerEquipment != null) return;
 
             foreach (var combat in FindObjectsByType<PlayerCombat>(FindObjectsSortMode.None))
             {
                 if (!combat.IsOwner) continue;
+
+                if (_playerEquipment == null)
+                {
+                    _playerEquipment = combat.GetComponent<Duskborn.Gameplay.Equipment.PlayerEquipmentContainer>();
+                }
 
                 if (_resourceInventory == null)
                 {
@@ -400,6 +425,129 @@ namespace Duskborn.UI
                 }
 
                 break;
+            }
+        }
+
+        public bool TryEquipFromInventory(int slotIndex)
+        {
+            if (!InstallerReady) return false;
+            var item = installer.Service.GetItem(slotIndex);
+            if (item == null) return false;
+
+            TryCacheLocalPlayer();
+            if (_playerEquipment == null)
+            {
+                foreach (var combat in FindObjectsByType<PlayerCombat>(FindObjectsSortMode.None))
+                {
+                    if (combat.IsOwner)
+                    {
+                        _playerEquipment = combat.GetComponent<Duskborn.Gameplay.Equipment.PlayerEquipmentContainer>();
+                        break;
+                    }
+                }
+                if (_playerEquipment == null)
+                    _playerEquipment = FindFirstObjectByType<Duskborn.Gameplay.Equipment.PlayerEquipmentContainer>();
+            }
+
+            if (item is Duskborn.Gameplay.Equipment.GearItem gearItem)
+            {
+                if (_playerEquipment == null) return false;
+
+                Duskborn.Gameplay.Equipment.EquipmentSlot targetSlot = gearItem.Slot;
+                if (gearItem.Slot == Duskborn.Gameplay.Equipment.EquipmentSlot.Ring1 || gearItem.Slot == Duskborn.Gameplay.Equipment.EquipmentSlot.Ring2)
+                {
+                    if (_playerEquipment.GetEquipped(Duskborn.Gameplay.Equipment.EquipmentSlot.Ring1) == null)
+                        targetSlot = Duskborn.Gameplay.Equipment.EquipmentSlot.Ring1;
+                    else if (_playerEquipment.GetEquipped(Duskborn.Gameplay.Equipment.EquipmentSlot.Ring2) == null)
+                        targetSlot = Duskborn.Gameplay.Equipment.EquipmentSlot.Ring2;
+                    else
+                        targetSlot = Duskborn.Gameplay.Equipment.EquipmentSlot.Ring1;
+                }
+
+                installer.Service.RemoveItem(slotIndex);
+                _playerEquipment.TryEquipToSlot(targetSlot, gearItem, out var displaced);
+
+                if (displaced != null)
+                {
+                    installer.Service.TryPlaceItemAt(slotIndex, displaced);
+                }
+
+                PlayEquipAudio();
+                CharacterUIManager.Instance?.Refresh();
+                return true;
+            }
+
+            if (item is Duskborn.Gameplay.Equipment.WeaponItem weaponItem && actionBarInstaller != null)
+            {
+                var abService = actionBarInstaller.Service.Service;
+                int targetSlot = actionBarInstaller.Service.SelectedIndex;
+                if (targetSlot < 0 || targetSlot >= abService.Grid.SlotCount) targetSlot = 0;
+
+                var displaced = abService.GetItem(targetSlot);
+                installer.Service.RemoveItem(slotIndex);
+                if (displaced != null)
+                {
+                    abService.RemoveItem(targetSlot);
+                    abService.TryPlaceItemAt(targetSlot, weaponItem);
+                    installer.Service.TryPlaceItemAt(slotIndex, displaced);
+                }
+                else
+                {
+                    abService.TryPlaceItemAt(targetSlot, weaponItem);
+                }
+
+                PlayEquipAudio();
+                CharacterUIManager.Instance?.Refresh();
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool TryEquipFromActionBar(int slotIndex)
+        {
+            if (actionBarInstaller?.Service?.Service == null) return false;
+            var abService = actionBarInstaller.Service.Service;
+            var item = abService.GetItem(slotIndex);
+            if (item is not Duskborn.Gameplay.Equipment.GearItem gearItem) return false;
+
+            TryCacheLocalPlayer();
+            if (_playerEquipment == null) return false;
+
+            Duskborn.Gameplay.Equipment.EquipmentSlot targetSlot = gearItem.Slot;
+            if (gearItem.Slot == Duskborn.Gameplay.Equipment.EquipmentSlot.Ring1 || gearItem.Slot == Duskborn.Gameplay.Equipment.EquipmentSlot.Ring2)
+            {
+                if (_playerEquipment.GetEquipped(Duskborn.Gameplay.Equipment.EquipmentSlot.Ring1) == null)
+                    targetSlot = Duskborn.Gameplay.Equipment.EquipmentSlot.Ring1;
+                else if (_playerEquipment.GetEquipped(Duskborn.Gameplay.Equipment.EquipmentSlot.Ring2) == null)
+                    targetSlot = Duskborn.Gameplay.Equipment.EquipmentSlot.Ring2;
+                else
+                    targetSlot = Duskborn.Gameplay.Equipment.EquipmentSlot.Ring1;
+            }
+
+            abService.RemoveItem(slotIndex);
+            _playerEquipment.TryEquipToSlot(targetSlot, gearItem, out var displaced);
+
+            if (displaced != null)
+            {
+                abService.TryPlaceItemAt(slotIndex, displaced);
+            }
+
+            PlayEquipAudio();
+            CharacterUIManager.Instance?.Refresh();
+            return true;
+        }
+
+        private void PlayEquipAudio()
+        {
+            var clip = Resources.Load<AudioClip>("SFX/pickup_common");
+            if (clip == null) clip = Resources.Load<AudioClip>("SFX/ui_button_click");
+            if (clip != null)
+            {
+                if (Duskborn.Audio.AudioManager.Instance != null)
+                    Duskborn.Audio.AudioManager.Instance.PlayAtPoint(clip, Camera.main != null ? Camera.main.transform.position : transform.position, 1.0f);
+                else
+                    AudioSource.PlayClipAtPoint(clip, Camera.main != null ? Camera.main.transform.position : transform.position);
             }
         }
 
@@ -476,8 +624,28 @@ namespace Duskborn.UI
                 CraftingUIManager.Instance.Close();
             }
 
+            // Se o painel de personagem estiver aberto, ajusta posicionamento lado a lado
+            if (CharacterUIManager.Instance != null && CharacterUIManager.Instance.IsOpen)
+            {
+                var charRoot = CharacterUIManager.Instance.CharacterRoot;
+                var invRect = InventoryFrameRect;
+                if (charRoot != null && invRect != null)
+                {
+                    if (willShow)
+                    {
+                        invRect.anchoredPosition = new Vector2(180f, invRect.anchoredPosition.y);
+                        charRoot.anchoredPosition = new Vector2(-180f, invRect.anchoredPosition.y);
+                    }
+                    else
+                    {
+                        charRoot.anchoredPosition = new Vector2(0f, charRoot.anchoredPosition.y);
+                    }
+                }
+            }
+
             // Libera o cursor e pausa a rotação da câmera quando o inventário estiver aberto
-            bool otherMenuOpen = CraftingUIManager.Instance != null && CraftingUIManager.Instance.IsOpen;
+            bool otherMenuOpen = (CraftingUIManager.Instance != null && CraftingUIManager.Instance.IsOpen) ||
+                                 (CharacterUIManager.Instance != null && CharacterUIManager.Instance.IsOpen);
             bool shouldUnlock = willShow || otherMenuOpen;
 
             if (shouldUnlock)
@@ -538,7 +706,8 @@ namespace Duskborn.UI
                 LastClosedFrame = Time.frameCount;
                 Toggle();
             }
-            else if (CraftingUIManager.Instance == null || !CraftingUIManager.Instance.IsOpen)
+            else if ((CraftingUIManager.Instance == null || !CraftingUIManager.Instance.IsOpen) &&
+                     (CharacterUIManager.Instance == null || !CharacterUIManager.Instance.IsOpen))
             {
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
@@ -566,6 +735,165 @@ namespace Duskborn.UI
 #else
             return Input.GetKeyDown(KeyCode.Escape);
 #endif
+        }
+
+        /// <summary>
+        /// Popula o inventário com itens de equipamento de teste placeholder cobrindo todos os slots
+        /// e com atributos variados (Vida, Dano, Vel. Ataque, Velocidade, Crítico, Redução de Dano, Mineração, Madeira),
+        /// permitindo testes imediatos com clique direito.
+        /// </summary>
+        public void PopulatePlaceholderTestGear()
+        {
+            if (!InstallerReady) return;
+            var inv = installer.Inventory;
+            if (inv == null) return;
+
+            var addedIds = new HashSet<string>();
+
+            // 1. Tenta carregar as definições de Resources/Gear
+            var gearDefs = Resources.LoadAll<Duskborn.Gameplay.Equipment.GearDefinition>("Gear");
+            if (gearDefs != null && gearDefs.Length > 0)
+            {
+                foreach (var def in gearDefs)
+                {
+                    if (def == null) continue;
+
+                    if (def.Icon != null)
+                    {
+                        installer.RegisterIcon(def.Id, def.Icon);
+                        ItemIconRegistry.Register(def.Id, def.Icon);
+                        if (actionBarInstaller != null)
+                            actionBarInstaller.RegisterIcon(def.Id, def.Icon);
+                    }
+
+                    bool exists = false;
+                    for (int i = 0; i < inv.Grid.SlotCount; i++)
+                    {
+                        var cur = inv.GetItem(i);
+                        if (cur != null && (cur.Id == def.Id || cur.DisplayName == def.DisplayName))
+                        {
+                            exists = true;
+                            break;
+                        }
+                    }
+
+                    if (!exists)
+                    {
+                        var runtimeItem = def.CreateRuntimeItem();
+                        if (inv.TryAddItem(runtimeItem, out _))
+                        {
+                            addedIds.Add(def.Id);
+                        }
+                    }
+                }
+            }
+
+            // 2. Garante loadout completo de 12 slots caso algum não esteja em Resources
+            EnsureProgrammaticTestLoadout(inv, addedIds);
+        }
+
+        private void EnsureProgrammaticTestLoadout(IInventory inv, HashSet<string> addedIds)
+        {
+            var testItems = new (string id, string name, string desc, string icon, Duskborn.Gameplay.Equipment.EquipmentSlot slot, Duskborn.Gameplay.Equipment.StatBonus[] bonuses)[]
+            {
+                ("gear_iron_helm", "Elmo de Ferro", "HP: +5%", "Iron Helmet", Duskborn.Gameplay.Equipment.EquipmentSlot.Head,
+                    new[] { new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.HP, Value = 0.05f } }),
+
+                ("gear_bone_necklace", "Colar de Ossos", "Dano: +7%  Crítico: +3%", "Bone Necklace", Duskborn.Gameplay.Equipment.EquipmentSlot.Neck,
+                    new[] {
+                        new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.Damage, Value = 0.07f },
+                        new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.CritChance, Value = 0.03f }
+                    }),
+
+                ("gear_iron_shoulders", "Ombreiras de Ferro", "Dano: +8%  Redução Dano: +4%", "Iron Shoulders", Duskborn.Gameplay.Equipment.EquipmentSlot.Shoulder,
+                    new[] {
+                        new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.Damage, Value = 0.08f },
+                        new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.DamageReduction, Value = 0.04f }
+                    }),
+
+                ("gear_shadow_cloak", "Manto das Sombras", "Velocidade: +10%  Crítico: +5%", "Shadow Cloak", Duskborn.Gameplay.Equipment.EquipmentSlot.Back,
+                    new[] {
+                        new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.MoveSpeed, Value = 0.10f },
+                        new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.CritChance, Value = 0.05f }
+                    }),
+
+                ("gear_leather_chest", "Peitoral de Couro", "HP: +12%  Redução Dano: +6%", "Iron Armor", Duskborn.Gameplay.Equipment.EquipmentSlot.Chest,
+                    new[] {
+                        new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.HP, Value = 0.12f },
+                        new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.DamageReduction, Value = 0.06f }
+                    }),
+
+                ("gear_iron_bracers", "Braçadeiras de Ferro", "Vel. Ataque: +6%  Redução Dano: +3%", "Iron Bracers", Duskborn.Gameplay.Equipment.EquipmentSlot.Wrist,
+                    new[] {
+                        new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.AttackSpeed, Value = 0.06f },
+                        new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.DamageReduction, Value = 0.03f }
+                    }),
+
+                ("gear_leather_gloves", "Luvas de Couro", "Vel. Ataque: +8%  Mineração: +15%", "Leather Gloves", Duskborn.Gameplay.Equipment.EquipmentSlot.Hands,
+                    new[] {
+                        new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.AttackSpeed, Value = 0.08f },
+                        new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.MiningResourceBonus, Value = 0.15f }
+                    }),
+
+                ("gear_leather_belt", "Cinto de Couro", "HP: +8%  Madeira: +15%", "Belt", Duskborn.Gameplay.Equipment.EquipmentSlot.Waist,
+                    new[] {
+                        new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.HP, Value = 0.08f },
+                        new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.WoodcuttingResourceBonus, Value = 0.15f }
+                    }),
+
+                ("gear_iron_greaves", "Grevas de Ferro", "Redução Dano: +8%  HP: +5%", "Iron Greaves", Duskborn.Gameplay.Equipment.EquipmentSlot.Legs,
+                    new[] {
+                        new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.DamageReduction, Value = 0.08f },
+                        new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.HP, Value = 0.05f }
+                    }),
+
+                ("gear_worn_boots", "Botas Desgastadas", "Velocidade: +12%", "Iron Boot", Duskborn.Gameplay.Equipment.EquipmentSlot.Feet,
+                    new[] { new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.MoveSpeed, Value = 0.12f } }),
+
+                ("gear_copper_ring", "Anel de Cobre", "Crítico: +5%  Vel. Ataque: +4%", "Copper Ring", Duskborn.Gameplay.Equipment.EquipmentSlot.Ring1,
+                    new[] {
+                        new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.CritChance, Value = 0.05f },
+                        new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.AttackSpeed, Value = 0.04f }
+                    }),
+
+                ("gear_ruby_ring", "Anel de Rubi", "Dano: +10%  Crítico: +6%", "Ruby Ring", Duskborn.Gameplay.Equipment.EquipmentSlot.Ring2,
+                    new[] {
+                        new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.Damage, Value = 0.10f },
+                        new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.CritChance, Value = 0.06f }
+                    })
+            };
+
+            foreach (var item in testItems)
+            {
+                if (addedIds.Contains(item.id)) continue;
+
+                var tex = Resources.Load<Texture2D>($"Textures/Gear/{item.icon}");
+                if (tex == null) tex = Resources.Load<Texture2D>(item.icon);
+                if (tex != null)
+                {
+                    installer.RegisterIcon(item.id, tex);
+                    ItemIconRegistry.Register(item.id, tex);
+                    if (actionBarInstaller != null)
+                        actionBarInstaller.RegisterIcon(item.id, tex);
+                }
+
+                bool exists = false;
+                for (int i = 0; i < inv.Grid.SlotCount; i++)
+                {
+                    var cur = inv.GetItem(i);
+                    if (cur != null && (cur.Id == item.id || cur.DisplayName == item.name))
+                    {
+                        exists = true;
+                        break;
+                    }
+                }
+
+                if (!exists)
+                {
+                    var runtimeGear = new Duskborn.Gameplay.Equipment.GearItem(item.id, item.name, item.desc, item.icon, item.slot, item.bonuses);
+                    inv.TryAddItem(runtimeGear, out _);
+                }
+            }
         }
     }
 }

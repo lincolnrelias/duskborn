@@ -28,6 +28,8 @@ namespace Duskborn.UI
     /// </summary>
     public class CraftingUIManager : MonoBehaviour
     {
+        private const float CraftingPanelScale = 0.67f;
+        private const float CraftingPanelPairedX = -160f;
         public static CraftingUIManager Instance { get; private set; }
 
         [Header("Configuração de Áudio")]
@@ -50,8 +52,14 @@ namespace Duskborn.UI
         public RectTransform CraftingRoot => _craftingRoot;
         private RectTransform _recipeListContainer;
         private RectTransform _ingredientsContainer;
+        private ScrollRect _recipeScrollRect;
+        private ScrollRect _ingredientsScrollRect;
+        private RectTransform _recipeListViewport;
+        private RectTransform _ingredientsViewport;
+        private readonly Dictionary<string, Sprite> _generatedIconSprites = new();
 
         // Elementos de Detalhes
+        private TextMeshProUGUI _headerTitle;
         private Image _detailIcon;
         private TextMeshProUGUI _detailTitle;
         private TextMeshProUGUI _detailCategory;
@@ -61,8 +69,17 @@ namespace Duskborn.UI
         private Button _craftButton;
         private TextMeshProUGUI _craftButtonLabel;
 
+        // Categoria Tabs
+        private RectTransform _tabsContainer;
+        private string _activeCategory = "Todos";
+        private readonly string[] _categories = { "Todos", "Ferramentas", "Armas", "Armadura", "Acessórios", "Consumíveis", "Materiais" };
+        private readonly List<GameObject> _tabViews = new();
+
+        private RecipeDiscoveryTracker _discoveryTracker;
+
         // Lista de Receitas e Seleção
         private readonly List<CraftingRecipe> _recipes = new();
+        private readonly List<CraftingRecipe> _filteredRecipes = new();
         private CraftingRecipe _selectedRecipe;
         private readonly List<GameObject> _recipeEntryViews = new();
         private readonly List<GameObject> _ingredientViews = new();
@@ -127,6 +144,9 @@ namespace Duskborn.UI
                 Close();
                 return;
             }
+
+            HandleNavigationInput();
+            HandleCraftingWheelInput();
 
             // Fecha automaticamente se o jogador se afastar da bancada
             if (CurrentWorkbench != null && !IsLocalPlayerNearWorkbench(4.0f))
@@ -200,6 +220,14 @@ namespace Duskborn.UI
                         _playerResources.ResourceChanged -= OnResourceChanged;
                         _playerResources.ResourceChanged += OnResourceChanged;
                     }
+
+                    if (_playerResources != null && _discoveryTracker == null)
+                    {
+                        _discoveryTracker = _playerResources.GetComponent<RecipeDiscoveryTracker>();
+                        if (_discoveryTracker == null)
+                            _discoveryTracker = _playerResources.gameObject.AddComponent<RecipeDiscoveryTracker>();
+                    }
+
                     break;
                 }
             }
@@ -243,18 +271,24 @@ namespace Duskborn.UI
             CurrentWorkbench = workbench;
             CurrentWorkbench.OpenForLocalPlayer();
 
-            // Carrega receitas da bancada ou padrão
+            // Carrega receitas padrão do banco de dados (Resources/Crafting)
             _recipes.Clear();
-            if (workbench.Recipes != null && workbench.Recipes.Count > 0)
+            LoadDefaultRecipes();
+
+            // Adiciona receitas específicas da bancada (se configuradas)
+            if (workbench.Recipes != null)
             {
                 foreach (var r in workbench.Recipes)
-                    if (r != null) _recipes.Add(r);
+                {
+                    if (r != null && !_recipes.Contains(r))
+                        _recipes.Add(r);
+                }
             }
 
-            if (_recipes.Count == 0)
-                LoadDefaultRecipes();
-
             EnsureUIHierarchy();
+
+            if (_headerTitle != null && CurrentWorkbench != null)
+                _headerTitle.text = CurrentWorkbench.StationDisplayName.ToUpper();
 
             if (_craftingRoot != null)
                 _craftingRoot.gameObject.SetActive(true);
@@ -338,9 +372,9 @@ namespace Duskborn.UI
                     }
 
                     // Posiciona painéis lado a lado
-                    invRect.anchoredPosition = new Vector2(195f, _originalInventoryPos.y);
+                    invRect.anchoredPosition = new Vector2(235f, _originalInventoryPos.y);
                     if (_craftingRoot != null)
-                        _craftingRoot.anchoredPosition = new Vector2(-195f, _originalInventoryPos.y);
+                        _craftingRoot.anchoredPosition = new Vector2(CraftingPanelPairedX, _originalInventoryPos.y);
                 }
                 else
                 {
@@ -440,6 +474,31 @@ namespace Duskborn.UI
 
         // ── Atualização Visual dos Painéis ─────────────────────────────────────
 
+        private void SetActiveCategory(string category)
+        {
+            _activeCategory = category;
+            PlaySound(clickSound);
+            RefreshTabStates();
+            RefreshRecipeList();
+            RefreshDetailsView();
+        }
+
+        private void RefreshTabStates()
+        {
+            for (int i = 0; i < _tabViews.Count && i < _categories.Length; i++)
+            {
+                var img = _tabViews[i].GetComponent<Image>();
+                if (img != null)
+                    img.color = _categories[i] == _activeCategory
+                        ? new Color(0.48f, 0.30f, 0.12f, 1f)
+                        : new Color(0.10f, 0.13f, 0.18f, 0.96f);
+
+                var outline = _tabViews[i].GetComponent<Outline>();
+                if (outline != null)
+                    outline.enabled = _categories[i] == _activeCategory;
+            }
+        }
+
         private void RefreshRecipeList()
         {
             if (_recipeListContainer == null) return;
@@ -447,24 +506,108 @@ namespace Duskborn.UI
             foreach (var go in _recipeEntryViews)
                 Destroy(go);
             _recipeEntryViews.Clear();
+            _filteredRecipes.Clear();
 
             foreach (var recipe in _recipes)
             {
                 if (recipe == null) continue;
-                var itemGO = CreateRecipeEntryView(recipe, _recipeListContainer);
+
+                // Estações especializadas (Forja, Caldeirão, Mesa Arcana) filtram para seus itens dedicados.
+                // A Bancada principal de acampamento exibe o catálogo completo de progressão.
+                if (CurrentWorkbench != null && CurrentWorkbench.StationType != CraftingStationType.Bancada && recipe.RequiredStation != CurrentWorkbench.StationType)
+                    continue;
+
+                // Filtragem por categoria selecionada
+                if (_activeCategory != "Todos" && recipe.Category != _activeCategory)
+                    continue;
+
+                _filteredRecipes.Add(recipe);
+                var itemGO = CreateRecipeEntryView(recipe, _recipeListContainer, false);
                 _recipeEntryViews.Add(itemGO);
             }
 
+            if (_filteredRecipes.Count > 0 && !_filteredRecipes.Contains(_selectedRecipe))
+                _selectedRecipe = _filteredRecipes[0];
+
             RefreshRecipeListStates();
+            ResetScroll(_recipeScrollRect);
+        }
+
+        private void HandleNavigationInput()
+        {
+#if ENABLE_INPUT_SYSTEM
+            var keyboard = Keyboard.current;
+            if (keyboard == null) return;
+
+            if (keyboard.leftArrowKey.wasPressedThisFrame)
+                SelectAdjacentCategory(-1);
+            else if (keyboard.rightArrowKey.wasPressedThisFrame)
+                SelectAdjacentCategory(1);
+            else if (keyboard.upArrowKey.wasPressedThisFrame)
+                SelectAdjacentRecipe(-1);
+            else if (keyboard.downArrowKey.wasPressedThisFrame)
+                SelectAdjacentRecipe(1);
+            else if (keyboard.enterKey.wasPressedThisFrame && _craftButton != null && _craftButton.interactable)
+                CraftSelectedRecipe();
+#endif
+        }
+
+        private void HandleCraftingWheelInput()
+        {
+#if ENABLE_INPUT_SYSTEM
+            var mouse = Mouse.current;
+            if (mouse == null) return;
+
+            float wheelDelta = mouse.scroll.ReadValue().y;
+            if (Mathf.Abs(wheelDelta) < 0.01f) return;
+
+            Vector2 pointerPosition = mouse.position.ReadValue();
+            Camera eventCamera = _canvas != null && _canvas.renderMode != RenderMode.ScreenSpaceOverlay ? _canvas.worldCamera : null;
+            const float wheelStep = 0.085f;
+
+            if (IsPointerInside(_recipeListViewport, pointerPosition, eventCamera))
+                ScrollTo(_recipeScrollRect, wheelDelta * wheelStep);
+            else if (IsPointerInside(_ingredientsViewport, pointerPosition, eventCamera))
+                ScrollTo(_ingredientsScrollRect, wheelDelta * wheelStep);
+#endif
+        }
+
+        private static bool IsPointerInside(RectTransform rect, Vector2 pointerPosition, Camera eventCamera)
+        {
+            return rect != null && RectTransformUtility.RectangleContainsScreenPoint(rect, pointerPosition, eventCamera);
+        }
+
+        private static void ScrollTo(ScrollRect scrollRect, float delta)
+        {
+            if (scrollRect == null || !scrollRect.gameObject.activeInHierarchy) return;
+            Canvas.ForceUpdateCanvases();
+            scrollRect.StopMovement();
+            scrollRect.verticalNormalizedPosition = Mathf.Clamp01(scrollRect.verticalNormalizedPosition + delta);
+        }
+
+        private void SelectAdjacentCategory(int direction)
+        {
+            int currentIndex = System.Array.IndexOf(_categories, _activeCategory);
+            int nextIndex = (currentIndex + direction + _categories.Length) % _categories.Length;
+            SetActiveCategory(_categories[nextIndex]);
+        }
+
+        private void SelectAdjacentRecipe(int direction)
+        {
+            if (_filteredRecipes.Count == 0) return;
+            int currentIndex = _filteredRecipes.IndexOf(_selectedRecipe);
+            int nextIndex = Mathf.Clamp(currentIndex + direction, 0, _filteredRecipes.Count - 1);
+            if (nextIndex != currentIndex)
+                SelectRecipe(_filteredRecipes[nextIndex]);
         }
 
         private void RefreshRecipeListStates()
         {
             for (int i = 0; i < _recipeEntryViews.Count; i++)
             {
-                if (i >= _recipes.Count) break;
+                if (i >= _filteredRecipes.Count) break;
                 var view = _recipeEntryViews[i];
-                var recipe = _recipes[i];
+                var recipe = _filteredRecipes[i];
                 if (view == null || recipe == null) continue;
 
                 bool isSelected = recipe == _selectedRecipe;
@@ -512,21 +655,30 @@ namespace Duskborn.UI
                 _detailTitle.text = _selectedRecipe.RecipeName;
 
             if (_detailCategory != null)
-                _detailCategory.text = $"{_selectedRecipe.Category} • Nível 1";
+            {
+                string tierStr = _selectedRecipe.Tier switch
+                {
+                    CraftingTier.Primitivo => "Tier 1",
+                    CraftingTier.Ferro => "Tier 2",
+                    CraftingTier.Reforcado => "Tier 3",
+                    CraftingTier.Espinheiro => "Tier 4",
+                    _ => ""
+                };
+                string stationStr = _selectedRecipe.RequiredStation switch
+                {
+                    CraftingStationType.Forja => "Forja",
+                    CraftingStationType.Caldeirao => "Caldeirão",
+                    CraftingStationType.MesaArcana => "Mesa Arcana",
+                    _ => "Bancada"
+                };
+                _detailCategory.text = $"{_selectedRecipe.Category} • {tierStr} • {stationStr}";
+            }
 
             // Ícone grande
             if (_detailIcon != null)
             {
-                var iconTex = _selectedRecipe.Icon;
-                if (iconTex != null)
-                {
-                    _detailIcon.sprite = Sprite.Create(iconTex, new Rect(0, 0, iconTex.width, iconTex.height), new Vector2(0.5f, 0.5f));
-                    _detailIcon.color = Color.white;
-                }
-                else
-                {
-                    _detailIcon.color = Color.clear;
-                }
+                _detailIcon.sprite = GetRecipeSprite(_selectedRecipe);
+                _detailIcon.color = Color.white;
             }
 
             // Estatísticas e Descrição
@@ -560,18 +712,34 @@ namespace Duskborn.UI
 
         private string BuildStatsString(CraftingRecipe recipe)
         {
+            if (recipe.OutputItem is ConsumableDefinition consumable)
+            {
+                return $"<color=#67e8f9><b>Efeito:</b> {consumable.EffectDescription}</color>\n<color=#94a3b8>Pilha máx: {consumable.MaxStack}</color>";
+            }
+
+            if (recipe.OutputItem is GearDefinition gear)
+            {
+                var lines = new List<string>();
+                foreach (var b in gear.Bonuses)
+                {
+                    string sign = b.Value >= 0 ? "+" : "";
+                    string colorHex = b.Value >= 0 ? "#86efac" : "#f87171";
+                    lines.Add($"<color={colorHex}>{sign}{b.Value * 100:F0}% {b.Type}</color>");
+                }
+                return string.Join("\n", lines);
+            }
+
             if (recipe.OutputItem is WeaponDefinition weapon)
             {
                 var lines = new List<string>();
 
-                // Bônus gerais de stats
                 foreach (var b in weapon.Bonuses)
                 {
                     string sign = b.Value >= 0 ? "+" : "";
-                    lines.Add($"<color=#86efac>{sign}{b.Value * 100:F0}% {b.Type}</color>");
+                    string colorHex = b.Value >= 0 ? "#86efac" : "#f87171";
+                    lines.Add($"<color={colorHex}>{sign}{b.Value * 100:F0}% {b.Type}</color>");
                 }
 
-                // Modificadores de dano por tipo (ex: +300% contra Árvores ou Rocha)
                 foreach (var mod in weapon.TypeModifiers)
                 {
                     string sign = mod.Bonus >= 0 ? "+" : "";
@@ -604,6 +772,16 @@ namespace Duskborn.UI
                 var view = CreateIngredientRowView(ing.material, current, ing.amount, _ingredientsContainer);
                 _ingredientViews.Add(view);
             }
+
+            ResetScroll(_ingredientsScrollRect);
+        }
+
+        private static void ResetScroll(ScrollRect scrollRect)
+        {
+            if (scrollRect == null) return;
+            Canvas.ForceUpdateCanvases();
+            scrollRect.StopMovement();
+            scrollRect.verticalNormalizedPosition = 1f;
         }
 
         // ── Construção Dinâmica da Hierarquia UI ───────────────────────────────
@@ -630,8 +808,19 @@ namespace Duskborn.UI
             _craftingRoot.anchorMin = new Vector2(0.5f, 0.5f);
             _craftingRoot.anchorMax = new Vector2(0.5f, 0.5f);
             _craftingRoot.pivot = new Vector2(0.5f, 0.5f);
-            _craftingRoot.sizeDelta = new Vector2(380f, 365f);
-            _craftingRoot.anchoredPosition = new Vector2(-195f, 0f);
+            _craftingRoot.sizeDelta = new Vector2(460f, 420f);
+            _craftingRoot.anchoredPosition = new Vector2(CraftingPanelPairedX, 0f);
+            _craftingRoot.localScale = Vector3.one * CraftingPanelScale;
+
+            // A full opaque backing prevents transparent frame sprites from exposing the world
+            // through the middle of the crafting screen.
+            var backdrop = CreatePanel("Backdrop", frameGO.transform, new Color(0.025f, 0.035f, 0.055f, 0.985f));
+            backdrop.anchorMin = Vector2.zero;
+            backdrop.anchorMax = Vector2.one;
+            backdrop.sizeDelta = Vector2.zero;
+            backdrop.SetSiblingIndex(0);
+            backdrop.GetComponent<Image>().raycastTarget = false;
+            AddFrameOutline(backdrop.gameObject, new Color(0.72f, 0.47f, 0.18f, 0.9f), new Vector2(2f, -2f));
 
             var frameImg = frameGO.GetComponent<Image>();
             frameImg.raycastTarget = true;
@@ -643,7 +832,7 @@ namespace Duskborn.UI
             }
             else
             {
-                frameImg.color = new Color(0.11f, 0.13f, 0.17f, 0.98f);
+                frameImg.color = new Color(0.055f, 0.07f, 0.10f, 0.985f);
             }
 
             // Arraste pelo corpo da moldura
@@ -659,23 +848,34 @@ namespace Duskborn.UI
             headerRect.anchorMax = new Vector2(1, 1);
             headerRect.pivot = new Vector2(0.5f, 1);
             headerRect.anchoredPosition = Vector2.zero;
-            headerRect.sizeDelta = new Vector2(0, 36);
+            headerRect.sizeDelta = new Vector2(0, 42);
 
             var headerImg = headerGO.GetComponent<Image>();
-            headerImg.color = new Color(0, 0, 0, 0.001f); // Invisível, mas intercepta cliques para arrastar
+            headerImg.color = new Color(0.12f, 0.075f, 0.035f, 0.98f);
             headerImg.raycastTarget = true;
+            AddFrameOutline(headerGO, new Color(0.84f, 0.55f, 0.20f, 0.55f), new Vector2(1f, -1f));
 
             var headerDrag = headerGO.AddComponent<DraggablePanel>();
             headerDrag.TargetPanel = _craftingRoot;
 
             // Título dentro do Cabeçalho
             var titleGO = CreateText("Title", headerGO.transform, "BANCADA DE TRABALHO", 13, FontStyles.Bold, new Color(0.98f, 0.82f, 0.38f, 1f), TextAlignmentOptions.Left);
+            _headerTitle = titleGO.GetComponent<TextMeshProUGUI>();
             var titleRect = titleGO.GetComponent<RectTransform>();
-            titleRect.anchorMin = new Vector2(0, 0);
+            titleRect.anchorMin = new Vector2(0, 0.40f);
             titleRect.anchorMax = new Vector2(1, 1);
             titleRect.pivot = new Vector2(0, 0.5f);
-            titleRect.anchoredPosition = new Vector2(16, 0);
+            titleRect.anchoredPosition = new Vector2(18, -1);
             titleRect.sizeDelta = new Vector2(-60, 0);
+
+            var subtitleGO = CreateText("Subtitle", headerGO.transform, "CATÁLOGO DE FABRICAÇÃO", 7.5f, FontStyles.Bold,
+                new Color(0.74f, 0.66f, 0.52f, 1f), TextAlignmentOptions.Left);
+            var subtitleRect = subtitleGO.GetComponent<RectTransform>();
+            subtitleRect.anchorMin = new Vector2(0, 0);
+            subtitleRect.anchorMax = new Vector2(1, 0.45f);
+            subtitleRect.pivot = new Vector2(0, 0);
+            subtitleRect.anchoredPosition = new Vector2(18, 4);
+            subtitleRect.sizeDelta = new Vector2(-66, 12);
 
             // Botão Fechar (X) dentro do Cabeçalho
             var closeBtnGO = CreateButton("CloseButton", headerGO.transform, "X", new Vector2(24, 24), new Color(0.7f, 0.2f, 0.2f, 1f));
@@ -684,23 +884,63 @@ namespace Duskborn.UI
             closeRect.anchorMax = new Vector2(1, 0.5f);
             closeRect.pivot = new Vector2(1, 0.5f);
             closeRect.anchoredPosition = new Vector2(-12, 0);
-            closeBtnGO.GetComponent<Button>().onClick.AddListener(Close);
+            closeBtnGO.GetComponent<Button>().onClick.AddListener(() => { PlaySound(clickSound); Close(); });
 
             // Divisória do Cabeçalho
             var headerDiv = CreatePanel("HeaderDivider", frameGO.transform, new Color(0.24f, 0.28f, 0.36f, 0.8f));
             headerDiv.anchorMin = new Vector2(0, 1);
             headerDiv.anchorMax = new Vector2(1, 1);
             headerDiv.pivot = new Vector2(0.5f, 1);
-            headerDiv.sizeDelta = new Vector2(-24, 2);
-            headerDiv.anchoredPosition = new Vector2(0, -36);
+            headerDiv.sizeDelta = new Vector2(-28, 2);
+            headerDiv.anchoredPosition = new Vector2(0, -42);
+
+            // ── Barra de Categorias ──────────────────────────────────────────
+            var tabBarGO = new GameObject("TabBar", typeof(RectTransform), typeof(Image), typeof(HorizontalLayoutGroup));
+            tabBarGO.transform.SetParent(frameGO.transform, false);
+            _tabsContainer = tabBarGO.GetComponent<RectTransform>();
+            _tabsContainer.anchorMin = new Vector2(0, 1);
+            _tabsContainer.anchorMax = new Vector2(1, 1);
+            _tabsContainer.pivot = new Vector2(0.5f, 1);
+            _tabsContainer.anchoredPosition = new Vector2(0, -45);
+            _tabsContainer.sizeDelta = new Vector2(-28, 25);
+            tabBarGO.GetComponent<Image>().color = new Color(0.035f, 0.05f, 0.075f, 0.88f);
+
+            var tabHlg = tabBarGO.GetComponent<HorizontalLayoutGroup>();
+            tabHlg.spacing = 3f;
+            tabHlg.childAlignment = TextAnchor.MiddleCenter;
+            tabHlg.childControlWidth = true;
+            tabHlg.childControlHeight = true;
+            tabHlg.childForceExpandWidth = true;
+            tabHlg.childForceExpandHeight = true;
+
+            foreach (var cat in _categories)
+            {
+                var tabGO = CreateButton($"Tab_{cat}", tabBarGO.transform, cat, new Vector2(60, 23),
+                    new Color(0.15f, 0.17f, 0.22f, 0.9f));
+                var tabLabel = tabGO.GetComponentInChildren<TextMeshProUGUI>();
+                if (tabLabel != null)
+                {
+                    tabLabel.fontSize = 8.2f;
+                    tabLabel.textWrappingMode = TextWrappingModes.NoWrap;
+                    tabLabel.overflowMode = TextOverflowModes.Ellipsis;
+                }
+                var tabOutline = tabGO.AddComponent<Outline>();
+                tabOutline.effectColor = new Color(0.94f, 0.66f, 0.26f, 0.9f);
+                tabOutline.effectDistance = new Vector2(1f, -1f);
+                tabOutline.enabled = cat == _activeCategory;
+                string captured = cat;
+                tabGO.GetComponent<Button>().onClick.AddListener(() => SetActiveCategory(captured));
+                _tabViews.Add(tabGO);
+            }
 
             // 3. Coluna Esquerda: Lista de Receitas
             var leftCol = CreatePanel("LeftColumn", frameGO.transform, new Color(0.08f, 0.09f, 0.12f, 0.7f));
             leftCol.anchorMin = new Vector2(0, 0);
             leftCol.anchorMax = new Vector2(0, 1);
             leftCol.pivot = new Vector2(0, 0.5f);
-            leftCol.sizeDelta = new Vector2(146f, -48f);
-            leftCol.anchoredPosition = new Vector2(12f, -18f);
+            leftCol.sizeDelta = new Vector2(180f, -86f);
+            leftCol.anchoredPosition = new Vector2(14f, -34f);
+            AddFrameOutline(leftCol.gameObject, new Color(0.24f, 0.30f, 0.40f, 0.85f), new Vector2(1f, -1f));
 
             var recipesTitle = CreateText("RecipesHeader", leftCol.transform, "RECEITAS", 10, FontStyles.Bold, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
             var rTitleRect = recipesTitle.GetComponent<RectTransform>();
@@ -710,14 +950,36 @@ namespace Duskborn.UI
             rTitleRect.anchoredPosition = new Vector2(8, -6);
             rTitleRect.sizeDelta = new Vector2(-16, 18);
 
-            var listContainerGO = new GameObject("RecipeList", typeof(RectTransform), typeof(VerticalLayoutGroup));
-            listContainerGO.transform.SetParent(leftCol.transform, false);
+            var listScrollGO = new GameObject("RecipeListScroll", typeof(RectTransform), typeof(ScrollRect));
+            listScrollGO.transform.SetParent(leftCol.transform, false);
+            var scrollRectTransform = listScrollGO.GetComponent<RectTransform>();
+            scrollRectTransform.anchorMin = Vector2.zero;
+            scrollRectTransform.anchorMax = Vector2.one;
+            scrollRectTransform.offsetMin = new Vector2(5, 8);
+            scrollRectTransform.offsetMax = new Vector2(-10, -34);
+
+            var viewportGO = new GameObject("Viewport", typeof(RectTransform), typeof(Image), typeof(Mask));
+            viewportGO.transform.SetParent(listScrollGO.transform, false);
+            var viewportRect = viewportGO.GetComponent<RectTransform>();
+            viewportRect.anchorMin = new Vector2(0, 0);
+            viewportRect.anchorMax = new Vector2(1, 1);
+            viewportRect.sizeDelta = new Vector2(-10, 0); // Leave space for scrollbar on the right
+            viewportRect.anchoredPosition = new Vector2(-5, 0);
+            _recipeListViewport = viewportRect;
+
+            var viewportImg = viewportGO.GetComponent<Image>();
+            viewportImg.color = new Color(1, 1, 1, 0.01f);
+            var mask = viewportGO.GetComponent<Mask>();
+            mask.showMaskGraphic = false;
+
+            var listContainerGO = new GameObject("RecipeList", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
+            listContainerGO.transform.SetParent(viewportGO.transform, false);
             _recipeListContainer = listContainerGO.GetComponent<RectTransform>();
-            _recipeListContainer.anchorMin = new Vector2(0, 0);
+            _recipeListContainer.anchorMin = new Vector2(0, 1);
             _recipeListContainer.anchorMax = new Vector2(1, 1);
             _recipeListContainer.pivot = new Vector2(0.5f, 1);
-            _recipeListContainer.anchoredPosition = new Vector2(0, -14);
-            _recipeListContainer.sizeDelta = new Vector2(-10, -32);
+            _recipeListContainer.anchoredPosition = new Vector2(0, 0);
+            _recipeListContainer.sizeDelta = new Vector2(0, 0);
 
             var vlg = listContainerGO.GetComponent<VerticalLayoutGroup>();
             vlg.spacing = 4f;
@@ -727,15 +989,61 @@ namespace Duskborn.UI
             vlg.childForceExpandWidth = true;
             vlg.childForceExpandHeight = false;
 
+            var csf = listContainerGO.GetComponent<ContentSizeFitter>();
+            csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            var scrollRect = listScrollGO.GetComponent<ScrollRect>();
+            scrollRect.content = _recipeListContainer;
+            scrollRect.viewport = viewportRect;
+            scrollRect.horizontal = false;
+            scrollRect.vertical = true;
+            ConfigureScroll(scrollRect);
+
+            var scrollbarGO = new GameObject("Scrollbar", typeof(RectTransform), typeof(Image), typeof(Scrollbar));
+            scrollbarGO.transform.SetParent(listScrollGO.transform, false);
+            var scrollbarRect = scrollbarGO.GetComponent<RectTransform>();
+            scrollbarRect.anchorMin = new Vector2(1, 0);
+            scrollbarRect.anchorMax = new Vector2(1, 1);
+            scrollbarRect.pivot = new Vector2(1, 0.5f);
+            scrollbarRect.sizeDelta = new Vector2(8, 0);
+            scrollbarRect.anchoredPosition = new Vector2(0, 0);
+
+            var sbImg = scrollbarGO.GetComponent<Image>();
+            sbImg.color = new Color(0.05f, 0.06f, 0.08f, 0.8f);
+
+            var slidingAreaGO = new GameObject("SlidingArea", typeof(RectTransform));
+            slidingAreaGO.transform.SetParent(scrollbarGO.transform, false);
+            var slidingAreaRect = slidingAreaGO.GetComponent<RectTransform>();
+            slidingAreaRect.anchorMin = Vector2.zero;
+            slidingAreaRect.anchorMax = Vector2.one;
+            slidingAreaRect.sizeDelta = Vector2.zero;
+
+            var handleGO = new GameObject("Handle", typeof(RectTransform), typeof(Image));
+            handleGO.transform.SetParent(slidingAreaGO.transform, false);
+            var handleRect = handleGO.GetComponent<RectTransform>();
+            handleRect.sizeDelta = Vector2.zero;
+            var handleImg = handleGO.GetComponent<Image>();
+            handleImg.color = new Color(0.3f, 0.35f, 0.45f, 1f);
+
+            var scrollbar = scrollbarGO.GetComponent<Scrollbar>();
+            scrollbar.direction = Scrollbar.Direction.BottomToTop;
+            scrollbar.targetGraphic = handleImg;
+            scrollbar.handleRect = handleRect;
+
+            scrollRect.verticalScrollbar = scrollbar;
+            scrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
+            _recipeScrollRect = scrollRect;
+
             // 4. Coluna Direita: Detalhes da Receita Selecionada
             var rightCol = CreatePanel("RightColumn", frameGO.transform, new Color(0.08f, 0.09f, 0.12f, 0.7f));
             rightCol.anchorMin = new Vector2(1, 0);
             rightCol.anchorMax = new Vector2(1, 1);
             rightCol.pivot = new Vector2(1, 0.5f);
-            rightCol.sizeDelta = new Vector2(200f, -48f);
-            rightCol.anchoredPosition = new Vector2(-12f, -18f);
+            rightCol.sizeDelta = new Vector2(250f, -86f);
+            rightCol.anchoredPosition = new Vector2(-14f, -34f);
+            AddFrameOutline(rightCol.gameObject, new Color(0.24f, 0.30f, 0.40f, 0.85f), new Vector2(1f, -1f));
 
-            var detailsTitle = CreateText("DetailsHeader", rightCol.transform, "DETALHES DA ARMA", 10, FontStyles.Bold, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
+            var detailsTitle = CreateText("DetailsHeader", rightCol.transform, "DETALHES", 10, FontStyles.Bold, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
             var dTitleRect = detailsTitle.GetComponent<RectTransform>();
             dTitleRect.anchorMin = new Vector2(0, 1);
             dTitleRect.anchorMax = new Vector2(1, 1);
@@ -750,6 +1058,7 @@ namespace Duskborn.UI
             previewBox.pivot = new Vector2(0.5f, 1);
             previewBox.anchoredPosition = new Vector2(0, -24);
             previewBox.sizeDelta = new Vector2(-14, 48);
+            AddFrameOutline(previewBox.gameObject, new Color(0.34f, 0.42f, 0.55f, 0.65f), new Vector2(1f, -1f));
 
             // Slot do Ícone Grande
             var iconSlot = CreatePanel("IconSlot", previewBox.transform, new Color(0.06f, 0.07f, 0.09f, 1f));
@@ -783,6 +1092,8 @@ namespace Duskborn.UI
             itemTitleRect.anchoredPosition = new Vector2(50, 2);
             itemTitleRect.sizeDelta = new Vector2(-54, 18);
             _detailTitle = itemTitleGO.GetComponent<TextMeshProUGUI>();
+            _detailTitle.textWrappingMode = TextWrappingModes.NoWrap;
+            _detailTitle.overflowMode = TextOverflowModes.Ellipsis;
 
             // Categoria do Item
             var itemCatGO = CreateText("ItemCategory", previewBox.transform, "Ferramenta • Nível 1", 9, FontStyles.Normal, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
@@ -793,6 +1104,8 @@ namespace Duskborn.UI
             itemCatRect.anchoredPosition = new Vector2(50, -2);
             itemCatRect.sizeDelta = new Vector2(-54, 14);
             _detailCategory = itemCatGO.GetComponent<TextMeshProUGUI>();
+            _detailCategory.textWrappingMode = TextWrappingModes.NoWrap;
+            _detailCategory.overflowMode = TextOverflowModes.Ellipsis;
 
             // Caixa de Atributos & Bônus
             var statsBox = CreatePanel("StatsBox", rightCol.transform, new Color(0.05f, 0.06f, 0.08f, 0.9f));
@@ -801,6 +1114,7 @@ namespace Duskborn.UI
             statsBox.pivot = new Vector2(0.5f, 1);
             statsBox.anchoredPosition = new Vector2(0, -76);
             statsBox.sizeDelta = new Vector2(-14, 60);
+            AddFrameOutline(statsBox.gameObject, new Color(0.19f, 0.27f, 0.37f, 0.8f), new Vector2(1f, -1f));
 
             var statsTextGO = CreateText("StatsText", statsBox.transform, "+15% Dano\n+300% Dano vs Árvores", 9.5f, FontStyles.Normal, new Color(0.85f, 0.9f, 0.95f, 1f), TextAlignmentOptions.TopLeft);
             var statsTextRect = statsTextGO.GetComponent<RectTransform>();
@@ -809,6 +1123,7 @@ namespace Duskborn.UI
             statsTextRect.sizeDelta = new Vector2(-10, -10);
             statsTextRect.anchoredPosition = Vector2.zero;
             _detailStats = statsTextGO.GetComponent<TextMeshProUGUI>();
+            _detailStats.overflowMode = TextOverflowModes.Ellipsis;
 
             // Descrição Flavour
             var descGO = CreateText("Description", rightCol.transform, "Descrição da ferramenta...", 9, FontStyles.Italic, new Color(0.55f, 0.60f, 0.68f, 1f), TextAlignmentOptions.TopLeft);
@@ -819,6 +1134,9 @@ namespace Duskborn.UI
             descRect.anchoredPosition = new Vector2(0, -140);
             descRect.sizeDelta = new Vector2(-14, 28);
             _detailDescription = descGO.GetComponent<TextMeshProUGUI>();
+            _detailDescription.textWrappingMode = TextWrappingModes.Normal;
+            _detailDescription.maxVisibleLines = 2;
+            _detailDescription.overflowMode = TextOverflowModes.Ellipsis;
 
             // Seção de Ingredientes
             var reqHeader = CreateText("ReqHeader", rightCol.transform, "MATERIAIS NECESSÁRIOS", 9.5f, FontStyles.Bold, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
@@ -829,14 +1147,37 @@ namespace Duskborn.UI
             reqHeaderRect.anchoredPosition = new Vector2(8, -170);
             reqHeaderRect.sizeDelta = new Vector2(-16, 16);
 
-            var ingContainerGO = new GameObject("IngredientsContainer", typeof(RectTransform), typeof(VerticalLayoutGroup));
-            ingContainerGO.transform.SetParent(rightCol.transform, false);
+            var ingScrollGO = new GameObject("IngredientsScroll", typeof(RectTransform), typeof(ScrollRect));
+            ingScrollGO.transform.SetParent(rightCol.transform, false);
+            var ingScrollRectTransform = ingScrollGO.GetComponent<RectTransform>();
+            ingScrollRectTransform.anchorMin = new Vector2(0, 1);
+            ingScrollRectTransform.anchorMax = new Vector2(1, 1);
+            ingScrollRectTransform.pivot = new Vector2(0.5f, 1);
+            ingScrollRectTransform.anchoredPosition = new Vector2(0, -188);
+            ingScrollRectTransform.sizeDelta = new Vector2(-14, 52);
+
+            var ingViewportGO = new GameObject("Viewport", typeof(RectTransform), typeof(Image), typeof(Mask));
+            ingViewportGO.transform.SetParent(ingScrollGO.transform, false);
+            var ingViewportRect = ingViewportGO.GetComponent<RectTransform>();
+            ingViewportRect.anchorMin = new Vector2(0, 0);
+            ingViewportRect.anchorMax = new Vector2(1, 1);
+            ingViewportRect.sizeDelta = new Vector2(-10, 0); // Leave space for scrollbar on the right
+            ingViewportRect.anchoredPosition = new Vector2(-5, 0);
+            _ingredientsViewport = ingViewportRect;
+
+            var ingViewportImg = ingViewportGO.GetComponent<Image>();
+            ingViewportImg.color = new Color(1, 1, 1, 0.01f);
+            var ingMask = ingViewportGO.GetComponent<Mask>();
+            ingMask.showMaskGraphic = false;
+
+            var ingContainerGO = new GameObject("IngredientsContainer", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
+            ingContainerGO.transform.SetParent(ingViewportGO.transform, false);
             _ingredientsContainer = ingContainerGO.GetComponent<RectTransform>();
             _ingredientsContainer.anchorMin = new Vector2(0, 1);
             _ingredientsContainer.anchorMax = new Vector2(1, 1);
             _ingredientsContainer.pivot = new Vector2(0.5f, 1);
-            _ingredientsContainer.anchoredPosition = new Vector2(0, -188);
-            _ingredientsContainer.sizeDelta = new Vector2(-14, 52);
+            _ingredientsContainer.anchoredPosition = new Vector2(0, 0);
+            _ingredientsContainer.sizeDelta = new Vector2(0, 0);
 
             var ingVlg = ingContainerGO.GetComponent<VerticalLayoutGroup>();
             ingVlg.spacing = 3f;
@@ -845,6 +1186,51 @@ namespace Duskborn.UI
             ingVlg.childControlHeight = false;
             ingVlg.childForceExpandWidth = true;
             ingVlg.childForceExpandHeight = false;
+
+            var ingCsf = ingContainerGO.GetComponent<ContentSizeFitter>();
+            ingCsf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            var ingScrollRect = ingScrollGO.GetComponent<ScrollRect>();
+            ingScrollRect.content = _ingredientsContainer;
+            ingScrollRect.viewport = ingViewportRect;
+            ingScrollRect.horizontal = false;
+            ingScrollRect.vertical = true;
+            ConfigureScroll(ingScrollRect);
+
+            var ingScrollbarGO = new GameObject("Scrollbar", typeof(RectTransform), typeof(Image), typeof(Scrollbar));
+            ingScrollbarGO.transform.SetParent(ingScrollGO.transform, false);
+            var ingScrollbarRect = ingScrollbarGO.GetComponent<RectTransform>();
+            ingScrollbarRect.anchorMin = new Vector2(1, 0);
+            ingScrollbarRect.anchorMax = new Vector2(1, 1);
+            ingScrollbarRect.pivot = new Vector2(1, 0.5f);
+            ingScrollbarRect.sizeDelta = new Vector2(8, 0);
+            ingScrollbarRect.anchoredPosition = new Vector2(0, 0);
+
+            var ingSbImg = ingScrollbarGO.GetComponent<Image>();
+            ingSbImg.color = new Color(0.05f, 0.06f, 0.08f, 0.8f);
+
+            var ingSlidingAreaGO = new GameObject("SlidingArea", typeof(RectTransform));
+            ingSlidingAreaGO.transform.SetParent(ingScrollbarGO.transform, false);
+            var ingSlidingAreaRect = ingSlidingAreaGO.GetComponent<RectTransform>();
+            ingSlidingAreaRect.anchorMin = Vector2.zero;
+            ingSlidingAreaRect.anchorMax = Vector2.one;
+            ingSlidingAreaRect.sizeDelta = Vector2.zero;
+
+            var ingHandleGO = new GameObject("Handle", typeof(RectTransform), typeof(Image));
+            ingHandleGO.transform.SetParent(ingSlidingAreaGO.transform, false);
+            var ingHandleRect = ingHandleGO.GetComponent<RectTransform>();
+            ingHandleRect.sizeDelta = Vector2.zero;
+            var ingHandleImg = ingHandleGO.GetComponent<Image>();
+            ingHandleImg.color = new Color(0.3f, 0.35f, 0.45f, 1f);
+
+            var ingScrollbar = ingScrollbarGO.GetComponent<Scrollbar>();
+            ingScrollbar.direction = Scrollbar.Direction.BottomToTop;
+            ingScrollbar.targetGraphic = ingHandleImg;
+            ingScrollbar.handleRect = ingHandleRect;
+
+            ingScrollRect.verticalScrollbar = ingScrollbar;
+            ingScrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
+            _ingredientsScrollRect = ingScrollRect;
 
             // Status de Fabricação
             var statusGO = CreateText("StatusLabel", rightCol.transform, string.Empty, 9.5f, FontStyles.Bold, Color.white, TextAlignmentOptions.Center);
@@ -880,20 +1266,25 @@ namespace Duskborn.UI
             frameGO.SetActive(false);
         }
 
-        private GameObject CreateRecipeEntryView(CraftingRecipe recipe, Transform parent)
+        private GameObject CreateRecipeEntryView(CraftingRecipe recipe, Transform parent, bool isHidden = false)
         {
-            var go = new GameObject($"Recipe_{recipe.RecipeId}", typeof(RectTransform), typeof(Image), typeof(Button), typeof(Outline));
+            var go = new GameObject($"Recipe_{recipe.RecipeId}", typeof(RectTransform), typeof(Image), typeof(Button), typeof(Outline), typeof(LayoutElement));
             go.transform.SetParent(parent, false);
 
             var rect = go.GetComponent<RectTransform>();
-            rect.sizeDelta = new Vector2(136, 36);
+            rect.sizeDelta = new Vector2(168, 46);
+            go.GetComponent<LayoutElement>().preferredHeight = 46f;
 
             var img = go.GetComponent<Image>();
-            img.color = new Color(0.12f, 0.14f, 0.18f, 0.95f);
+            img.color = isHidden ? new Color(0.08f, 0.09f, 0.11f, 0.95f) : new Color(0.12f, 0.14f, 0.18f, 0.95f);
 
             var outline = go.GetComponent<Outline>();
             outline.effectDistance = new Vector2(1.5f, -1.5f);
             outline.enabled = false;
+
+            var cardShadow = go.AddComponent<Shadow>();
+            cardShadow.effectColor = new Color(0f, 0f, 0f, 0.55f);
+            cardShadow.effectDistance = new Vector2(1.5f, -2f);
 
             // Ícone do Item
             var iconGO = new GameObject("Icon", typeof(RectTransform), typeof(Image));
@@ -902,23 +1293,26 @@ namespace Duskborn.UI
             iconRect.anchorMin = new Vector2(0, 0.5f);
             iconRect.anchorMax = new Vector2(0, 0.5f);
             iconRect.pivot = new Vector2(0, 0.5f);
-            iconRect.anchoredPosition = new Vector2(4, 0);
-            iconRect.sizeDelta = new Vector2(28, 28);
+            iconRect.anchoredPosition = new Vector2(7, 0);
+            iconRect.sizeDelta = new Vector2(34, 34);
 
             var iconImg = iconGO.GetComponent<Image>();
-            var iconTex = recipe.Icon;
-            if (iconTex != null)
-                iconImg.sprite = Sprite.Create(iconTex, new Rect(0, 0, iconTex.width, iconTex.height), new Vector2(0.5f, 0.5f));
+            iconImg.sprite = GetRecipeSprite(recipe);
             iconImg.preserveAspect = true;
+            if (isHidden) iconImg.color = new Color(1, 1, 1, 0.2f);
 
             // Nome da Receita
-            var labelGO = CreateText("Name", go.transform, recipe.RecipeName, 11, FontStyles.Bold, Color.white, TextAlignmentOptions.Left);
+            string displayName = isHidden ? "??? Receita Desconhecida" : recipe.RecipeName;
+            var labelGO = CreateText("Name", go.transform, displayName, 11, FontStyles.Bold, Color.white, TextAlignmentOptions.Left);
             var labelRect = labelGO.GetComponent<RectTransform>();
             labelRect.anchorMin = new Vector2(0, 0.5f);
             labelRect.anchorMax = new Vector2(1, 0.5f);
             labelRect.pivot = new Vector2(0, 0.5f);
-            labelRect.anchoredPosition = new Vector2(36, 4);
-            labelRect.sizeDelta = new Vector2(-40, 16);
+            labelRect.anchoredPosition = new Vector2(48, 6);
+            labelRect.sizeDelta = new Vector2(-54, 18);
+            var labelTmp = labelGO.GetComponent<TextMeshProUGUI>();
+            labelTmp.textWrappingMode = TextWrappingModes.NoWrap;
+            labelTmp.overflowMode = TextOverflowModes.Ellipsis;
 
             // Indicador de Status (Pronto / Falta)
             var indGO = CreateText("Indicator", go.transform, "Pronto", 8.5f, FontStyles.Normal, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
@@ -926,22 +1320,52 @@ namespace Duskborn.UI
             indRect.anchorMin = new Vector2(0, 0.5f);
             indRect.anchorMax = new Vector2(1, 0.5f);
             indRect.pivot = new Vector2(0, 0.5f);
-            indRect.anchoredPosition = new Vector2(36, -8);
-            indRect.sizeDelta = new Vector2(-40, 12);
+            indRect.anchoredPosition = new Vector2(48, -10);
+            indRect.sizeDelta = new Vector2(-54, 13);
 
             var btn = go.GetComponent<Button>();
-            btn.onClick.AddListener(() => SelectRecipe(recipe));
+            if (!isHidden)
+            {
+                btn.onClick.AddListener(() => SelectRecipe(recipe));
+                AddRecipeHoverHighlight(go);
+            }
+
+            // Badge de Tier
+            string tierLabel = recipe.Tier switch
+            {
+                CraftingTier.Primitivo => "T1",
+                CraftingTier.Ferro => "T2",
+                CraftingTier.Reforcado => "T3",
+                CraftingTier.Espinheiro => "T4",
+                _ => ""
+            };
+            Color tierColor = recipe.Tier switch
+            {
+                CraftingTier.Primitivo => new Color(0.6f, 0.6f, 0.6f, 1f),
+                CraftingTier.Ferro => new Color(0.7f, 0.8f, 0.9f, 1f),
+                CraftingTier.Reforcado => new Color(0.4f, 0.6f, 1f, 1f),
+                CraftingTier.Espinheiro => new Color(0.9f, 0.5f, 0.2f, 1f),
+                _ => Color.gray
+            };
+            var tierGO = CreateText("TierBadge", go.transform, tierLabel, 7.5f, FontStyles.Bold, tierColor, TextAlignmentOptions.Right);
+            var tierRect = tierGO.GetComponent<RectTransform>();
+            tierRect.anchorMin = new Vector2(1, 1);
+            tierRect.anchorMax = new Vector2(1, 1);
+            tierRect.pivot = new Vector2(1, 1);
+            tierRect.anchoredPosition = new Vector2(-6, -3);
+            tierRect.sizeDelta = new Vector2(24, 13);
 
             return go;
         }
 
         private GameObject CreateIngredientRowView(MaterialDefinition mat, int current, int required, Transform parent)
         {
-            var rowGO = new GameObject($"Ingredient_{mat.Id}", typeof(RectTransform), typeof(Image));
+            var rowGO = new GameObject($"Ingredient_{mat.Id}", typeof(RectTransform), typeof(Image), typeof(LayoutElement));
             rowGO.transform.SetParent(parent, false);
 
             var rect = rowGO.GetComponent<RectTransform>();
             rect.sizeDelta = new Vector2(180, 22);
+            rowGO.GetComponent<LayoutElement>().preferredHeight = 22f;
 
             var img = rowGO.GetComponent<Image>();
             img.color = new Color(0.12f, 0.14f, 0.18f, 0.6f);
@@ -957,8 +1381,7 @@ namespace Duskborn.UI
             iconRect.sizeDelta = new Vector2(16, 16);
 
             var iconImg = iconGO.GetComponent<Image>();
-            if (mat.Icon != null)
-                iconImg.sprite = Sprite.Create(mat.Icon, new Rect(0, 0, mat.Icon.width, mat.Icon.height), new Vector2(0.5f, 0.5f));
+            iconImg.sprite = GetMaterialSprite(mat);
             iconImg.preserveAspect = true;
 
             // Nome do Material
@@ -988,6 +1411,78 @@ namespace Duskborn.UI
 
         // ── Utilitários UI Básicos ─────────────────────────────────────────────
 
+        private void ConfigureScroll(ScrollRect scrollRect)
+        {
+            // Elastic movement was allowing the list to visibly spring past its first and last card.
+            // Clamped bounds retain the responsive drag feel without exposing empty space.
+            scrollRect.movementType = ScrollRect.MovementType.Clamped;
+            scrollRect.inertia = true;
+            scrollRect.decelerationRate = 0.12f;
+            // Wheel input is routed explicitly by HandleCraftingWheelInput so it cannot be
+            // swallowed by the draggable frame or a nested viewport.
+            scrollRect.scrollSensitivity = 0f;
+        }
+
+        private Sprite GetRecipeSprite(CraftingRecipe recipe)
+        {
+            if (recipe == null) return GetGeneratedIcon("unknown", new Color(0.35f, 0.40f, 0.48f));
+            return GetTextureSprite(recipe.Icon, $"recipe:{recipe.RecipeId}", GetCategoryColor(recipe.Category));
+        }
+
+        private Sprite GetMaterialSprite(MaterialDefinition material)
+        {
+            if (material == null) return GetGeneratedIcon("material", new Color(0.45f, 0.55f, 0.48f));
+            return GetTextureSprite(material.Icon, $"material:{material.Id}", new Color(0.45f, 0.60f, 0.52f));
+        }
+
+        private Sprite GetTextureSprite(Texture2D texture, string fallbackKey, Color fallbackColor)
+        {
+            if (texture == null) return GetGeneratedIcon(fallbackKey, fallbackColor);
+            string key = $"texture:{texture.GetInstanceID()}";
+            if (_generatedIconSprites.TryGetValue(key, out var cached)) return cached;
+
+            var sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+            _generatedIconSprites[key] = sprite;
+            return sprite;
+        }
+
+        private Sprite GetGeneratedIcon(string key, Color accent)
+        {
+            if (_generatedIconSprites.TryGetValue(key, out var cached)) return cached;
+
+            const int size = 32;
+            var texture = new Texture2D(size, size, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point, name = $"CraftingIcon_{key}" };
+            var pixels = new Color[size * size];
+            Color baseColor = new Color(0.06f, 0.08f, 0.12f, 1f);
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                bool border = x < 2 || x >= size - 2 || y < 2 || y >= size - 2;
+                bool diamond = Mathf.Abs(x - 15) + Mathf.Abs(y - 15) < 11;
+                bool glyph = (x > 13 && x < 19 && y > 7 && y < 25) || (y > 13 && y < 19 && x > 7 && x < 25);
+                pixels[y * size + x] = border ? accent * 0.72f : (glyph ? accent : (diamond ? accent * 0.34f : baseColor));
+            }
+            texture.SetPixels(pixels);
+            texture.Apply(false, true);
+            var sprite = Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
+            _generatedIconSprites[key] = sprite;
+            return sprite;
+        }
+
+        private static Color GetCategoryColor(string category)
+        {
+            return category switch
+            {
+                "Armas" => new Color(0.92f, 0.48f, 0.28f),
+                "Ferramentas" => new Color(0.52f, 0.72f, 0.88f),
+                "Armadura" => new Color(0.62f, 0.72f, 0.82f),
+                "Acessórios" => new Color(0.94f, 0.72f, 0.28f),
+                "Consumíveis" => new Color(0.48f, 0.84f, 0.62f),
+                "Materiais" => new Color(0.62f, 0.78f, 0.50f),
+                _ => new Color(0.60f, 0.66f, 0.78f)
+            };
+        }
+
         private static RectTransform CreatePanel(string name, Transform parent, Color color)
         {
             var go = new GameObject(name, typeof(RectTransform), typeof(Image));
@@ -996,6 +1491,34 @@ namespace Duskborn.UI
             var img = go.GetComponent<Image>();
             img.color = color;
             return rect;
+        }
+
+        private static void AddFrameOutline(GameObject gameObject, Color color, Vector2 distance)
+        {
+            var outline = gameObject.GetComponent<Outline>() ?? gameObject.AddComponent<Outline>();
+            outline.effectColor = color;
+            outline.effectDistance = distance;
+            outline.useGraphicAlpha = false;
+        }
+
+        private void AddRecipeHoverHighlight(GameObject gameObject)
+        {
+            var trigger = gameObject.GetComponent<EventTrigger>() ?? gameObject.AddComponent<EventTrigger>();
+            trigger.triggers ??= new List<EventTrigger.Entry>();
+
+            var enter = new EventTrigger.Entry { eventID = EventTriggerType.PointerEnter };
+            enter.callback.AddListener(_ =>
+            {
+                var image = gameObject.GetComponent<Image>();
+                if (image != null)
+                    image.color = new Color(0.20f, 0.27f, 0.36f, 1f);
+            });
+
+            var exit = new EventTrigger.Entry { eventID = EventTriggerType.PointerExit };
+            exit.callback.AddListener(_ => RefreshRecipeListStates());
+
+            trigger.triggers.Add(enter);
+            trigger.triggers.Add(exit);
         }
 
         private static GameObject CreateText(string name, Transform parent, string content, float size, FontStyles style, Color color, TextAlignmentOptions alignment)
@@ -1092,13 +1615,13 @@ namespace Duskborn.UI
             }
         }
 
-        private void PlaySound(AudioClip clip)
+        private void PlaySound(AudioClip clip, float volume = 1.0f)
         {
             if (clip == null) return;
             if (AudioManager.Instance != null)
-                AudioManager.Instance.PlayAtPoint(clip, Camera.main != null ? Camera.main.transform.position : transform.position, 1.0f);
+                AudioManager.Instance.PlayAtPoint(clip, Camera.main != null ? Camera.main.transform.position : transform.position, volume);
             else
-                AudioSource.PlayClipAtPoint(clip, Camera.main != null ? Camera.main.transform.position : transform.position);
+                AudioSource.PlayClipAtPoint(clip, Camera.main != null ? Camera.main.transform.position : transform.position, volume);
         }
 
         private static bool IsEscapePressed()

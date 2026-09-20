@@ -51,7 +51,7 @@ namespace Duskborn.UI
 
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.C))
+            if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.C))
                 _showStats = !_showStats;
         }
 
@@ -155,7 +155,7 @@ namespace Duskborn.UI
             sb.AppendLine("─────────────────");
             sb.AppendLine("F1 Pular dia  F2 Encerrar noite");
             sb.AppendLine("F3 Dano       F4 Linha do tempo");
-            sb.AppendLine("C  Alternar estatísticas");
+            sb.AppendLine("C  Painel do Personagem");
 
             float w = 270f, h = (cycle != null && cycle.IsDusk) ? 252f : 234f;
             GUI.Box(new Rect(10, 10, w, h), GUIContent.none, _boxStyle);

@@ -30,6 +30,9 @@ namespace Duskborn.Gameplay.Crafting
         [SerializeField] private string recipeName;
         [SerializeField, TextArea] private string description;
         [SerializeField] private string category = "Ferramentas";
+        [SerializeField] private CraftingTier tier = CraftingTier.Primitivo;
+        [SerializeField] private CraftingStationType requiredStation = CraftingStationType.Bancada;
+        [SerializeField] private bool isAlwaysDiscovered = false;
 
         [Header("Resultado")]
         [SerializeField] private ItemDefinitionBase outputItem;
@@ -42,6 +45,9 @@ namespace Duskborn.Gameplay.Crafting
         public string RecipeName => string.IsNullOrEmpty(recipeName) ? (outputItem != null ? outputItem.DisplayName : name) : recipeName;
         public string Description => string.IsNullOrEmpty(description) ? (outputItem != null ? outputItem.Description : string.Empty) : description;
         public string Category => category;
+        public CraftingTier Tier => tier;
+        public CraftingStationType RequiredStation => requiredStation;
+        public bool IsAlwaysDiscovered => isAlwaysDiscovered;
         public ItemDefinitionBase OutputItem => outputItem;
         public int OutputAmount => outputAmount;
         public IReadOnlyList<CraftingIngredient> Ingredients => ingredients;

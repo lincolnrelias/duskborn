@@ -14,6 +14,10 @@ namespace Duskborn.Gameplay.Crafting
     /// </summary>
     public class Workbench : NetworkBehaviour
     {
+        [Header("Tipo de Estação")]
+        [SerializeField] private CraftingStationType stationType = CraftingStationType.Bancada;
+        [SerializeField] private string stationDisplayName = "Bancada de Trabalho";
+
         [Header("Outline & Visuals")]
         [SerializeField] private string outlineLayerName = "GreenOutline";
         [SerializeField] private Renderer outlineRenderer;
@@ -30,6 +34,8 @@ namespace Duskborn.Gameplay.Crafting
         public event Action<NetworkConnection> OnInteracted;
         public event Action OnClientInteracted;
 
+        public CraftingStationType StationType => stationType;
+        public string StationDisplayName => !string.IsNullOrEmpty(stationDisplayName) ? stationDisplayName : "Bancada";
         public IReadOnlyList<CraftingRecipe> Recipes => recipes;
 
         private void Awake()

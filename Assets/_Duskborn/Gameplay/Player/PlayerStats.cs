@@ -14,6 +14,8 @@ namespace Duskborn.Gameplay.Player
     {
         [Header("Class")]
         [SerializeField] private ClassDefinition classDefinition;
+        public ClassDefinition ClassDef => classDefinition;
+        public string ClassName => classDefinition != null && !string.IsNullOrWhiteSpace(classDefinition.ClassName) ? classDefinition.ClassName : "Aventureiro";
 
         [Header("Stats")]
         [SerializeField] private EntityStats _entity = new();
@@ -38,6 +40,9 @@ namespace Duskborn.Gameplay.Player
         public float IncomingDamageMultiplier { get => _entity.IncomingDamageMultiplier; set => _entity.IncomingDamageMultiplier = value; }
         public float MiningResourceBonus      { get => _entity.MiningResourceBonus;      set => _entity.MiningResourceBonus = value; }
         public float WoodcuttingResourceBonus { get => _entity.WoodcuttingResourceBonus; set => _entity.WoodcuttingResourceBonus = value; }
+        public float LifestealBonus           { get => _entity.LifestealBonus;           set => _entity.LifestealBonus = value; }
+        public float ThornsDamageBonus        { get => _entity.ThornsDamageBonus;        set => _entity.ThornsDamageBonus = value; }
+        public float GatheringSpeedBonus      { get => _entity.GatheringSpeedBonus;      set => _entity.GatheringSpeedBonus = value; }
 
         // ── Buff additive layer (flat additions after gear base) ──────────────
         public float HPBuffAdditive                   { get => _entity.HPBuffAdditive;                  set => _entity.HPBuffAdditive = value; }
@@ -69,6 +74,9 @@ namespace Duskborn.Gameplay.Player
         // Effective resource gathering bonuses
         public float EffectiveMiningResourceBonus      => _entity.EffectiveMiningResourceBonus;
         public float EffectiveWoodcuttingResourceBonus => _entity.EffectiveWoodcuttingResourceBonus;
+        public float EffectiveLifesteal                => _entity.EffectiveLifesteal;
+        public float EffectiveThornsDamage             => _entity.EffectiveThornsDamage;
+        public float EffectiveGatheringSpeed           => _entity.EffectiveGatheringSpeed;
 
         // ── Buff container (for HP-delta tracking on stat changes) ───────────
         private PlayerBuffContainer _buffs;
@@ -167,6 +175,9 @@ namespace Duskborn.Gameplay.Player
         }
 
         public void TakeDamage(float amount, bool isCrit = false)
+            => TakeDamage(amount, null, isCrit);
+
+        public void TakeDamage(float amount, IDamageable attacker, bool isCrit = false)
         {
             if (!IsServerStarted) return;
             if (!IsAlive) return;
@@ -178,6 +189,16 @@ namespace Duskborn.Gameplay.Player
             float actual = amount * EffectiveIncomingDamage;
             _currentHP.Value = Mathf.Max(0f, _currentHP.Value - actual);
             RpcShowDamageNumber(transform.position, actual, isCrit);
+
+            // ── Dano de Espinhos (Thorns) ────────────────────────────────────
+            float thorns = EffectiveThornsDamage;
+            if (thorns > 0f && attacker != null && actual > 0f)
+            {
+                float reflected = actual * thorns;
+                attacker.TakeDamage(reflected, false);
+                DuskLog.Log(LogChannel.Combat, $"{name}: reflected {reflected:F1} thorns damage.");
+            }
+
             if (_currentHP.Value <= 0f) HandleDeath();
         }
 

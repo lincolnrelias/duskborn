@@ -14,12 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   centerClearingRadius: 10
   workbenchPrefab: {fileID: 606149192729443004, guid: 862022962dbd44b098231bde31a4d0f4, type: 3}
+  forgePrefab: {fileID: 606149192729443004, guid: b8a101f140294719b940e7da3c11s101, type: 3}
+  cauldronPrefab: {fileID: 606149192729443004, guid: b8a101f140294719b940e7da3c11s102, type: 3}
+  arcaneTablePrefab: {fileID: 606149192729443004, guid: b8a101f140294719b940e7da3c11s103, type: 3}
   playerSpawnPointPrefab: {fileID: 0}
+  playerSpawnPointsCount: 5
+  playerSpawnRadius: 6.5
   treeProp: {fileID: 11400000, guid: 1bccee7a2bba4864b30c0c670e1ff9fe, type: 2}
   stoneProp: {fileID: 11400000, guid: 65f6d3d724c04d2fb16b1491b498c0b1, type: 2}
   ironProp: {fileID: 11400000, guid: f23d6ffd80964e1a8a1b5e1da245cf09, type: 2}
   fiberProp: {fileID: 11400000, guid: d6a181d9482b4e4d9968ec2ce046a9e6, type: 2}
-  extraProps: []
+  extraProps:
+  - {fileID: 11400000, guid: bd0c106b6a323624eaf5349ecf63ade3, type: 2}
   chestPrefab: {fileID: 606149192729443004, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
   totalChests: 10
   basicLootTable: {fileID: 11400000, guid: 950a218e4beb2224ab756592277a2c09, type: 2}

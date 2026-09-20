@@ -10,6 +10,9 @@ namespace Duskborn.Gameplay.Equipment
         DamageReduction,
         MiningResourceBonus,
         WoodcuttingResourceBonus,
+        Lifesteal,
+        ThornsDamage,
+        GatheringSpeed,
     }
 
     // Multiplicative = 0 so existing serialised StatBonus assets default to Multiplicative.
@@ -44,6 +47,9 @@ namespace Duskborn.Gameplay.Equipment
             StatType.DamageReduction          => "Damage Reduction",
             StatType.MiningResourceBonus      => "Mining Resource Bonus",
             StatType.WoodcuttingResourceBonus => "Woodcutting Resource Bonus",
+            StatType.Lifesteal                => "Roubo de Vida",
+            StatType.ThornsDamage             => "Dano de Espinhos",
+            StatType.GatheringSpeed           => "Velocidade de Coleta",
             _                                 => type.ToString()
         };
     }

@@ -5,6 +5,7 @@ using UnityEngine;
 using Duskborn.Core;
 using Duskborn.Effects;
 using Duskborn.Gameplay;
+using Duskborn.Gameplay.Crafting;
 using Duskborn.Gameplay.Player;
 
 namespace Duskborn.Gameplay.Loot
@@ -13,10 +14,13 @@ namespace Duskborn.Gameplay.Loot
     {
         [SerializeField] private float maxHP = 30f;
 
-        [Header("Material Type")]
+        [Header("Material Type & Tier")]
         [SerializeField, TargetTypeFilter(TargetTypeMasks.NodeTypes)]
         private TargetType materialTypes;
         public TargetType Types => materialTypes;
+
+        [SerializeField] private CraftingTier requiredHarvestTier = CraftingTier.Primitivo;
+        public CraftingTier RequiredHarvestTier => requiredHarvestTier;
 
         [Header("Damage Numbers")]
         [SerializeField] private DamageNumberConfig _damageNumberConfig;

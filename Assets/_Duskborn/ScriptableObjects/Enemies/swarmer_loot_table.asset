@@ -18,6 +18,16 @@ MonoBehaviour:
     scalingBonus: -0.36
     minAmount: 1
     maxAmount: 5
+  - itemDefinition: {fileID: 11400000, guid: a92f16bb4ae5a6248b808453aecb3cf2, type: 2}
+    baseChance: 0.7
+    scalingBonus: 0.15
+    minAmount: 1
+    maxAmount: 2
+  - itemDefinition: {fileID: 11400000, guid: c4b918a240194689b940e7da3c11f101, type: 2}
+    baseChance: 0.4
+    scalingBonus: 0.1
+    minAmount: 1
+    maxAmount: 2
   goldMin: 1
   goldMax: 5
   rarityScaleRate: 0

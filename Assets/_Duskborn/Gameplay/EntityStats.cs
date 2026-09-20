@@ -22,6 +22,9 @@ namespace Duskborn.Gameplay
         [HideInInspector] public float CritChanceBonus          = 0f;
         [HideInInspector] public float MiningResourceBonus      = 0f;
         [HideInInspector] public float WoodcuttingResourceBonus = 0f;
+        [HideInInspector] public float LifestealBonus           = 0f;
+        [HideInInspector] public float ThornsDamageBonus        = 0f;
+        [HideInInspector] public float GatheringSpeedBonus      = 0f;
 
         // Buff additive layer — flat additions after gear base (e.g. +20 HP literally).
         [HideInInspector] public float HPBuffAdditive                   = 0f;
@@ -30,6 +33,9 @@ namespace Duskborn.Gameplay
         [HideInInspector] public float AttackSpeedBuffAdditive          = 0f;
         [HideInInspector] public float MiningResourceBuffAdditive       = 0f;
         [HideInInspector] public float WoodcuttingResourceBuffAdditive  = 0f;
+        [HideInInspector] public float LifestealBuffAdditive            = 0f;
+        [HideInInspector] public float ThornsDamageBuffAdditive         = 0f;
+        [HideInInspector] public float GatheringSpeedBuffAdditive       = 0f;
 
         // Buff multiplicative layer — compound factor applied on top of (gear base + additive).
         // Starts at 1 (identity). Each multiplicative buff: Factor *= (1 + value).
@@ -39,6 +45,9 @@ namespace Duskborn.Gameplay
         [HideInInspector] public float AttackSpeedBuffFactor          = 1f;
         [HideInInspector] public float MiningResourceBuffFactor       = 1f;
         [HideInInspector] public float WoodcuttingResourceBuffFactor  = 1f;
+        [HideInInspector] public float LifestealBuffFactor            = 1f;
+        [HideInInspector] public float ThornsDamageBuffFactor         = 1f;
+        [HideInInspector] public float GatheringSpeedBuffFactor       = 1f;
 
         // CritChance buff layers — gear uses CritChanceBonus (flat).
         // Additive buffs add flat crit; multiplicative buffs scale the total.
@@ -72,6 +81,16 @@ namespace Duskborn.Gameplay
         public float EffectiveWoodcuttingResourceBonus => Mathf.Max(0f,
             (WoodcuttingResourceBonus + WoodcuttingResourceBuffAdditive) * WoodcuttingResourceBuffFactor);
 
+        public float EffectiveLifesteal => Mathf.Clamp01(
+            (LifestealBonus + LifestealBuffAdditive) * LifestealBuffFactor);
+
+        public float EffectiveThornsDamage => Mathf.Max(0f,
+            (ThornsDamageBonus + ThornsDamageBuffAdditive) * ThornsDamageBuffFactor);
+
+        public float EffectiveGatheringSpeed => Mathf.Max(0f,
+            (GatheringSpeedBonus + GatheringSpeedBuffAdditive) * GatheringSpeedBuffFactor);
+
+
         public void ResetMultipliers()
         {
             HPMultiplier             = 1f;
@@ -101,6 +120,16 @@ namespace Duskborn.Gameplay
             CritChanceBuffFactor      = 1f;
             IncomingDamageBuffAdditive = 0f;
             IncomingDamageBuffFactor   = 1f;
+
+            LifestealBonus = 0f;
+            ThornsDamageBonus = 0f;
+            GatheringSpeedBonus = 0f;
+            LifestealBuffAdditive = 0f;
+            ThornsDamageBuffAdditive = 0f;
+            GatheringSpeedBuffAdditive = 0f;
+            LifestealBuffFactor = 1f;
+            ThornsDamageBuffFactor = 1f;
+            GatheringSpeedBuffFactor = 1f;
         }
     }
 }

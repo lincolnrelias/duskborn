@@ -13,6 +13,15 @@ namespace Duskborn.Gameplay.World
         [Tooltip("Prefab da bancada de trabalho inicial a ser posicionada na clareira central.")]
         public GameObject workbenchPrefab;
 
+        [Tooltip("Prefab da forja de fundição a ser posicionada na clareira central.")]
+        public GameObject forgePrefab;
+
+        [Tooltip("Prefab do caldeirão alquímico a ser posicionado na clareira central.")]
+        public GameObject cauldronPrefab;
+
+        [Tooltip("Prefab da mesa arcana a ser posicionada na clareira central.")]
+        public GameObject arcaneTablePrefab;
+
         [Tooltip("Prefab opcional para instanciar pontos de spawn de jogadores na clareira se não existirem na cena.")]
         public GameObject playerSpawnPointPrefab;
 

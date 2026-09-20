@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69a035e9387548a99afbe57083e2590a, type: 3}
+  m_Name: Prop_ArcaneCrystal
+  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.World.PropDefinition
+  propName: Arcane Crystal
+  prefab: {fileID: 7967917925737338743, guid: cdb45e40e86442ed91ed664a42e94532, type: 3}
+  prefabVariations: []
+  clusterSettings:
+    enableClustering: 1
+    clustersPerChunk: 1
+    nodesPerCluster: {x: 1, y: 3}
+    clusterRadius: 4
+    intraClusterSpacing: 2.5
+    interClusterSpacing: 6
+  solidRadius: 1.3
+  canopyRadius: 0
+  minRadialDistance: 50
+  maxRadialDistance: 0
+  minPerChunk: 0
+  maxPerChunk: 2
+  useClustering: 1
+  clusterFrequency: 0.04
+  clusterThreshold: 0.38
+  minHeight: 1
+  maxHeight: 120
+  maxSlopeAngle: 40
+  scaleRange: {x: 0.9, y: 1.25}
+  heightScaleMultiplier: {x: 1, y: 1}
+  randomYRotation: 1
+  alignToNormal: 1
+  exclusionRadius: 3.5

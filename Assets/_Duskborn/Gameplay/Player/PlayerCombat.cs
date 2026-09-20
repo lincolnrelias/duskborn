@@ -13,6 +13,7 @@ using Duskborn.Gameplay.Enemies;
 using Duskborn.Gameplay.Equipment;
 using Duskborn.Gameplay.Hotkeys;
 using Duskborn.Gameplay.Loot;
+using Duskborn.UI;
 
 namespace Duskborn.Gameplay.Player
 {
@@ -180,9 +181,14 @@ namespace Duskborn.Gameplay.Player
                 _prevLinkedNode = _linkedNode;
             }
 
-            float scroll = Mouse.current?.scroll.ReadValue().y ?? 0f;
-            if (scroll > 0f) actionBarInstaller?.Service.SelectPrevious();
-            else if (scroll < 0f) actionBarInstaller?.Service.SelectNext();
+            // The recipe list owns mouse-wheel input while crafting is open.
+            // Without this guard, one wheel gesture both scrolls recipes and changes equipment.
+            if (CraftingUIManager.Instance == null || !CraftingUIManager.Instance.IsOpen)
+            {
+                float scroll = Mouse.current?.scroll.ReadValue().y ?? 0f;
+                if (scroll > 0f) actionBarInstaller?.Service.SelectPrevious();
+                else if (scroll < 0f) actionBarInstaller?.Service.SelectNext();
+            }
 
             var kb = Keyboard.current;
             if (kb != null)
@@ -334,6 +340,23 @@ namespace Duskborn.Gameplay.Player
                 DuskLog.Log(LogChannel.Combat, $"Cleave hit {col.name} — {damage:F1}{(isCrit ? " CRIT" : "")}");
             }
 
+            // ── Lifesteal ──
+            if (hitEnemies.Count > 0)
+            {
+                float lifestealFraction = _stats.EffectiveLifesteal;
+                if (lifestealFraction > 0f)
+                {
+                    // Calcula o dano total aplicado neste ataque para lifesteal
+                    float totalDamageDealt = 0f;
+                    // Recalcula — simplificação: usa o dano médio × contagem
+                    float baseDmg = _stats.Damage * damageMultiplier;
+                    totalDamageDealt = baseDmg * hitEnemies.Count;
+                    float healAmount = totalDamageDealt * lifestealFraction;
+                    if (healAmount > 0.5f)
+                        _stats.Heal(healAmount);
+                }
+            }
+
             if (hitEnemies.Count > 0)
             {
                 _classAbility?.OnAttackCompleted(hitEnemies);
@@ -366,6 +389,23 @@ namespace Duskborn.Gameplay.Player
                 if (firstHitCol == null) firstHitCol = col;
                 DuskLog.Log(LogChannel.Combat, $"Hit {col.name} — {damage:F1}{(isCrit ? " CRIT" : "")}");
             }
+            // ── Lifesteal ──
+            if (hitEnemies.Count > 0)
+            {
+                float lifestealFraction = _stats.EffectiveLifesteal;
+                if (lifestealFraction > 0f)
+                {
+                    // Calcula o dano total aplicado neste ataque para lifesteal
+                    float totalDamageDealt = 0f;
+                    // Recalcula — simplificação: usa o dano médio × contagem
+                    float baseDmg = _stats.Damage * comboMultiplier;
+                    totalDamageDealt = baseDmg * hitEnemies.Count;
+                    float healAmount = totalDamageDealt * lifestealFraction;
+                    if (healAmount > 0.5f)
+                        _stats.Heal(healAmount);
+                }
+            }
+
             if (hitEnemies.Count > 0)
             {
                 _classAbility?.OnAttackCompleted(hitEnemies);
@@ -406,6 +446,61 @@ namespace Duskborn.Gameplay.Player
             RpcConfirmConsume(Owner, slotIndex);
         }
 
+        public void ApplyConsumable(ConsumableItem consumable, int slotIndex)
+        {
+            if (!IsOwner || !_stats.IsAlive) return;
+            RequestApplyConsumableRpc(slotIndex, (int)consumable.EffectType, consumable.EffectValue, consumable.Duration);
+        }
+
+        [ServerRpc]
+        private void RequestApplyConsumableRpc(int slotIndex, int effectTypeIndex, float effectValue, float duration)
+        {
+            if (!_stats.IsAlive) return;
+            var effectType = (ConsumableEffectType)effectTypeIndex;
+            switch (effectType)
+            {
+                case ConsumableEffectType.InstantHeal:
+                    _stats.Heal(effectValue);
+                    break;
+                case ConsumableEffectType.SpeedBuff:
+                    _stats.MoveSpeedBuffAdditive += effectValue;
+                    if (duration > 0f)
+                        StartCoroutine(RemoveSpeedBuffLater(effectValue, duration));
+                    break;
+                case ConsumableEffectType.DamageBuff:
+                    _stats.DamageBuffAdditive += effectValue;
+                    if (duration > 0f)
+                        StartCoroutine(RemoveDamageBuffLater(effectValue, duration));
+                    break;
+                case ConsumableEffectType.ThornsBuff:
+                    _stats.ThornsDamageBonus += effectValue;
+                    if (duration > 0f)
+                        StartCoroutine(RemoveThornsBuffLater(effectValue, duration));
+                    break;
+            }
+
+            DuskLog.Log(LogChannel.ActionBar, $"Consumed {effectType} from slot {slotIndex}.");
+            RpcConfirmConsume(Owner, slotIndex);
+        }
+
+        private System.Collections.IEnumerator RemoveSpeedBuffLater(float amount, float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            if (_stats != null) _stats.MoveSpeedBuffAdditive = Mathf.Max(0f, _stats.MoveSpeedBuffAdditive - amount);
+        }
+
+        private System.Collections.IEnumerator RemoveDamageBuffLater(float amount, float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            if (_stats != null) _stats.DamageBuffAdditive = Mathf.Max(0f, _stats.DamageBuffAdditive - amount);
+        }
+
+        private System.Collections.IEnumerator RemoveThornsBuffLater(float amount, float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            if (_stats != null) _stats.ThornsDamageBonus = Mathf.Max(0f, _stats.ThornsDamageBonus - amount);
+        }
+
         [TargetRpc]
         private void RpcConfirmConsume(NetworkConnection conn, int slotIndex)
         {
@@ -422,7 +517,30 @@ namespace Duskborn.Gameplay.Player
             var node = nodeObj.GetComponent<ResourceNode>();
             if (node == null || !node.IsAlive) return;
 
-            float damage = _stats.Damage * (_weaponHandler?.ActiveWeapon?.GetTypeDamageMultiplier(node.Types) ?? 1f);
+            var activeWeapon = _weaponHandler?.ActiveWeapon;
+            float typeMultiplier = activeWeapon?.GetTypeDamageMultiplier(node.Types) ?? 1f;
+            float gatheringSpeed = _stats.EffectiveGatheringSpeed;
+            float damage = _stats.Damage * typeMultiplier * (1f + gatheringSpeed);
+
+            // Gating de ferramenta: nós avançados exigem ferramentas do tipo e tier adequados
+            bool toolAdequate = true;
+            if (node.RequiredHarvestTier > Crafting.CraftingTier.Primitivo)
+            {
+                if (typeMultiplier <= 1.0f)
+                {
+                    toolAdequate = false;
+                }
+                else if (node.RequiredHarvestTier >= Crafting.CraftingTier.Reforcado && typeMultiplier < 4.0f)
+                {
+                    toolAdequate = false;
+                }
+            }
+
+            if (!toolAdequate)
+            {
+                damage = Mathf.Min(damage, 1f); // Golpe resvalado / ferramenta insuficiente
+            }
+
             string surfaceTag = node.GetSurfaceTag();
             node.TakeDamage(damage, _stats);
 

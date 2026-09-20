@@ -32,6 +32,11 @@ namespace Duskborn.Editor
             RunTest(Test_Workbench_PrefabModelIntegrity, ref passed, ref total);
             RunTest(Test_DraggablePanel_BindingAndCanvasResolution, ref passed, ref total);
             RunTest(Test_DraggablePanel_ScreenClampingMath, ref passed, ref total);
+            RunTest(Test_AllFourCraftingStations_Integrity, ref passed, ref total);
+            RunTest(Test_MultiTierProgression_Recipes, ref passed, ref total);
+            RunTest(Test_ConsumableItems_Functionality, ref passed, ref total);
+            RunTest(Test_EquipmentTradeoffs_Calculations, ref passed, ref total);
+            RunTest(Test_RecipeDiscoveryTracker_Logic, ref passed, ref total);
 
             Debug.Log($"<color=#55FF55><b>[CraftingTests] {passed}/{total} testes passaram com sucesso!</b></color>");
         }
@@ -309,6 +314,116 @@ namespace Duskborn.Editor
 
             UnityEngine.Object.DestroyImmediate(childGO);
             UnityEngine.Object.DestroyImmediate(parentGO);
+        }
+
+        private static void Test_AllFourCraftingStations_Integrity()
+        {
+            string[] prefabs = { "Workbench", "Station_Forge", "Station_Cauldron", "Station_ArcaneTable" };
+            CraftingStationType[] expectedTypes = { CraftingStationType.Bancada, CraftingStationType.Forja, CraftingStationType.Caldeirao, CraftingStationType.MesaArcana };
+
+            for (int i = 0; i < prefabs.Length; i++)
+            {
+                var prefab = Resources.Load<GameObject>($"Stations/{prefabs[i]}");
+                if (prefab == null)
+                    prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"Assets/_Duskborn/Prefabs/World/{prefabs[i]}.prefab");
+
+                if (prefab == null)
+                    throw new Exception($"Prefab da estação '{prefabs[i]}' não foi encontrado em Resources ou Prefabs/World.");
+
+                var wb = prefab.GetComponent<Workbench>();
+                if (wb == null)
+                    throw new Exception($"Prefab '{prefabs[i]}' não possui o componente Workbench.");
+
+                if (wb.StationType != expectedTypes[i])
+                    throw new Exception($"Estação '{prefabs[i]}' esperava StationType {expectedTypes[i]}, mas possui {wb.StationType}.");
+            }
+        }
+
+        private static void Test_MultiTierProgression_Recipes()
+        {
+            var recipes = Resources.LoadAll<CraftingRecipe>("Crafting");
+            if (recipes == null || recipes.Length < 25)
+                throw new Exception($"Esperado pelo menos 25 receitas no sistema de progressão, mas encontradas {recipes?.Length ?? 0}.");
+
+            bool hasT1 = false, hasT2 = false, hasT3 = false, hasT4 = false;
+            bool hasBancada = false, hasForja = false, hasCaldeirao = false, hasMesaArcana = false;
+
+            foreach (var r in recipes)
+            {
+                if (r == null) continue;
+                if (r.Tier == CraftingTier.Primitivo) hasT1 = true;
+                if (r.Tier == CraftingTier.Ferro) hasT2 = true;
+                if (r.Tier == CraftingTier.Reforcado) hasT3 = true;
+                if (r.Tier == CraftingTier.Espinheiro) hasT4 = true;
+
+                if (r.RequiredStation == CraftingStationType.Bancada) hasBancada = true;
+                if (r.RequiredStation == CraftingStationType.Forja) hasForja = true;
+                if (r.RequiredStation == CraftingStationType.Caldeirao) hasCaldeirao = true;
+                if (r.RequiredStation == CraftingStationType.MesaArcana) hasMesaArcana = true;
+            }
+
+            if (!hasT1 || !hasT2 || !hasT3 || !hasT4)
+                throw new Exception($"Faltam receitas em algum dos 4 Tiers de progressão (T1={hasT1}, T2={hasT2}, T3={hasT3}, T4={hasT4}).");
+
+            if (!hasBancada || !hasForja || !hasCaldeirao || !hasMesaArcana)
+                throw new Exception($"Faltam receitas atribuídas para alguma das 4 estações de fabricação (Bancada={hasBancada}, Forja={hasForja}, Caldeirao={hasCaldeirao}, MesaArcana={hasMesaArcana}).");
+        }
+
+        private static void Test_ConsumableItems_Functionality()
+        {
+            var consumableItem = new ConsumableItem(
+                "test_tonic", "Tônico Teste", "Restaura vida", "icon_tonic",
+                ConsumableEffectType.InstantHeal, 50f, 0f, 5);
+
+            if (consumableItem.EffectType != ConsumableEffectType.InstantHeal)
+                throw new Exception("ConsumableItem não reteve o EffectType correto.");
+
+            if (Mathf.Abs(consumableItem.EffectValue - 50f) > 0.01f)
+                throw new Exception("ConsumableItem não reteve o EffectValue correto.");
+
+            if (consumableItem.StackSize != 5)
+                throw new Exception("ConsumableItem não reteve o StackSize correto.");
+        }
+
+        private static void Test_EquipmentTradeoffs_Calculations()
+        {
+            var stats = new EntityStats
+            {
+                maxHP = 100f,
+                damage = 10f,
+                moveSpeed = 5f
+            };
+
+            // Simula bônus positivo e negativo (tradeoff)
+            stats.DamageBuffAdditive = 5f;
+            stats.MoveSpeedMultiplier = 0.85f; // Penalidade de -15% de velocidade
+
+            if (stats.Damage < 14f)
+                throw new Exception("Cálculo de dano de EntityStats incorreto.");
+
+            // Base 5.0 * 0.85 = 4.25f
+            if (Mathf.Abs(stats.MoveSpeed - 4.25f) > 0.05f)
+                throw new Exception($"Cálculo de MoveSpeed com tradeoff falhou: esperado ~4.25, obtido {stats.MoveSpeed}");
+        }
+
+        private static void Test_RecipeDiscoveryTracker_Logic()
+        {
+            var go = new GameObject("Tracker_Test");
+            var tracker = go.AddComponent<RecipeDiscoveryTracker>();
+
+            var recipe = Resources.Load<CraftingRecipe>("Crafting/Recipe_SmeltIronBar");
+            if (recipe != null)
+            {
+                // Antes da descoberta
+                bool initial = tracker.IsDiscovered(recipe);
+                tracker.ForceDiscover(recipe);
+                bool after = tracker.IsDiscovered(recipe);
+
+                if (!after)
+                    throw new Exception("RecipeDiscoveryTracker não registrou a descoberta da receita.");
+            }
+
+            UnityEngine.Object.DestroyImmediate(go);
         }
 
         private static CraftingIngredient FindIngredient(CraftingRecipe recipe, string materialId)

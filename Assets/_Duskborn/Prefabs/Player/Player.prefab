@@ -179,14 +179,20 @@ MonoBehaviour:
     MoveSpeedMultiplier: 1
     IncomingDamageMultiplier: 1
     CritChanceBonus: 0
+    MiningResourceBonus: 0
+    WoodcuttingResourceBonus: 0
     HPBuffAdditive: 0
     DamageBuffAdditive: 0
     MoveSpeedBuffAdditive: 0
     AttackSpeedBuffAdditive: 0
+    MiningResourceBuffAdditive: 0
+    WoodcuttingResourceBuffAdditive: 0
     HPBuffFactor: 1
     DamageBuffFactor: 1
     MoveSpeedBuffFactor: 1
     AttackSpeedBuffFactor: 1
+    MiningResourceBuffFactor: 1
+    WoodcuttingResourceBuffFactor: 1
     CritChanceBuffAdditive: 0
     CritChanceBuffFactor: 1
     IncomingDamageBuffAdditive: 0
@@ -211,6 +217,11 @@ MonoBehaviour:
   rotationSpeed: 720
   accelTime: 0.15
   decelTime: 0.08
+  runMultiplier: 1
+  sprintMultiplier: 1.5
+  jumpHeight: 1.6
+  coyoteTime: 0.15
+  jumpBufferTime: 0.15
   _animator: {fileID: 8116265279598197991}
 --- !u!114 &7734906760495636806
 MonoBehaviour:
@@ -411,7 +422,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584119473664110649
+  _initializedTimestamp: -8584117596719279917
 --- !u!114 &8514665050153253299
 MonoBehaviour:
   m_ObjectHideFlags: 0

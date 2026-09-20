@@ -491,26 +491,30 @@ namespace Duskborn.Gameplay.World
             // A) Posicionamento / Atualização de Pontos de Spawn de Jogadores
             SetupPlayerSpawnPoints(propsConfig, centerGroundY);
 
-            // B) Posicionamento da Bancada (Workbench)
-            if (propsConfig.workbenchPrefab != null)
+            // B) Posicionamento das Estações de Fabricação (Bancada, Forja, Caldeirão, Mesa Arcana)
+            (GameObject prefab, Vector3 offset, float rotY)[] stationsToPlace = new[]
             {
-                Vector3 wbOffset = new Vector3(2.5f, 0f, 1.5f);
-                Vector3 wbRayOrigin = new Vector3(wbOffset.x, 150f, wbOffset.z);
-                Vector3 wbPos = wbOffset + Vector3.up * centerGroundY;
+                (propsConfig.workbenchPrefab ?? Resources.Load<GameObject>("Stations/Workbench"), new Vector3(2.5f, 0f, 1.5f), -45f),
+                (propsConfig.forgePrefab ?? Resources.Load<GameObject>("Stations/Station_Forge"), new Vector3(3.5f, 0f, -2.0f), -135f),
+                (propsConfig.cauldronPrefab ?? Resources.Load<GameObject>("Stations/Station_Cauldron"), new Vector3(-2.5f, 0f, 2.5f), 45f),
+                (propsConfig.arcaneTablePrefab ?? Resources.Load<GameObject>("Stations/Station_ArcaneTable"), new Vector3(-3.0f, 0f, -2.0f), 135f)
+            };
 
-                if (RaycastGround(wbRayOrigin, out RaycastHit wbHit))
+            foreach (var st in stationsToPlace)
+            {
+                if (st.prefab == null) continue;
+
+                Vector3 stRayOrigin = new Vector3(st.offset.x, 150f, st.offset.z);
+                Vector3 stPos = st.offset + Vector3.up * centerGroundY;
+
+                if (RaycastGround(stRayOrigin, out RaycastHit stHit))
                 {
-                    wbPos = wbHit.point;
+                    stPos = stHit.point;
                 }
 
-                GameObject wbGO = InstantiateProp(propsConfig.workbenchPrefab, wbPos, Quaternion.Euler(0f, -45f, 0f), Vector3.one);
-                _placedPositions.Add(wbPos);
-                _occupancyMap.Register(wbPos, solidRadius: 1.5f, canopyRadius: 0f, OccupancyType.Resource_Solid);
-
-                if (wbGO.TryGetComponent<Workbench>(out var wb))
-                {
-                    // Pronto para interação
-                }
+                GameObject stGO = InstantiateProp(st.prefab, stPos, Quaternion.Euler(0f, st.rotY, 0f), Vector3.one);
+                _placedPositions.Add(stPos);
+                _occupancyMap.Register(stPos, solidRadius: 1.5f, canopyRadius: 0f, OccupancyType.Resource_Solid);
             }
 
             // C) Posicionamento de Nós de Recursos de Teste de Tiers (Comum -> Incomum -> Raro -> Épico -> Lendário)

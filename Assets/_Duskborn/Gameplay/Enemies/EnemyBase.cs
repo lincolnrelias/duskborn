@@ -248,7 +248,7 @@ namespace Duskborn.Gameplay.Enemies
             HitboxDebugger.Flash(transform.position, attackRange, Color.cyan);
             bool  isCrit = UnityEngine.Random.value < CritChance;
             float dmg    = Damage * (isCrit ? CritMultiplier : 1f);
-            CurrentTarget.GetComponent<PlayerStats>()?.TakeDamage(dmg, isCrit);
+            CurrentTarget.GetComponent<PlayerStats>()?.TakeDamage(dmg, this, isCrit);
             DuskLog.Log(LogChannel.Enemy, $"{name} melee hit for {dmg:F1}{(isCrit ? " CRIT" : "")}");
             RpcRaiseHitAudio(CurrentTarget.tag);
             RpcSpawnHitEffect(CurrentTarget.tag, CurrentTarget.position);
@@ -279,7 +279,7 @@ namespace Duskborn.Gameplay.Enemies
 
                 bool  isCrit = UnityEngine.Random.value < CritChance;
                 float dmg    = Damage * damageMultiplier * (isCrit ? CritMultiplier : 1f);
-                ps.TakeDamage(dmg, isCrit);
+                ps.TakeDamage(dmg, this, isCrit);
                 if (hitTag == null) { hitTag = col.tag; hitPosition = ps.transform.position; }
                 DuskLog.Log(LogChannel.Enemy, $"{name} cleave hit {col.name} for {dmg:F1}{(isCrit ? " CRIT" : "")}");
             }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Duskborn.Core;
 using Duskborn.Gameplay.Loot;
 using Duskborn.Gameplay.Player;
@@ -47,6 +48,8 @@ namespace Duskborn.Gameplay.Equipment
             if (any) _buffs.ApplyAll();
         }
 
+        public IReadOnlyList<GearItem> Equipped => _equipped;
+
         /// <summary>
         /// Equips <paramref name="item"/> to its declared slot.
         /// If the slot was occupied, the displaced item is returned via <paramref name="previousItem"/>.
@@ -59,16 +62,31 @@ namespace Duskborn.Gameplay.Equipment
                 return false;
             }
 
-            int idx       = (int)item.Slot;
+            return TryEquipToSlot(item.Slot, item, out previousItem);
+        }
+
+        /// <summary>
+        /// Equips <paramref name="item"/> to a specific <paramref name="slot"/> (e.g. Ring1 vs Ring2).
+        /// If the slot was occupied, the displaced item is returned via <paramref name="previousItem"/>.
+        /// </summary>
+        public bool TryEquipToSlot(EquipmentSlot slot, GearItem item, out GearItem previousItem)
+        {
+            if (item == null)
+            {
+                previousItem = null;
+                return false;
+            }
+
+            int idx       = (int)slot;
             previousItem  = _equipped[idx];
             _equipped[idx] = item;
 
             DuskLog.Log(LogChannel.Inventory,
-                $"Equipped '{item.DisplayName}' → slot {item.Slot}" +
+                $"Equipped '{item.DisplayName}' → slot {slot}" +
                 (previousItem != null ? $" (replacing '{previousItem.DisplayName}')" : string.Empty));
 
-            _buffs.ApplyAll();
-            OnEquipmentChanged?.Invoke(item.Slot, previousItem, item);
+            _buffs?.ApplyAll();
+            OnEquipmentChanged?.Invoke(slot, previousItem, item);
             return true;
         }
 
@@ -84,7 +102,7 @@ namespace Duskborn.Gameplay.Equipment
             _equipped[idx] = null;
             DuskLog.Log(LogChannel.Inventory, $"Unequipped '{removed.DisplayName}' from slot {slot}");
 
-            _buffs.ApplyAll();
+            _buffs?.ApplyAll();
             OnEquipmentChanged?.Invoke(slot, removed, null);
             return removed;
         }
@@ -131,6 +149,15 @@ namespace Duskborn.Gameplay.Equipment
                     break;
                 case StatType.WoodcuttingResourceBonus:
                     _stats.WoodcuttingResourceBonus += bonus.Value;
+                    break;
+                case StatType.Lifesteal:
+                    _stats.LifestealBonus += bonus.Value;
+                    break;
+                case StatType.ThornsDamage:
+                    _stats.ThornsDamageBonus += bonus.Value;
+                    break;
+                case StatType.GatheringSpeed:
+                    _stats.GatheringSpeedBonus += bonus.Value;
                     break;
                 default:
                     DuskLog.Warn(LogChannel.Inventory, $"Unhandled StatType: {bonus.Type}");

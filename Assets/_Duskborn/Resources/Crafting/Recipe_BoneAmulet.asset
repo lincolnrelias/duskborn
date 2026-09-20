@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30f025e9978c4c2ba32a4b46bfece54f, type: 3}
+  m_Name: Recipe_BoneAmulet
+  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
+  recipeId: Recipe_BoneAmulet
+  recipeName: Amuleto de Garras
+  description: Amuleto de Garras
+  category: "Acess\xF3rios"
+  tier: 4
+  requiredStation: 3
+  isAlwaysDiscovered: 0
+  outputItem: {fileID: 11400000, guid: defb8f610529d7c40863cae097a25374, type: 2}
+  outputAmount: 1
+  ingredients:
+  - material: {fileID: 11400000, guid: a3e031a0d03acc5498fc981e1a8b3200, type: 2}
+    amount: 4
+  - material: {fileID: 11400000, guid: ac75ce17d5fdcaf4d956e4f0e2ed6c88, type: 2}
+    amount: 1

@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30f025e9978c4c2ba32a4b46bfece54f, type: 3}
+  m_Name: Recipe_ReinforcedArmor
+  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
+  recipeId: Recipe_ReinforcedArmor
+  recipeName: "Armadura de A\xE7o Refor\xE7ado"
+  description: "Armadura de A\xE7o Refor\xE7ado"
+  category: Armadura
+  tier: 4
+  requiredStation: 1
+  isAlwaysDiscovered: 0
+  outputItem: {fileID: 11400000, guid: 41deac0d2bd99c642b03326a22f78ab2, type: 2}
+  outputAmount: 1
+  ingredients:
+  - material: {fileID: 11400000, guid: c4b918a240194689b940e7da3c11f103, type: 2}
+    amount: 4
+  - material: {fileID: 11400000, guid: be23fd8e4c7348e408fc7a584998f922, type: 2}
+    amount: 3

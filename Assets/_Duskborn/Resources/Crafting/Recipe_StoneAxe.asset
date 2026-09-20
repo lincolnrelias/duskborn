@@ -12,10 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30f025e9978c4c2ba32a4b46bfece54f, type: 3}
   m_Name: Recipe_StoneAxe
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
-  recipeId: recipe_stone_axe
+  recipeId: Recipe_StoneAxe
   recipeName: Machado de Pedra
-  description: Machado de pedra rustico. Causa dano massivo (+300%) a arvores e bonus contra humanoides.
+  description: Machado de Pedra
   category: Ferramentas
+  tier: 2
+  requiredStation: 0
+  isAlwaysDiscovered: 1
   outputItem: {fileID: 11400000, guid: 601f53b2da268ec439655f119087feb4, type: 2}
   outputAmount: 1
   ingredients:

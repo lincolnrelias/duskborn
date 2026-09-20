@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd3d5058e86c5134280550ec598a88cf, type: 3}
+  m_Name: gear_leather_belt
+  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.GearDefinition
+  id: gear_leather_belt
+  displayName: Cinto de Couro
+  description: 'HP: +6%  Woodcutting: +10%'
+  icon: {fileID: 2800000, guid: 6601e6b66b58590498b3416eadc6e7ce, type: 3}
+  dropPrefab: {fileID: 0}
+  slot: 7
+  bonuses:
+  - Type: 0
+    Value: 0.06
+  - Type: 7
+    Value: 0.1

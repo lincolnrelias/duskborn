@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 246cd6b673e021a47849a992f2ab04ec, type: 3}
+  m_Name: weapon_heavy_waraxe
+  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.WeaponDefinition
+  id: weapon_heavy_waraxe
+  displayName: Machado de Guerra Pesado
+  description: "Machado de guerra colossal. Dano maci\xE7o e devastador contra \xE1rvores
+    e humanoides, por\xE9m lento de manusear."
+  icon: {fileID: 2800000, guid: f00953ca56fd7d84e93625f0a86482fc, type: 3}
+  dropPrefab: {fileID: 0}
+  rarity: 0
+  prefab: {fileID: 4757211534840990446, guid: 0761d24af9de94747a949c3acd122201, type: 3}
+  bonuses:
+  - Type: 1
+    Value: 0.55
+    Mode: 0
+  - Type: 3
+    Value: -0.2
+    Mode: 0
+  - Type: 7
+    Value: 0.5
+    Mode: 0
+  typeModifiers:
+  - Type: 256
+    Bonus: 5
+  - Type: 1
+    Bonus: 2
+  behaviour: {fileID: 11400000, guid: c5a595ad70d17be40826423d131de2dd, type: 2}
+  actions:
+  - BaseSpeed: 1
+    PreserveLocomotion: 1
+    ComboChain: 1
+    ComboResetTime: 0.8
+    Entries:
+    - Clip: {fileID: 7400000, guid: 3558db8e6c045c3418d8e7593f8a88de, type: 3}
+      DamageMultiplier: 1
+      Events:
+      - Type: 0
+        NormalizedTime: 0.25
+    - Clip: {fileID: 7400000, guid: f9808de8e12794d468604280ad76ca36, type: 3}
+      DamageMultiplier: 1
+      Events:
+      - Type: 0
+        NormalizedTime: 0.25
+    - Clip: {fileID: 7400000, guid: 210680178f4ec7045b47ffeeb53bc31d, type: 3}
+      DamageMultiplier: 1
+      Events:
+      - Type: 0
+        NormalizedTime: 0.25
+    Clips: []
+    Events: []
+    ComboDamageMultipliers: []
+  skills:
+  - {fileID: 11400000, guid: d57cb9290c0fd0b4ea77e6fd29e1bd3c, type: 2}
+  audioProfile: {fileID: 11400000, guid: 658caad55867c5d41829bba0cc8ead5b, type: 2}
+  effectProfile: {fileID: 11400000, guid: 4365837daea7cab4ebadeab220765a1c, type: 2}

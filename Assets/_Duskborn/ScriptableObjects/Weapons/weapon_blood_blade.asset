@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 246cd6b673e021a47849a992f2ab04ec, type: 3}
+  m_Name: weapon_blood_blade
+  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.WeaponDefinition
+  id: weapon_blood_blade
+  displayName: "L\xE2mina Sedenta de Sangue"
+  description: "Arma ritual\xEDstica forjada com ossos e p\xF3 de cristal. Rouba
+    vida a cada golpe, por\xE9m drena a vitalidade m\xE1xima do usu\xE1rio."
+  icon: {fileID: 2800000, guid: f00953ca56fd7d84e93625f0a86482fc, type: 3}
+  dropPrefab: {fileID: 0}
+  rarity: 0
+  prefab: {fileID: 8365917419817379780, guid: 5c566737bd2a8ea4c86db5af8cf9b6ec, type: 3}
+  bonuses:
+  - Type: 1
+    Value: 0.4
+    Mode: 0
+  - Type: 8
+    Value: 0.15
+    Mode: 0
+  - Type: 0
+    Value: -0.15
+    Mode: 0
+  typeModifiers: []
+  behaviour: {fileID: 11400000, guid: c5a595ad70d17be40826423d131de2dd, type: 2}
+  actions:
+  - BaseSpeed: 1
+    PreserveLocomotion: 1
+    ComboChain: 1
+    ComboResetTime: 0.8
+    Entries:
+    - Clip: {fileID: 7400000, guid: 3558db8e6c045c3418d8e7593f8a88de, type: 3}
+      DamageMultiplier: 1
+      Events:
+      - Type: 0
+        NormalizedTime: 0.25
+    - Clip: {fileID: 7400000, guid: f9808de8e12794d468604280ad76ca36, type: 3}
+      DamageMultiplier: 1
+      Events:
+      - Type: 0
+        NormalizedTime: 0.25
+    - Clip: {fileID: 7400000, guid: 210680178f4ec7045b47ffeeb53bc31d, type: 3}
+      DamageMultiplier: 1
+      Events:
+      - Type: 0
+        NormalizedTime: 0.25
+    Clips: []
+    Events: []
+    ComboDamageMultipliers: []
+  skills:
+  - {fileID: 11400000, guid: d57cb9290c0fd0b4ea77e6fd29e1bd3c, type: 2}
+  audioProfile: {fileID: 11400000, guid: 658caad55867c5d41829bba0cc8ead5b, type: 2}
+  effectProfile: {fileID: 11400000, guid: 4365837daea7cab4ebadeab220765a1c, type: 2}

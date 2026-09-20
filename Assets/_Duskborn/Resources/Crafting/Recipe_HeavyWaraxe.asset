@@ -10,19 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 30f025e9978c4c2ba32a4b46bfece54f, type: 3}
-  m_Name: Recipe_StonePickaxe
+  m_Name: Recipe_HeavyWaraxe
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
-  recipeId: Recipe_StonePickaxe
-  recipeName: Picareta de Pedra
-  description: Picareta de Pedra
-  category: Ferramentas
-  tier: 2
-  requiredStation: 0
-  isAlwaysDiscovered: 1
-  outputItem: {fileID: 11400000, guid: 0aa265baf59b4068bf539eadb27c59f5, type: 2}
+  recipeId: Recipe_HeavyWaraxe
+  recipeName: Machado de Guerra Pesado
+  description: Machado de Guerra Pesado
+  category: Armas
+  tier: 4
+  requiredStation: 1
+  isAlwaysDiscovered: 0
+  outputItem: {fileID: 11400000, guid: 90d954e21a9b38a43a196fe6ece24968, type: 2}
   outputAmount: 1
   ingredients:
+  - material: {fileID: 11400000, guid: c4b918a240194689b940e7da3c11f103, type: 2}
+    amount: 3
   - material: {fileID: 11400000, guid: bf7b5f988956014458ebc1a8ae0e761e, type: 2}
-    amount: 5
-  - material: {fileID: 11400000, guid: 2a0acc988d7bb054889caff0a3472d3d, type: 2}
-    amount: 5
+    amount: 4

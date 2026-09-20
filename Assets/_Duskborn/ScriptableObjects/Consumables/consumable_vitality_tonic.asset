@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a0f4438b0e84b80bcf2673a907101de, type: 3}
+  m_Name: consumable_vitality_tonic
+  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.ConsumableDefinition
+  id: consumable_vitality_tonic
+  displayName: "T\xF4nico de Vitalidade"
+  description: Restaura instantaneamente 70 pontos de vida.
+  icon: {fileID: 2800000, guid: b1b00fa4504752ff8f8b1976927ad60c, type: 3}
+  dropPrefab: {fileID: 0}
+  rarity: 1
+  effectType: 0
+  effectValue: 70
+  duration: 0
+  maxStack: 5
+  effectDescription: Restaura +70 HP instantaneamente.

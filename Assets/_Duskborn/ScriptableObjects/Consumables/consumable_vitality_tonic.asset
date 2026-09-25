@@ -15,7 +15,7 @@ MonoBehaviour:
   id: consumable_vitality_tonic
   displayName: "T\xF4nico de Vitalidade"
   description: Restaura instantaneamente 70 pontos de vida.
-  icon: {fileID: 2800000, guid: b1b00fa4504752ff8f8b1976927ad60c, type: 3}
+  icon: {fileID: 2800000, guid: e0b3f4090e394b82ab82cc61ea861d8e, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 1
   effectType: 0

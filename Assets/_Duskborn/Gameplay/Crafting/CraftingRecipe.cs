@@ -41,6 +41,9 @@ namespace Duskborn.Gameplay.Crafting
         [Header("Ingredientes Necessários")]
         [SerializeField] private List<CraftingIngredient> ingredients = new();
 
+        [Header("Combustível de Processamento")]
+        [SerializeField] private List<CraftingIngredient> fuelIngredients = new();
+
         public string RecipeId => string.IsNullOrEmpty(recipeId) ? (outputItem != null ? outputItem.Id : name) : recipeId;
         public string RecipeName => string.IsNullOrEmpty(recipeName) ? (outputItem != null ? outputItem.DisplayName : name) : recipeName;
         public string Description => string.IsNullOrEmpty(description) ? (outputItem != null ? outputItem.Description : string.Empty) : description;
@@ -51,43 +54,17 @@ namespace Duskborn.Gameplay.Crafting
         public ItemDefinitionBase OutputItem => outputItem;
         public int OutputAmount => outputAmount;
         public IReadOnlyList<CraftingIngredient> Ingredients => ingredients;
+        public IReadOnlyList<CraftingIngredient> FuelIngredients => fuelIngredients;
 
+        [SerializeField, Min(0)] private float processingSeconds;
+        public float ProcessingSeconds => processingSeconds;
         public Texture2D Icon => outputItem != null ? outputItem.Icon : null;
 
         /// <summary>
         /// Verifica se o inventário de recursos do jogador possui todos os ingredientes necessários.
         /// </summary>
-        public bool CanCraft(ResourceInventory resources)
-        {
-            if (resources == null || ingredients == null || ingredients.Count == 0)
-                return false;
-
-            foreach (var ing in ingredients)
-            {
-                if (ing.material == null) continue;
-                if (resources.GetCount(ing.material.Id) < ing.amount)
-                    return false;
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Deduz os materiais necessários do inventário de recursos.
-        /// </summary>
-        public bool TrySpendIngredients(ResourceInventory resources)
-        {
-            if (!CanCraft(resources)) return false;
-
-            foreach (var ing in ingredients)
-            {
-                if (ing.material == null) continue;
-                resources.TrySpend(ing.material.Id, ing.amount);
-            }
-
-            return true;
-        }
-
+        public bool CanCraft(ResourceInventory resources) => Building.MaterialCosts.CanPay(resources, ingredients, fuelIngredients);
+        public bool TrySpendIngredients(ResourceInventory resources) => Building.MaterialCosts.Spend(resources, ingredients, fuelIngredients);
         /// <summary>
         /// Instancia o item em tempo de execução para colocação no inventário ou action bar.
         /// </summary>

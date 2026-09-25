@@ -219,18 +219,27 @@ MonoBehaviour:
     CritChanceBonus: 0
     MiningResourceBonus: 0
     WoodcuttingResourceBonus: 0
+    LifestealBonus: 0
+    ThornsDamageBonus: 0
+    GatheringSpeedBonus: 0
     HPBuffAdditive: 0
     DamageBuffAdditive: 0
     MoveSpeedBuffAdditive: 0
     AttackSpeedBuffAdditive: 0
     MiningResourceBuffAdditive: 0
     WoodcuttingResourceBuffAdditive: 0
+    LifestealBuffAdditive: 0
+    ThornsDamageBuffAdditive: 0
+    GatheringSpeedBuffAdditive: 0
     HPBuffFactor: 1
     DamageBuffFactor: 1
     MoveSpeedBuffFactor: 1
     AttackSpeedBuffFactor: 1
     MiningResourceBuffFactor: 1
     WoodcuttingResourceBuffFactor: 1
+    LifestealBuffFactor: 1
+    ThornsDamageBuffFactor: 1
+    GatheringSpeedBuffFactor: 1
     CritChanceBuffAdditive: 0
     CritChanceBuffFactor: 1
     IncomingDamageBuffAdditive: 0
@@ -462,7 +471,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584117596719279917
+  _initializedTimestamp: -8584114860223081508
 --- !u!114 &8514665050153253299
 MonoBehaviour:
   m_ObjectHideFlags: 0

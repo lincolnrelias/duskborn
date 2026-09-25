@@ -136,6 +136,7 @@ MonoBehaviour:
   _networkObjectCache: {fileID: 2002914817134659099}
   maxHP: 120
   materialTypes: 512
+  requiredHarvestTier: 1
   _damageNumberConfig: {fileID: 11400000, guid: eb5a6de148f00fa47adfa4984d057943, type: 2}
   depletedClip: {fileID: 0}
   outlineLayerName: ResourceOutline
@@ -224,7 +225,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584117596719279917
+  _initializedTimestamp: -8584114860223081508
 --- !u!114 &-4121080129504171373
 MonoBehaviour:
   m_ObjectHideFlags: 0

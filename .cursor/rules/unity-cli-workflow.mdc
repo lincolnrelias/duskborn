@@ -1,0 +1,14 @@
+---
+description: Use the project's documented non-interactive Unity CLI workflow
+alwaysApply: true
+---
+
+# Unity CLI Workflow
+
+- Use `Tools/unity.ps1` for Unity-backed compilation, validation, tests, and builds.
+- Read `Docs/unity-cli.md` before changing the wrapper or its C# entry points.
+- Prefer `.\Tools\unity.ps1 all` after gameplay changes; use `compile` for a fast gate.
+- Keep Unity work non-interactive: never open/control the Editor UI or enter Play Mode.
+- Do not run the CLI while the user has this project open in Unity.
+- Treat `Logs/UnityCli` and `Builds` as generated output, not source files.
+- Report visual behavior as unverified unless a dedicated automated artifact proves it.

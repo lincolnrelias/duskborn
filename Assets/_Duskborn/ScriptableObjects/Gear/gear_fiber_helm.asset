@@ -15,7 +15,7 @@ MonoBehaviour:
   id: gear_fiber_helm
   displayName: Elmo de Fibra
   description: Elmo de Fibra
-  icon: {fileID: 0}
+  icon: {fileID: 2800000, guid: bf425b6a73974a12b5dfbb4d14f81ed5, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 0
   slot: 0

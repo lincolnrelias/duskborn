@@ -20,6 +20,14 @@ namespace Duskborn.Gameplay.Crafting
         private CraftingRecipe[] _allRecipes;
         private ResourceInventory _resources;
 
+        public List<string> CaptureDiscoveries() => new List<string>(_discoveredIds);
+        public List<string> CaptureKnownMaterials() => new List<string>(_knownMaterials);
+        public void RestoreDiscoveries(IEnumerable<string> recipes, IEnumerable<string> materials)
+        {
+            _discoveredIds.Clear(); _knownMaterials.Clear();
+            if (recipes != null) foreach (var id in recipes) _discoveredIds.Add(id);
+            if (materials != null) foreach (var id in materials) _knownMaterials.Add(id);
+        }
         private void Start()
         {
             _resources = GetComponent<ResourceInventory>();
@@ -37,6 +45,7 @@ namespace Duskborn.Gameplay.Crafting
                     _discoveredIds.Add(recipe.RecipeId);
             }
 
+            if (_resources != null) foreach (var entry in _resources.Counts) OnResourceChanged(entry.Key, entry.Value);
             DuskLog.Log(LogChannel.Inventory, $"RecipeDiscoveryTracker: {_discoveredIds.Count} receitas iniciais descobertas.");
         }
 
@@ -86,7 +95,7 @@ namespace Duskborn.Gameplay.Crafting
 
         private void OnResourceChanged(string resourceId, int newTotal)
         {
-            if (!_knownMaterials.Add(resourceId)) return; // Já conhecido
+            if (newTotal <= 0 || !_knownMaterials.Add(resourceId)) return; // Já conhecido
 
             // Verifica todas as receitas para ver se alguma nova pode ser descoberta
             if (_allRecipes == null) return;

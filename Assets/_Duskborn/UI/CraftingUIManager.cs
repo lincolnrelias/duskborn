@@ -399,6 +399,28 @@ namespace Duskborn.UI
         {
             if (_selectedRecipe == null) return;
             TryFindIntegrations();
+            if (CurrentWorkbench == null || !IsLocalPlayerNearWorkbench(4f) || _selectedRecipe.RequiredStation != CurrentWorkbench.StationType)
+            { ShowStatusFeedback("Esta receita requer a estação correta e próxima.", true); return; }
+            var discovery = _playerResources != null ? _playerResources.GetComponent<RecipeDiscoveryTracker>() : null;
+            if (discovery == null || !discovery.IsDiscovered(_selectedRecipe))
+            { ShowStatusFeedback("Descubra um ingrediente para desbloquear esta receita.", true); return; }
+            if (_selectedRecipe.ProcessingSeconds > 0)
+            {
+                var building = CurrentWorkbench.GetComponent<Duskborn.Gameplay.Building.PlacedBuilding>();
+                if (building == null) { ShowStatusFeedback("Construa uma estação [B] para processar este material.", true); return; }
+                if (building.Definition.station == CraftingStationType.Forja)
+                {
+                    var controller = Duskborn.Gameplay.Building.BuildingController.Local;
+                    if (controller == null) { ShowStatusFeedback("Forja indisponível.", true); return; }
+                    var recipe = _selectedRecipe;
+                    Close();
+                    controller.OpenStation(building, recipe);
+                    return;
+                }
+                Duskborn.Gameplay.Building.BuildingController.Local?.Queue(_selectedRecipe, building);
+                ShowStatusFeedback("Processamento solicitado. Retire a produção na estação.", false);
+                return;
+            }
 
             if (_playerResources == null)
             {
@@ -414,7 +436,7 @@ namespace Duskborn.UI
                 return;
             }
 
-            if (!HasFreeInventorySlot())
+            if (!(_selectedRecipe.OutputItem is InventorySystem.Data.MaterialDefinition) && !HasFreeInventorySlot())
             {
                 ShowStatusFeedback("Inventário cheio! Libere um espaço.", true);
                 PlaySound(errorSound);
@@ -429,6 +451,13 @@ namespace Duskborn.UI
                 return;
             }
 
+            if (_selectedRecipe.OutputItem is InventorySystem.Data.MaterialDefinition material)
+            {
+                _playerResources.Add(material.Id, _selectedRecipe.OutputAmount);
+                RefreshRecipeListStates(); RefreshDetailsView();
+                ShowStatusFeedback("Material fabricado!", false);
+                return;
+            }
             // Cria e registra o item
             var outputItem = _selectedRecipe.CreateOutputItem();
             if (outputItem != null)
@@ -512,9 +541,8 @@ namespace Duskborn.UI
             {
                 if (recipe == null) continue;
 
-                // Estações especializadas (Forja, Caldeirão, Mesa Arcana) filtram para seus itens dedicados.
-                // A Bancada principal de acampamento exibe o catálogo completo de progressão.
-                if (CurrentWorkbench != null && CurrentWorkbench.StationType != CraftingStationType.Bancada && recipe.RequiredStation != CurrentWorkbench.StationType)
+                // Filter every station by its actual capability.
+                if (CurrentWorkbench != null && recipe.RequiredStation != CurrentWorkbench.StationType)
                     continue;
 
                 // Filtragem por categoria selecionada
@@ -526,6 +554,7 @@ namespace Duskborn.UI
                 _recipeEntryViews.Add(itemGO);
             }
 
+            if (_filteredRecipes.Count == 0) _selectedRecipe = null;
             if (_filteredRecipes.Count > 0 && !_filteredRecipes.Contains(_selectedRecipe))
                 _selectedRecipe = _filteredRecipes[0];
 
@@ -697,13 +726,17 @@ namespace Duskborn.UI
 
             // Botão Fabricar e Status
             bool canCraft = _playerResources != null && _selectedRecipe.CanCraft(_playerResources);
-            bool hasSpace = HasFreeInventorySlot();
+            bool discovered = _discoveryTracker != null && _discoveryTracker.IsDiscovered(_selectedRecipe);
+            bool hasProcessor = _selectedRecipe.ProcessingSeconds <= 0 || (CurrentWorkbench != null && CurrentWorkbench.GetComponent<Duskborn.Gameplay.Building.PlacedBuilding>() != null);
+            canCraft = canCraft && discovered && hasProcessor;
+            bool hasSpace = _selectedRecipe.OutputItem is InventorySystem.Data.MaterialDefinition || HasFreeInventorySlot();
 
             if (_craftButton != null)
                 _craftButton.interactable = canCraft && hasSpace;
 
-            if (!canCraft)
-                ShowStatusFeedback("Recursos insuficientes", true);
+            if (!discovered) ShowStatusFeedback("Descubra os ingredientes desta receita.", true);
+            else if (!hasProcessor) ShowStatusFeedback("Construa esta estação [B] para processar materiais.", true);
+            else if (!canCraft) ShowStatusFeedback("Recursos insuficientes", true);
             else if (!hasSpace)
                 ShowStatusFeedback("Inventário cheio", true);
             else
@@ -770,6 +803,13 @@ namespace Duskborn.UI
                 if (ing.material == null) continue;
                 int current = _playerResources != null ? _playerResources.GetCount(ing.material.Id) : 0;
                 var view = CreateIngredientRowView(ing.material, current, ing.amount, _ingredientsContainer);
+                _ingredientViews.Add(view);
+            }
+            foreach (var fuel in recipe.FuelIngredients)
+            {
+                if (fuel.material == null) continue;
+                int current = _playerResources != null ? _playerResources.GetCount(fuel.material.Id) : 0;
+                var view = CreateIngredientRowView(fuel.material, current, fuel.amount, _ingredientsContainer);
                 _ingredientViews.Add(view);
             }
 

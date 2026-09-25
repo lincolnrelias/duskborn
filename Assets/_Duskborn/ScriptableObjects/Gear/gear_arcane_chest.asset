@@ -15,7 +15,7 @@ MonoBehaviour:
   id: gear_arcane_chest
   displayName: Armadura Arcana
   description: Armadura Arcana
-  icon: {fileID: 0}
+  icon: {fileID: 2800000, guid: 9719a2ab276b4f53846cdb6a85badc8c, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 0
   slot: 4

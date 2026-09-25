@@ -12,7 +12,7 @@ using Duskborn.UI;
 namespace Duskborn.Gameplay.Player
 {
     [RequireComponent(typeof(PlayerBuffContainer))]
-    public class PlayerInteractor : NetworkBehaviour
+    public partial class PlayerInteractor : NetworkBehaviour
     {
         [SerializeField] private Transform dropSpawnPoint;
         [SerializeField] private float     pickupRange = 2f;
@@ -40,6 +40,7 @@ namespace Duskborn.Gameplay.Player
             base.OnStartClient();
             if (!IsOwner) return;
 
+            InitializeBuildingClient();
             _onInteract = HandleInteract;
             var hk = HotkeyManager.Instance;
             if (hk != null)
@@ -145,6 +146,7 @@ namespace Duskborn.Gameplay.Player
 
         private void HandleInteract()
         {
+            if (Duskborn.Gameplay.Building.BuildingController.BlocksGameplay) return;
             bool targetWorkbench = _linkedWorkbench != null && (_linked == null || SqDist(_linkedWorkbench) <= SqDist(_linked));
             if (targetWorkbench)
             {
@@ -159,6 +161,12 @@ namespace Duskborn.Gameplay.Player
         private void InteractWithWorkbench(Workbench wb)
         {
             if (wb == null) return;
+            var placed = wb.GetComponent<Duskborn.Gameplay.Building.PlacedBuilding>();
+            if (placed != null)
+            {
+                Duskborn.Gameplay.Building.BuildingController.Local.OpenStation(placed);
+                return;
+            }
             RequestInteractWorkbenchRpc(wb.GetComponent<NetworkObject>());
             CraftingUIManager.EnsureInstance().Toggle(wb);
         }

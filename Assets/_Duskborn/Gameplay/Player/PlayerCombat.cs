@@ -183,7 +183,8 @@ namespace Duskborn.Gameplay.Player
 
             // The recipe list owns mouse-wheel input while crafting is open.
             // Without this guard, one wheel gesture both scrolls recipes and changes equipment.
-            if (CraftingUIManager.Instance == null || !CraftingUIManager.Instance.IsOpen)
+            if (!Duskborn.Gameplay.Building.BuildingController.BlocksGameplay &&
+                (CraftingUIManager.Instance == null || !CraftingUIManager.Instance.IsOpen))
             {
                 float scroll = Mouse.current?.scroll.ReadValue().y ?? 0f;
                 if (scroll > 0f) actionBarInstaller?.Service.SelectPrevious();
@@ -201,6 +202,7 @@ namespace Duskborn.Gameplay.Player
 
         private void TryWeaponSkill(int index)
         {
+            if (Duskborn.Gameplay.Building.BuildingController.BlocksGameplay) return;
             if (!IsOwner || !_stats.IsAlive) return;
             if (IsActionLocked) { BufferAction(() => TryWeaponSkill(index)); return; }
             var weapon = actionBarInstaller?.Service.GetSelectedItem() as WeaponItem;
@@ -228,6 +230,7 @@ namespace Duskborn.Gameplay.Player
 
         private void TryPrimaryAction()
         {
+            if (Duskborn.Gameplay.Building.BuildingController.BlocksGameplay) return;
             if (Cursor.lockState != CursorLockMode.Locked) return;
             if (PlayerCameraController.LocalInstance != null && PlayerCameraController.LocalInstance.JustLockedCursorThisFrame) return;
             if (!_stats.IsAlive || _cooldown > 0f) return;
@@ -255,6 +258,7 @@ namespace Duskborn.Gameplay.Player
 
         private void TrySecondaryAction()
         {
+            if (Duskborn.Gameplay.Building.BuildingController.BlocksGameplay) return;
             if (Cursor.lockState != CursorLockMode.Locked) return;
             if (PlayerCameraController.LocalInstance != null && PlayerCameraController.LocalInstance.JustLockedCursorThisFrame) return;
             if (!_stats.IsAlive) return;
@@ -267,13 +271,13 @@ namespace Duskborn.Gameplay.Player
 
         public void OnPrevious(InputValue _)
         {
-            if (!IsOwner) return;
+            if (!IsOwner || Duskborn.Gameplay.Building.BuildingController.BlocksGameplay) return;
             actionBarInstaller?.Service.SelectPrevious();
         }
 
         public void OnNext(InputValue _)
         {
-            if (!IsOwner) return;
+            if (!IsOwner || Duskborn.Gameplay.Building.BuildingController.BlocksGameplay) return;
             actionBarInstaller?.Service.SelectNext();
         }
 

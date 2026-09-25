@@ -15,7 +15,7 @@ MonoBehaviour:
   id: material_steel_plate
   displayName: Placa de Aco Reforcado
   description: Placa densa temperada com ferro, osso e pedra. Alta resistencia estrutural.
-  icon: {fileID: 0}
+  icon: {fileID: 2800000, guid: b4b0115cd33a46198da5535592e1b22a, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 2
   category: component

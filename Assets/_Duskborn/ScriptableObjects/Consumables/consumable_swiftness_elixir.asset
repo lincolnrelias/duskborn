@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: Elixir da Rapina
   description: "Acelera a circula\xE7\xE3o garantindo +30% de velocidade de movimento
     por 20 segundos."
-  icon: {fileID: 2800000, guid: b1b00fa4504752ff8f8b1976927ad60c, type: 3}
+  icon: {fileID: 2800000, guid: 99384d9ffc11411da4b227cf8dc08d95, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 1
   effectType: 1

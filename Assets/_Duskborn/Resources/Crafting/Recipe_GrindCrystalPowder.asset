@@ -24,3 +24,4 @@ MonoBehaviour:
   ingredients:
   - material: {fileID: 11400000, guid: ac75ce17d5fdcaf4d956e4f0e2ed6c88, type: 2}
     amount: 1
+  processingSeconds: 12

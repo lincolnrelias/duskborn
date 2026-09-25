@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: "\xD3leo Flamejante"
   description: "Infunde a arma com ess\xEAncia ardente, aumentando o dano geral em
     +25% por 40 segundos."
-  icon: {fileID: 2800000, guid: b1b00fa4504752ff8f8b1976927ad60c, type: 3}
+  icon: {fileID: 2800000, guid: df4616650ef34fa7804b4fd36ed1f0a1, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 1
   effectType: 2

@@ -15,7 +15,7 @@ MonoBehaviour:
   id: gear_heavy_iron_helm
   displayName: Elmo de Ferro Batido
   description: Elmo de Ferro Batido
-  icon: {fileID: 0}
+  icon: {fileID: 2800000, guid: 1ad59aca6e6a471b849f57afa2b030df, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 0
   slot: 0

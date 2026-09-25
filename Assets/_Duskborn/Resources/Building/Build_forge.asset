@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2939c81d592945a4ad9eef4d18d5a857, type: 3}
+  m_Name: Build_forge
+  m_EditorClassIdentifier: 
+  id: forge
+  displayName: Forja
+  description: "Fundi\xE7\xE3o com combust\xEDvel, ligas e equipamento pesado."
+  category: "Esta\xE7\xF5es"
+  prefab: {fileID: 606149192729443004, guid: e4c15758e1a7455b9c5d6eed6f2e1171, type: 3}
+  icon: {fileID: 0}
+  station: 1
+  costs:
+  - material: {fileID: 11400000, guid: 2a0acc988d7bb054889caff0a3472d3d, type: 2}
+    amount: 15
+  - material: {fileID: 11400000, guid: bf7b5f988956014458ebc1a8ae0e761e, type: 2}
+    amount: 8
+  unlockRecipe: {fileID: 0}
+  clearance: 0.1
+  maxSlope: 30
+  groundTolerance: 0.2
+  reach: 6
+  rotationStep: 15
+  groundLayers:
+    serializedVersion: 2
+    m_Bits: 1
+  blockingLayers:
+    serializedVersion: 2
+    m_Bits: 963
+  allowMultiple: 1
+  movable: 1
+  dismantlable: 1
+  storage: 0
+  capacity: 200
+  queueCapacity: 5
+  processingSpeed: 1
+  rules: []

@@ -20,7 +20,7 @@ namespace Duskborn.Gameplay.Crafting
 
         [Header("Outline & Visuals")]
         [SerializeField] private string outlineLayerName = "GreenOutline";
-        [SerializeField] private Renderer outlineRenderer;
+        [SerializeField] private Renderer[] outlineRenderers;
 
         [Header("Receitas")]
         [Tooltip("Lista de receitas disponibilizadas nesta bancada. Se vazio, carrega as receitas padrões.")]
@@ -38,24 +38,39 @@ namespace Duskborn.Gameplay.Crafting
         public string StationDisplayName => !string.IsNullOrEmpty(stationDisplayName) ? stationDisplayName : "Bancada";
         public IReadOnlyList<CraftingRecipe> Recipes => recipes;
 
+        public void Configure(CraftingStationType type, string label)
+        {
+            stationType = type;
+            stationDisplayName = label;
+        }
+
         private void Awake()
         {
-            if (outlineRenderer == null)
-                outlineRenderer = GetComponentInChildren<Renderer>();
+            if (outlineRenderers == null || outlineRenderers.Length == 0)
+                outlineRenderers = GetComponentsInChildren<Renderer>(true);
 
-            if (outlineRenderer != null)
+            if (outlineRenderers.Length > 0)
             {
                 int layerIndex = RenderingLayerMask.NameToRenderingLayer(outlineLayerName);
                 _outlineMask = layerIndex >= 0 ? (uint)(1 << layerIndex) : 0u;
-                _baseMask = outlineRenderer.renderingLayerMask & ~_outlineMask;
-                outlineRenderer.renderingLayerMask = _baseMask;
+                foreach (var renderer in outlineRenderers)
+                {
+                    if (renderer == null) continue;
+                    _baseMask = renderer.renderingLayerMask & ~_outlineMask;
+                    renderer.renderingLayerMask = _baseMask;
+                }
             }
         }
 
         public void SetOutline(bool show)
         {
-            if (outlineRenderer == null) return;
-            outlineRenderer.renderingLayerMask = show ? _baseMask | _outlineMask : _baseMask;
+            if (outlineRenderers == null) return;
+            foreach (var renderer in outlineRenderers)
+            {
+                if (renderer == null) continue;
+                var baseMask = renderer.renderingLayerMask & ~_outlineMask;
+                renderer.renderingLayerMask = show ? baseMask | _outlineMask : baseMask;
+            }
         }
 
         public bool IsInRange(Vector3 position, float maxDistance = 3.5f)

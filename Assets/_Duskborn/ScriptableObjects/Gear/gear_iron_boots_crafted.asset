@@ -15,7 +15,7 @@ MonoBehaviour:
   id: gear_iron_boots_crafted
   displayName: Botas de Ferro
   description: Botas de Ferro
-  icon: {fileID: 0}
+  icon: {fileID: 2800000, guid: 1229adaa85634cea8bd91def879fab9e, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 0
   slot: 9

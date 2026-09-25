@@ -28,3 +28,7 @@ MonoBehaviour:
     amount: 1
   - material: {fileID: 11400000, guid: a3e031a0d03acc5498fc981e1a8b3200, type: 2}
     amount: 1
+  fuelIngredients:
+  - material: {fileID: 11400000, guid: bf7b5f988956014458ebc1a8ae0e761e, type: 2}
+    amount: 1
+  processingSeconds: 12

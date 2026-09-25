@@ -15,7 +15,7 @@ MonoBehaviour:
   id: gear_wind_boots
   displayName: Botas do Vendaval
   description: Botas do Vendaval
-  icon: {fileID: 0}
+  icon: {fileID: 2800000, guid: 77c87d8b4b96455b848829e5bd029d82, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 0
   slot: 9

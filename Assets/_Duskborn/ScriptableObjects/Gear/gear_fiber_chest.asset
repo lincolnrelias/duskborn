@@ -15,7 +15,7 @@ MonoBehaviour:
   id: gear_fiber_chest
   displayName: Armadura de Fibra
   description: Armadura de Fibra
-  icon: {fileID: 0}
+  icon: {fileID: 2800000, guid: 1e9b8a65b0b44ac3922e6b58f5100730, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 0
   slot: 4

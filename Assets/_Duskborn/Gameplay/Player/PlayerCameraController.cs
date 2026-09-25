@@ -329,7 +329,7 @@ namespace Duskborn.Gameplay.Player
             {
                 if (kb.leftBracketKey.wasPressedThisFrame) scroll = 1f;
                 else if (kb.rightBracketKey.wasPressedThisFrame) scroll = -1f;
-                else if (kb.altKey.isPressed && mouse != null)
+                else if (kb.altKey.isPressed && mouse != null && !Duskborn.Gameplay.Building.BuildingController.IsPlacing)
                     scroll = mouse.scroll.ReadValue().y;
             }
 
@@ -352,6 +352,7 @@ namespace Duskborn.Gameplay.Player
         /// </summary>
         public static bool IsAnyMenuOpen()
         {
+            if (Duskborn.Gameplay.Building.BuildingController.MenuOpen) return true;
             if (InGameMenuController.Instance != null && InGameMenuController.Instance.IsOpen)
                 return true;
 
@@ -395,6 +396,9 @@ namespace Duskborn.Gameplay.Player
 
         private void UpdateCursorLock()
         {
+            // Record the state before automatic cursor recovery below. An ordinary
+            // gameplay click must not be tagged as a click used to restore focus.
+            bool cursorWasLocked = _isCursorLocked && Cursor.lockState == CursorLockMode.Locked && !Cursor.visible;
             // Atalho de conveniência: pressionar Alt Esquerdo alterna temporariamente o cursor durante testes
             var kb = Keyboard.current;
             if (kb != null && kb.leftAltKey.wasPressedThisFrame && !_isRotationLocked)
@@ -443,6 +447,7 @@ namespace Duskborn.Gameplay.Player
             }
 
             if (!mouseClicked) return;
+            if (Duskborn.Gameplay.Building.BuildingController.MenuOpen) return;
 
             // Se o menu de pausa estiver aberto, o cursor é gerenciado pelo próprio menu OnGUI
             if (InGameMenuController.Instance != null && InGameMenuController.Instance.IsOpen)
@@ -463,6 +468,7 @@ namespace Duskborn.Gameplay.Player
             // Clicar em qualquer área foca no jogo, esconde o cursor e trava a mira.
             if (!anyMenuOpen)
             {
+                if (cursorWasLocked) return;
                 _isAltUnlocked = false;
                 SetRotationLocked(false);
                 SetCursorLocked(true);

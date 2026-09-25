@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: Bomba de Espinhos
   description: "Bomba alqu\xEDmica de estilha\xE7os. Aumenta a reflex\xE3o de espinhos
     em +35% por 30 segundos."
-  icon: {fileID: 2800000, guid: b1b00fa4504752ff8f8b1976927ad60c, type: 3}
+  icon: {fileID: 2800000, guid: 33718cef75304df89b34888b6e354215, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 1
   effectType: 3

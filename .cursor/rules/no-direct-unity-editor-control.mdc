@@ -1,0 +1,11 @@
+---
+description: Avoid direct Unity Editor control and Play Mode as part of agent workflows
+alwaysApply: true
+---
+
+# No Direct Unity Editor Control
+
+- Never rely on opening, driving, or otherwise directly controlling the Unity Editor.
+- Do not attempt to enter Play Mode or play the game through the Unity Editor.
+- Prefer source inspection, command-line or headless Unity operations, automated tests, build scripts, logs, and generated artifacts for implementation and verification.
+- If a result can only be checked interactively in the Unity Editor, provide concise manual verification steps for the user. Clearly label that check as unverified instead of attempting direct control or claiming success.

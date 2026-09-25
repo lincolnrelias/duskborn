@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: Picareta de Ferro
   description: "Picareta de ferro temperado. Capaz de perfurar veios de ferro e estilha\xE7ar
     cristais arcanos (+400%)."
-  icon: {fileID: 2800000, guid: 2720386e668fc8343b619dc5530a12f6, type: 3}
+  icon: {fileID: 2800000, guid: 2784489d28684f26a2a49741fb1378b2, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 0
   prefab: {fileID: 4757211534840990446, guid: 93048451e46a4a34a0c83f2e7884028f, type: 3}

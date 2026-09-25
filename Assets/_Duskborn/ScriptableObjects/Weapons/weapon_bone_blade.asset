@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: "L\xE2mina de Osso"
   description: "L\xE2mina serrilhada esculpida a partir de f\xEAmures bestiais. Ataques
     r\xE1pidos e cr\xEDticos frequentes."
-  icon: {fileID: 2800000, guid: f00953ca56fd7d84e93625f0a86482fc, type: 3}
+  icon: {fileID: 2800000, guid: 6412511187ef44cab90344346a46c5a8, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 0
   prefab: {fileID: 8365917419817379780, guid: 5c566737bd2a8ea4c86db5af8cf9b6ec, type: 3}

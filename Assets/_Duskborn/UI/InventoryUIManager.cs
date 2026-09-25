@@ -38,6 +38,8 @@ namespace Duskborn.UI
         private int _hoveredInventorySlot  = -1;
         private int _hoveredActionBarSlot  = -1;
         private bool _slotEventsSubscribed = false;
+        private bool _stationContext;
+        private Vector2 _positionBeforeStation;
 
         public bool InstallerReady => installer != null && installer.Inventory != null;
 
@@ -236,6 +238,9 @@ namespace Duskborn.UI
         {
             if (eventData.button == PointerEventData.InputButton.Right)
             {
+                var item = InstallerReady ? installer.Service.GetItem(index) : null;
+                if (item is MaterialItem && Duskborn.Gameplay.Building.BuildingController.Local != null &&
+                    Duskborn.Gameplay.Building.BuildingController.Local.TryAssignInventoryItem(item.Id)) return;
                 TryEquipFromInventory(index);
             }
         }
@@ -692,6 +697,24 @@ namespace Duskborn.UI
         }
 
         public bool IsOpen => inventoryRoot != null && inventoryRoot.activeSelf;
+
+        public void SetStationContext(bool active)
+        {
+            var rect = InventoryFrameRect;
+            if (rect == null || _stationContext == active) return;
+            if (active)
+            {
+                _positionBeforeStation = rect.anchoredPosition;
+                _stationContext = true;
+                Open();
+                rect.anchoredPosition = new Vector2(Mathf.Max(420f, _positionBeforeStation.x + 360f), _positionBeforeStation.y);
+            }
+            else
+            {
+                rect.anchoredPosition = _positionBeforeStation;
+                _stationContext = false;
+            }
+        }
 
         public void Open()
         {

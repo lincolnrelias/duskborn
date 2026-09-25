@@ -15,7 +15,7 @@ MonoBehaviour:
   id: gear_fiber_legs
   displayName: "Cal\xE7as de Fibra"
   description: "Cal\xE7as de Fibra"
-  icon: {fileID: 0}
+  icon: {fileID: 2800000, guid: bf2ff5f86c4647b3a96fdae683fee20e, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 0
   slot: 8

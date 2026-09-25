@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   centerClearingRadius: 10
   workbenchPrefab: {fileID: 606149192729443004, guid: 862022962dbd44b098231bde31a4d0f4, type: 3}
-  forgePrefab: {fileID: 606149192729443004, guid: b8a101f140294719b940e7da3c11s101, type: 3}
-  cauldronPrefab: {fileID: 606149192729443004, guid: b8a101f140294719b940e7da3c11s102, type: 3}
-  arcaneTablePrefab: {fileID: 606149192729443004, guid: b8a101f140294719b940e7da3c11s103, type: 3}
+  forgePrefab: {fileID: 606149192729443004, guid: e4c15758e1a7455b9c5d6eed6f2e1171, type: 3}
+  cauldronPrefab: {fileID: 606149192729443004, guid: c9349ce6e82c4a8baca0026bef3af606, type: 3}
+  arcaneTablePrefab: {fileID: 606149192729443004, guid: 9c75cb20e7ec4c54b526869d824ad674, type: 3}
   playerSpawnPointPrefab: {fileID: 0}
   playerSpawnPointsCount: 5
   playerSpawnRadius: 6.5

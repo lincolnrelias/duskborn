@@ -251,11 +251,11 @@ public static class CraftingAssetGenerator
         // Estação: FORJA DE FUNDIÇÃO (Metalurgia, Placas Pesadas, Armas de Ferro)
         CreateOrUpdateRecipe("Recipe_SmeltIronBar", "Fundir Barra de Ferro", "Materiais",
             CraftingTier.Ferro, CraftingStationType.Forja, false, matIronBar,
-            new[] { (matIronOre, 2), (matWood, 1) });
+            new[] { (matIronOre, 2) }, new[] { (matWood, 1) });
 
         CreateOrUpdateRecipe("Recipe_SteelPlate", "Forjar Placa de Aço", "Materiais",
             CraftingTier.Reforcado, CraftingStationType.Forja, false, matSteelPlate,
-            new[] { (matIronBar, 2), (matStone, 1), (matBone, 1) });
+            new[] { (matIronBar, 2), (matStone, 1), (matBone, 1) }, new[] { (matWood, 1) });
 
         CreateOrUpdateRecipe("Recipe_IronAxe", "Machado de Ferro", "Ferramentas",
             CraftingTier.Ferro, CraftingStationType.Forja, false, wpnIronAxe,
@@ -361,6 +361,15 @@ public static class CraftingAssetGenerator
         // ═════════════════════════════════════════════════════════════════════
         CreateCrystalProp();
 
+        // Preserve processing semantics when regenerating the crafting catalog.
+        foreach (var id in new[] { "Recipe_SmeltIronBar", "Recipe_SteelPlate", "Recipe_TannedLeather", "Recipe_GrindCrystalPowder" })
+        {
+            var processing = AssetDatabase.LoadAssetAtPath<CraftingRecipe>(RecipesPath + id + ".asset");
+            if (processing == null) continue;
+            var serialized = new SerializedObject(processing);
+            serialized.FindProperty("processingSeconds").floatValue = 12f;
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+        }
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
         Debug.Log("Complete Duskborn Crafting Ecosystem Generated.");
@@ -560,7 +569,8 @@ public static class CraftingAssetGenerator
 
     private static void CreateOrUpdateRecipe(string id, string recipeName, string category,
         CraftingTier tier, CraftingStationType station, bool isAlwaysDiscovered,
-        ItemDefinitionBase outputItem, (MaterialDefinition mat, int amount)[] ingredients)
+        ItemDefinitionBase outputItem, (MaterialDefinition mat, int amount)[] ingredients,
+        (MaterialDefinition mat, int amount)[] fuel = null, int outputAmount = 1)
     {
         string path = RecipesPath + id + ".asset";
         var asset = AssetDatabase.LoadAssetAtPath<CraftingRecipe>(path);
@@ -579,7 +589,7 @@ public static class CraftingAssetGenerator
         so.FindProperty("requiredStation").enumValueIndex = (int)station;
         so.FindProperty("isAlwaysDiscovered").boolValue = isAlwaysDiscovered;
         so.FindProperty("outputItem").objectReferenceValue = outputItem;
-        so.FindProperty("outputAmount").intValue = 1;
+        so.FindProperty("outputAmount").intValue = outputAmount;
 
         var ingProp = so.FindProperty("ingredients");
         ingProp.arraySize = ingredients.Length;
@@ -588,6 +598,15 @@ public static class CraftingAssetGenerator
             var elem = ingProp.GetArrayElementAtIndex(i);
             elem.FindPropertyRelative("material").objectReferenceValue = ingredients[i].mat;
             elem.FindPropertyRelative("amount").intValue = ingredients[i].amount;
+        }
+
+        var fuelProp = so.FindProperty("fuelIngredients");
+        fuelProp.arraySize = fuel?.Length ?? 0;
+        for (int i = 0; i < fuelProp.arraySize; i++)
+        {
+            var elem = fuelProp.GetArrayElementAtIndex(i);
+            elem.FindPropertyRelative("material").objectReferenceValue = fuel[i].mat;
+            elem.FindPropertyRelative("amount").intValue = fuel[i].amount;
         }
 
         so.ApplyModifiedPropertiesWithoutUndo();

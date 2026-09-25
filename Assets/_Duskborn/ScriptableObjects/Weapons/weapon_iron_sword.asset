@@ -15,7 +15,7 @@ MonoBehaviour:
   id: weapon_iron_sword
   displayName: Espada de Ferro
   description: "Espada de ferro forjada na brasa. Dano s\xF3lido e balanceado."
-  icon: {fileID: 2800000, guid: f00953ca56fd7d84e93625f0a86482fc, type: 3}
+  icon: {fileID: 2800000, guid: 5da3504dd0904a948529fc798ee2f6a9, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 0
   prefab: {fileID: 8365917419817379780, guid: 5c566737bd2a8ea4c86db5af8cf9b6ec, type: 3}

@@ -10,11 +10,13 @@ and builds. The wrapper reads the required Unity version from
 .\Tools\unity.ps1 compile
 .\Tools\unity.ps1 validate
 .\Tools\unity.ps1 test
+.\Tools\unity.ps1 clear-terrain
 .\Tools\unity.ps1 all
 .\Tools\unity.ps1 build-windows
 ```
 
 - `compile` imports changed assets, compiles scripts, and requires a success marker.
+- `clear-terrain` clears procedurally generated meshes/foliage from `SampleScene.unity` and clears NavMesh surfaces before committing.
 - `validate` checks enabled build scenes, project prefabs for missing scripts, and
   ScriptableObject assets under `Assets/_Duskborn/Resources`.
 - `test` executes the project's existing static Editor test suites and turns any

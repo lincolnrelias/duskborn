@@ -12,3 +12,4 @@ alwaysApply: true
 - Do not run the CLI while the user has this project open in Unity.
 - Treat `Logs/UnityCli` and `Builds` as generated output, not source files.
 - Report visual behavior as unverified unless a dedicated automated artifact proves it.
+- Always clear generated terrain before committing (`.\Tools\unity.ps1 clear-terrain` and delete leftover `NavMesh-TerrainManager*.asset` files).

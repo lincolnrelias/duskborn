@@ -4,3 +4,4 @@
 - Do not directly control the Unity Editor or enter Play Mode. Use source inspection, offline compilation, automated tests, logs, and the project's non-interactive CLI workflow.
 - Read `.cursor/rules/unity-cli-workflow.mdc` before Unity-backed validation. Do not run the Unity CLI while this project is open in Unity.
 - Clearly identify visual checks that remain unverified and provide concise manual verification steps when needed.
+- Always remove generated terrain (run `.\Tools\unity.ps1 clear-terrain` and purge `NavMesh-TerrainManager*.asset` files) before committing changes to avoid bloated scene files and large Git payloads.

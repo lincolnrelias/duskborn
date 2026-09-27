@@ -26,18 +26,77 @@ namespace Duskborn.Gameplay.Building
         private static CraftingRecipe[] recipes;
         private float nextSync;
         private bool loadedCheckpoint;
+        private readonly Dictionary<string, string> initialSceneFurnaces = new();
         private int WorldSeed => FindAnyObjectByType<ChunkGridManager>() is ChunkGridManager terrain ? terrain.ActiveSeed : (GameSession.Instance != null ? GameSession.Instance.Seed : 0);
         public static BuildingWorld Ensure()
         {
             if (Instance == null) Instance = new GameObject("BuildingWorld").AddComponent<BuildingWorld>();
             return Instance;
         }
-        private void Awake() { Instance = this; Definitions = Resources.LoadAll<BuildableDefinition>("Building"); recipes = Resources.LoadAll<CraftingRecipe>("Crafting"); }
+        private void Awake()
+        {
+            Instance = this;
+            Definitions = Resources.LoadAll<BuildableDefinition>("Building");
+            recipes = Resources.LoadAll<CraftingRecipe>("Crafting");
+            RegisterSceneFurnaces();
+        }
+
+        // Scene-authored stations bypass Create. Register them on both peers using
+        // a deterministic scene hierarchy id, so snapshots update the existing model.
+        private void RegisterSceneFurnaces()
+        {
+            var definition = Array.Find(Definitions, d => d.station == CraftingStationType.Forja && !d.storage);
+            if (definition == null || !BuildableBounds.TryGet(definition, out var bounds)) return;
+            foreach (var station in FindObjectsByType<Workbench>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                if (station.StationType != CraftingStationType.Forja || station.GetComponent<PlacedBuilding>() != null ||
+                    !station.gameObject.scene.IsValid() || station.gameObject.scene != gameObject.scene) continue;
+                string path = "";
+                for (var node = station.transform; node != null; node = node.parent)
+                    path = "/" + node.GetSiblingIndex() + ":" + node.name + path;
+                var state = new BuildingState
+                {
+                    instanceId = "scene-forge:" + station.gameObject.scene.path + path,
+                    definitionId = definition.id,
+                    position = station.transform.position - BuildableBounds.GroundOffset(bounds),
+                    yaw = station.transform.eulerAngles.y
+                };
+                var placed = station.gameObject.AddComponent<PlacedBuilding>();
+                placed.Initialize(definition, state);
+                Buildings.Add(state.instanceId, placed);
+                initialSceneFurnaces.Add(state.instanceId, JsonUtility.ToJson(state));
+                AttachOperatingEffect(placed);
+            }
+        }
+
+        private static void AttachOperatingEffect(PlacedBuilding placed)
+        {
+            var effect = placed.Definition.operatingEffect;
+            if (effect == null) return;
+            effect.PrepareModel(placed.gameObject);
+            // Batch mode can render (tests/captures). Only skip genuinely headless rendering.
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null) return;
+            var existing = placed.GetComponentInChildren<Duskborn.Effects.FurnaceEffects>(true);
+            if (existing == null) existing = Instantiate(effect, placed.transform, false);
+            existing.Bind(placed);
+        }
+
+        private bool HasChangedBuildings()
+        {
+            if (Buildings.Count != initialSceneFurnaces.Count) return true;
+            foreach (var entry in Buildings)
+                if (!initialSceneFurnaces.TryGetValue(entry.Key, out var initial) ||
+                    JsonUtility.ToJson(entry.Value.State) != initial) return true;
+            return false;
+        }
         private void OnDestroy() { if (Instance == this) Instance = null; }
         public static CraftingRecipe Recipe(string id)
         {
             recipes ??= Resources.LoadAll<CraftingRecipe>("Crafting");
-            return Array.Find(recipes, r => r.RecipeId == id);
+            // This lookup is also polled by local operating effects; avoid a captured
+            // predicate allocation for every furnace on every frame.
+            foreach (var recipe in recipes) if (recipe.RecipeId == id) return recipe;
+            return null;
         }
         public BuildableDefinition Definition(string id) => Array.Find(Definitions, d => d.id == id);
         private void Update()
@@ -76,6 +135,9 @@ namespace Duskborn.Gameplay.Building
             root.AddComponent<Workbench>().Configure(d.station, d.displayName);
             root.transform.SetParent(transform, true);
             Buildings.Add(state.instanceId, placed);
+            // Attach after Workbench.Awake caches the model outline renderers.
+            // Both restore and late-join snapshots use this same creation path.
+            AttachOperatingEffect(placed);
             Physics.SyncTransforms();
             return placed;
         }
@@ -89,6 +151,13 @@ namespace Duskborn.Gameplay.Building
         {
             var root = new GameObject(d.displayName + " Visual");
             if (d.prefab != null) CopyVisual(d.prefab.transform, root.transform, true);
+            if (d.operatingEffect != null) d.operatingEffect.PrepareModel(root);
+            foreach (var anim in root.GetComponentsInChildren<Animator>(true))
+            {
+                anim.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+                anim.Rebind();
+                anim.Update(0f);
+            }
             if (root.GetComponentInChildren<Renderer>() == null)
             {
                 var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -106,6 +175,33 @@ namespace Duskborn.Gameplay.Building
             {
                 target.gameObject.AddComponent<MeshFilter>().sharedMesh = mesh.sharedMesh;
                 target.gameObject.AddComponent<MeshRenderer>().sharedMaterials = renderer.sharedMaterials;
+            }
+            var skinned = source.GetComponent<SkinnedMeshRenderer>();
+            if (skinned != null)
+            {
+                var targetSkinned = target.gameObject.AddComponent<SkinnedMeshRenderer>();
+                targetSkinned.sharedMesh = skinned.sharedMesh;
+                targetSkinned.sharedMaterials = skinned.sharedMaterials;
+                targetSkinned.updateWhenOffscreen = true;
+                if (skinned.sharedMesh != null)
+                {
+                    for (int i = 0; i < skinned.sharedMesh.blendShapeCount; i++)
+                        targetSkinned.SetBlendShapeWeight(i, skinned.GetBlendShapeWeight(i));
+                }
+            }
+            var anim = source.GetComponent<Animator>();
+            if (anim != null)
+            {
+                var targetAnim = target.gameObject.AddComponent<Animator>();
+                targetAnim.runtimeAnimatorController = anim.runtimeAnimatorController;
+                targetAnim.avatar = anim.avatar;
+                targetAnim.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+                targetAnim.applyRootMotion = false;
+                targetAnim.updateMode = anim.updateMode;
+            }
+            if (source.GetComponent<Duskborn.Gameplay.Crafting.MoonwellStationAnimator>() != null)
+            {
+                target.gameObject.AddComponent<Duskborn.Gameplay.Crafting.MoonwellStationAnimator>();
             }
             foreach (Transform child in source)
             {
@@ -226,7 +322,7 @@ namespace Duskborn.Gameplay.Building
         }
         public void Load(ResourceInventory inventory)
         {
-            if (loadedCheckpoint || Buildings.Count != 0 || inventory.Revision != 0) throw new InvalidOperationException("Carregue no início de uma sessão, antes de coletar ou gastar materiais.");
+            if (loadedCheckpoint || HasChangedBuildings() || inventory.Revision != 0) throw new InvalidOperationException("Carregue no início de uma sessão, antes de coletar ou gastar materiais.");
             var snapshot = JsonUtility.FromJson<BuildingSnapshot>(File.ReadAllText(SavePath));
             var current = Capture();
             if (snapshot == null || snapshot.version != 1 || snapshot.seed != current.seed || snapshot.scene != current.scene || snapshot.buildings == null || snapshot.hostResources == null) throw new InvalidDataException("Save incompatível com este mundo.");

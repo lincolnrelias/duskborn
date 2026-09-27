@@ -129,6 +129,7 @@ namespace Duskborn.Gameplay.Player
 
         private void OnDestroy()
         {
+            _currentHP.OnChange -= OnCurrentHPSync;
             if (_buffs != null) _buffs.OnStatsApplied -= HandleStatsApplied;
         }
 

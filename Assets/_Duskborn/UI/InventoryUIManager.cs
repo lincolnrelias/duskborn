@@ -54,6 +54,18 @@ namespace Duskborn.UI
                     _defById[def.Id] = def;
                 }
             }
+
+            var initialDb = Duskborn.Inventory.InitialInventoryDatabase.Instance;
+            if (initialDb != null && initialDb.BackpackItems != null)
+            {
+                foreach (var entry in initialDb.BackpackItems)
+                {
+                    if (entry?.Item is MaterialDefinition mat && !string.IsNullOrWhiteSpace(mat.Id))
+                    {
+                        _defById[mat.Id] = mat;
+                    }
+                }
+            }
         }
 
         private void Start()
@@ -94,6 +106,10 @@ namespace Duskborn.UI
             SubscribeSlotHoverEvents();
             SubscribeActionBarDrop();
             PopulatePlaceholderTestGear();
+
+            LocalPlayerContext.OnLocalPlayerRegistered += HandleLocalPlayerRegistered;
+            LocalPlayerContext.OnLocalPlayerUnregistered += HandleLocalPlayerUnregistered;
+            TryCacheLocalPlayer();
         }
 
         private void EnsureInventoryRoot()
@@ -172,8 +188,6 @@ namespace Duskborn.UI
 
         private void Update()
         {
-            TryCacheLocalPlayer();
-
             if (!_slotEventsSubscribed)
                 SubscribeSlotHoverEvents();
 
@@ -186,12 +200,31 @@ namespace Duskborn.UI
         private void OnDestroy()
         {
             if (Instance == this) Instance = null;
+
+            LocalPlayerContext.OnLocalPlayerRegistered -= HandleLocalPlayerRegistered;
+            LocalPlayerContext.OnLocalPlayerUnregistered -= HandleLocalPlayerUnregistered;
+
             if (_resourceInventory != null)
                 _resourceInventory.ResourceChanged -= OnResourceChanged;
             if (_dropEventSubscribed && installer != null)
                 installer.OnItemDroppedOutside -= OnInventoryItemDroppedOutside;
             if (_actionBarDropSubscribed && actionBarInstaller != null)
                 actionBarInstaller.OnItemDroppedOutside -= OnActionBarItemDroppedOutside;
+        }
+
+        private void HandleLocalPlayerRegistered()
+        {
+            TryCacheLocalPlayer();
+        }
+
+        private void HandleLocalPlayerUnregistered()
+        {
+            if (_resourceInventory != null)
+                _resourceInventory.ResourceChanged -= OnResourceChanged;
+
+            _resourceInventory = null;
+            _playerEquipment = null;
+            _playerInteractor = null;
         }
 
         // ── Slot hover tracking ───────────────────────────────────────────────
@@ -249,6 +282,9 @@ namespace Duskborn.UI
         {
             if (eventData.button == PointerEventData.InputButton.Right)
             {
+                var item = actionBarInstaller?.Service?.Service != null ? actionBarInstaller.Service.Service.GetItem(index) : null;
+                if (item is MaterialItem && Duskborn.Gameplay.Building.BuildingController.Local != null &&
+                    Duskborn.Gameplay.Building.BuildingController.Local.TryAssignInventoryItem(item.Id)) return;
                 TryEquipFromActionBar(index);
             }
         }
@@ -396,6 +432,35 @@ namespace Duskborn.UI
         {
             if (_resourceInventory != null && _playerInteractor != null && _playerEquipment != null) return;
 
+            if (LocalPlayerContext.HasLocalPlayer)
+            {
+                if (_playerEquipment == null)
+                    _playerEquipment = LocalPlayerContext.Equipment;
+
+                if (_resourceInventory == null && LocalPlayerContext.Resources != null)
+                {
+                    _resourceInventory = LocalPlayerContext.Resources;
+                    _resourceInventory.ResourceChanged -= OnResourceChanged;
+                    _resourceInventory.ResourceChanged += OnResourceChanged;
+                    _resourceInventory.InitializeFromInitialDatabase();
+                    SyncExistingGridMaterialsToResourceInventory();
+                    SyncResources();
+                }
+
+                if (_playerInteractor == null && LocalPlayerContext.Controller != null)
+                {
+                    _playerInteractor = LocalPlayerContext.Controller.GetComponent<PlayerInteractor>();
+                    if (_playerInteractor != null && !_dropEventSubscribed && installer != null)
+                    {
+                        installer.OnItemDroppedOutside += OnInventoryItemDroppedOutside;
+                        _dropEventSubscribed = true;
+                    }
+                }
+
+                if (_resourceInventory != null && _playerInteractor != null && _playerEquipment != null)
+                    return;
+            }
+
             foreach (var combat in FindObjectsByType<PlayerCombat>(FindObjectsSortMode.None))
             {
                 if (!combat.IsOwner) continue;
@@ -412,6 +477,9 @@ namespace Duskborn.UI
                     {
                         _resourceInventory = res;
                         _resourceInventory.ResourceChanged += OnResourceChanged;
+                        _resourceInventory.InitializeFromInitialDatabase();
+                        SyncExistingGridMaterialsToResourceInventory();
+                        SyncResources();
                     }
                     else
                     {
@@ -442,14 +510,7 @@ namespace Duskborn.UI
             TryCacheLocalPlayer();
             if (_playerEquipment == null)
             {
-                foreach (var combat in FindObjectsByType<PlayerCombat>(FindObjectsSortMode.None))
-                {
-                    if (combat.IsOwner)
-                    {
-                        _playerEquipment = combat.GetComponent<Duskborn.Gameplay.Equipment.PlayerEquipmentContainer>();
-                        break;
-                    }
-                }
+                _playerEquipment = LocalPlayerContext.Equipment;
                 if (_playerEquipment == null)
                     _playerEquipment = FindFirstObjectByType<Duskborn.Gameplay.Equipment.PlayerEquipmentContainer>();
             }
@@ -674,6 +735,21 @@ namespace Duskborn.UI
                 SyncResources();
         }
 
+        private void SyncExistingGridMaterialsToResourceInventory()
+        {
+            if (!InstallerReady || _resourceInventory == null) return;
+            var slots = installer.Service.GetSlots();
+            for (int i = 0; i < slots.Count; i++)
+            {
+                if (slots[i].Item is MaterialItem mat && !string.IsNullOrWhiteSpace(mat.Id))
+                {
+                    int qty = mat is IStackable s ? s.StackSize : 1;
+                    _resourceInventory.EnsureStartingAmount(mat.Id, qty);
+                    _resourceSlot[mat.Id] = i;
+                }
+            }
+        }
+
         private void SyncResources()
         {
             if (!InstallerReady || _resourceInventory == null) return;
@@ -693,6 +769,17 @@ namespace Duskborn.UI
                     }
                     _resourceSlot.Remove(kv.Key);
                 }
+            }
+        }
+
+        public void SyncAllResources()
+        {
+            TryCacheLocalPlayer();
+            if (_resourceInventory != null)
+            {
+                _resourceInventory.InitializeFromInitialDatabase();
+                SyncExistingGridMaterialsToResourceInventory();
+                SyncResources();
             }
         }
 

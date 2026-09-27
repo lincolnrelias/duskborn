@@ -68,12 +68,14 @@ namespace Duskborn.Gameplay.Player
         public bool IsInDeepWater => _isInDeepWater;
         public float SpeedModifier => _isInDeepWater ? deepWaterSpeedMultiplier : 1f;
         public float CurrentWaterSurfaceY => _currentWaterLevel;
+        private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
 
         private class RippleInstance
         {
             public GameObject gameObject;
             public Transform transform;
-            public Material material;
+            public MeshRenderer renderer;
+            public MaterialPropertyBlock propertyBlock;
             public float elapsed;
             public float duration;
             public float startScale;
@@ -314,7 +316,8 @@ namespace Duskborn.Gameplay.Player
             ripple.startScale = startScale;
             ripple.endScale = endScale;
             ripple.baseColor = rippleColor;
-            ripple.material.color = rippleColor;
+            ripple.propertyBlock.SetColor(BaseColorId, rippleColor);
+            ripple.renderer.SetPropertyBlock(ripple.propertyBlock);
             ripple.gameObject.SetActive(true);
 
             _activeRipples.Add(ripple);
@@ -334,7 +337,8 @@ namespace Duskborn.Gameplay.Player
 
                 // Fade out gradual de opacidade com decaimento suave
                 float alpha = r.baseColor.a * (1f - t) * (1f - t);
-                r.material.color = new Color(r.baseColor.r, r.baseColor.g, r.baseColor.b, alpha);
+                r.propertyBlock.SetColor(BaseColorId, new Color(r.baseColor.r, r.baseColor.g, r.baseColor.b, alpha));
+                r.renderer.SetPropertyBlock(r.propertyBlock);
 
                 if (t >= 1f)
                 {
@@ -373,14 +377,14 @@ namespace Duskborn.Gameplay.Player
             mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             mr.receiveShadows = false;
 
-            Material instancedMat = new Material(s_cachedRingMaterial);
-            mr.material = instancedMat;
+            mr.sharedMaterial = s_cachedRingMaterial;
 
             RippleInstance instance = new RippleInstance
             {
                 gameObject = rippleObj,
                 transform = rippleObj.transform,
-                material = instancedMat
+                renderer = mr,
+                propertyBlock = new MaterialPropertyBlock()
             };
 
             return instance;

@@ -28,6 +28,19 @@ namespace Duskborn.Gameplay.Loot
 
         private void Awake() => _stats = GetComponent<PlayerStats>();
 
+        private void Start()
+        {
+            var initialDb = Duskborn.Inventory.InitialInventoryDatabase.Instance;
+            if (initialDb != null && initialDb.StartingRelics != null)
+            {
+                foreach (var relic in initialDb.StartingRelics)
+                {
+                    if (relic != null)
+                        AddBuff(relic);
+                }
+            }
+        }
+
         public void AddBuff(ItemDefinition item)
         {
             _buffs.Add(item);

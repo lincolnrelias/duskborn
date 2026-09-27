@@ -31,10 +31,12 @@ class Program
         var definition = new BuildableDefinition { capacity = 1, processingSpeed = 1, station = CraftingStationType.Forja };
         var station = new PlacedBuilding(); var state = new BuildingState(); state.jobs.Add(new ProcessingJob { recipe="smelt", remaining=5 });
         station.Initialize(definition,state); station.Tick(2);
+        Assert(station.IsProcessing, "paid queued job burns with no stored fuel");
         Assert(state.jobs[0].remaining == 3 && state.contents.Count == 0, "processing consumes elapsed time without early output");
         station.Tick(3); Assert(state.jobs.Count == 0 && state.contents[0].amount == 1, "completed process produces exact output once");
         station.Tick(100); Assert(state.contents[0].amount == 1, "completed process cannot duplicate output");
         state.jobs.Add(new ProcessingJob {recipe="smelt", remaining=5}); station.Tick(30);
+        Assert(!station.IsProcessing, "output blocking extinguishes paid queued work");
         Assert(state.jobs[0].remaining == 5 && state.contents[0].amount == 1, "full output pauses without burning queued work");
         state.contents.Clear(); station.Tick(5); Assert(state.jobs.Count == 0 && state.contents[0].amount == 1, "collecting output resumes processing");
         Assert(!station.Empty, "contents block dismantling"); state.contents.Clear(); Assert(station.Empty,"empty station can be dismantled");
@@ -49,17 +51,21 @@ class Program
         slottedState.inputs.Add(new MaterialStack{id="ore",amount=4});
         slottedState.fuel.Add(new MaterialStack{id="wood",amount=1});
         var slotted = new PlacedBuilding(); slotted.Initialize(definition,slottedState); slotted.Tick(2);
+        Assert(slotted.IsProcessing, "paid slotted job stays active after fuel inventory reaches zero");
         Assert(slottedState.jobs.Count==1 && slottedState.jobs[0].remaining==3 && slotted.InputAmount("ore")==2 && slotted.FuelAmount("wood")==0 && slotted.FuelCharges==1,
             "one wood starts the first of two two-ore forge burns");
         slotted.Tick(3);
+        Assert(slotted.IsProcessing, "consecutive burns remain active at an exact job boundary");
         Assert(slottedState.contents[0].amount==1 && slottedState.jobs.Count==0,
             "slotted processing produces output after exact duration");
         slotted.Tick(5);
+        Assert(!slotted.IsProcessing, "final recipe completion starts cooldown");
         Assert(slottedState.contents[0].amount==2 && slottedState.jobs.Count==0 && slotted.FuelCharges==0,
             "one wood refines four ore across two separate melts");
         var starvedState = new BuildingState { selectedRecipe="smelt" };
         starvedState.inputs.Add(new MaterialStack{id="ore",amount=2});
         var starved = new PlacedBuilding(); starved.Initialize(definition,starvedState); starved.Tick(10);
+        Assert(!starved.IsProcessing, "true fuel starvation is idle");
         Assert(starvedState.jobs.Count==0 && starved.InputAmount("ore")==2,
             "missing fuel never consumes the input slot");
         Assert(!starved.Empty, "loaded forge slots block dismantling");
@@ -68,6 +74,26 @@ class Program
         fullSlottedState.fuel.Add(new MaterialStack{id="wood",amount=1});
         fullSlottedState.contents.Add(new MaterialStack{id="bar",amount=10});
         var fullSlotted = new PlacedBuilding(); fullSlotted.Initialize(definition,fullSlottedState); fullSlotted.Tick(10);
+        Assert(!fullSlotted.IsProcessing, "full output blocks eligible slotted burn");
+        fullSlottedState.contents.Clear();
+        Assert(fullSlotted.IsProcessing, "collecting output resumes eligible slotted burn");
+        int inputBefore = fullSlotted.InputAmount("ore"), fuelBefore = fullSlotted.FuelAmount("wood");
+        for (int i = 0; i < 100; i++) { _ = fullSlotted.IsProcessing; fullSlotted.Apply(fullSlottedState); }
+        Assert(fullSlotted.InputAmount("ore") == inputBefore && fullSlotted.FuelAmount("wood") == fuelBefore && fullSlottedState.jobs.Count == 0,
+            "repeated snapshots and VFX polling never consume inputs or fuel");
+        foreach (float speed in new[] { 0f, -1f, float.NaN, float.PositiveInfinity })
+        {
+            definition.processingSpeed = speed;
+            Assert(!fullSlotted.IsProcessing, "invalid/nonpositive speed is idle: " + speed);
+            fullSlotted.Tick(1);
+        }
+        definition.processingSpeed = 1;
+        Assert(new PlacedBuilding().IsProcessing == false, "uninitialized visual is safely idle");
+        fullSlottedState.jobs.Add(new ProcessingJob { recipe = "missing", remaining = 5 });
+        Assert(!fullSlotted.IsProcessing, "missing recipe is idle");
+        fullSlottedState.jobs.Clear();
+        var observer = new PlacedBuilding(); observer.Initialize(definition, new BuildingState { jobs = new() { new() { recipe = "smelt", remaining = 2 } } });
+        Assert(observer.IsProcessing, "late join/restored paid job is active without replaying payment");
         Assert(fullSlottedState.jobs.Count==0 && fullSlotted.InputAmount("ore")==2 && fullSlotted.FuelAmount("wood")==1,
             "full output never consumes loaded input or fuel");
         var forgeWallet = new ResourceInventory(); forgeWallet.Add("ore",2);
@@ -82,13 +108,17 @@ namespace UnityEngine
     public class Object { public string name; }
     public class ScriptableObject : Object {}
     public class MonoBehaviour : Object { public Transform transform = new(); }
-    public class Transform { public void SetPositionAndRotation(Vector3 p, Quaternion q) {} }
-    public class GameObject : Object {}
+    public class Transform { public Vector3 localScale = new(1,1,1); public void SetPositionAndRotation(Vector3 p, Quaternion q) {} public Vector3 InverseTransformPoint(Vector3 p)=>p; public Vector3 TransformPoint(Vector3 p)=>p; public T[] GetComponentsInChildren<T>(bool includeInactive)=>Array.Empty<T>(); }
+    public class GameObject : Object { public Transform transform = new(); }
+    public class Mesh { public Bounds bounds; }
+    public class MeshFilter { public Mesh sharedMesh; public Transform transform = new(); }
+    public class SkinnedMeshRenderer { public Transform transform = new(); public Bounds localBounds; }
+    public struct Bounds { public Vector3 center,size; public Bounds(Vector3 c,Vector3 s){center=c;size=s;} public Vector3 min=>center; public Vector3 max=>center; public void Encapsulate(Vector3 p){} }
     public class Texture2D : Object {}
-    public struct Vector3 { public float x,y,z; public Vector3(float x,float y,float z){this.x=x;this.y=y;this.z=z;} }
+    public struct Vector3 { public float x,y,z; public Vector3(float x,float y,float z){this.x=x;this.y=y;this.z=z;} public static Vector3 zero=>new(); public static Vector3 up=>new(0,1,0); public float sqrMagnitude=>x*x+y*y+z*z; public static Vector3 Scale(Vector3 a,Vector3 b)=>new(a.x*b.x,a.y*b.y,a.z*b.z); public static Vector3 operator +(Vector3 a,Vector3 b)=>new(a.x+b.x,a.y+b.y,a.z+b.z); public static Vector3 operator *(Vector3 a,float b)=>new(a.x*b,a.y*b,a.z*b); }
     public struct Quaternion { public static Quaternion Euler(float x,float y,float z) => new(); }
     public struct LayerMask { public static implicit operator LayerMask(int n)=>new(); }
-    public static class Mathf { public static float Max(float a,float b)=>Math.Max(a,b); public static float Min(float a,float b)=>Math.Min(a,b); }
+    public static class Mathf { public static float Abs(float a)=>Math.Abs(a); public static float Max(float a,float b)=>Math.Max(a,b); public static float Min(float a,float b)=>Math.Min(a,b); }
     public static class Debug { public static void LogException(Exception e) {} }
     public class SerializeField : Attribute {}
     public class Header : Attribute { public Header(string x){} }
@@ -99,6 +129,7 @@ namespace UnityEngine
     public class CreateAssetMenu : Attribute { public string menuName,fileName; }
 }
 namespace InventorySystem.Core { public interface IInventoryItem {} }
+namespace Duskborn.Effects { public class FurnaceEffects {} }
 namespace InventorySystem.Data
 {
     public class ItemDefinitionBase { public string Id, DisplayName, Description; public UnityEngine.Texture2D Icon; public InventorySystem.Core.IInventoryItem CreateRuntimeItem()=>null; }

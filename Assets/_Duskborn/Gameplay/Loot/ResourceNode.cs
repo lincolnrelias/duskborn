@@ -67,6 +67,11 @@ namespace Duskborn.Gameplay.Loot
             }
         }
 
+        private void OnDestroy()
+        {
+            _currentHP.OnChange -= OnHPChanged;
+        }
+
         public override void OnStartServer()
         {
             base.OnStartServer();

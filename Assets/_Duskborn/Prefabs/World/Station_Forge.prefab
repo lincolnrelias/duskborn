@@ -251,11 +251,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e35fefe33e16f30489d205da82a75db7, type: 3}
---- !u!23 &2015219879831630176 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 4593911759341608725, guid: e35fefe33e16f30489d205da82a75db7, type: 3}
-  m_PrefabInstance: {fileID: 2609736660402876021}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &2575246272040389022 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: e35fefe33e16f30489d205da82a75db7, type: 3}

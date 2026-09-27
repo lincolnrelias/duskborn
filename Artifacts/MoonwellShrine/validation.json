@@ -1,0 +1,17 @@
+{
+  "page_to_crescent_or_crystal_collisions": [],
+  "sampled_frames": 121,
+  "loop_seam_max_world_delta": 0.0,
+  "triangles_evaluated": 3126,
+  "materials": 2,
+  "atlas_resolution": [
+    1024,
+    1024
+  ],
+  "intentional_open_surfaces": [
+    "Painted_Crescent_and_Runes",
+    "Inscribed_Page_-1",
+    "Inscribed_Page_1"
+  ],
+  "unity_validation": "Not performed. Inspect scale, camera readability and page motion after import."
+}

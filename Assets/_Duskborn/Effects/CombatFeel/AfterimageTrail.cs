@@ -1,10 +1,11 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
 namespace Duskborn.Effects
 {
-    // Spawns fading mesh snapshots ("ghosts") behind the character. Call EmitFor(duration).
+    // Spawns fading mesh snapshots ("ghosts") behind the character using object pooling and MaterialPropertyBlock.
     public class AfterimageTrail : MonoBehaviour
     {
         [SerializeField] private float spawnInterval = 0.05f;
@@ -12,7 +13,20 @@ namespace Duskborn.Effects
         [SerializeField] private Color color         = new(0.45f, 0.8f, 1f, 0.55f);
 
         private static Material _baseMaterial;
+        private static readonly Stack<Afterimage> _pool = new();
+        private static Transform _container;
+        private WaitForSeconds _waitSpawnInterval;
         private Coroutine _emitting;
+
+        private void Awake()
+        {
+            _waitSpawnInterval = new WaitForSeconds(spawnInterval);
+            if (_container == null)
+            {
+                var go = new GameObject("Afterimage_Container");
+                _container = go.transform;
+            }
+        }
 
         public void EmitFor(float duration)
         {
@@ -26,7 +40,7 @@ namespace Duskborn.Effects
             while (Time.time < end)
             {
                 SpawnSnapshot();
-                yield return new WaitForSeconds(spawnInterval);
+                yield return _waitSpawnInterval;
             }
             _emitting = null;
         }
@@ -39,52 +53,92 @@ namespace Duskborn.Effects
             foreach (var smr in GetComponentsInChildren<SkinnedMeshRenderer>())
             {
                 if (!smr.enabled) continue;
-                var mesh = new Mesh();
-                smr.BakeMesh(mesh, true); // scale baked in
-                CreateImage(mesh, smr.transform.position, smr.transform.rotation, Vector3.one, ownsMesh: true);
+                var afterimage = GetOrCreate();
+                afterimage.transform.SetPositionAndRotation(smr.transform.position, smr.transform.rotation);
+                afterimage.transform.localScale = Vector3.one;
+                afterimage.BakeFrom(smr);
+                afterimage.Init(_baseMaterial, color, fadeDuration);
             }
 
             foreach (var mf in GetComponentsInChildren<MeshFilter>())
             {
                 var mr = mf.GetComponent<MeshRenderer>();
                 if (mr == null || !mr.enabled || mf.sharedMesh == null) continue;
-                CreateImage(mf.sharedMesh, mf.transform.position, mf.transform.rotation,
-                            mf.transform.lossyScale, ownsMesh: false);
+                var afterimage = GetOrCreate();
+                afterimage.transform.SetPositionAndRotation(mf.transform.position, mf.transform.rotation);
+                afterimage.transform.localScale = mf.transform.lossyScale;
+                afterimage.SetMesh(mf.sharedMesh);
+                afterimage.Init(_baseMaterial, color, fadeDuration);
             }
         }
 
-        private void CreateImage(Mesh mesh, Vector3 pos, Quaternion rot, Vector3 scale, bool ownsMesh)
+        private static Afterimage GetOrCreate()
         {
+            while (_pool.Count > 0)
+            {
+                var item = _pool.Pop();
+                if (item != null && item.gameObject != null)
+                {
+                    item.gameObject.SetActive(true);
+                    return item;
+                }
+            }
+
             var go = new GameObject("Afterimage");
-            go.transform.SetPositionAndRotation(pos, rot);
-            go.transform.localScale = scale;
+            if (_container != null) go.transform.SetParent(_container);
+            var ai = go.AddComponent<Afterimage>();
+            return ai;
+        }
 
-            go.AddComponent<MeshFilter>().sharedMesh = mesh;
-            var mr = go.AddComponent<MeshRenderer>();
-            mr.shadowCastingMode = ShadowCastingMode.Off;
-
-            var mat = new Material(_baseMaterial);
-            mr.sharedMaterial = mat;
-
-            go.AddComponent<Afterimage>().Init(mat, color, fadeDuration, ownsMesh ? mesh : null);
+        internal static void ReturnToPool(Afterimage item)
+        {
+            if (item == null || item.gameObject == null) return;
+            item.gameObject.SetActive(false);
+            _pool.Push(item);
         }
     }
 
     internal class Afterimage : MonoBehaviour
     {
-        private Material _material;
-        private Mesh     _ownedMesh;
-        private Color    _startColor;
-        private float    _fadeDuration;
-        private float    _elapsed;
+        private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
 
-        public void Init(Material material, Color color, float fadeDuration, Mesh ownedMesh)
+        private MeshFilter            _mf;
+        private MeshRenderer          _mr;
+        private Mesh                  _bakedMesh;
+        private MaterialPropertyBlock _propBlock;
+        private Color                 _startColor;
+        private float                 _fadeDuration;
+        private float                 _elapsed;
+
+        private void Awake()
         {
-            _material     = material;
+            _mf = gameObject.AddComponent<MeshFilter>();
+            _mr = gameObject.AddComponent<MeshRenderer>();
+            _mr.shadowCastingMode = ShadowCastingMode.Off;
+            _bakedMesh = new Mesh { name = "Afterimage_BakedMesh" };
+            _propBlock = new MaterialPropertyBlock();
+        }
+
+        public void BakeFrom(SkinnedMeshRenderer smr)
+        {
+            smr.BakeMesh(_bakedMesh, true);
+            _mf.sharedMesh = _bakedMesh;
+        }
+
+        public void SetMesh(Mesh mesh)
+        {
+            _mf.sharedMesh = mesh;
+        }
+
+        public void Init(Material material, Color color, float fadeDuration)
+        {
             _startColor   = color;
             _fadeDuration = Mathf.Max(fadeDuration, 0.01f);
-            _ownedMesh    = ownedMesh;
-            _material.color = color;
+            _elapsed      = 0f;
+
+            _mr.sharedMaterial = material;
+            _propBlock.SetColor(BaseColorId, color);
+            _mr.SetPropertyBlock(_propBlock);
         }
 
         private void Update()
@@ -93,18 +147,18 @@ namespace Duskborn.Effects
             float t = _elapsed / _fadeDuration;
             if (t >= 1f)
             {
-                Destroy(gameObject);
+                AfterimageTrail.ReturnToPool(this);
                 return;
             }
             var c = _startColor;
             c.a *= 1f - t;
-            _material.color = c;
+            _propBlock.SetColor(BaseColorId, c);
+            _mr.SetPropertyBlock(_propBlock);
         }
 
         private void OnDestroy()
         {
-            if (_material  != null) Destroy(_material);
-            if (_ownedMesh != null) Destroy(_ownedMesh);
+            if (_bakedMesh != null) Destroy(_bakedMesh);
         }
     }
 }

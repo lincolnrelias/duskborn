@@ -23,7 +23,18 @@ namespace Duskborn.Core
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
-            _stateSync.OnChange += (prev, next, asServer) => OnStateChanged?.Invoke(next);
+            _stateSync.OnChange += HandleStateSync;
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+            _stateSync.OnChange -= HandleStateSync;
+        }
+
+        private void HandleStateSync(GameState prev, GameState next, bool asServer)
+        {
+            OnStateChanged?.Invoke(next);
         }
 
         public override void OnStartServer()

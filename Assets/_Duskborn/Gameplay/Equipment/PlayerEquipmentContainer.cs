@@ -34,6 +34,26 @@ namespace Duskborn.Gameplay.Equipment
 
         private void EquipStartingGear()
         {
+            var initialDb = Duskborn.Inventory.InitialInventoryDatabase.Instance;
+            if (initialDb != null && initialDb.StartingGear != null && initialDb.StartingGear.Count > 0)
+            {
+                bool anyDb = false;
+                foreach (var entry in initialDb.StartingGear)
+                {
+                    if (entry == null || entry.Gear == null) continue;
+                    var item = entry.Gear.CreateRuntimeItem() as GearItem;
+                    if (item == null) continue;
+                    _equipped[(int)entry.Slot] = item;
+                    DuskLog.Log(LogChannel.Inventory, $"Starting gear (Central DB): '{item.DisplayName}' → slot {entry.Slot}");
+                    anyDb = true;
+                }
+                if (anyDb)
+                {
+                    _buffs.ApplyAll();
+                    return;
+                }
+            }
+
             if (startingGear == null || startingGear.Length == 0) return;
             bool any = false;
             foreach (var def in startingGear)

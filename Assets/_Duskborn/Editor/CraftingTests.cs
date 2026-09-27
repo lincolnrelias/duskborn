@@ -30,6 +30,7 @@ namespace Duskborn.Editor
             RunTest(Test_Recipe_CreateOutputItem, ref passed, ref total);
             RunTest(Test_Workbench_ProximityCalculation, ref passed, ref total);
             RunTest(Test_Workbench_PrefabModelIntegrity, ref passed, ref total);
+            RunTest(Test_ArcaneTable_PrefabModelIntegrity, ref passed, ref total);
             RunTest(Test_DraggablePanel_BindingAndCanvasResolution, ref passed, ref total);
             RunTest(Test_DraggablePanel_ScreenClampingMath, ref passed, ref total);
             RunTest(Test_AllFourCraftingStations_Integrity, ref passed, ref total);
@@ -249,6 +250,91 @@ namespace Duskborn.Editor
             var wb = prefab.GetComponent<Workbench>();
             if (wb == null)
                 throw new Exception("Workbench.prefab deve possuir o componente Workbench.");
+        }
+
+        private static void Test_ArcaneTable_PrefabModelIntegrity()
+        {
+            string[] paths = {
+                "Assets/_Duskborn/Prefabs/World/Station_ArcaneTable.prefab",
+                "Assets/_Duskborn/Resources/Stations/Station_ArcaneTable.prefab"
+            };
+
+            foreach (var path in paths)
+            {
+                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                if (prefab == null)
+                    throw new Exception($"Nao foi possivel carregar '{path}'.");
+
+                var mf = prefab.GetComponent<MeshFilter>();
+                if (mf != null && mf.sharedMesh != null && mf.sharedMesh.name != "Moonwell_Shrine")
+                    throw new Exception($"{path} ainda contem MeshFilter legado na raiz.");
+
+                var visual = prefab.transform.Find("Visual");
+                if (visual == null)
+                    throw new Exception($"{path} deve possuir o filho 'Visual' contendo o modelo do Moonwell.");
+
+                var animator = visual.GetComponent<Animator>();
+                if (animator == null)
+                    throw new Exception($"{path}/Visual deve possuir um componente Animator.");
+
+                if (animator.runtimeAnimatorController == null)
+                    throw new Exception($"{path}/Visual Animator deve possuir um RuntimeAnimatorController configurado.");
+
+                if (animator.cullingMode != AnimatorCullingMode.AlwaysAnimate)
+                    throw new Exception($"{path}/Visual Animator cullingMode deve ser AlwaysAnimate para evitar congelamento da animação.");
+
+                var renderers = visual.GetComponentsInChildren<Renderer>(true);
+                if (renderers == null || renderers.Length < 4)
+                    throw new Exception($"{path}/Visual deve possuir pelo menos 4 renderizadores (Tabela, Cristais, Livro, Pagina).");
+
+                var skinnedPage = visual.GetComponentsInChildren<SkinnedMeshRenderer>(true);
+                if (skinnedPage == null || skinnedPage.Length == 0)
+                    throw new Exception($"{path}/Visual deve conter SkinnedMeshRenderer para a pagina do livro animado.");
+
+                if (!skinnedPage[0].updateWhenOffscreen)
+                    throw new Exception($"{path} SkinnedMeshRenderer deve ter updateWhenOffscreen = true para evitar congelamento por frustum culling.");
+
+                var col = prefab.GetComponent<BoxCollider>();
+                if (col == null)
+                    throw new Exception($"{path} deve possuir um BoxCollider na raiz.");
+
+                if (col.size.x < 1.5f || col.size.z < 1.5f)
+                    throw new Exception($"{path} BoxCollider deve ter dimensoes compativeis com Moonwell (>= 1.5m): {col.size}");
+
+                var wb = prefab.GetComponent<Workbench>();
+                if (wb == null)
+                    throw new Exception($"{path} deve possuir o componente Workbench.");
+
+                if (wb.StationType != CraftingStationType.MesaArcana)
+                    throw new Exception($"{path} Workbench StationType deve ser MesaArcana, obtido: {wb.StationType}");
+            }
+
+            // Valida tambem se BuildingWorld.CreateVisual clona corretamente SkinnedMeshRenderer e Animator
+            var buildDef = Resources.Load<Duskborn.Gameplay.Building.BuildableDefinition>("Building/Build_arcane_table");
+            if (buildDef != null)
+            {
+                var visualInstance = Duskborn.Gameplay.Building.BuildingWorld.CreateVisual(buildDef);
+                try
+                {
+                    var anim = visualInstance.GetComponentInChildren<Animator>();
+                    if (anim == null)
+                        throw new Exception("BuildingWorld.CreateVisual não copiou o Animator da Mesa Arcana.");
+
+                    if (anim.runtimeAnimatorController == null)
+                        throw new Exception("BuildingWorld.CreateVisual Animator não possui controller associado.");
+
+                    var smr = visualInstance.GetComponentInChildren<SkinnedMeshRenderer>();
+                    if (smr == null)
+                        throw new Exception("BuildingWorld.CreateVisual não copiou o SkinnedMeshRenderer da Mesa Arcana.");
+
+                    if (!smr.updateWhenOffscreen)
+                        throw new Exception("BuildingWorld.CreateVisual SkinnedMeshRenderer deve ter updateWhenOffscreen = true.");
+                }
+                finally
+                {
+                    UnityEngine.Object.DestroyImmediate(visualInstance);
+                }
+            }
         }
 
         private static void Test_DraggablePanel_BindingAndCanvasResolution()

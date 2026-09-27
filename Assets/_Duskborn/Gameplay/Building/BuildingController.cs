@@ -417,14 +417,23 @@ namespace Duskborn.Gameplay.Building
             if (busy || station == null || !MenuOpen || station.Definition.station != CraftingStationType.Forja ||
                 string.IsNullOrEmpty(materialId) || resources == null) return false;
             var recipes = Resources.LoadAll<CraftingRecipe>("Crafting")
-                .Where(recipe => recipe.RequiredStation == CraftingStationType.Forja && recipe.ProcessingSeconds > 0 &&
-                    discovery != null && discovery.IsDiscovered(recipe))
+                .Where(recipe => recipe.RequiredStation == CraftingStationType.Forja && recipe.ProcessingSeconds > 0)
+                .ToArray();
+            var discoveredRecipes = recipes
+                .Where(recipe => discovery == null || discovery.IsDiscovered(recipe))
                 .ToArray();
             var recipe = selectedRecipe;
             bool compatible = recipe != null &&
                 (IngredientAmount(recipe.Ingredients, materialId) > 0 || IngredientAmount(recipe.FuelIngredients, materialId) > 0);
             if (!compatible)
-                recipe = recipes.FirstOrDefault(candidate => IngredientAmount(candidate.Ingredients, materialId) > 0);
+            {
+                recipe = discoveredRecipes.FirstOrDefault(candidate =>
+                    IngredientAmount(candidate.Ingredients, materialId) > 0 ||
+                    IngredientAmount(candidate.FuelIngredients, materialId) > 0)
+                    ?? recipes.FirstOrDefault(candidate =>
+                    IngredientAmount(candidate.Ingredients, materialId) > 0 ||
+                    IngredientAmount(candidate.FuelIngredients, materialId) > 0);
+            }
             if (recipe == null)
             {
                 ui.ShowToast("Este item não pode ser usado na forja.", true);
@@ -667,6 +676,10 @@ namespace Duskborn.Gameplay.Building
                 ui.ShowToast("O catálogo de construção ainda não está disponível.", true);
                 return;
             }
+            if (resources == null) resources = GetComponent<ResourceInventory>();
+            if (resources != null) resources.InitializeFromInitialDatabase();
+            InventoryUIManager.Instance?.SyncAllResources();
+
             ui.ShowCatalog(world.Definitions, Presentation, definition => Begin(definition), Cancel,
                 () => Checkpoint(false), () => Checkpoint(true));
             UnlockCursor();

@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using Unity.AI.Navigation;
+using Unity.AI.Navigation.Editor;
 
 namespace Duskborn.Editor
 {
@@ -33,6 +36,60 @@ namespace Duskborn.Editor
             public int suitesPassed;
             public int suitesFailed;
             public string[] failures;
+        }
+
+        public static void ClearGeneratedTerrain()
+        {
+            EnsureCompilationSucceeded();
+
+            string scenePath = "Assets/_Duskborn/Scenes/SampleScene.unity";
+            var scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+            if (!scene.IsValid())
+            {
+                throw new InvalidOperationException($"Could not open scene: {scenePath}");
+            }
+
+            var chunkManager = UnityEngine.Object.FindAnyObjectByType<ChunkGridManager>();
+            if (chunkManager != null)
+            {
+                chunkManager.ClearGrid();
+
+                for (int i = chunkManager.transform.childCount - 1; i >= 0; i--)
+                {
+                    Transform child = chunkManager.transform.GetChild(i);
+                    if (child.name == "WorldPropsContainer")
+                    {
+                        for (int j = child.childCount - 1; j >= 0; j--)
+                        {
+                            UnityEngine.Object.DestroyImmediate(child.GetChild(j).gameObject);
+                        }
+                    }
+                    else
+                    {
+                        UnityEngine.Object.DestroyImmediate(child.gameObject);
+                    }
+                }
+
+                if (chunkManager.navMeshSurface != null)
+                {
+                    NavMeshAssetManager.instance.ClearSurfaces(new UnityEngine.Object[] { chunkManager.navMeshSurface });
+                    chunkManager.navMeshSurface.navMeshData = null;
+                    EditorUtility.SetDirty(chunkManager.navMeshSurface);
+                }
+
+                EditorUtility.SetDirty(chunkManager);
+                EditorSceneManager.MarkSceneDirty(scene);
+                bool saved = EditorSceneManager.SaveScene(scene);
+                if (!saved)
+                {
+                    throw new InvalidOperationException($"Failed to save scene: {scenePath}");
+                }
+                Debug.Log("[DuskbornCli] ClearGeneratedTerrain succeeded.");
+            }
+            else
+            {
+                throw new InvalidOperationException("ChunkGridManager not found in SampleScene.");
+            }
         }
 
         public static void Compile()
@@ -67,6 +124,7 @@ namespace Duskborn.Editor
             {
                 new TestSuite(nameof(AudioDatabaseTests), AudioDatabaseTests.RunAllTests),
                 new TestSuite(nameof(BuildingTests), BuildingTests.Run),
+                new TestSuite(nameof(SceneFurnaceTests), SceneFurnaceTests.Run),
                 new TestSuite(nameof(CharacterPanelTests), CharacterPanelTests.RunAllTests),
                 new TestSuite(nameof(CraftingTests), CraftingTests.RunAllTests),
                 new TestSuite(nameof(CursorAndMenuFocusTests), CursorAndMenuFocusTests.RunAllTests),

@@ -70,12 +70,15 @@ namespace Duskborn.Core
             }
         }
 
+        private static readonly Vector3[] CirclePts = new Vector3[Segments];
+
         // ── Public API ────────────────────────────────────────────────────────
 
         /// <summary>
         /// Flash a wireframe sphere at <paramref name="center"/> for <paramref name="duration"/> seconds.
-        /// Call this from any combat code. No-ops when the debugger is off.
+        /// Call this from any combat code. Stripped in release builds; no-ops when the debugger is off.
         /// </summary>
+        [System.Diagnostics.Conditional("UNITY_EDITOR"), System.Diagnostics.Conditional("DEVELOPMENT_BUILD")]
         public static void Flash(Vector3 center, float radius, Color color, float duration = 0.15f)
         {
             if (Instance == null || !Instance._enabled) return;
@@ -107,19 +110,18 @@ namespace Duskborn.Core
             lr.endColor   = color;
 
             float step = 2f * Mathf.PI / Segments;
-            var pts = new Vector3[Segments];
             for (int i = 0; i < Segments; i++)
             {
                 float c = Mathf.Cos(i * step), s = Mathf.Sin(i * step);
-                pts[i] = center + axis switch
+                CirclePts[i] = center + (axis switch
                 {
                     0 => new Vector3(c, 0, s),  // XZ
                     1 => new Vector3(c, s, 0),  // XY
                     _ => new Vector3(0, c, s),  // YZ
-                } * radius;
+                }) * radius;
             }
 
-            lr.SetPositions(pts);
+            lr.SetPositions(CirclePts);
             lr.gameObject.SetActive(true);
         }
 

@@ -49,6 +49,20 @@ namespace Duskborn.Gameplay.Player
         private System.Action _bufferedAction;
         private float         _bufferExpiry;
 
+        private static readonly Collider[] CombatHitBuffer = new Collider[64];
+        private static readonly List<EnemyBase> HitEnemiesCache = new(32);
+        private static readonly Dictionary<float, WaitForSeconds> WaitCache = new();
+
+        private static WaitForSeconds GetWait(float seconds)
+        {
+            if (!WaitCache.TryGetValue(seconds, out var wait))
+            {
+                wait = new WaitForSeconds(seconds);
+                WaitCache[seconds] = wait;
+            }
+            return wait;
+        }
+
         // Cached delegates for stable Register/Unregister.
         private System.Action _onSkill0;
         private System.Action _onSkill1;
@@ -319,18 +333,21 @@ namespace Duskborn.Gameplay.Player
         {
             HitboxDebugger.Flash(transform.position, range, new Color(1f, 0.6f, 0f));
 
-            float      cosHalfArc = Mathf.Cos(arcDegrees * 0.5f * Mathf.Deg2Rad);
-            Collider[] cols       = Physics.OverlapSphere(transform.position, range, enemyLayer);
-            var     hitEnemies    = new List<EnemyBase>();
-            Vector3 firstHitPos   = Vector3.zero;
+            float cosHalfArc = Mathf.Cos(arcDegrees * 0.5f * Mathf.Deg2Rad);
+            int hitCount = Physics.OverlapSphereNonAlloc(transform.position, range, CombatHitBuffer, enemyLayer);
+            HitEnemiesCache.Clear();
+            Vector3 firstHitPos = Vector3.zero;
 
-            foreach (var col in cols)
+            for (int i = 0; i < hitCount; i++)
             {
+                var col = CombatHitBuffer[i];
+                if (col == null) continue;
+
                 Vector3 toEnemy = (col.transform.position - transform.position).normalized;
                 if (Vector3.Dot(transform.forward, toEnemy) < cosHalfArc) continue;
 
                 var enemy = col.GetComponentInParent<EnemyBase>();
-                if (enemy == null || !enemy.IsAlive) continue;
+                if (enemy == null || !enemy.IsAlive || HitEnemiesCache.Contains(enemy)) continue;
 
                 bool    isCrit   = Random.value < _stats.CritChance;
                 float   damage   = _stats.Damage * damageMultiplier * (isCrit ? _stats.CritMultiplier : 1f);
@@ -339,33 +356,33 @@ namespace Duskborn.Gameplay.Player
                 Vector3 hitPoint = col.ClosestPoint(transform.position);
                 Vector3 hitDir   = (enemy.transform.position - transform.position).normalized;
                 enemy.TakeDamage(damage, isCrit, hitPoint, hitDir);
-                if (hitEnemies.Count == 0) firstHitPos = enemy.transform.position;
-                hitEnemies.Add(enemy);
+                if (HitEnemiesCache.Count == 0) firstHitPos = enemy.transform.position;
+                HitEnemiesCache.Add(enemy);
                 DuskLog.Log(LogChannel.Combat, $"Cleave hit {col.name} — {damage:F1}{(isCrit ? " CRIT" : "")}");
             }
 
+            for (int i = 0; i < hitCount; i++) CombatHitBuffer[i] = null;
+
             // ── Lifesteal ──
-            if (hitEnemies.Count > 0)
+            if (HitEnemiesCache.Count > 0)
             {
                 float lifestealFraction = _stats.EffectiveLifesteal;
                 if (lifestealFraction > 0f)
                 {
                     // Calcula o dano total aplicado neste ataque para lifesteal
-                    float totalDamageDealt = 0f;
-                    // Recalcula — simplificação: usa o dano médio × contagem
                     float baseDmg = _stats.Damage * damageMultiplier;
-                    totalDamageDealt = baseDmg * hitEnemies.Count;
+                    float totalDamageDealt = baseDmg * HitEnemiesCache.Count;
                     float healAmount = totalDamageDealt * lifestealFraction;
                     if (healAmount > 0.5f)
                         _stats.Heal(healAmount);
                 }
             }
 
-            if (hitEnemies.Count > 0)
+            if (HitEnemiesCache.Count > 0)
             {
-                _classAbility?.OnAttackCompleted(hitEnemies);
-                RpcOnHitAudio(Owner, hitEnemies[0].tag);
-                RpcOnHitEffect(hitEnemies[0].tag, firstHitPos);
+                _classAbility?.OnAttackCompleted(HitEnemiesCache);
+                RpcOnHitAudio(Owner, HitEnemiesCache[0].tag);
+                RpcOnHitEffect(HitEnemiesCache[0].tag, firstHitPos);
             }
             else _classAbility?.OnAttackMissed();
         }
@@ -373,15 +390,18 @@ namespace Duskborn.Gameplay.Player
         [ServerRpc]
         private void RequestAttackRpc(float comboMultiplier)
         {
-            Vector3    origin = transform.position + transform.forward * (attackRange * 0.5f);
-            Collider[] cols   = Physics.OverlapSphere(origin, attackRange, enemyLayer);
-            var hitEnemies = new List<EnemyBase>();
+            Vector3 origin = transform.position + transform.forward * (attackRange * 0.5f);
+            int hitCount = Physics.OverlapSphereNonAlloc(origin, attackRange, CombatHitBuffer, enemyLayer);
+            HitEnemiesCache.Clear();
             Collider firstHitCol = null;
             comboMultiplier = Mathf.Clamp(comboMultiplier, 0.1f, 5f);
-            foreach (var col in cols)
+            for (int i = 0; i < hitCount; i++)
             {
+                var col = CombatHitBuffer[i];
+                if (col == null) continue;
+
                 var enemy = col.GetComponentInParent<EnemyBase>();
-                if (enemy == null || !enemy.IsAlive) continue;
+                if (enemy == null || !enemy.IsAlive || HitEnemiesCache.Contains(enemy)) continue;
                 bool  isCrit   = Random.value < _stats.CritChance;
                 float damage   = _stats.Damage * comboMultiplier * (isCrit ? _stats.CritMultiplier : 1f);
                 if (_classAbility != null) damage = _classAbility.ModifyDamage(damage, enemy);
@@ -389,32 +409,33 @@ namespace Duskborn.Gameplay.Player
                 Vector3 hitPoint = col.ClosestPoint(origin);
                 Vector3 hitDir   = (enemy.transform.position - transform.position).normalized;
                 enemy.TakeDamage(damage, isCrit, hitPoint, hitDir);
-                hitEnemies.Add(enemy);
+                HitEnemiesCache.Add(enemy);
                 if (firstHitCol == null) firstHitCol = col;
                 DuskLog.Log(LogChannel.Combat, $"Hit {col.name} — {damage:F1}{(isCrit ? " CRIT" : "")}");
             }
+
+            for (int i = 0; i < hitCount; i++) CombatHitBuffer[i] = null;
+
             // ── Lifesteal ──
-            if (hitEnemies.Count > 0)
+            if (HitEnemiesCache.Count > 0)
             {
                 float lifestealFraction = _stats.EffectiveLifesteal;
                 if (lifestealFraction > 0f)
                 {
                     // Calcula o dano total aplicado neste ataque para lifesteal
-                    float totalDamageDealt = 0f;
-                    // Recalcula — simplificação: usa o dano médio × contagem
                     float baseDmg = _stats.Damage * comboMultiplier;
-                    totalDamageDealt = baseDmg * hitEnemies.Count;
+                    float totalDamageDealt = baseDmg * HitEnemiesCache.Count;
                     float healAmount = totalDamageDealt * lifestealFraction;
                     if (healAmount > 0.5f)
                         _stats.Heal(healAmount);
                 }
             }
 
-            if (hitEnemies.Count > 0)
+            if (HitEnemiesCache.Count > 0)
             {
-                _classAbility?.OnAttackCompleted(hitEnemies);
-                RpcOnHitAudio(Owner, hitEnemies[0].tag);
-                RpcOnHitEffect(hitEnemies[0].tag, firstHitCol.ClosestPoint(origin));
+                _classAbility?.OnAttackCompleted(HitEnemiesCache);
+                RpcOnHitAudio(Owner, HitEnemiesCache[0].tag);
+                RpcOnHitEffect(HitEnemiesCache[0].tag, firstHitCol.ClosestPoint(origin));
             }
             else _classAbility?.OnAttackMissed();
         }
@@ -489,19 +510,19 @@ namespace Duskborn.Gameplay.Player
 
         private System.Collections.IEnumerator RemoveSpeedBuffLater(float amount, float delay)
         {
-            yield return new WaitForSeconds(delay);
+            yield return GetWait(delay);
             if (_stats != null) _stats.MoveSpeedBuffAdditive = Mathf.Max(0f, _stats.MoveSpeedBuffAdditive - amount);
         }
 
         private System.Collections.IEnumerator RemoveDamageBuffLater(float amount, float delay)
         {
-            yield return new WaitForSeconds(delay);
+            yield return GetWait(delay);
             if (_stats != null) _stats.DamageBuffAdditive = Mathf.Max(0f, _stats.DamageBuffAdditive - amount);
         }
 
         private System.Collections.IEnumerator RemoveThornsBuffLater(float amount, float delay)
         {
-            yield return new WaitForSeconds(delay);
+            yield return GetWait(delay);
             if (_stats != null) _stats.ThornsDamageBonus = Mathf.Max(0f, _stats.ThornsDamageBonus - amount);
         }
 

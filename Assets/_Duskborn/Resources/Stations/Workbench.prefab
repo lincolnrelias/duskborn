@@ -220,5 +220,5 @@ MonoBehaviour:
   stationType: 0
   stationDisplayName: Bancada de Trabalho
   outlineLayerName: GreenOutline
-  outlineRenderer: {fileID: 8399161928399641455}
+  outlineRenderers: []
   recipes: []

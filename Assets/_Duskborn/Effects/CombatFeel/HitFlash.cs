@@ -3,28 +3,28 @@ using UnityEngine;
 
 namespace Duskborn.Effects
 {
-    // White material flash on damage. Added at runtime by EnemyBase; runs on every client.
+    // White material flash on damage via MaterialPropertyBlock (zero material cloning, preserves SRP Batcher).
     public class HitFlash : MonoBehaviour
     {
-        private static Material _flashMaterial;
+        private static readonly int BaseColorId     = Shader.PropertyToID("_BaseColor");
+        private static readonly int EmissionColorId = Shader.PropertyToID("_EmissionColor");
 
-        private Renderer[]   _renderers;
-        private Material[][] _originalMaterials;
-        private Material[][] _flashMaterials;
-        private Coroutine    _routine;
+        private static MaterialPropertyBlock _flashBlock;
+
+        private Renderer[] _renderers;
+        private Coroutine  _routine;
 
         public void Flash()
         {
             var s = CombatFeelSettings.Instance;
             if (s == null || !s.hitFlashEnabled) return;
 
-            if (_flashMaterial == null)
+            if (_flashBlock == null)
             {
-                var shader = Shader.Find("Universal Render Pipeline/Unlit");
-                if (shader == null) return;
-                _flashMaterial = new Material(shader);
+                _flashBlock = new MaterialPropertyBlock();
+                _flashBlock.SetColor(BaseColorId, s.hitFlashColor);
+                _flashBlock.SetColor(EmissionColorId, s.hitFlashColor);
             }
-            _flashMaterial.color = s.hitFlashColor;
 
             if (_renderers == null) Capture();
 
@@ -43,24 +43,20 @@ namespace Duskborn.Effects
             foreach (var r in all)
                 if (r is MeshRenderer || r is SkinnedMeshRenderer) list.Add(r);
 
-            _renderers         = list.ToArray();
-            _originalMaterials = new Material[_renderers.Length][];
-            _flashMaterials    = new Material[_renderers.Length][];
-            for (int i = 0; i < _renderers.Length; i++)
-            {
-                _originalMaterials[i] = _renderers[i].sharedMaterials;
-                _flashMaterials[i]    = new Material[_originalMaterials[i].Length];
-                for (int m = 0; m < _flashMaterials[i].Length; m++)
-                    _flashMaterials[i][m] = _flashMaterial;
-            }
+            _renderers = list.ToArray();
         }
 
         private IEnumerator FlashRoutine(float duration)
         {
             for (int i = 0; i < _renderers.Length; i++)
-                if (_renderers[i] != null) _renderers[i].sharedMaterials = _flashMaterials[i];
+                if (_renderers[i] != null) _renderers[i].SetPropertyBlock(_flashBlock);
 
-            yield return new WaitForSecondsRealtime(duration);
+            float elapsed = 0f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                yield return null;
+            }
 
             Restore();
             _routine = null;
@@ -70,7 +66,7 @@ namespace Duskborn.Effects
         {
             if (_renderers == null) return;
             for (int i = 0; i < _renderers.Length; i++)
-                if (_renderers[i] != null) _renderers[i].sharedMaterials = _originalMaterials[i];
+                if (_renderers[i] != null) _renderers[i].SetPropertyBlock(null);
         }
 
         private void OnDisable()

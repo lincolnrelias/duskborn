@@ -48,6 +48,10 @@ namespace Duskborn.Gameplay.Crafting
         {
             if (outlineRenderers == null || outlineRenderers.Length == 0)
                 outlineRenderers = GetComponentsInChildren<Renderer>(true);
+            // A scene station can receive effects while FishNet keeps it inactive,
+            // before this Awake. Effects must never enter the interaction outline.
+            outlineRenderers = Array.FindAll(outlineRenderers, renderer => renderer != null &&
+                renderer.GetComponentInParent<Duskborn.Effects.FurnaceEffects>() == null);
 
             if (outlineRenderers.Length > 0)
             {

@@ -61,6 +61,11 @@ namespace Duskborn.Gameplay.Loot
             _isOpenSync.OnChange += OnIsOpenChanged;
         }
 
+        private void OnDestroy()
+        {
+            _isOpenSync.OnChange -= OnIsOpenChanged;
+        }
+
         private void OnIsOpenChanged(bool prev, bool next, bool asServer)
         {
             if (next)

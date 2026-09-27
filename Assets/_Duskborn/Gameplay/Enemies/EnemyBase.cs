@@ -52,8 +52,8 @@ namespace Duskborn.Gameplay.Enemies
         private float        _staggerTimer;
 
         [Header("Outline")]
-        [SerializeField] private string     outlineLayerName = "RedOutline";
-        [SerializeField] private Renderer[] outlineRenderers;
+        [SerializeField] private string       outlineLayerName = "RedOutline";
+        [SerializeField] protected Renderer[] outlineRenderers;
 
         // ── Animator hashes ───────────────────────────────────────────────────
         private static readonly int HashVelocityX = Animator.StringToHash("VelocityX");
@@ -79,16 +79,27 @@ namespace Duskborn.Gameplay.Enemies
         protected Transform    CurrentTarget;
         protected float        MeleeCooldown;
 
-        private WeaponActionPlayer _weaponActionPlayer;
-        private WeaponHitNotifier  _hitNotifier;
-        private WeaponItem         _weaponItem;
-        private GameObject         _weaponInstance;
-        private float[]            _skillCooldowns = Array.Empty<float>();
+        private static readonly Collider[] CleaveHitBuffer = new Collider[32];
+        private static readonly System.Collections.Generic.List<PlayerStats> CleaveHitPlayers = new(8);
+        private static readonly WaitForSeconds WaitDeathDelay = new(0.4f);
+
+        private const float ScanIntervalMin = 0.25f;
+        private const float ScanIntervalMax = 0.40f;
+
+        private WeaponActionPlayer  _weaponActionPlayer;
+        private WeaponHitNotifier   _hitNotifier;
+        private WeaponItem          _weaponItem;
+        private GameObject          _weaponInstance;
+        private EnemyAudioFeedback  _audioFeedback;
+        private PlayerStats         _currentTargetStats;
+        private float[]             _skillCooldowns = Array.Empty<float>();
         private float    _baseMaxHP;
         private uint     _outlineMask;
         private uint[]   _rendererBaseMasks;
         private Vector3  _prevPosition;
         private Vector2  _smoothedVelocity;
+        private Vector3  _lastDest;
+        private float    _targetScanTimer;
         private bool     _warnedNoTarget;
         private bool     _warnedNoNavMesh;
 
@@ -130,10 +141,16 @@ namespace Duskborn.Gameplay.Enemies
             _hitNotifier        = GetComponent<WeaponHitNotifier>();
             _skillCooldowns     = new float[weapon?.Skills != null ? weapon.Skills.Length : 0];
 
-            if (GetComponent<EnemyAudioFeedback>() == null)
-                gameObject.AddComponent<EnemyAudioFeedback>();
+            _audioFeedback = GetComponent<EnemyAudioFeedback>();
+            if (_audioFeedback == null)
+                _audioFeedback = gameObject.AddComponent<EnemyAudioFeedback>();
 
             SpawnWeaponVisual();
+        }
+
+        protected virtual void OnDestroy()
+        {
+            _currentHP.OnChange -= OnHPChanged;
         }
 
         public override void OnStartServer()
@@ -158,7 +175,12 @@ namespace Duskborn.Gameplay.Enemies
                 return;
             }
 
-            AcquireTarget();
+            _targetScanTimer -= Time.deltaTime;
+            if (_targetScanTimer <= 0f || CurrentTarget == null || (_currentTargetStats != null && !_currentTargetStats.IsAlive))
+            {
+                _targetScanTimer = UnityEngine.Random.Range(ScanIntervalMin, ScanIntervalMax);
+                AcquireTarget();
+            }
 
             if (CurrentTarget == null)
             {
@@ -191,17 +213,22 @@ namespace Duskborn.Gameplay.Enemies
                 return;
             }
 
-            float dist      = Vector3.Distance(transform.position, CurrentTarget.position);
+            float sqrDist = (transform.position - CurrentTarget.position).sqrMagnitude;
+            float sqrAttackRange = attackRange * attackRange;
             bool  skillUsed = TryUseSkill();
 
-            if (dist <= attackRange)
+            if (sqrDist <= sqrAttackRange)
             {
                 Agent.ResetPath();
                 if (!skillUsed) TryBasicMelee();
             }
             else
             {
-                Agent.SetDestination(CurrentTarget.position);
+                if ((CurrentTarget.position - _lastDest).sqrMagnitude > 1.5f * 1.5f)
+                {
+                    _lastDest = CurrentTarget.position;
+                    Agent.SetDestination(_lastDest);
+                }
             }
         }
 
@@ -210,6 +237,7 @@ namespace Duskborn.Gameplay.Enemies
         protected virtual void AcquireTarget()
         {
             CurrentTarget = PlayerRegistry.FindNearest(transform.position);
+            _currentTargetStats = CurrentTarget != null ? CurrentTarget.GetComponent<PlayerStats>() : null;
         }
 
         protected virtual bool TryUseSkill()
@@ -248,11 +276,12 @@ namespace Duskborn.Gameplay.Enemies
             HitboxDebugger.Flash(transform.position, attackRange, Color.cyan);
             bool  isCrit = UnityEngine.Random.value < CritChance;
             float dmg    = Damage * (isCrit ? CritMultiplier : 1f);
-            CurrentTarget.GetComponent<PlayerStats>()?.TakeDamage(dmg, this, isCrit);
+            if (_currentTargetStats == null) _currentTargetStats = CurrentTarget.GetComponent<PlayerStats>();
+            _currentTargetStats?.TakeDamage(dmg, this, isCrit);
             DuskLog.Log(LogChannel.Enemy, $"{name} melee hit for {dmg:F1}{(isCrit ? " CRIT" : "")}");
             RpcRaiseHitAudio(CurrentTarget.tag);
             RpcSpawnHitEffect(CurrentTarget.tag, CurrentTarget.position);
-            GetComponent<EnemyAudioFeedback>()?.PlayAttackVoice();
+            _audioFeedback?.PlayAttackVoice();
         }
 
         // ── ICombatEntity ─────────────────────────────────────────────────────
@@ -264,18 +293,22 @@ namespace Duskborn.Gameplay.Enemies
             if (!IsServerStarted) return;
             HitboxDebugger.Flash(transform.position, range, new Color(0f, 1f, 0.5f));
             float cosHalfArc = Mathf.Cos(arcDegrees * 0.5f * Mathf.Deg2Rad);
-            var   cols       = Physics.OverlapSphere(transform.position, range, playerLayer);
-            var     hitPlayers  = new System.Collections.Generic.HashSet<PlayerStats>();
+            int hitCount = Physics.OverlapSphereNonAlloc(transform.position, range, CleaveHitBuffer, playerLayer);
+            CleaveHitPlayers.Clear();
             string  hitTag      = null;
             Vector3 hitPosition = Vector3.zero;
 
-            foreach (var col in cols)
+            for (int i = 0; i < hitCount; i++)
             {
+                var col = CleaveHitBuffer[i];
+                if (col == null) continue;
+
                 Vector3 toTarget = (col.transform.position - transform.position).normalized;
                 if (Vector3.Dot(transform.forward, toTarget) < cosHalfArc) continue;
 
                 var ps = col.GetComponentInParent<PlayerStats>();
-                if (ps == null || !ps.IsAlive || !hitPlayers.Add(ps)) continue;
+                if (ps == null || !ps.IsAlive || CleaveHitPlayers.Contains(ps)) continue;
+                CleaveHitPlayers.Add(ps);
 
                 bool  isCrit = UnityEngine.Random.value < CritChance;
                 float dmg    = Damage * damageMultiplier * (isCrit ? CritMultiplier : 1f);
@@ -283,6 +316,8 @@ namespace Duskborn.Gameplay.Enemies
                 if (hitTag == null) { hitTag = col.tag; hitPosition = ps.transform.position; }
                 DuskLog.Log(LogChannel.Enemy, $"{name} cleave hit {col.name} for {dmg:F1}{(isCrit ? " CRIT" : "")}");
             }
+
+            for (int i = 0; i < hitCount; i++) CleaveHitBuffer[i] = null;
 
             if (hitTag != null) { RpcRaiseHitAudio(hitTag); RpcSpawnHitEffect(hitTag, hitPosition); }
         }
@@ -375,19 +410,20 @@ namespace Duskborn.Gameplay.Enemies
 
         private IEnumerator DespawnAfterDelay()
         {
-            yield return new WaitForSeconds(deathDelay);
-            InstanceFinder.ServerManager.Despawn(NetworkObject, DespawnType.Destroy);
+            yield return WaitDeathDelay;
+            if (IsSpawned)
+                InstanceFinder.ServerManager.Despawn(NetworkObject, DespawnType.Pool);
         }
 
         // ── Animation ─────────────────────────────────────────────────────────
 
         private void UpdateAnimation()
         {
-            if (_animator == null) return;
+            if (_animator == null || !IsAlive) return;
 
             Vector3 worldVel = IsServerStarted && Agent != null && Agent.isOnNavMesh
                 ? Agent.velocity
-                : (transform.position - _prevPosition) / Time.deltaTime;
+                : (transform.position - _prevPosition) / Mathf.Max(Time.deltaTime, 0.0001f);
 
             _prevPosition = transform.position;
 
@@ -427,15 +463,18 @@ namespace Duskborn.Gameplay.Enemies
 
         public virtual void ResetEnemy(Vector3 position)
         {
-            OnDied         = null;
-            CurrentTarget  = null;
-            MeleeCooldown  = 0f;
-            _knockbackTimer = 0f;
-            _staggerTimer   = 0f;
-            _warnedNoTarget  = false;
-            _warnedNoNavMesh = false;
-            _entity.maxHP    = _baseMaxHP;
-            _currentHP.Value = _baseMaxHP;
+            OnDied              = null;
+            CurrentTarget       = null;
+            _currentTargetStats = null;
+            MeleeCooldown       = 0f;
+            _knockbackTimer     = 0f;
+            _staggerTimer       = 0f;
+            _targetScanTimer    = 0f;
+            _lastDest           = Vector3.zero;
+            _warnedNoTarget     = false;
+            _warnedNoNavMesh    = false;
+            _entity.maxHP       = _baseMaxHP;
+            _currentHP.Value    = _baseMaxHP;
             _entity.ResetMultipliers();
 
             for (int i = 0; i < _skillCooldowns.Length; i++) _skillCooldowns[i] = 0f;
@@ -444,6 +483,13 @@ namespace Duskborn.Gameplay.Enemies
             _animator?.SetBool(HashDead, false);
             _ragdoll?.DisableRagdoll();
             transform.position = position;
+            if (Agent != null)
+            {
+                Agent.enabled = true;
+                if (Agent.isOnNavMesh) Agent.Warp(position);
+            }
+            var col = GetComponent<Collider>();
+            if (col != null) col.enabled = true;
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────

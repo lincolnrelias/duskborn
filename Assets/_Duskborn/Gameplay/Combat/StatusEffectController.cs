@@ -27,6 +27,11 @@ namespace Duskborn.Gameplay.Combat
                 gameObject.AddComponent<StatusEffectVisuals>();
         }
 
+        private void OnDestroy()
+        {
+            _activeMask.OnChange -= OnMaskChanged;
+        }
+
         private void OnMaskChanged(int prev, int next, bool asServer)
         {
             int changed = prev ^ next;

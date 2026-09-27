@@ -5,6 +5,7 @@ alwaysApply: true
 
 # No Direct Unity Editor Control
 
+- Unity MCP is unavailable on the user's free Unity plan (user-confirmed). Do not call Unity MCP tools, retry the connection, or ask the user to enable it or upgrade their plan.
 - Never rely on opening, driving, or otherwise directly controlling the Unity Editor.
 - Do not attempt to enter Play Mode or play the game through the Unity Editor.
 - Prefer source inspection, command-line or headless Unity operations, automated tests, build scripts, logs, and generated artifacts for implementation and verification.

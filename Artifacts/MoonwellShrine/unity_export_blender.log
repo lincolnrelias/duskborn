@@ -1,0 +1,10 @@
+00:00.016  color_management | Using OCIO=C:\Program Files\Blender Foundation\Blender 5.1\5.1\datafiles\colormanagement\config.ocio
+00:01.953  blend            | Read blend: "C:\Users\linco\Mugg\Artifacts\MoonwellShrine\Moonwell_Shrine.blend"
+00:06.875  render           | Saved: 'C:\Users\linco\Mugg\Artifacts\MoonwellShrine\Unity_Export_Roundtrip.png'
+
+FBX export starting... 'C:/Users/linco/Mugg/Artifacts/MoonwellShrine/UnityExport/MoonwellShrine/Models/Moonwell_Shrine.fbx'
+export finished in 0.0942 sec.
+FBX version: 7400
+Blender 5.1.1 (hash b70da489d7f4 built 2026-04-14 01:37:22)
+
+Blender quit

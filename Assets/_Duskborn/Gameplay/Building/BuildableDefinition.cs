@@ -14,6 +14,8 @@ namespace Duskborn.Gameplay.Building
         [TextArea] public string description;
         public string category = "Estações";
         public GameObject prefab;
+        [Tooltip("Attached only to initialized placed buildings; never copied into placement previews.")]
+        public Duskborn.Effects.FurnaceEffects operatingEffect;
         public Texture2D icon;
         public CraftingStationType station;
         public List<CraftingIngredient> costs = new();

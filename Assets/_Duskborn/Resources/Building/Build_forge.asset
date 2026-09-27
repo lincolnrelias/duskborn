@@ -17,6 +17,7 @@ MonoBehaviour:
   description: "Fundi\xE7\xE3o com combust\xEDvel, ligas e equipamento pesado."
   category: "Esta\xE7\xF5es"
   prefab: {fileID: 606149192729443004, guid: e4c15758e1a7455b9c5d6eed6f2e1171, type: 3}
+  operatingEffect: {fileID: 11400000, guid: f77e39a1e1521ed02a9eeba6d9259c74, type: 3}
   icon: {fileID: 0}
   station: 1
   costs:

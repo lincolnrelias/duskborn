@@ -13,6 +13,26 @@ namespace Duskborn.Gameplay.Loot
         public IReadOnlyDictionary<string, int> Counts => _counts;
         public int GetCount(string resourceId) => resourceId != null && _counts.TryGetValue(resourceId, out int v) ? v : 0;
         public int GetCount(MaterialDefinition def) => def != null ? GetCount(def.Id) : 0;
+        private void Start()
+        {
+            InitializeFromInitialDatabase();
+        }
+
+        public void InitializeFromInitialDatabase()
+        {
+            var initialDb = Duskborn.Inventory.InitialInventoryDatabase.Instance;
+            if (initialDb != null && initialDb.BackpackItems != null)
+            {
+                foreach (var entry in initialDb.BackpackItems)
+                {
+                    if (entry != null && entry.Item is MaterialDefinition mat && !string.IsNullOrEmpty(mat.Id))
+                    {
+                        EnsureStartingAmount(mat.Id, entry.Quantity);
+                    }
+                }
+            }
+        }
+
         // Establishes a new-session baseline without marking the wallet as gameplay activity.
         // This keeps the infrastructure checkpoint load gate usable before the player acts.
         public void EnsureStartingAmount(string resourceId, int amount)

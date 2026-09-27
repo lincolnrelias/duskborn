@@ -1,0 +1,49 @@
+Compilador do Microsoft (R) Visual C# versão 4.3.1-3.22526.13 (41a5af9d)
+Copyright (C) Microsoft Corporation. Todos os direitos reservados.
+
+Assets\_Duskborn\Gameplay\Crafting\CraftingRecipe.cs(31,51): warning CS0649: Campo "CraftingRecipe.description" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Crafting\CraftingRecipe.cs(59,48): warning CS0649: Campo "CraftingRecipe.processingSeconds" nunca é atribuído e sempre terá seu valor padrão 0
+Assets\_Duskborn\Gameplay\Crafting\CraftingRecipe.cs(30,41): warning CS0649: Campo "CraftingRecipe.recipeName" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Crafting\CraftingRecipe.cs(38,53): warning CS0649: Campo "CraftingRecipe.outputItem" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Crafting\CraftingRecipe.cs(29,41): warning CS0649: Campo "CraftingRecipe.recipeId" nunca é atribuído e sempre terá seu valor padrão null
+PASS duplicate ingredient totals cannot overspend
+PASS negative spending cannot mint resources
+PASS zero spending rejected
+PASS failed multi-material purchase is atomic
+PASS observers see committed batch
+PASS null material does not become a free cost
+PASS paid queued job burns with no stored fuel
+PASS processing consumes elapsed time without early output
+PASS completed process produces exact output once
+PASS completed process cannot duplicate output
+PASS output blocking extinguishes paid queued work
+PASS full output pauses without burning queued work
+PASS collecting output resumes processing
+PASS contents block dismantling
+PASS empty station can be dismantled
+PASS large ticks carry remaining time into next job
+PASS negative time cannot reverse production
+PASS restored progress completes only remaining duration
+PASS paid slotted job stays active after fuel inventory reaches zero
+PASS one wood starts the first of two two-ore forge burns
+PASS consecutive burns remain active at an exact job boundary
+PASS slotted processing produces output after exact duration
+PASS final recipe completion starts cooldown
+PASS one wood refines four ore across two separate melts
+PASS true fuel starvation is idle
+PASS missing fuel never consumes the input slot
+PASS loaded forge slots block dismantling
+PASS full output blocks eligible slotted burn
+PASS collecting output resumes eligible slotted burn
+PASS repeated snapshots and VFX polling never consume inputs or fuel
+PASS invalid/nonpositive speed is idle: 0
+PASS invalid/nonpositive speed is idle: -1
+PASS invalid/nonpositive speed is idle: NaN
+PASS invalid/nonpositive speed is idle: ∞
+PASS uninitialized visual is safely idle
+PASS missing recipe is idle
+PASS late join/restored paid job is active without replaying payment
+PASS full output never consumes loaded input or fuel
+PASS recipe affordability includes separate fuel
+PASS recipe becomes affordable with input and fuel
+40 contract tests passed.

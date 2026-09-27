@@ -37,6 +37,32 @@ namespace Duskborn.Gameplay.Building
         public const int SlotStackCapacity = 64;
         public BuildableDefinition Definition { get; private set; }
         public BuildingState State { get; private set; }
+        // Derived from the same gates as Tick. Snapshots/save files already carry all
+        // inputs to this predicate; clients never advance or pay for a burn.
+        public bool IsProcessing
+        {
+            get
+            {
+                if (State == null || Definition == null ||
+                    !float.IsFinite(Definition.processingSpeed) || Definition.processingSpeed <= 0) return false;
+                if (State.jobs.Count == 0) return CanBeginSlottedProcess();
+                var job = State.jobs[0];
+                return job != null && float.IsFinite(job.remaining) && job.remaining >= 0 &&
+                    CanOutput(BuildingWorld.Recipe(job.recipe));
+            }
+        }
+
+        private bool CanOutput(CraftingRecipe recipe) => recipe != null && recipe.OutputItem != null &&
+            (long)StoredCount + recipe.OutputAmount <= Definition.capacity;
+
+        private bool CanBeginSlottedProcess()
+        {
+            if (string.IsNullOrEmpty(State.selectedRecipe)) return false;
+            var recipe = BuildingWorld.Recipe(State.selectedRecipe);
+            return CanOutput(recipe) && float.IsFinite(recipe.ProcessingSeconds) && recipe.ProcessingSeconds > 0 &&
+                Contains(State.inputs, recipe.Ingredients) &&
+                (State.fuelCharges > 0 || Contains(State.fuel, recipe.FuelIngredients));
+        }
         public bool Empty => State.jobs.Count == 0 && State.contents.Count == 0 && State.inputs.Count == 0 && State.fuel.Count == 0;
         public void Initialize(BuildableDefinition definition, BuildingState state)
         {
@@ -79,14 +105,15 @@ namespace Duskborn.Gameplay.Building
         // jobs consume their inputs and fuel atomically when a burn begins.
         public void Tick(float delta)
         {
+            if (!float.IsFinite(delta) || !IsProcessing) return;
             float budget = Mathf.Max(0, delta) * Definition.processingSpeed;
             while (budget > 0)
             {
                 if (State.jobs.Count == 0 && !TryBeginSlottedProcess()) return;
                 var job = State.jobs[0];
+                if (job == null) return;
                 var recipe = BuildingWorld.Recipe(job.recipe);
-                if (recipe == null || recipe.OutputItem == null) return;
-                if (StoredCount + recipe.OutputAmount > Definition.capacity) return;
+                if (job == null || !float.IsFinite(job.remaining) || job.remaining < 0 || !CanOutput(recipe)) return;
                 float used = Mathf.Min(budget, job.remaining);
                 job.remaining -= used;
                 budget -= used;
@@ -99,11 +126,8 @@ namespace Duskborn.Gameplay.Building
 
         private bool TryBeginSlottedProcess()
         {
-            if (string.IsNullOrEmpty(State.selectedRecipe)) return false;
+            if (!CanBeginSlottedProcess()) return false;
             var recipe = BuildingWorld.Recipe(State.selectedRecipe);
-            if (recipe == null || recipe.OutputItem == null || recipe.ProcessingSeconds <= 0) return false;
-            if (StoredCount + recipe.OutputAmount > Definition.capacity) return false;
-            if (!Contains(State.inputs, recipe.Ingredients)) return false;
             if (State.fuelCharges <= 0)
             {
                 if (!Contains(State.fuel, recipe.FuelIngredients)) return false;
@@ -119,8 +143,11 @@ namespace Duskborn.Gameplay.Building
         private int FuelBurnsPerLoadedFuel(CraftingRecipe recipe) =>
             Definition.station == CraftingStationType.Forja && recipe.FuelIngredients.Count > 0 ? 2 : 1;
 
-        private static int Amount(List<MaterialStack> stacks, string id) =>
-            stacks.Find(value => value.id == id)?.amount ?? 0;
+        private static int Amount(List<MaterialStack> stacks, string id)
+        {
+            foreach (var stack in stacks) if (stack.id == id) return stack.amount;
+            return 0;
+        }
 
         private static void AddTo(List<MaterialStack> stacks, string id, int amount)
         {

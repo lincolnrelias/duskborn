@@ -194,6 +194,28 @@ namespace InventorySystem.Bootstrap
 
         private void AddStartupItems()
         {
+            var initialDb = Duskborn.Inventory.InitialInventoryDatabase.Instance;
+            if (initialDb != null && initialDb.BackpackItems != null && initialDb.BackpackItems.Count > 0)
+            {
+                for (var i = 0; i < initialDb.BackpackItems.Count; i++)
+                {
+                    var entry = initialDb.BackpackItems[i];
+                    if (entry == null || entry.Item == null) continue;
+
+                    if (entry.Item.Icon != null)
+                    {
+                        RegisterIcon(entry.Item.Id, entry.Item.Icon);
+                    }
+
+                    var item = entry.CreateRuntimeItem();
+                    if (item != null)
+                    {
+                        _service.TryAddItem(item, out _);
+                    }
+                }
+                return;
+            }
+
             if (startupItems == null)
             {
                 return;
@@ -215,6 +237,23 @@ namespace InventorySystem.Bootstrap
         private void CacheStartupItemIcons()
         {
             _iconByItemId.Clear();
+
+            var initialDb = Duskborn.Inventory.InitialInventoryDatabase.Instance;
+            if (initialDb != null && initialDb.BackpackItems != null && initialDb.BackpackItems.Count > 0)
+            {
+                for (var i = 0; i < initialDb.BackpackItems.Count; i++)
+                {
+                    var definition = initialDb.BackpackItems[i]?.Item;
+                    if (definition == null || string.IsNullOrWhiteSpace(definition.Id)) continue;
+                    if (definition.Icon != null)
+                    {
+                        _iconByItemId[definition.Id] = definition.Icon;
+                        ItemIconRegistry.Register(definition.Id, definition.Icon);
+                    }
+                }
+                return;
+            }
+
             if (startupItems == null)
             {
                 return;

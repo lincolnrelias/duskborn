@@ -39,9 +39,7 @@ namespace Duskborn.Gameplay.Player
         {
             var inventory = GetComponent<ResourceInventory>();
             if (inventory == null) return;
-            inventory.EnsureStartingAmount("material_stone", 50);
-            inventory.EnsureStartingAmount("material_wood", 50);
-            inventory.EnsureStartingAmount("material_iron", 50);
+            inventory.InitializeFromInitialDatabase();
         }
         [ServerRpc] private void RequestBuildingSnapshotRpc() => SendBuildingSnapshot(JsonUtility.ToJson(BuildingWorld.Ensure().Capture()));
         public void SendBuildingSnapshot(string json) { if (IsServerStarted) BuildingSnapshotRpc(Owner, json); }
@@ -89,8 +87,16 @@ namespace Duskborn.Gameplay.Player
             bool unlocked = true;
             var discovery = GetComponent<RecipeDiscoveryTracker>();
             if (command.action == "place") unlocked = BuildingWorld.Instance.Definition(command.definition).IsUnlocked(discovery);
-            if (command.action == "queue" || command.action == "load")
-                unlocked = discovery != null && discovery.IsDiscovered(BuildingWorld.Recipe(command.recipe));
+            if (command.action == "queue")
+            {
+                var r = BuildingWorld.Recipe(command.recipe);
+                unlocked = r != null && (discovery == null || discovery.IsDiscovered(r));
+            }
+            if (command.action == "load")
+            {
+                var r = BuildingWorld.Recipe(command.recipe);
+                unlocked = r != null && (discovery == null || discovery.IsDiscovered(r) || r.RequiredStation == CraftingStationType.Forja);
+            }
             bool paid = unlocked && GetComponent<ResourceInventory>().TrySpendBatch(Decode(costJson));
             CompleteBuildingRpc(token, paid);
         }

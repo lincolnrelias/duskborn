@@ -311,6 +311,9 @@ namespace Duskborn.Effects
 
         private void LateUpdate()
         {
+            if (_canvasGroup != null && _canvasGroup.alpha <= 0.001f && _fadeTimer <= 0f && Mathf.Abs(_displayFill - _targetFill) < 0.001f)
+                return;
+
             if (_mainCamera == null)
             {
                 _mainCamera = Camera.main;

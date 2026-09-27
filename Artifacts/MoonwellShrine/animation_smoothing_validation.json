@@ -1,0 +1,10 @@
+{
+  "preview_fps": 30,
+  "preview_frames": 120,
+  "loop_seam_max_world_delta": 0.0,
+  "collision_sample_count": 241,
+  "page_to_crescent_or_crystal_collisions": [],
+  "minimum_tip_step_in_middle_80_percent_m": 0.006648891839888341,
+  "stationary_steps_during_turn": 0,
+  "note": "Turn follows cosine angular easing sampled every two frames; no intermediate pose stops. Hidden reset follows frames 113-121."
+}

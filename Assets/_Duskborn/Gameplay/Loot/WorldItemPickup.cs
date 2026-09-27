@@ -46,6 +46,11 @@ namespace Duskborn.Gameplay.Loot
             _rarity.OnChange += OnRarityChanged;
         }
 
+        private void OnDestroy()
+        {
+            _rarity.OnChange -= OnRarityChanged;
+        }
+
         public override void OnStartClient()
         {
             base.OnStartClient();

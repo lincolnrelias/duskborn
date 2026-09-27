@@ -145,6 +145,23 @@ namespace Duskborn.Gameplay.ActionBar
 
         private void AddStartingItems()
         {
+            var initialDb = Duskborn.Inventory.InitialInventoryDatabase.Instance;
+            if (initialDb != null && initialDb.ActionBarItems != null && initialDb.ActionBarItems.Count > 0)
+            {
+                foreach (var entry in initialDb.ActionBarItems)
+                {
+                    if (entry == null || entry.Item == null) continue;
+
+                    if (entry.Item.Icon != null)
+                        RegisterIcon(entry.Item.Id, entry.Item.Icon);
+
+                    var item = entry.CreateRuntimeItem();
+                    if (item != null && !_service.Service.TryAddItem(item, out _))
+                        DuskLog.Warn(LogChannel.ActionBar, $"Could not add starting item '{entry.Item.name}' to action bar (no free slot).");
+                }
+                return;
+            }
+
             if (startingItems == null) return;
             foreach (var def in startingItems)
             {
@@ -157,6 +174,22 @@ namespace Duskborn.Gameplay.ActionBar
 
         private void CacheStartupItemIcons()
         {
+            var initialDb = Duskborn.Inventory.InitialInventoryDatabase.Instance;
+            if (initialDb != null && initialDb.ActionBarItems != null && initialDb.ActionBarItems.Count > 0)
+            {
+                foreach (var entry in initialDb.ActionBarItems)
+                {
+                    var def = entry?.Item;
+                    if (def == null || string.IsNullOrWhiteSpace(def.Id)) continue;
+                    if (def.Icon != null)
+                    {
+                        _iconByItemId[def.Id] = def.Icon;
+                        ItemIconRegistry.Register(def.Id, def.Icon);
+                    }
+                }
+                return;
+            }
+
             if (startingItems == null) return;
             foreach (var def in startingItems)
             {

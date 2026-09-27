@@ -104,16 +104,32 @@ namespace Duskborn.Gameplay.Crafting
                 if (recipe == null) continue;
                 if (_discoveredIds.Contains(recipe.RecipeId)) continue;
 
-                // Receita é descoberta quando o jogador obtém qualquer um dos seus ingredientes
+                // Receita é descoberta quando o jogador obtém qualquer um dos seus ingredientes ou combustíveis
+                bool discovered = false;
                 foreach (var ing in recipe.Ingredients)
                 {
                     if (ing.material != null && ing.material.Id == resourceId)
                     {
-                        _discoveredIds.Add(recipe.RecipeId);
-                        DuskLog.Log(LogChannel.Inventory, $"Nova receita descoberta: {recipe.RecipeName} (via {resourceId})");
-                        OnRecipeDiscovered?.Invoke(recipe);
+                        discovered = true;
                         break;
                     }
+                }
+                if (!discovered && recipe.FuelIngredients != null)
+                {
+                    foreach (var fuel in recipe.FuelIngredients)
+                    {
+                        if (fuel.material != null && fuel.material.Id == resourceId)
+                        {
+                            discovered = true;
+                            break;
+                        }
+                    }
+                }
+                if (discovered)
+                {
+                    _discoveredIds.Add(recipe.RecipeId);
+                    DuskLog.Log(LogChannel.Inventory, $"Nova receita descoberta: {recipe.RecipeName} (via {resourceId})");
+                    OnRecipeDiscovered?.Invoke(recipe);
                 }
             }
         }

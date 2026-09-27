@@ -85,10 +85,23 @@ namespace Duskborn.Gameplay.Player
             base.OnStartClient();
             if (IsOwner)
             {
+                LocalPlayerContext.Register(this);
                 if (_camController == null)
                     _camController = GetComponent<PlayerCameraController>();
                 _camController?.InitializeForOwner();
             }
+        }
+
+        public override void OnStopClient()
+        {
+            base.OnStopClient();
+            if (IsOwner)
+                LocalPlayerContext.Unregister(this);
+        }
+
+        private void OnDestroy()
+        {
+            LocalPlayerContext.Unregister(this);
         }
 
         public override void OnOwnershipClient(FishNet.Connection.NetworkConnection prevOwner)
@@ -96,9 +109,14 @@ namespace Duskborn.Gameplay.Player
             base.OnOwnershipClient(prevOwner);
             if (IsOwner)
             {
+                LocalPlayerContext.Register(this);
                 if (_camController == null)
                     _camController = GetComponent<PlayerCameraController>();
                 _camController?.InitializeForOwner();
+            }
+            else
+            {
+                LocalPlayerContext.Unregister(this);
             }
         }
 

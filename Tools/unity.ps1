@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Position = 0)]
-    [ValidateSet('help', 'compile', 'validate', 'test', 'build-windows', 'all')]
+    [ValidateSet('help', 'compile', 'validate', 'test', 'build-windows', 'clear-terrain', 'all')]
     [string]$Command = 'help',
 
     [string]$UnityPath,
@@ -23,6 +23,7 @@ Unity CLI workflow
   .\Tools\unity.ps1 validate
   .\Tools\unity.ps1 test
   .\Tools\unity.ps1 build-windows
+  .\Tools\unity.ps1 clear-terrain
   .\Tools\unity.ps1 all
 
 Options:
@@ -162,6 +163,11 @@ switch ($Command) {
             ) `
             -SuccessMarker '[DuskbornCli] Windows build succeeded.' `
             -ExpectedOutput $BuildPath
+    }
+    'clear-terrain' {
+        Invoke-UnityTask -Name 'clear-terrain' `
+            -TaskArguments @('-quit', '-executeMethod', 'Duskborn.Editor.DuskbornCli.ClearGeneratedTerrain') `
+            -SuccessMarker '[DuskbornCli] ClearGeneratedTerrain succeeded.'
     }
     'all' {
         Invoke-UnityTask -Name 'compile' `

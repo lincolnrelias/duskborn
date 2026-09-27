@@ -39,27 +39,40 @@ namespace Duskborn.Gameplay.Enemies
                 return null;
             }
 
-            EnemyBase e = Instantiate(_prefab, position, Quaternion.identity);
+            NetworkObject nob = InstanceFinder.NetworkManager != null
+                ? InstanceFinder.NetworkManager.GetPooledInstantiated(_prefab.NetworkObject, position, Quaternion.identity, asServer: true)
+                : Instantiate(_prefab.NetworkObject, position, Quaternion.identity);
+
+            EnemyBase e = nob.GetComponent<EnemyBase>();
+            e.ResetEnemy(position);
+            e.OnDied -= HandleEnemyDied;
             e.OnDied += HandleEnemyDied;
             e.ApplyPlayerCountScaling(playerCount);
-            InstanceFinder.ServerManager.Spawn(e.NetworkObject);
+
+            if (!nob.IsSpawned)
+                InstanceFinder.ServerManager.Spawn(nob);
+
             _active.Add(e);
             return e;
         }
 
         private void HandleEnemyDied(EnemyBase enemy)
         {
+            enemy.OnDied -= HandleEnemyDied;
             _active.Remove(enemy);
-            // Despawn is called inside EnemyBase.Die() — destruction is already handled there.
             OnAnyEnemyDied?.Invoke(enemy);
         }
 
         public void DespawnAll()
         {
-            foreach (var e in new List<EnemyBase>(_active))
+            for (int i = _active.Count - 1; i >= 0; i--)
             {
+                var e = _active[i];
                 if (e != null && e.IsSpawned)
-                    InstanceFinder.ServerManager.Despawn(e.NetworkObject, DespawnType.Destroy);
+                {
+                    e.OnDied -= HandleEnemyDied;
+                    InstanceFinder.ServerManager.Despawn(e.NetworkObject, DespawnType.Pool);
+                }
             }
             _active.Clear();
         }

@@ -78,10 +78,16 @@ namespace Duskborn.Effects
             ReturnToPool();
         }
 
+        private static Camera _mainCamera;
+
         private void LateUpdate()
         {
-            if (Camera.main != null)
-                transform.rotation = Camera.main.transform.rotation;
+            if (_mainCamera == null)
+            {
+                _mainCamera = Camera.main;
+                if (_mainCamera == null) return;
+            }
+            transform.rotation = _mainCamera.transform.rotation;
         }
 
         private void ReturnToPool()

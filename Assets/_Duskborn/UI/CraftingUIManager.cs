@@ -131,6 +131,9 @@ namespace Duskborn.UI
         {
             LoadSprites();
             LoadDefaultRecipes();
+
+            LocalPlayerContext.OnLocalPlayerRegistered += HandleLocalPlayerRegistered;
+            LocalPlayerContext.OnLocalPlayerUnregistered += HandleLocalPlayerUnregistered;
             TryFindIntegrations();
         }
 
@@ -159,8 +162,25 @@ namespace Duskborn.UI
         private void OnDestroy()
         {
             if (Instance == this) Instance = null;
+
+            LocalPlayerContext.OnLocalPlayerRegistered -= HandleLocalPlayerRegistered;
+            LocalPlayerContext.OnLocalPlayerUnregistered -= HandleLocalPlayerUnregistered;
+
             if (_playerResources != null)
                 _playerResources.ResourceChanged -= OnResourceChanged;
+        }
+
+        private void HandleLocalPlayerRegistered()
+        {
+            TryFindIntegrations();
+        }
+
+        private void HandleLocalPlayerUnregistered()
+        {
+            if (_playerResources != null)
+                _playerResources.ResourceChanged -= OnResourceChanged;
+            _playerResources = null;
+            _discoveryTracker = null;
         }
 
         // ── Integrações e Cache ────────────────────────────────────────────────
@@ -211,24 +231,40 @@ namespace Duskborn.UI
             // Cache do jogador local
             if (_playerResources == null)
             {
-                foreach (var combat in FindObjectsByType<PlayerCombat>())
+                if (LocalPlayerContext.Resources != null)
                 {
-                    if (!combat.IsOwner) continue;
-                    _playerResources = combat.GetComponent<ResourceInventory>();
-                    if (_playerResources != null)
-                    {
-                        _playerResources.ResourceChanged -= OnResourceChanged;
-                        _playerResources.ResourceChanged += OnResourceChanged;
-                    }
+                    _playerResources = LocalPlayerContext.Resources;
+                    _playerResources.ResourceChanged -= OnResourceChanged;
+                    _playerResources.ResourceChanged += OnResourceChanged;
 
-                    if (_playerResources != null && _discoveryTracker == null)
+                    if (_discoveryTracker == null)
                     {
                         _discoveryTracker = _playerResources.GetComponent<RecipeDiscoveryTracker>();
                         if (_discoveryTracker == null)
                             _discoveryTracker = _playerResources.gameObject.AddComponent<RecipeDiscoveryTracker>();
                     }
+                }
+                else
+                {
+                    foreach (var combat in FindObjectsByType<PlayerCombat>())
+                    {
+                        if (!combat.IsOwner) continue;
+                        _playerResources = combat.GetComponent<ResourceInventory>();
+                        if (_playerResources != null)
+                        {
+                            _playerResources.ResourceChanged -= OnResourceChanged;
+                            _playerResources.ResourceChanged += OnResourceChanged;
+                        }
 
-                    break;
+                        if (_playerResources != null && _discoveryTracker == null)
+                        {
+                            _discoveryTracker = _playerResources.GetComponent<RecipeDiscoveryTracker>();
+                            if (_discoveryTracker == null)
+                                _discoveryTracker = _playerResources.gameObject.AddComponent<RecipeDiscoveryTracker>();
+                        }
+
+                        break;
+                    }
                 }
             }
         }
@@ -245,6 +281,9 @@ namespace Duskborn.UI
         private bool IsLocalPlayerNearWorkbench(float maxDistance)
         {
             if (CurrentWorkbench == null) return false;
+            if (LocalPlayerContext.Combat != null)
+                return CurrentWorkbench.IsInRange(LocalPlayerContext.Combat.transform.position, maxDistance);
+
             foreach (var combat in FindObjectsByType<PlayerCombat>())
             {
                 if (combat.IsOwner)

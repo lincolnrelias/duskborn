@@ -39,14 +39,44 @@ namespace Duskborn.UI
             _showStats = false;
         }
 
+        private static readonly StringBuilder s_mainHudSb = new(512);
+        private static readonly StringBuilder s_statPanelSb = new(512);
+        private static readonly EquipmentSlot[] s_equipmentSlots = (EquipmentSlot[])System.Enum.GetValues(typeof(EquipmentSlot));
+
         private void Awake()
         {
             Instance = this;
         }
 
+        private void OnEnable()
+        {
+            LocalPlayerContext.OnLocalPlayerRegistered += HandleLocalPlayerRegistered;
+            LocalPlayerContext.OnLocalPlayerUnregistered += HandleLocalPlayerUnregistered;
+            TryCacheLocalPlayer();
+        }
+
+        private void OnDisable()
+        {
+            LocalPlayerContext.OnLocalPlayerRegistered -= HandleLocalPlayerRegistered;
+            LocalPlayerContext.OnLocalPlayerUnregistered -= HandleLocalPlayerUnregistered;
+        }
+
         private void OnDestroy()
         {
             if (Instance == this) Instance = null;
+        }
+
+        private void HandleLocalPlayerRegistered()
+        {
+            TryCacheLocalPlayer();
+        }
+
+        private void HandleLocalPlayerUnregistered()
+        {
+            _stats = null;
+            _resources = null;
+            _inventory = null;
+            _equipment = null;
         }
 
         private void Update()
@@ -55,18 +85,15 @@ namespace Duskborn.UI
                 _showStats = !_showStats;
         }
 
-        // Deferred — players may not be spawned yet at Start.
         private void TryCacheLocalPlayer()
         {
-            if (_inventory != null && _resources != null && _stats != null) return;
-            foreach (var combat in FindObjectsByType<PlayerCombat>(FindObjectsSortMode.None))
+            if (_inventory != null && _resources != null && _stats != null && _equipment != null) return;
+            if (LocalPlayerContext.HasLocalPlayer)
             {
-                if (!combat.IsOwner) continue;
-                _inventory  ??= combat.GetComponent<PlayerBuffContainer>();
-                _resources  ??= combat.GetComponent<ResourceInventory>();
-                _stats      ??= combat.GetComponent<PlayerStats>();
-                _equipment  ??= combat.GetComponent<PlayerEquipmentContainer>();
-                break;
+                _inventory ??= LocalPlayerContext.Buffs;
+                _resources ??= LocalPlayerContext.Resources;
+                _stats     ??= LocalPlayerContext.Stats;
+                _equipment ??= LocalPlayerContext.Equipment;
             }
         }
 
@@ -129,59 +156,59 @@ namespace Duskborn.UI
             int    gold    = GoldManager.Instance != null ? GoldManager.Instance.Gold             : 0;
 
             var players = PlayerRegistry.All;
-            var sb = new StringBuilder();
-            sb.AppendLine($"Fase:    {period} (Noite {night})");
-            sb.AppendLine($"Tempo:   {timer}");
+            s_mainHudSb.Clear();
+            s_mainHudSb.AppendLine($"Fase:    {period} (Noite {night})");
+            s_mainHudSb.AppendLine($"Tempo:   {timer}");
             if (cycle != null && cycle.IsDusk)
             {
-                sb.AppendLine(">> AVISO: Crepúsculo! Retorne à base! <<");
+                s_mainHudSb.AppendLine(">> AVISO: Crepúsculo! Retorne à base! <<");
             }
-            sb.AppendLine($"Estado:  {gstate}");
-            sb.AppendLine($"Ouro:    {gold}");
-            sb.AppendLine($"Buffs:   {(_inventory != null ? _inventory.Buffs.Count : 0)}");
+            s_mainHudSb.AppendLine($"Estado:  {gstate}");
+            s_mainHudSb.AppendLine($"Ouro:    {gold}");
+            s_mainHudSb.AppendLine($"Buffs:   {(_inventory != null ? _inventory.Buffs.Count : 0)}");
             if (_resources != null)
             {
                 foreach (KeyValuePair<string, int> kv in _resources.Counts)
-                    if (kv.Value > 0) sb.AppendLine($"{kv.Key}: {kv.Value}");
+                    if (kv.Value > 0) s_mainHudSb.AppendLine($"{kv.Key}: {kv.Value}");
             }
-            sb.AppendLine($"Inimigos: {alive} vivos  |  {pending} na fila");
-            sb.AppendLine("─────────────────");
+            s_mainHudSb.AppendLine($"Inimigos: {alive} vivos  |  {pending} na fila");
+            s_mainHudSb.AppendLine("─────────────────");
             if (players.Count == 0)
-                sb.AppendLine("Nenhum jogador registrado");
+                s_mainHudSb.AppendLine("Nenhum jogador registrado");
             else
                 for (int i = 0; i < players.Count; i++)
-                    sb.AppendLine($"P{i + 1} HP: {players[i].CurrentHP:F0} / {players[i].MaxHP:F0}");
+                    s_mainHudSb.AppendLine($"P{i + 1} HP: {players[i].CurrentHP:F0} / {players[i].MaxHP:F0}");
 
-            sb.AppendLine("─────────────────");
-            sb.AppendLine("F1 Pular dia  F2 Encerrar noite");
-            sb.AppendLine("F3 Dano       F4 Linha do tempo");
-            sb.AppendLine("C  Painel do Personagem");
+            s_mainHudSb.AppendLine("─────────────────");
+            s_mainHudSb.AppendLine("F1 Pular dia  F2 Encerrar noite");
+            s_mainHudSb.AppendLine("F3 Dano       F4 Linha do tempo");
+            s_mainHudSb.AppendLine("C  Painel do Personagem");
 
             float w = 270f, h = (cycle != null && cycle.IsDusk) ? 252f : 234f;
             GUI.Box(new Rect(10, 10, w, h), GUIContent.none, _boxStyle);
-            GUI.Label(new Rect(18, 14, w - 8, h - 4), sb.ToString(), _labelStyle);
+            GUI.Label(new Rect(18, 14, w - 8, h - 4), s_mainHudSb.ToString(), _labelStyle);
         }
 
         private void DrawStatPanel(float virtualW, float virtualH)
         {
-            var sb = new StringBuilder();
-            sb.AppendLine("── Player Stats ─────────");
-            sb.AppendLine($"HP:          {_stats.CurrentHP:F0} / {_stats.MaxHP:F0}");
-            sb.AppendLine($"Damage:      {_stats.Damage:F1}");
-            sb.AppendLine($"Move Speed:  {_stats.MoveSpeed:F2}");
-            sb.AppendLine($"Atk Speed:   {_stats.AttackSpeed:F2}");
-            sb.AppendLine($"Crit:        {_stats.CritChance * 100f:F0}%");
-            sb.AppendLine($"Dmg Reduc:   {(1f - _stats.EffectiveIncomingDamage) * 100f:F0}%");
-            sb.AppendLine("─────────────────────────");
-            sb.AppendLine("Equipped");
+            s_statPanelSb.Clear();
+            s_statPanelSb.AppendLine("── Player Stats ─────────");
+            s_statPanelSb.AppendLine($"HP:          {_stats.CurrentHP:F0} / {_stats.MaxHP:F0}");
+            s_statPanelSb.AppendLine($"Damage:      {_stats.Damage:F1}");
+            s_statPanelSb.AppendLine($"Move Speed:  {_stats.MoveSpeed:F2}");
+            s_statPanelSb.AppendLine($"Atk Speed:   {_stats.AttackSpeed:F2}");
+            s_statPanelSb.AppendLine($"Crit:        {_stats.CritChance * 100f:F0}%");
+            s_statPanelSb.AppendLine($"Dmg Reduc:   {(1f - _stats.EffectiveIncomingDamage) * 100f:F0}%");
+            s_statPanelSb.AppendLine("─────────────────────────");
+            s_statPanelSb.AppendLine("Equipped");
 
-            var slots = System.Enum.GetValues(typeof(EquipmentSlot));
-            foreach (EquipmentSlot slot in slots)
+            for (int i = 0; i < s_equipmentSlots.Length; i++)
             {
+                EquipmentSlot slot = s_equipmentSlots[i];
                 var gear = _equipment != null ? _equipment.GetEquipped(slot) : null;
                 string slotName  = FormatSlotName(slot);
                 string itemLabel = gear != null ? gear.DisplayName : "—";
-                sb.AppendLine($"{slotName,-10} {itemLabel}");
+                s_statPanelSb.AppendLine($"{slotName,-10} {itemLabel}");
             }
 
             const float w = 240f, h = 400f;
@@ -189,7 +216,7 @@ namespace Duskborn.UI
             float y = virtualH - h - 10f;
 
             GUI.Box(new Rect(x, y, w, h), GUIContent.none, _boxStyle);
-            GUI.Label(new Rect(x + 8f, y + 4f, w - 16f, h - 8f), sb.ToString(), _labelStyle);
+            GUI.Label(new Rect(x + 8f, y + 4f, w - 16f, h - 8f), s_statPanelSb.ToString(), _labelStyle);
         }
 
         private static string FormatSlotName(EquipmentSlot slot) => slot switch

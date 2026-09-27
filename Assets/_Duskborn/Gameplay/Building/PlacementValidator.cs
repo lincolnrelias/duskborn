@@ -3,12 +3,14 @@ namespace Duskborn.Gameplay.Building
 {
     public static class PlacementValidator
     {
+        private static readonly Collider[] BoxBuffer = new Collider[32];
+
         public static bool Finite(Vector3 p) => float.IsFinite(p.x) && float.IsFinite(p.y) && float.IsFinite(p.z);
         public static string Validate(BuildableDefinition d, Vector3 p, Quaternion rotation, Vector3 player, Transform ignored = null)
         {
             if (d == null || !Finite(p) || !Finite(rotation.eulerAngles)) return "Posição inválida.";
             if (!BuildableBounds.TryGet(d, out var bounds)) return "O modelo da construção não possui uma malha utilizável.";
-            if (Vector3.Distance(player, p) > d.reach) return "Aproxime-se do local.";
+            if ((player - p).sqrMagnitude > d.reach * d.reach) return "Aproxime-se do local.";
             // Test center and all footprint corners. Reject supports which are props or stations.
             for (int i = 0; i < 5; i++)
             {
@@ -26,9 +28,14 @@ namespace Duskborn.Gameplay.Building
             float bottomInset = Mathf.Min(d.groundTolerance + .02f, extents.y * .5f);
             extents.y -= bottomInset * .5f;
             var center = p + BuildableBounds.GroundOffset(bounds) + rotation * bounds.center + Vector3.up * bottomInset * .5f;
-            foreach (var collider in Physics.OverlapBox(center, extents, rotation, d.blockingLayers, QueryTriggerInteraction.Ignore))
+            int count = Physics.OverlapBoxNonAlloc(center, extents, BoxBuffer, rotation, d.blockingLayers, QueryTriggerInteraction.Ignore);
+            for (int i = 0; i < count; i++)
             {
+                var collider = BoxBuffer[i];
+                BoxBuffer[i] = null;
                 if (ignored != null && collider.transform.IsChildOf(ignored)) continue;
+                // Clear remaining refs
+                for (int j = i + 1; j < count; j++) BoxBuffer[j] = null;
                 return "Há um obstáculo na área ou falta espaço livre.";
             }
             if (d.rules != null) foreach (var rule in d.rules)

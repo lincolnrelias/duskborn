@@ -22,7 +22,18 @@ namespace Duskborn.Gameplay.Loot
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
-            _goldSync.OnChange += (prev, next, asServer) => OnGoldChanged?.Invoke(next);
+            _goldSync.OnChange += HandleGoldSync;
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+            _goldSync.OnChange -= HandleGoldSync;
+        }
+
+        private void HandleGoldSync(int prev, int next, bool asServer)
+        {
+            OnGoldChanged?.Invoke(next);
         }
 
         public override void OnStartServer()

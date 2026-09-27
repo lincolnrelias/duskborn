@@ -145,14 +145,14 @@ namespace Duskborn.UI
 
         private void Start()
         {
+            LocalPlayerContext.OnLocalPlayerRegistered += HandleLocalPlayerRegistered;
+            LocalPlayerContext.OnLocalPlayerUnregistered += HandleLocalPlayerUnregistered;
             TryFindIntegrations();
             EnsureUIHierarchy();
         }
 
         private void Update()
         {
-            TryFindIntegrations();
-
             if (IsCharacterPanelKeyPressed())
             {
                 Toggle();
@@ -181,6 +181,9 @@ namespace Duskborn.UI
         {
             if (Instance == this) Instance = null;
 
+            LocalPlayerContext.OnLocalPlayerRegistered -= HandleLocalPlayerRegistered;
+            LocalPlayerContext.OnLocalPlayerUnregistered -= HandleLocalPlayerUnregistered;
+
             if (IsOpen)
             {
                 bool otherMenuOpen = (_inventoryUI != null && _inventoryUI.IsOpen) ||
@@ -201,6 +204,27 @@ namespace Duskborn.UI
                 _playerStats.OnHealthChanged -= HandleHealthChanged;
 
             CleanupPreviewRig();
+        }
+
+        private void HandleLocalPlayerRegistered()
+        {
+            TryFindIntegrations();
+        }
+
+        private void HandleLocalPlayerUnregistered()
+        {
+            if (_equipment != null)
+                _equipment.OnEquipmentChanged -= HandleEquipmentChanged;
+            if (_buffs != null)
+                _buffs.OnStatsApplied -= HandleStatsApplied;
+            if (_playerStats != null)
+                _playerStats.OnHealthChanged -= HandleHealthChanged;
+
+            _playerCombat = null;
+            _equipment = null;
+            _playerStats = null;
+            _buffs = null;
+            _weaponHandler = null;
         }
 
         // ── Integrações e Cache do Jogador ─────────────────────────────────────
@@ -231,37 +255,48 @@ namespace Duskborn.UI
 
             if (_equipment == null || _playerStats == null)
             {
-                PlayerCombat fallbackCombat = null;
-                foreach (var combat in FindObjectsByType<PlayerCombat>(FindObjectsSortMode.None))
+                if (LocalPlayerContext.HasLocalPlayer)
                 {
-                    if (combat.IsOwner)
-                    {
-                        _playerCombat = combat;
-                        break;
-                    }
-                    if (fallbackCombat == null) fallbackCombat = combat;
-                }
-
-                if (_playerCombat == null && fallbackCombat != null)
-                    _playerCombat = fallbackCombat;
-
-                if (_playerCombat != null)
-                {
-                    _equipment = _playerCombat.GetComponent<PlayerEquipmentContainer>();
-                    _playerStats = _playerCombat.GetComponent<PlayerStats>();
-                    _buffs = _playerCombat.GetComponent<PlayerBuffContainer>();
-                    _weaponHandler = _playerCombat.GetComponent<PlayerWeaponHandler>();
+                    _playerCombat = LocalPlayerContext.Combat;
+                    _equipment = LocalPlayerContext.Equipment;
+                    _playerStats = LocalPlayerContext.Stats;
+                    _buffs = LocalPlayerContext.Buffs;
+                    _weaponHandler = LocalPlayerContext.WeaponHandler;
                 }
                 else
                 {
-                    if (_equipment == null)
-                        _equipment = FindAnyObjectByType<PlayerEquipmentContainer>();
-                    if (_playerStats == null)
-                        _playerStats = FindAnyObjectByType<PlayerStats>();
-                    if (_buffs == null)
-                        _buffs = FindAnyObjectByType<PlayerBuffContainer>();
-                    if (_weaponHandler == null)
-                        _weaponHandler = FindAnyObjectByType<PlayerWeaponHandler>();
+                    PlayerCombat fallbackCombat = null;
+                    foreach (var combat in FindObjectsByType<PlayerCombat>(FindObjectsSortMode.None))
+                    {
+                        if (combat.IsOwner)
+                        {
+                            _playerCombat = combat;
+                            break;
+                        }
+                        if (fallbackCombat == null) fallbackCombat = combat;
+                    }
+
+                    if (_playerCombat == null && fallbackCombat != null)
+                        _playerCombat = fallbackCombat;
+
+                    if (_playerCombat != null)
+                    {
+                        _equipment = _playerCombat.GetComponent<PlayerEquipmentContainer>();
+                        _playerStats = _playerCombat.GetComponent<PlayerStats>();
+                        _buffs = _playerCombat.GetComponent<PlayerBuffContainer>();
+                        _weaponHandler = _playerCombat.GetComponent<PlayerWeaponHandler>();
+                    }
+                    else
+                    {
+                        if (_equipment == null)
+                            _equipment = FindAnyObjectByType<PlayerEquipmentContainer>();
+                        if (_playerStats == null)
+                            _playerStats = FindAnyObjectByType<PlayerStats>();
+                        if (_buffs == null)
+                            _buffs = FindAnyObjectByType<PlayerBuffContainer>();
+                        if (_weaponHandler == null)
+                            _weaponHandler = FindAnyObjectByType<PlayerWeaponHandler>();
+                    }
                 }
 
                 if (_equipment != null)

@@ -210,6 +210,12 @@ namespace Duskborn.Editor
                 instance.name = "Fresco_Furnace";
                 var renderers = instance.GetComponentsInChildren<Renderer>(true);
                 foreach (var modelRenderer in renderers) modelRenderer.sharedMaterial = material;
+                // Keep static flames dark after regeneration; VFX live in a separate
+                // definition-referenced assembly, outside the recreated model child.
+                var effectPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(
+                    "Assets/_Duskborn/Effects/Furnace/FurnaceEffects.prefab");
+                var effect = effectPrefab != null ? effectPrefab.GetComponent<Duskborn.Effects.FurnaceEffects>() : null;
+                if (effect != null) effect.PrepareModel(instance);
                 var renderer = root.GetComponent<MeshRenderer>();
                 var collider = root.GetComponent<BoxCollider>();
                 if (renderers.Length == 0)

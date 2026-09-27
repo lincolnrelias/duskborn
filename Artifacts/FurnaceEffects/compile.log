@@ -1,0 +1,124 @@
+Compilador do Microsoft (R) Visual C# versão 4.3.1-3.22526.13 (41a5af9d)
+Copyright (C) Microsoft Corporation. Todos os direitos reservados.
+
+warning CS2002: Arquivo de origem "Assets\_Duskborn\Effects\Furnace\FurnaceEffects.cs" especificado várias vezes
+Assets\ThirdPartyAssets\FishNet\Upgrading\UpgradeFromMirrorMenu.cs(44,37): warning CS0618: "PlayerSettings.GetScriptingDefineSymbolsForGroup(BuildTargetGroup)" é obsoleto: "Use GetScriptingDefineSymbols(NamedBuildTarget buildTarget) instead"
+Assets\ThirdPartyAssets\FishNet\Upgrading\UpgradeFromMirrorMenu.cs(66,17): warning CS0618: "PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup, string)" é obsoleto: "Use SetScriptingDefineSymbols(NamedBuildTarget buildTarget, string defines) instead"
+Assets\_Duskborn\Gameplay\World\ChunkGridManager.cs(443,34): warning CS0618: "Object.GetInstanceID()" é obsoleto: "GetInstanceID is deprecated. Use GetEntityId instead. This will be removed in a future version."
+Assets\_Duskborn\Gameplay\World\ChunkGridManager.cs(443,17): warning CS0618: "Physics.BakeMesh(int, bool)" é obsoleto: "BakeMesh(int, bool) is obsolete. Use BakeMesh(EntityId, bool) instead."
+Assets\_Duskborn\Gameplay\World\StaticTierTestNodes.cs(246,107): warning CS0618: "FindObjectsSortMode" é obsoleto: "FindObjectsSortMode has been deprecated. Use the FindObjectsByType overloads that do not take a FindObjectsSortMode parameter."
+Assets\_Duskborn\Gameplay\World\StaticTierTestNodes.cs(246,28): warning CS0618: "Object.FindObjectsByType<T>(FindObjectsSortMode)" é obsoleto: "FindObjectsByType with FindObjectsSortMode parameter has been deprecated. Use FindObjectsByType<T>() or FindObjectsByType<T>(FindObjectsInactive) instead. InstanceID will be replaced in the future with EntityId and previous sort order cannot be maintained."
+Assets\_Duskborn\Gameplay\ActionBar\ActionBarInstaller.cs(273,57): warning CS0618: "FindObjectsSortMode" é obsoleto: "FindObjectsSortMode has been deprecated. Use the FindObjectsByType overloads that do not take a FindObjectsSortMode parameter."
+Assets\_Duskborn\Gameplay\ActionBar\ActionBarInstaller.cs(273,31): warning CS0618: "Object.FindObjectsByType<T>(FindObjectsSortMode)" é obsoleto: "FindObjectsByType with FindObjectsSortMode parameter has been deprecated. Use FindObjectsByType<T>() or FindObjectsByType<T>(FindObjectsInactive) instead. InstanceID will be replaced in the future with EntityId and previous sort order cannot be maintained."
+Assets\_Duskborn\UI\CharacterUIManager.cs(220,65): warning CS0618: "FindObjectsSortMode" é obsoleto: "FindObjectsSortMode has been deprecated. Use the FindObjectsByType overloads that do not take a FindObjectsSortMode parameter."
+Assets\_Duskborn\UI\CharacterUIManager.cs(220,39): warning CS0618: "Object.FindObjectsByType<T>(FindObjectsSortMode)" é obsoleto: "FindObjectsByType with FindObjectsSortMode parameter has been deprecated. Use FindObjectsByType<T>() or FindObjectsByType<T>(FindObjectsInactive) instead. InstanceID will be replaced in the future with EntityId and previous sort order cannot be maintained."
+Assets\_Duskborn\UI\CharacterUIManager.cs(235,72): warning CS0618: "FindObjectsSortMode" é obsoleto: "FindObjectsSortMode has been deprecated. Use the FindObjectsByType overloads that do not take a FindObjectsSortMode parameter."
+Assets\_Duskborn\UI\CharacterUIManager.cs(235,40): warning CS0618: "Object.FindObjectsByType<T>(FindObjectsSortMode)" é obsoleto: "FindObjectsByType with FindObjectsSortMode parameter has been deprecated. Use FindObjectsByType<T>() or FindObjectsByType<T>(FindObjectsInactive) instead. InstanceID will be replaced in the future with EntityId and previous sort order cannot be maintained."
+Assets\_Duskborn\UI\DraggablePanel.cs(65,27): warning CS0618: "Object.FindFirstObjectByType<T>()" é obsoleto: "FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering."
+Assets\_Duskborn\UI\CraftingUIManager.cs(187,65): warning CS0618: "FindObjectsSortMode" é obsoleto: "FindObjectsSortMode has been deprecated. Use the FindObjectsByType overloads that do not take a FindObjectsSortMode parameter."
+Assets\_Duskborn\UI\CraftingUIManager.cs(187,39): warning CS0618: "Object.FindObjectsByType<T>(FindObjectsSortMode)" é obsoleto: "FindObjectsByType with FindObjectsSortMode parameter has been deprecated. Use FindObjectsByType<T>() or FindObjectsByType<T>(FindObjectsInactive) instead. InstanceID will be replaced in the future with EntityId and previous sort order cannot be maintained."
+Assets\_Duskborn\UI\GameHUD.cs(62,68): warning CS0618: "FindObjectsSortMode" é obsoleto: "FindObjectsSortMode has been deprecated. Use the FindObjectsByType overloads that do not take a FindObjectsSortMode parameter."
+Assets\_Duskborn\UI\GameHUD.cs(62,36): warning CS0618: "Object.FindObjectsByType<T>(FindObjectsSortMode)" é obsoleto: "FindObjectsByType with FindObjectsSortMode parameter has been deprecated. Use FindObjectsByType<T>() or FindObjectsByType<T>(FindObjectsInactive) instead. InstanceID will be replaced in the future with EntityId and previous sort order cannot be maintained."
+Assets\_Duskborn\Gameplay\Building\BuildingWorld.cs(50,95): warning CS0618: "FindObjectsSortMode" é obsoleto: "FindObjectsSortMode has been deprecated. Use the FindObjectsByType overloads that do not take a FindObjectsSortMode parameter."
+Assets\_Duskborn\Gameplay\Building\BuildingWorld.cs(50,37): warning CS0618: "Object.FindObjectsByType<T>(FindObjectsInactive, FindObjectsSortMode)" é obsoleto: "FindObjectsByType with FindObjectsSortMode parameter has been deprecated. Use FindObjectsByType<T>() or FindObjectsByType<T>(FindObjectsInactive) instead. InstanceID will be replaced in the future with EntityId and previous sort order cannot be maintained."
+Assets\_Duskborn\UI\CharacterUIManager.cs(821,68): warning CS0618: "FindObjectsSortMode" é obsoleto: "FindObjectsSortMode has been deprecated. Use the FindObjectsByType overloads that do not take a FindObjectsSortMode parameter."
+Assets\_Duskborn\UI\CharacterUIManager.cs(821,36): warning CS0618: "Object.FindObjectsByType<T>(FindObjectsSortMode)" é obsoleto: "FindObjectsByType with FindObjectsSortMode parameter has been deprecated. Use FindObjectsByType<T>() or FindObjectsByType<T>(FindObjectsInactive) instead. InstanceID will be replaced in the future with EntityId and previous sort order cannot be maintained."
+Assets\_Duskborn\UI\CharacterUIManager.cs(844,72): warning CS0618: "FindObjectsSortMode" é obsoleto: "FindObjectsSortMode has been deprecated. Use the FindObjectsByType overloads that do not take a FindObjectsSortMode parameter."
+Assets\_Duskborn\UI\CharacterUIManager.cs(844,33): warning CS0618: "Object.FindObjectsByType<T>(FindObjectsSortMode)" é obsoleto: "FindObjectsByType with FindObjectsSortMode parameter has been deprecated. Use FindObjectsByType<T>() or FindObjectsByType<T>(FindObjectsInactive) instead. InstanceID will be replaced in the future with EntityId and previous sort order cannot be maintained."
+Assets\_Duskborn\UI\InventoryUIManager.cs(399,68): warning CS0618: "FindObjectsSortMode" é obsoleto: "FindObjectsSortMode has been deprecated. Use the FindObjectsByType overloads that do not take a FindObjectsSortMode parameter."
+Assets\_Duskborn\UI\InventoryUIManager.cs(399,36): warning CS0618: "Object.FindObjectsByType<T>(FindObjectsSortMode)" é obsoleto: "FindObjectsByType with FindObjectsSortMode parameter has been deprecated. Use FindObjectsByType<T>() or FindObjectsByType<T>(FindObjectsInactive) instead. InstanceID will be replaced in the future with EntityId and previous sort order cannot be maintained."
+Assets\_Duskborn\UI\InventoryUIManager.cs(445,72): warning CS0618: "FindObjectsSortMode" é obsoleto: "FindObjectsSortMode has been deprecated. Use the FindObjectsByType overloads that do not take a FindObjectsSortMode parameter."
+Assets\_Duskborn\UI\InventoryUIManager.cs(445,40): warning CS0618: "Object.FindObjectsByType<T>(FindObjectsSortMode)" é obsoleto: "FindObjectsByType with FindObjectsSortMode parameter has been deprecated. Use FindObjectsByType<T>() or FindObjectsByType<T>(FindObjectsInactive) instead. InstanceID will be replaced in the future with EntityId and previous sort order cannot be maintained."
+Assets\_Duskborn\UI\InventoryUIManager.cs(454,40): warning CS0618: "Object.FindFirstObjectByType<T>()" é obsoleto: "FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering."
+Assets\_Duskborn\Gameplay\Loot\WorldDropRegistry.cs(16,33): warning CS0618: "Object.FindFirstObjectByType<T>()" é obsoleto: "FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering."
+Assets\_Duskborn\Gameplay\Loot\LootManager.cs(21,33): warning CS0618: "Object.FindFirstObjectByType<T>()" é obsoleto: "FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering."
+Assets\_Duskborn\UI\CraftingUIManager.cs(1481,37): warning CS0618: "Object.GetInstanceID()" é obsoleto: "GetInstanceID is deprecated. Use GetEntityId instead. This will be removed in a future version."
+Assets\ThirdPartyAssets\Kevin Iglesias\Throwing Animations Pack\Scripts\ThrowProp.cs(46,25): warning CS0169: O campo "ThrowProp.nextPos" nunca é usado
+Assets\_Duskborn\Gameplay\Equipment\WeaponDefinition.cs(23,54): warning CS0649: Campo "WeaponDefinition.effectProfile" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Enemies\WaveManager.cs(15,44): warning CS0649: Campo "WaveManager.spawnCenter" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Enemies\EnemyPool.cs(18,44): warning CS0649: Campo "EnemyPool.inspectorPrefab" nunca é atribuído e sempre terá seu valor padrão null
+Assets\Inventory\Scripts\Inventory\Data\ItemDefinitionBase.cs(11,52): warning CS0649: Campo "ItemDefinitionBase.description" nunca é atribuído e sempre terá seu valor padrão null
+Assets\Inventory\Scripts\Inventory\Bootstrap\InventoryInstaller.cs(21,48): warning CS0649: Campo "InventoryInstaller.gridRoot" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Equipment\PlayerWeaponHandler.cs(13,44): warning CS0649: Campo "PlayerWeaponHandler.holdPoint" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Core\DayNightCycle.cs(44,49): warning CS0649: Campo "DayNightCycle.skyboxNightBlendCurve" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\ActionBar\ActionBarInstaller.cs(31,55): warning CS0649: Campo "ActionBarInstaller.startingItems" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\UI\CharacterUIManager.cs(35,44): warning CS0649: Campo "CharacterUIManager.closeSound" nunca é atribuído e sempre terá seu valor padrão null
+Assets\Inventory\Scripts\Inventory\Bootstrap\InventoryInstaller.cs(23,40): warning CS0649: Campo "InventoryInstaller.dragIcon" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Equipment\WeaponDefinition.cs(19,53): warning CS0649: Campo "WeaponDefinition.actions" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Crafting\CraftingRecipe.cs(29,41): warning CS0649: Campo "CraftingRecipe.recipeId" nunca é atribuído e sempre terá seu valor padrão null
+Assets\Inventory\Scripts\Inventory\Bootstrap\InventoryInstaller.cs(25,50): warning CS0649: Campo "InventoryInstaller.tooltipTitle" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Loot\WorldItemPickup.cs(13,44): warning CS0649: Campo "WorldItemPickup.pickupClip" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Loot\LootDropper.cs(10,48): warning CS0649: Campo "LootDropper.dropOrigin" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\ActionBar\ActionBarInstaller.cs(17,64): warning CS0649: Campo "ActionBarInstaller.gridController" nunca é atribuído e sempre terá seu valor padrão null
+Assets\Inventory\Scripts\Inventory\Data\ItemDefinitionBase.cs(10,41): warning CS0649: Campo "ItemDefinitionBase.displayName" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\UI\InventoryUIManager.cs(23,53): warning CS0649: Campo "InventoryUIManager.installer" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Player\PlayerCombat.cs(27,53): warning CS0649: Campo "PlayerCombat.attackTrigger" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Crafting\Workbench.cs(27,51): warning CS0649: Campo "Workbench.recipes" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Effects\WorldHealthBar.cs(30,50): warning CS0649: Campo "WorldHealthBar.config" nunca é atribuído e sempre terá seu valor padrão null
+Assets\Inventory\Scripts\Inventory\Bootstrap\InventoryInstaller.cs(18,55): warning CS0649: Campo "InventoryInstaller.startupItems" nunca é atribuído e sempre terá seu valor padrão null
+Assets\Inventory\Scripts\Inventory\Bootstrap\InventoryInstaller.cs(26,50): warning CS0649: Campo "InventoryInstaller.tooltipDescription" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Loot\Chest.cs(15,46): warning CS0649: Campo "Chest.priceLabel" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Effects\WorldHealthBar.cs(25,50): warning CS0649: Campo "WorldHealthBar.background" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Equipment\WeaponDefinition.cs(16,59): warning CS0649: Campo "WeaponDefinition.typeModifiers" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Crafting\CraftingRecipe.cs(30,41): warning CS0649: Campo "CraftingRecipe.recipeName" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\UI\InventoryUIManager.cs(25,53): warning CS0649: Campo "InventoryUIManager.actionBarInstaller" nunca é atribuído e sempre terá seu valor padrão null
+Assets\Inventory\Scripts\Inventory\UI\InventoryGridLayoutController.cs(11,52): warning CS0649: Campo "InventoryGridLayoutController.slotTemplate" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Equipment\WeaponDefinition.cs(22,54): warning CS0649: Campo "WeaponDefinition.audioProfile" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Core\DayNightCycle.cs(33,49): warning CS0649: Campo "DayNightCycle.dayNightLightColor" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Equipment\PlayerEquipmentContainer.cs(15,51): warning CS0649: Campo "PlayerEquipmentContainer.startingGear" nunca é atribuído e sempre terá seu valor padrão null
+Assets\ThirdPartyAssets\Kevin Iglesias\Throwing Animations Pack\Scripts\ThrowBigAxe.cs(34,28): warning CS0169: O campo "ThrowBigAxe.endRotation" nunca é usado
+Assets\_Duskborn\Gameplay\Enemies\WaveManager.cs(12,54): warning CS0649: Campo "WaveManager.nightDefinitions" nunca é atribuído e sempre terá seu valor padrão null
+Assets\ThirdPartyAssets\Kevin Iglesias\Throwing Animations Pack\Scripts\IdleThrowTrick.cs(34,28): warning CS0169: O campo "IdleThrowTrick.endRotation" nunca é usado
+Assets\_Duskborn\Gameplay\Loot\WorldDropRegistry.cs(28,55): warning CS0649: Campo "WorldDropRegistry.definitions" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Core\GameDebugController.cs(15,46): warning CS0649: Campo "GameDebugController.waveManager" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Equipment\WeaponActionPlayer.cs(21,46): warning CS0649: Campo "WeaponActionPlayer.upperBodyMask" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Equipment\WeaponDefinition.cs(14,51): warning CS0649: Campo "WeaponDefinition.prefab" nunca é atribuído e sempre terá seu valor padrão null
+Assets\Inventory\Scripts\Inventory\Bootstrap\InventoryInstaller.cs(24,48): warning CS0649: Campo "InventoryInstaller.tooltipPanel" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Player\PlayerInteractor.cs(17,44): warning CS0649: Campo "PlayerInteractor.dropSpawnPoint" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Enemies\EnemyBase.cs(44,43): warning CS0649: Campo "EnemyBase._animator" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Effects\WorldHealthBar.cs(23,50): warning CS0649: Campo "WorldHealthBar.fill" nunca é atribuído e sempre terá seu valor padrão null
+Assets\Inventory\Scripts\Inventory\Bootstrap\InventoryInstaller.cs(22,64): warning CS0649: Campo "InventoryInstaller.gridController" nunca é atribuído e sempre terá seu valor padrão null
+Assets\Inventory\Scripts\Inventory\Data\ItemDefinitionBase.cs(9,41): warning CS0649: Campo "ItemDefinitionBase.id" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Enemies\EnemyBase.cs(26,28): warning CS0649: Campo "EnemyBase.creatureTypes" nunca é atribuído e sempre terá seu valor padrão 
+Assets\ThirdPartyAssets\Kevin Iglesias\Throwing Animations Pack\Scripts\ThrowMultipleProps.cs(49,25): warning CS0169: O campo "ThrowMultipleProps.nextPos" nunca é usado
+Assets\_Duskborn\Gameplay\Equipment\GearDefinition.cs(12,50): warning CS0649: Campo "GearDefinition.bonuses" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Effects\WorldHealthBar.cs(26,50): warning CS0649: Campo "WorldHealthBar.frame" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\UI\InventoryUIManager.cs(26,55): warning CS0649: Campo "InventoryUIManager.resourceDefinitions" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Effects\WorldHealthBar.cs(24,50): warning CS0649: Campo "WorldHealthBar.ghostFill" nunca é atribuído e sempre terá seu valor padrão null
+Assets\ThirdPartyAssets\Kevin Iglesias\Throwing Animations Pack\Scripts\ChangeSpear.cs(34,28): warning CS0169: O campo "ChangeSpear.endRotation" nunca é usado
+Assets\_Duskborn\Gameplay\Crafting\CraftingRecipe.cs(38,53): warning CS0649: Campo "CraftingRecipe.outputItem" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Equipment\WeaponDefinition.cs(21,53): warning CS0649: Campo "WeaponDefinition.skills" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Equipment\WeaponDefinition.cs(17,51): warning CS0649: Campo "WeaponDefinition.behaviour" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\UI\GameHUD.cs(18,46): warning CS0649: Campo "GameHUD.waveManager" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Equipment\WeaponActionPlayer.cs(20,46): warning CS0649: Campo "WeaponActionPlayer.animator" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\ActionBar\ActionBarInstaller.cs(18,64): warning CS0649: Campo "ActionBarInstaller.dragIcon" nunca é atribuído e sempre terá seu valor padrão null
+Assets\Inventory\Scripts\Inventory\Bootstrap\InventoryInstaller.cs(20,41): warning CS0649: Campo "InventoryInstaller.canvas" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Equipment\WeaponDefinition.cs(15,51): warning CS0649: Campo "WeaponDefinition.bonuses" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Effects\DamageNumberPool.cs(11,55): warning CS0649: Campo "DamageNumberPool.prefab" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Loot\ResourceNode.cs(29,44): warning CS0649: Campo "ResourceNode.depletedClip" nunca é atribuído e sempre terá seu valor padrão null
+Assets\Inventory\Scripts\Inventory\Examples\InventoryConsumerExample.cs(13,53): warning CS0649: Campo "InventoryConsumerExample.installer" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\ActionBar\ActionBarInstaller.cs(16,64): warning CS0649: Campo "ActionBarInstaller.actionBarRoot" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Loot\ItemDefinitionRegistry.cs(10,51): warning CS0649: Campo "ItemDefinitionRegistry._definitions" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Effects\WorldHealthBar.cs(27,50): warning CS0649: Campo "WorldHealthBar.nameLabel" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Player\PlayerCombat.cs(26,53): warning CS0649: Campo "PlayerCombat.enemyLayer" nunca é atribuído e sempre terá seu valor padrão 
+Assets\_Duskborn\Gameplay\Loot\LootManager.cs(58,45): warning CS0649: Campo "LootManager.worldGoldPickupPrefab" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Network\PlayerSpawner.cs(11,45): warning CS0649: Campo "PlayerSpawner.playerPrefab" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Core\DayNightCycle.cs(34,49): warning CS0649: Campo "DayNightCycle.dayNightIntensity" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Enemies\EnemyBase.cs(41,53): warning CS0649: Campo "EnemyBase._damageNumberConfig" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Crafting\CraftingRecipe.cs(59,48): warning CS0649: Campo "CraftingRecipe.processingSeconds" nunca é atribuído e sempre terá seu valor padrão 0
+Assets\_Duskborn\Gameplay\Enemies\EnemyBase.cs(34,51): warning CS0649: Campo "EnemyBase.weapon" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Crafting\CraftingRecipe.cs(31,51): warning CS0649: Campo "CraftingRecipe.description" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Loot\ResourceNode.cs(19,28): warning CS0649: Campo "ResourceNode.materialTypes" nunca é atribuído e sempre terá seu valor padrão 
+Assets\_Duskborn\Gameplay\Player\PlayerStats.cs(24,53): warning CS0649: Campo "PlayerStats._damageNumberConfig" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Effects\Pixelation\PixelationEffectController.cs(12,43): warning CS0649: Campo "PixelationEffectController.pixelationMaterial" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Loot\ResourceNode.cs(26,53): warning CS0649: Campo "ResourceNode._damageNumberConfig" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Equipment\GearDefinition.cs(11,50): warning CS0649: Campo "GearDefinition.slot" nunca é atribuído e sempre terá seu valor padrão 
+Assets\Inventory\Scripts\Inventory\Data\ItemDefinitionBase.cs(12,44): warning CS0649: Campo "ItemDefinitionBase.icon" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Enemies\EnemyBase.cs(35,51): warning CS0649: Campo "EnemyBase.holdPoint" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Enemies\WaveManager.cs(11,54): warning CS0649: Campo "WaveManager.enemyRegistry" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Player\PlayerStats.cs(16,50): warning CS0649: Campo "PlayerStats.classDefinition" nunca é atribuído e sempre terá seu valor padrão null
+Assets\_Duskborn\Gameplay\Enemies\EnemyPool.cs(19,44): warning CS0414: O campo "EnemyPool.inspectorSize" é atribuído, mas seu valor nunca é usado
+Compilador do Microsoft (R) Visual C# versão 4.3.1-3.22526.13 (41a5af9d)
+Copyright (C) Microsoft Corporation. Todos os direitos reservados.
+
+Runtime and furnace editor C# compilation passed (offline; no Unity import/render validation).

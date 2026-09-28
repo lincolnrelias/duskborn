@@ -94,6 +94,20 @@ namespace Duskborn.Gameplay.Loot
                 Physics.IgnoreLayerCollision(resourceLayer, playerLayer, true);
         }
 
+        /// <summary>One guaranteed progression item, using the existing network pickup and rarity effects.</summary>
+        public void ServerDropItem(ItemDefinitionBase item, Vector3 origin)
+        {
+            if (!InstanceFinder.IsServerStarted) return;
+            if (item == null || item.dropPrefab == null || string.IsNullOrEmpty(item.Id))
+            {
+                Debug.LogError("[LootManager] Guaranteed item is missing its definition or pickup prefab.");
+                return;
+            }
+            WorldDropRegistry.Instance.Register(item);
+            SpawnItem(item.dropPrefab, item.Id, item.Rarity, origin, 0, 1, 0,
+                GameSession.Instance?.RNG, true);
+        }
+
         public void ServerDropLoot(
             DropLootTable table,
             Vector3 origin,

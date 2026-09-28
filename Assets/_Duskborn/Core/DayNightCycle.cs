@@ -105,6 +105,7 @@ namespace Duskborn.Core
         public event Action              OnDawnStart;
 
         private bool _running;
+        private int _heldEncounterNight;
         private const int TotalNights = 7;
         private CyclePeriod _lastPeriod = (CyclePeriod)(-1);
 
@@ -185,6 +186,14 @@ namespace Duskborn.Core
             if (!Application.isPlaying) return;
             if (!_running || !IsServerStarted) return;
 
+            // Keep a finite clock/lighting value while a mid-run boss owns the night.
+            if (_heldEncounterNight == CurrentNight && IsNight)
+            {
+                _timeRemaining.Value = Duskborn.Gameplay.Enemies.HollowWardenNightRules.AdvanceHeldClock(
+                    _timeRemaining.Value, nightDuration, Time.deltaTime);
+                return;
+            }
+
             _timeRemaining.Value -= Time.deltaTime;
 
             if (_timeRemaining.Value <= 0f)
@@ -264,6 +273,7 @@ namespace Duskborn.Core
 
         private void BeginDay()
         {
+            _heldEncounterNight = 0;
             _isDaySync.Value     = true;
             _timeRemaining.Value = dayDuration;
             BroadcastDayStartRpc();
@@ -322,13 +332,40 @@ namespace Duskborn.Core
 
         // ── Debug / editor helpers ──
 
+        public bool TryHoldEncounterNight(int night)
+        {
+            if (!IsServerStarted || !IsNight || CurrentNight != night || _heldEncounterNight != 0) return false;
+            _heldEncounterNight = night;
+            return true;
+        }
+
+        public void ReleaseEncounterNight(int night)
+        {
+            if (IsServerStarted && _heldEncounterNight == night) _heldEncounterNight = 0;
+        }
+
+        public bool CompleteEncounterNight(int night)
+        {
+            if (!IsServerStarted || !IsNight || CurrentNight != night || _heldEncounterNight != night) return false;
+            _heldEncounterNight = 0;
+            EndNight();
+            return true;
+        }
+
         public void ForceEndNight()
         {
             if (!_isDaySync.Value)
+            {
+                _heldEncounterNight = 0;
                 _timeRemaining.Value = 0f;
+            }
         }
 
-        public void ForceEndCurrentPhase() => _timeRemaining.Value = 0f;
+        public void ForceEndCurrentPhase()
+        {
+            _heldEncounterNight = 0;
+            _timeRemaining.Value = 0f;
+        }
 
         private void UpdateLighting()
         {

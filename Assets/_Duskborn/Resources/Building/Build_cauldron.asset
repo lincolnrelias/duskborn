@@ -11,12 +11,13 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2939c81d592945a4ad9eef4d18d5a857, type: 3}
   m_Name: Build_cauldron
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   id: cauldron
-  displayName: Caldeirão
-  description: Transforma materiais orgânicos em tônicos e óleos.
-  category: Estações
+  displayName: "Caldeir\xE3o"
+  description: "Transforma materiais org\xE2nicos em t\xF4nicos e \xF3leos."
+  category: "Esta\xE7\xF5es"
   prefab: {fileID: 606149192729443004, guid: c9349ce6e82c4a8baca0026bef3af606, type: 3}
+  operatingEffect: {fileID: 0}
   icon: {fileID: 0}
   station: 2
   costs:
@@ -25,8 +26,6 @@ MonoBehaviour:
   - material: {fileID: 11400000, guid: 2a0acc988d7bb054889caff0a3472d3d, type: 2}
     amount: 8
   unlockRecipe: {fileID: 0}
-  size: {x: 1.74, y: 1.16, z: 1.07}
-  center: {x: 0.01, y: 0.58, z: -0.1}
   clearance: 0.1
   maxSlope: 15
   groundTolerance: 0.2
@@ -37,7 +36,7 @@ MonoBehaviour:
     m_Bits: 1
   blockingLayers:
     serializedVersion: 2
-    m_Bits: 4294967243
+    m_Bits: 963
   allowMultiple: 1
   movable: 1
   dismantlable: 1

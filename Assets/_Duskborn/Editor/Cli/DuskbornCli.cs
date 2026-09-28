@@ -98,6 +98,40 @@ namespace Duskborn.Editor
             Debug.Log("[DuskbornCli] Compile check succeeded.");
         }
 
+        public static void BuildHollowWarden()
+        {
+            EnsureCompilationSucceeded();
+            var errors = new List<string>();
+            Application.LogCallback capture = (message, stack, type) =>
+            {
+                if (type == LogType.Error || type == LogType.Exception || type == LogType.Assert) errors.Add(message);
+            };
+            Application.logMessageReceived += capture;
+            try
+            {
+                HollowWardenBuilder.Build();
+                HollowWardenTests.RunAllTests();
+            }
+            finally { Application.logMessageReceived -= capture; }
+            if (errors.Count > 0) throw new InvalidOperationException("Hollow Warden build logged errors:\n" + string.Join("\n", errors));
+            Debug.Log("[DuskbornCli] Hollow Warden build succeeded.");
+        }
+
+        public static void TestHollowWarden()
+        {
+            EnsureCompilationSucceeded();
+            var errors = new List<string>();
+            Application.LogCallback capture = (message, stack, type) =>
+            {
+                if (type == LogType.Error || type == LogType.Exception || type == LogType.Assert) errors.Add(message);
+            };
+            Application.logMessageReceived += capture;
+            try { HollowWardenTests.RunAllTests(); }
+            finally { Application.logMessageReceived -= capture; }
+            if (errors.Count > 0) throw new InvalidOperationException("Hollow Warden tests logged errors:\n" + string.Join("\n", errors));
+            Debug.Log("[DuskbornCli] Hollow Warden tests succeeded.");
+        }
+
         public static void Validate()
         {
             EnsureCompilationSucceeded();
@@ -129,6 +163,7 @@ namespace Duskborn.Editor
                 new TestSuite(nameof(CraftingTests), CraftingTests.RunAllTests),
                 new TestSuite(nameof(CursorAndMenuFocusTests), CursorAndMenuFocusTests.RunAllTests),
                 new TestSuite(nameof(DayNightCycleTests), DayNightCycleTests.RunAllTests),
+                new TestSuite(nameof(HollowWardenTests), HollowWardenTests.RunAllTests),
                 new TestSuite(nameof(ItemTierDropTests), ItemTierDropTests.RunAllTests),
                 new TestSuite(nameof(ResourceGatheringTests), ResourceGatheringTests.RunAllTests),
                 new TestSuite(nameof(SpatialOccupancyMapTests), SpatialOccupancyMapTests.RunAllTests),

@@ -21,7 +21,7 @@ try {
     $editorArgs = @('-target:library', '-nostdlib+', '-langversion:latest', '-define:UNITY_EDITOR', ('-out:"'+$output+'/FurnaceEditorCompile.dll"'), ('-r:"'+$output+'/FurnaceCompile.dll"'))
     $editorArgs += $editorProject.Project.ItemGroup.Reference.HintPath | Where-Object { $_ -and $_ -notmatch 'Assembly-CSharp.dll$' } | ForEach-Object { '-r:"'+$_+'"' }
     $editorArgs += '-r:"Library/ScriptAssemblies/FishNet.Runtime.dll"'
-    $editorArgs += 'Assets/_Duskborn/Editor/ForgeModelGenerator.cs', 'Assets/_Duskborn/Editor/FurnaceEffectsPreview.cs', 'Assets/_Duskborn/Editor/SceneFurnaceTests.cs'
+    $editorArgs += 'Assets/_Duskborn/Editor/ForgeModelGenerator.cs', 'Assets/_Duskborn/Editor/FurnaceEffectsPreview.cs', 'Assets/_Duskborn/Editor/FurnaceEffectsEditor.cs', 'Assets/_Duskborn/Editor/SceneFurnaceTests.cs'
     $editorFile = Join-Path $output 'editor.rsp'
     $editorArgs | Set-Content $editorFile
     & "$unityData/NetCoreRuntime/dotnet.exe" "$unityData/DotNetSdkRoslyn/csc.dll" "@$editorFile"

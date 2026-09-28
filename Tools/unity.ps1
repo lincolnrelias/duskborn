@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Position = 0)]
-    [ValidateSet('help', 'compile', 'validate', 'test', 'build-windows', 'clear-terrain', 'all')]
+    [ValidateSet('help', 'compile', 'validate', 'test', 'test-warden', 'build-windows', 'build-warden', 'clear-terrain', 'all')]
     [string]$Command = 'help',
 
     [string]$UnityPath,
@@ -22,7 +22,9 @@ Unity CLI workflow
   .\Tools\unity.ps1 compile
   .\Tools\unity.ps1 validate
   .\Tools\unity.ps1 test
+  .\Tools\unity.ps1 test-warden
   .\Tools\unity.ps1 build-windows
+  .\Tools\unity.ps1 build-warden
   .\Tools\unity.ps1 clear-terrain
   .\Tools\unity.ps1 all
 
@@ -96,8 +98,9 @@ function Invoke-UnityTask {
     $process = Start-Process -FilePath $script:resolvedUnityPath `
         -ArgumentList ($quotedArguments -join ' ') `
         -WindowStyle Hidden `
-        -Wait `
         -PassThru
+    # Wait for the Editor itself, not persistent licensing/crash-handler descendants.
+    $process.WaitForExit()
     $exitCode = $process.ExitCode
 
     if ($exitCode -ne 0) {
@@ -133,6 +136,17 @@ if ($Command -eq 'help') {
 $script:resolvedUnityPath = Resolve-UnityExecutable
 
 switch ($Command) {
+    'test-warden' {
+        Invoke-UnityTask -Name 'test-warden' `
+            -TaskArguments @('-quit', '-executeMethod', 'Duskborn.Editor.DuskbornCli.TestHollowWarden') `
+            -SuccessMarker '[DuskbornCli] Hollow Warden tests succeeded.'
+    }
+    'build-warden' {
+        Invoke-UnityTask -Name 'build-warden' `
+            -TaskArguments @('-quit', '-executeMethod', 'Duskborn.Editor.DuskbornCli.BuildHollowWarden') `
+            -SuccessMarker '[DuskbornCli] Hollow Warden build succeeded.' `
+            -ExpectedOutput (Join-Path $projectRoot 'Assets/_Duskborn/Resources/Bosses/HollowWarden.prefab')
+    }
     'compile' {
         Invoke-UnityTask -Name 'compile' `
             -TaskArguments @('-quit', '-executeMethod', 'Duskborn.Editor.DuskbornCli.Compile') `

@@ -1,0 +1,96 @@
+{
+  "stage": "prototype; Unity import and gameplay unverified",
+  "version": 1,
+  "triangles": 1018,
+  "vertices": 591,
+  "bones": 21,
+  "materials": 2,
+  "height_m": 4.06635856628418,
+  "clips": [
+    {
+      "name": "HW_Idle",
+      "duration": 2,
+      "loop": true,
+      "markers": {}
+    },
+    {
+      "name": "HW_Walk",
+      "duration": 1.2,
+      "loop": true,
+      "markers": {}
+    },
+    {
+      "name": "HW_Spawn",
+      "duration": 2,
+      "loop": false,
+      "markers": {}
+    },
+    {
+      "name": "HW_Rootbreaker",
+      "duration": 2.4,
+      "loop": false,
+      "markers": {
+        "Lock": 0.6,
+        "Impact": 1
+      }
+    },
+    {
+      "name": "HW_HarvestSweep",
+      "duration": 2.2,
+      "loop": false,
+      "markers": {
+        "Lock": 0.6,
+        "Impact": 0.9
+      }
+    },
+    {
+      "name": "HW_RootPlant",
+      "duration": 1.4,
+      "loop": false,
+      "markers": {
+        "RootsAppear": 1.4
+      }
+    },
+    {
+      "name": "HW_Rooted",
+      "duration": 2,
+      "loop": true,
+      "markers": {}
+    },
+    {
+      "name": "HW_Stagger",
+      "duration": 1,
+      "loop": false,
+      "markers": {}
+    },
+    {
+      "name": "HW_Exposed",
+      "duration": 2,
+      "loop": true,
+      "markers": {}
+    },
+    {
+      "name": "HW_Recover",
+      "duration": 1,
+      "loop": false,
+      "markers": {}
+    },
+    {
+      "name": "HW_PhaseBreak",
+      "duration": 2,
+      "loop": false,
+      "markers": {
+        "ChestCrack": 1
+      }
+    },
+    {
+      "name": "HW_Death",
+      "duration": 3,
+      "loop": false,
+      "markers": {}
+    }
+  ],
+  "forward": "-Y in Blender; exported -Z forward / Y up",
+  "root_motion": false,
+  "phase_2_note": "Unity presentation should maintain open chest plates as an additive/masked layer after PhaseBreak."
+}

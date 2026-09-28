@@ -46,6 +46,8 @@ namespace Duskborn.UI
         private void Awake()
         {
             Instance = this;
+            foreach (var def in Resources.LoadAll<MaterialDefinition>("Bosses/Items"))
+                if (def != null && !string.IsNullOrEmpty(def.Id)) _defById[def.Id] = def;
             if (resourceDefinitions != null)
             {
                 foreach (var def in resourceDefinitions)
@@ -658,7 +660,7 @@ namespace Duskborn.UI
             string displayName = def != null ? def.DisplayName : resourceId;
             string iconId      = def?.Icon != null ? def.Icon.name : string.Empty;
 
-            var newItem = new MaterialItem(resourceId, displayName, string.Empty, iconId, "resource", newTotal);
+            var newItem = new MaterialItem(resourceId, displayName, def != null ? def.Description : string.Empty, iconId, "resource", newTotal);
 
             if (existingSlot >= 0)
             {

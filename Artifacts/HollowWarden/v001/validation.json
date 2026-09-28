@@ -1,0 +1,36 @@
+{
+  "source_triangles": 1018,
+  "source_bones": 21,
+  "source_materials": 2,
+  "uv_layers": 1,
+  "nonmanifold_edges": 0,
+  "zero_area_faces": 0,
+  "invalid_weight_vertices": 0,
+  "signed_volume": 4.689001482673023,
+  "rest_min_z": 0.0,
+  "rest_max_z": 4.066359043121338,
+  "loop_matrix_max_error": {
+    "HW_Idle": 0.0,
+    "HW_Walk": 0.0,
+    "HW_Rooted": 0.0,
+    "HW_Exposed": 0.0
+  },
+  "fbx_clips_frames": {
+    "HW_Rig.001|HW_Rig|HW_Death": 90.0,
+    "HW_Rig.001|HW_Rig|HW_Exposed": 60.0,
+    "HW_Rig.001|HW_Rig|HW_HarvestSweep": 66.0,
+    "HW_Rig.001|HW_Rig|HW_Idle": 60.0,
+    "HW_Rig.001|HW_Rig|HW_PhaseBreak": 60.0,
+    "HW_Rig.001|HW_Rig|HW_Recover": 30.0,
+    "HW_Rig.001|HW_Rig|HW_Rootbreaker": 72.0,
+    "HW_Rig.001|HW_Rig|HW_Rooted": 60.0,
+    "HW_Rig.001|HW_Rig|HW_RootPlant": 42.0,
+    "HW_Rig.001|HW_Rig|HW_Spawn": 60.0,
+    "HW_Rig.001|HW_Rig|HW_Stagger": 30.0,
+    "HW_Rig.001|HW_Rig|HW_Walk": 36.0
+  },
+  "fbx_rigs": 1,
+  "fbx_meshes": 1,
+  "fbx_bones": 21,
+  "status": "PASS; Blender round-trip only, Unity import unverified"
+}

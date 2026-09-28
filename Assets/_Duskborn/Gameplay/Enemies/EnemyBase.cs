@@ -142,11 +142,13 @@ namespace Duskborn.Gameplay.Enemies
             _skillCooldowns     = new float[weapon?.Skills != null ? weapon.Skills.Length : 0];
 
             _audioFeedback = GetComponent<EnemyAudioFeedback>();
-            if (_audioFeedback == null)
+            if (_audioFeedback == null && UseGenericAudio)
                 _audioFeedback = gameObject.AddComponent<EnemyAudioFeedback>();
 
             SpawnWeaponVisual();
         }
+
+        protected virtual bool UseGenericAudio => true;
 
         protected virtual void OnDestroy()
         {
@@ -390,8 +392,8 @@ namespace Duskborn.Gameplay.Enemies
             {
                 if (_ragdoll != null)
                     _ragdoll.EnableRagdoll();
-                else
-                    _animator?.SetBool(HashDead, true);
+                else if (_animator != null)
+                    _animator.SetBool(HashDead, true);
             }
         }
 
@@ -408,7 +410,7 @@ namespace Duskborn.Gameplay.Enemies
         private void RpcApplyRagdollImpulse(Vector3 hitPoint, Vector3 direction)
             => _ragdoll?.ApplyImpulse(hitPoint, direction);
 
-        private IEnumerator DespawnAfterDelay()
+        protected virtual IEnumerator DespawnAfterDelay()
         {
             yield return WaitDeathDelay;
             if (IsSpawned)
@@ -480,7 +482,9 @@ namespace Duskborn.Gameplay.Enemies
             for (int i = 0; i < _skillCooldowns.Length; i++) _skillCooldowns[i] = 0f;
 
             SetOutline(false);
-            _animator?.SetBool(HashDead, false);
+            // Unity's unassigned/destroyed object references require its overloaded null check.
+            // Static enemies such as Warden roots intentionally have no Animator.
+            if (_animator != null) _animator.SetBool(HashDead, false);
             _ragdoll?.DisableRagdoll();
             transform.position = position;
             if (Agent != null)

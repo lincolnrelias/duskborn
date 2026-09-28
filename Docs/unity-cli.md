@@ -10,12 +10,17 @@ and builds. The wrapper reads the required Unity version from
 .\Tools\unity.ps1 compile
 .\Tools\unity.ps1 validate
 .\Tools\unity.ps1 test
+.\Tools\unity.ps1 test-warden
 .\Tools\unity.ps1 clear-terrain
 .\Tools\unity.ps1 all
 .\Tools\unity.ps1 build-windows
+.\Tools\unity.ps1 build-warden
 ```
 
 - `compile` imports changed assets, compiles scripts, and requires a success marker.
+- `build-warden` imports the grounded v002 Hollow Warden model, creates its materials,
+  Animator, boss/root prefabs and HUD, registers FishNet prefabs, and validates references.
+  Run it before `all` when setting up or regenerating the boss assets.
 - `clear-terrain` clears procedurally generated meshes/foliage from `SampleScene.unity` and clears NavMesh surfaces before committing.
 - `validate` checks enabled build scenes, project prefabs for missing scripts, and
   ScriptableObject assets under `Assets/_Duskborn/Resources`.
@@ -48,3 +53,5 @@ Override executable discovery or the build destination when necessary:
   or generated artifact exists. Never claim visual verification from CLI checks.
 - Do not add `-runTests` unless real Unity Test Framework tests are introduced.
   The current suites are menu-style static methods driven by `DuskbornCli.RunTests`.
+
+The `test-warden` command runs focused boss asset/mechanics/regression checks without rebuilding prefabs.

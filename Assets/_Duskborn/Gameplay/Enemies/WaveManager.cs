@@ -26,7 +26,11 @@ namespace Duskborn.Gameplay.Enemies
         private float _elapsedNightTime;
         private int   _aliveCount;
         private bool  _waveActive;
+        private HollowWardenNight _wardenNight;
         private int   _currentPlayerCount;
+        private NightDefinition _nightDefinition;
+        private float _timelineDuration;
+        private int _waveNight;
 
         public SpawnTimeline ActiveTimeline  => _activeTimeline;
         public int           AliveEnemyCount => _aliveCount;
@@ -35,6 +39,8 @@ namespace Duskborn.Gameplay.Enemies
 
         private void Awake()
         {
+            _wardenNight = GetComponent<HollowWardenNight>();
+            if (_wardenNight == null) _wardenNight = gameObject.AddComponent<HollowWardenNight>();
             BuildPools();
         }
 
@@ -87,12 +93,18 @@ namespace Duskborn.Gameplay.Enemies
         private void OnNightStart(int nightNumber)
         {
             if (!InstanceFinder.IsServerStarted) return;
-            if (nightNumber > nightDefinitions.Length) return;
+            if (nightNumber == 3) _wardenNight.TryBegin();
+            int definitionIndex = HollowWardenNightRules.DefinitionIndex(nightNumber, nightDefinitions?.Length ?? 0);
+            if (definitionIndex < 0 || nightDefinitions[definitionIndex] == null) return;
 
-            NightDefinition def = nightDefinitions[nightNumber - 1];
+            NightDefinition def = nightDefinitions[definitionIndex];
+            _waveNight = nightNumber;
+            _nightDefinition = def;
+            _timelineDuration = Mathf.Max(1f, nightNumber == 3 && DayNightCycle.Instance != null
+                ? DayNightCycle.Instance.PhaseDuration : nightDuration);
             _currentPlayerCount = GameSession.Instance != null ? GameSession.Instance.PlayerCount : 1;
 
-            _activeTimeline   = TimelineGenerator.Generate(def, _currentPlayerCount, nightDuration,
+            _activeTimeline   = TimelineGenerator.Generate(def, _currentPlayerCount, _timelineDuration,
                                                            GameSession.Instance?.RNG);
             _nextEventIndex   = 0;
             _elapsedNightTime = 0f;
@@ -105,6 +117,7 @@ namespace Duskborn.Gameplay.Enemies
         private void OnNightEnd(int _)
         {
             if (!InstanceFinder.IsServerStarted) return;
+            _wardenNight.Cancel();
             _waveActive = false;
             DespawnAll();
         }
@@ -113,6 +126,13 @@ namespace Duskborn.Gameplay.Enemies
         {
             if (!InstanceFinder.IsServerStarted) return;
             if (!_waveActive || _activeTimeline == null) return;
+            if (GameStateManager.Instance != null && GameStateManager.Instance.CurrentState != GameState.Running)
+            {
+                _wardenNight.Cancel();
+                _waveActive = false;
+                DespawnAll();
+                return;
+            }
 
             _elapsedNightTime += Time.deltaTime;
 
@@ -121,6 +141,16 @@ namespace Duskborn.Gameplay.Enemies
             {
                 SpawnFromEvent(_activeTimeline.Events[_nextEventIndex]);
                 _nextEventIndex++;
+            }
+            // A held night outlives its finite budget. Continue normal night-three batches
+            // until dawn, preserving living mobs and co-op scaling (including after the kill).
+            if (DayNightCycle.Instance != null && HollowWardenNightRules.RepeatWaves(
+                _waveNight, DayNightCycle.Instance.IsNight, _elapsedNightTime, _timelineDuration))
+            {
+                _elapsedNightTime = 0f; // Do not backfill entire missed batches after a hitch.
+                _nextEventIndex = 0;
+                _activeTimeline = TimelineGenerator.Generate(_nightDefinition, _currentPlayerCount,
+                    _timelineDuration, GameSession.Instance?.RNG);
             }
         }
 

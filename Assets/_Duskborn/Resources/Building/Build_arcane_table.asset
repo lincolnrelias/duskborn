@@ -26,6 +26,8 @@ MonoBehaviour:
     amount: 4
   - material: {fileID: 11400000, guid: ac75ce17d5fdcaf4d956e4f0e2ed6c88, type: 2}
     amount: 2
+  - material: {fileID: 11400000, guid: c9d69446dc174a208eb7f68bf1f4ae70, type: 2}
+    amount: 1
   unlockRecipe: {fileID: 0}
   size: {x: 1.67, y: 1.15, z: 1.67}
   center: {x: 0, y: 0.575, z: 0}

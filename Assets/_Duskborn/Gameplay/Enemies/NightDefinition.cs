@@ -9,7 +9,7 @@ namespace Duskborn.Gameplay.Enemies
     [CreateAssetMenu(fileName = "Night_X_Definition", menuName = "Duskborn/Night Definition")]
     public class NightDefinition : ScriptableObject
     {
-        [Tooltip("Night number this definition applies to (1–6). Night 7 = boss, handled separately.")]
+        [Tooltip("Normal wave budget (nights 1–6). Night 3 includes Hollow Warden and repeats waves while extended; night 7 is handled separately.")]
         public int NightNumber;
 
         [Tooltip("Total spawn budget for 1 player. Scaled up by WaveManager for more players.")]

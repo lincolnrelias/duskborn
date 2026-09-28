@@ -33,6 +33,9 @@ namespace Duskborn.Gameplay.Loot
         {
             if (_instance != null && _instance != this) { Destroy(gameObject); return; }
             _instance = this;
+            // Progression drops must resolve on clients and in player builds, too.
+            foreach (var definition in Resources.LoadAll<ItemDefinitionBase>("Bosses/Items"))
+                Register(definition);
 
             if (definitions != null)
             {

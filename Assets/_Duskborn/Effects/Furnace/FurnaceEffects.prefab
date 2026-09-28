@@ -3,6 +3,9 @@
 --- !u!1 &100
 GameObject:
   m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
   - component: {fileID: 101}
@@ -10,64 +13,36 @@ GameObject:
   m_Layer: 0
   m_Name: FurnaceEffects
   m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &101
 Transform:
   m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 100}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 201}
   - {fileID: 301}
   m_Father: {fileID: 0}
---- !u!1 &200
-GameObject:
-  m_ObjectHideFlags: 0
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 201}
-  m_Layer: 0
-  m_Name: FireAnchor
-  m_TagString: Untagged
-  m_IsActive: 1
---- !u!4 &201
-Transform:
-  m_ObjectHideFlags: 0
-  m_GameObject: {fileID: 200}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.84, z: 0.26}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 101}
---- !u!1 &300
-GameObject:
-  m_ObjectHideFlags: 0
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 301}
-  m_Layer: 0
-  m_Name: SmokeAnchor
-  m_TagString: Untagged
-  m_IsActive: 1
---- !u!4 &301
-Transform:
-  m_ObjectHideFlags: 0
-  m_GameObject: {fileID: 300}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2.275, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 101}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 100}
   m_Enabled: 1
+  m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 286d9ccf4974c67d622d526f8629b252, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
@@ -76,13 +51,86 @@ MonoBehaviour:
   coalMaterial: {fileID: 2100000, guid: 882e2ecb359dde7024ec2681e9c7e19a, type: 2}
   fireAnchor: {fileID: 201}
   smokeAnchor: {fileID: 301}
+  fitAnchorsToModel: 1
+  flameCount: 5
+  flameScale: 1
+  flameHeight: 1
+  flameSpread: 1
+  flameTint: {r: 1, g: 0.62, b: 0.18, a: 1}
+  coalIntensity: 1
+  smokeDensity: 14
+  maxSmokeParticles: 100
+  smokeSize: 0.32
+  smokeAlpha: 0.6
+  smokeLifetime: 2.8
+  smokeSpeed: 0.42
+  smokeTint: {r: 0.43, g: 0.4, b: 0.36, a: 0.35}
+  smokeDelay: 0.3
+  intensity: 1.7
   startupSeconds: 0.6
   cooldownSeconds: 1.5
-  smokeDelay: 0.3
-  smokeDensity: 5
-  intensity: 1
-  flameTint: {r: 1, g: 0.62, b: 0.18, a: 1}
-  smokeTint: {r: 0.43, g: 0.40, b: 0.36, a: 0.24}
-  particleDistance: 40
-  lightDistance: 10
   lightIntensity: 0.7
+  particleDistance: 80
+  lightDistance: 20
+--- !u!1 &200
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 201}
+  m_Layer: 0
+  m_Name: FireAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &201
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 200}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.84, z: 0.26}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 101}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &300
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 301}
+  m_Layer: 0
+  m_Name: SmokeAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &301
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 300}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 2.275, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 101}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

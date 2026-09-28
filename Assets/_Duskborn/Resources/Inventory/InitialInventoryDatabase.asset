@@ -28,6 +28,8 @@ MonoBehaviour:
     quantity: 1
   - item: {fileID: 11400000, guid: 0aa265baf59b4068bf539eadb27c59f5, type: 2}
     quantity: 1
+  - item: {fileID: 11400000, guid: 2b976e74834525a448b6f02827781567, type: 2}
+    quantity: 1
   startingGear:
   - slot: 0
     gear: {fileID: 11400000, guid: 2ef60dda97873e4428f91174061c52f0, type: 2}

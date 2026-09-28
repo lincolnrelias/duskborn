@@ -64,6 +64,7 @@ namespace Duskborn.Gameplay.Enemies
         public int RewardGold => rewardGold;
         public const float DeathSeconds = 3f;
         public double ActionAge => TimeManager != null ? TimeManager.TimePassed(_view.Value.StartTick) : 0;
+        public Transform Target => CurrentTarget;
 
         protected override void Awake()
         {
@@ -248,7 +249,7 @@ namespace Duskborn.Gameplay.Enemies
             Vector3 position = collider != null ? collider.bounds.center : player.transform.position + Vector3.up;
             float radius = collider != null ? Mathf.Max(collider.bounds.extents.x, collider.bounds.extents.z) : .4f;
             float vertical = collider != null ? collider.bounds.extents.y : 1f;
-            if (Mathf.Abs(position.y - (view.Origin.y + 1f)) > vertical + 1f) return;
+            if (Mathf.Abs(position.y - (view.Origin.y + 1f)) > vertical + 4.5f) return;
             Vector3 offset = position - view.Origin;
             offset.y = 0;
             float forward = Vector3.Dot(offset, view.Forward);
@@ -270,8 +271,8 @@ namespace Duskborn.Gameplay.Enemies
             {
                 if (player == null || !player.IsAlive) continue;
                 // Lock the actual ground beneath this player once. The warning never chases them.
-                if (!Physics.Raycast(player.transform.position + Vector3.up, Vector3.down,
-                    out var ground, 6f, groundMask, QueryTriggerInteraction.Ignore)) continue;
+                if (!Physics.Raycast(player.transform.position + Vector3.up * 2f, Vector3.down,
+                    out var ground, 12f, groundMask, QueryTriggerInteraction.Ignore)) continue;
                 _spikes.Add(new WardenSpikeView {
                     Wave = wave, StartTick = tick, Position = ground.point, Normal = ground.normal
                 });

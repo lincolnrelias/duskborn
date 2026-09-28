@@ -19,6 +19,16 @@ namespace Duskborn.Gameplay.Enemies
         [SerializeField] private Quaternion openRight;
         [SerializeField] private Quaternion openLeft;
 
+        private const int LineSegmentsZ = 16;
+        private const int LineSegmentsX = 2;
+        private const int LineVertexCount = (LineSegmentsZ + 1) * (LineSegmentsX + 1); // 51
+        private readonly Vector3[] _linePoints = new Vector3[LineVertexCount];
+
+        private const int ArcRings = 4;
+        private const int ArcSlices = 18;
+        private const int ArcVertexCount = 1 + ArcRings * (ArcSlices + 1); // 77
+        private readonly Vector3[] _arcPoints = new Vector3[ArcVertexCount];
+
         private Mesh _lineMesh, _arcMesh;
         private MeshRenderer _line, _arc;
         private int _sequence = -1;
@@ -27,8 +37,6 @@ namespace Duskborn.Gameplay.Enemies
         private bool _wasLocked;
         private float _groundAt;
         private MaterialPropertyBlock _properties;
-        private readonly Vector3[] _linePoints = new Vector3[4];
-        private readonly Vector3[] _arcPoints = new Vector3[26];
         private readonly List<SpikeVisual> _spikePool = new();
         private Mesh _spikeMesh;
         private Material _spikeMaterial;
@@ -44,17 +52,107 @@ namespace Duskborn.Gameplay.Enemies
             public Vector3 Position;
         }
 
+        private static int _cachedGroundMask;
+        private static int GroundMask
+        {
+            get
+            {
+                if (_cachedGroundMask == 0)
+                {
+                    int mask = ~0;
+                    string[] exclude = { "Enemy", "Player", "Ignore Raycast", "TransparentFX", "Resource", "ResourceNode", "Water" };
+                    foreach (var name in exclude)
+                    {
+                        int layer = LayerMask.NameToLayer(name);
+                        if (layer >= 0) mask &= ~(1 << layer);
+                    }
+                    mask &= ~(1 << 2);
+                    _cachedGroundMask = mask;
+                }
+                return _cachedGroundMask;
+            }
+        }
+
+        private static float SampleGround(Vector3 worldPos, float referenceY, out Vector3 normal)
+        {
+            int mask = GroundMask;
+            float rayStartY = referenceY + 30f;
+            if (Physics.Raycast(new Vector3(worldPos.x, rayStartY, worldPos.z), Vector3.down,
+                out var hit, 60f, mask, QueryTriggerInteraction.Ignore))
+            {
+                normal = hit.normal;
+                return hit.point.y;
+            }
+            if (Physics.Raycast(new Vector3(worldPos.x, worldPos.y + 40f, worldPos.z), Vector3.down,
+                out hit, 80f, mask, QueryTriggerInteraction.Ignore))
+            {
+                normal = hit.normal;
+                return hit.point.y;
+            }
+            normal = Vector3.up;
+            return referenceY;
+        }
+
         private void Awake()
         {
             _properties = new MaterialPropertyBlock();
             _line = CreateTelegraph("Rootbreaker warning", out _lineMesh);
             _arc = CreateTelegraph("Sweep warning", out _arcMesh);
-            _lineMesh.vertices = new Vector3[4];
-            _lineMesh.triangles = new[] {0,2,1,0,3,2};
-            _arcMesh.vertices = new Vector3[26];
-            int[] triangles = new int[24*3];
-            for (int i=0; i<24; i++) { triangles[i*3]=0; triangles[i*3+1]=i+1; triangles[i*3+2]=i+2; }
-            _arcMesh.triangles = triangles;
+
+            _lineMesh.vertices = new Vector3[LineVertexCount];
+            int[] lineTriangles = new int[LineSegmentsZ * LineSegmentsX * 6];
+            int ltIdx = 0;
+            for (int z = 0; z < LineSegmentsZ; z++)
+            {
+                for (int x = 0; x < LineSegmentsX; x++)
+                {
+                    int r0 = z * (LineSegmentsX + 1) + x;
+                    int r0Next = r0 + 1;
+                    int r1 = (z + 1) * (LineSegmentsX + 1) + x;
+                    int r1Next = r1 + 1;
+
+                    lineTriangles[ltIdx++] = r0;
+                    lineTriangles[ltIdx++] = r1;
+                    lineTriangles[ltIdx++] = r1Next;
+
+                    lineTriangles[ltIdx++] = r0;
+                    lineTriangles[ltIdx++] = r1Next;
+                    lineTriangles[ltIdx++] = r0Next;
+                }
+            }
+            _lineMesh.triangles = lineTriangles;
+
+            _arcMesh.vertices = new Vector3[ArcVertexCount];
+            int[] arcTriangles = new int[(ArcSlices + (ArcRings - 1) * ArcSlices * 2) * 3];
+            int atIdx = 0;
+            for (int s = 0; s < ArcSlices; s++)
+            {
+                arcTriangles[atIdx++] = 0;
+                arcTriangles[atIdx++] = 1 + s + 1;
+                arcTriangles[atIdx++] = 1 + s;
+            }
+            for (int r = 1; r < ArcRings; r++)
+            {
+                int rStart = 1 + (r - 1) * (ArcSlices + 1);
+                int nextRStart = 1 + r * (ArcSlices + 1);
+                for (int s = 0; s < ArcSlices; s++)
+                {
+                    int r0 = rStart + s;
+                    int r0Next = r0 + 1;
+                    int r1 = nextRStart + s;
+                    int r1Next = r1 + 1;
+
+                    arcTriangles[atIdx++] = r0;
+                    arcTriangles[atIdx++] = r1Next;
+                    arcTriangles[atIdx++] = r1;
+
+                    arcTriangles[atIdx++] = r0;
+                    arcTriangles[atIdx++] = r0Next;
+                    arcTriangles[atIdx++] = r1Next;
+                }
+            }
+            _arcMesh.triangles = arcTriangles;
+
             if (hud != null) hud.enabled = false;
             _spikeMaterial = boss != null ? boss.SpikeMaterial : null;
             _spikeMesh = BuildSpikeMesh();
@@ -133,29 +231,52 @@ namespace Duskborn.Gameplay.Enemies
             Vector3 origin = view.FacingLocked ? view.Origin : boss.transform.position;
             Vector3 forward = view.FacingLocked ? view.Forward : boss.transform.forward;
             Quaternion rotation = Quaternion.LookRotation(forward);
-            float width = boss.RootbreakerWidth*.5f;
-            _linePoints[0]=new Vector3(-width,0,0);_linePoints[1]=new Vector3(width,0,0);
-            _linePoints[2]=new Vector3(width,0,boss.RootbreakerLength);_linePoints[3]=new Vector3(-width,0,boss.RootbreakerLength);
-            _arcPoints[0]=Vector3.zero;
-            for (int i=0;i<=24;i++)
-            {
-                float angle=(-90+i*180f/24)*Mathf.Deg2Rad;
-                _arcPoints[i+1]=new Vector3(Mathf.Sin(angle),0,Mathf.Cos(angle))*boss.SweepRadius;
-            }
-            Ground(_linePoints,origin,rotation);
-            Ground(_arcPoints,origin,rotation);
-            _lineMesh.vertices=_linePoints;_lineMesh.RecalculateBounds();_lineMesh.RecalculateNormals();
-            _arcMesh.vertices=_arcPoints;_arcMesh.RecalculateBounds();_arcMesh.RecalculateNormals();
-        }
+            float targetY = boss.Target != null ? boss.Target.position.y : origin.y;
+            float highestY = Mathf.Max(origin.y, targetY);
 
-        private void Ground(Vector3[] vertices, Vector3 origin, Quaternion rotation)
-        {
-            int mask=~((1<<LayerMask.NameToLayer("Enemy"))|(1<<LayerMask.NameToLayer("Player"))|(1<<2));
-            for (int i=0;i<vertices.Length;i++)
+            if (_line.enabled)
             {
-                Vector3 world=origin+rotation*vertices[i];
-                if (Physics.Raycast(world+Vector3.up*3,Vector3.down,out var hit,7,mask,QueryTriggerInteraction.Ignore)) world.y=hit.point.y;
-                vertices[i]=world+Vector3.up*.065f;
+                float length = boss.RootbreakerLength;
+                float halfWidth = boss.RootbreakerWidth * 0.5f;
+                int idx = 0;
+                for (int zi = 0; zi <= LineSegmentsZ; zi++)
+                {
+                    float z = ((float)zi / LineSegmentsZ) * length;
+                    for (int xi = 0; xi <= LineSegmentsX; xi++)
+                    {
+                        float x = Mathf.Lerp(-halfWidth, halfWidth, (float)xi / LineSegmentsX);
+                        Vector3 worldPos = origin + rotation * new Vector3(x, 0, z);
+                        float groundY = SampleGround(worldPos, highestY, out var normal);
+                        _linePoints[idx++] = new Vector3(worldPos.x, groundY, worldPos.z) + normal * 0.08f + Vector3.up * 0.04f;
+                    }
+                }
+                _lineMesh.vertices = _linePoints;
+                _lineMesh.RecalculateBounds();
+                _lineMesh.RecalculateNormals();
+            }
+
+            if (_arc.enabled)
+            {
+                float radius = boss.SweepRadius;
+                int idx = 0;
+                float centerGroundY = SampleGround(origin, highestY, out var centerNormal);
+                _arcPoints[idx++] = new Vector3(origin.x, centerGroundY, origin.z) + centerNormal * 0.08f + Vector3.up * 0.04f;
+
+                for (int ring = 1; ring <= ArcRings; ring++)
+                {
+                    float r = ((float)ring / ArcRings) * radius;
+                    for (int s = 0; s <= ArcSlices; s++)
+                    {
+                        float angle = (-90f + s * (180f / ArcSlices)) * Mathf.Deg2Rad;
+                        Vector3 local = new Vector3(Mathf.Sin(angle), 0, Mathf.Cos(angle)) * r;
+                        Vector3 worldPos = origin + rotation * local;
+                        float groundY = SampleGround(worldPos, highestY, out var normal);
+                        _arcPoints[idx++] = new Vector3(worldPos.x, groundY, worldPos.z) + normal * 0.08f + Vector3.up * 0.04f;
+                    }
+                }
+                _arcMesh.vertices = _arcPoints;
+                _arcMesh.RecalculateBounds();
+                _arcMesh.RecalculateNormals();
             }
         }
 
@@ -222,12 +343,12 @@ namespace Duskborn.Gameplay.Enemies
                 float lifetime = (float)HollowWardenEncounter.SpikeVisibleSeconds;
                 visual.Root.SetActive(age < delay + lifetime);
                 if (!visual.Root.activeSelf) continue;
-                visual.Root.transform.position = spike.Position + Vector3.up * .06f;
+                visual.Root.transform.position = spike.Position + Vector3.up * .08f;
                 if (visual.Wave != spike.Wave || visual.Tick != spike.StartTick || visual.Position != spike.Position)
                 {
-                    // Ground plane slope is replicated by the server. Preserve the horizontal hit radius.
-                    SetCircle(visual.RingMesh, .91f, spike.Normal);
-                    SetCircle(visual.FillMesh, 0, spike.Normal);
+                    // Ground plane slope adapts to local terrain. Preserve the horizontal hit radius.
+                    SetCircle(visual.RingMesh, .91f, spike.Position, spike.Normal);
+                    SetCircle(visual.FillMesh, 0, spike.Position, spike.Normal);
                     visual.Wave = spike.Wave; visual.Tick = spike.StartTick; visual.Position = spike.Position;
                 }
                 bool warning = age < delay;
@@ -272,19 +393,36 @@ namespace Duskborn.Gameplay.Enemies
             return visual;
         }
 
-        private static void SetCircle(Mesh mesh, float inner, Vector3 normal)
+        private static void SetCircle(Mesh mesh, float inner, Vector3 spikePos, Vector3 fallbackNormal)
         {
             const int segments = 32;
             var vertices = new Vector3[segments * 2];
             var triangles = new int[segments * 6];
+            float highestY = spikePos.y + 15f;
             for (int i = 0; i < segments; i++)
             {
                 float angle = i * Mathf.PI * 2 / segments;
                 float x = Mathf.Cos(angle) * HollowWardenEncounter.SpikeRadius;
                 float z = Mathf.Sin(angle) * HollowWardenEncounter.SpikeRadius;
-                float y = -(normal.x * x + normal.z * z) / Mathf.Max(.3f, normal.y);
-                vertices[i * 2] = new Vector3(x, y, z);
-                vertices[i * 2 + 1] = vertices[i * 2] * inner;
+
+                Vector3 worldOuter = spikePos + new Vector3(x, 0, z);
+                float outerGroundY = SampleGround(worldOuter, highestY, out _);
+                float localOuterY = outerGroundY - spikePos.y;
+
+                float localInnerY;
+                if (inner > 0.01f)
+                {
+                    Vector3 worldInner = spikePos + new Vector3(x * inner, 0, z * inner);
+                    float innerGroundY = SampleGround(worldInner, highestY, out _);
+                    localInnerY = innerGroundY - spikePos.y;
+                }
+                else
+                {
+                    localInnerY = localOuterY * inner;
+                }
+
+                vertices[i * 2] = new Vector3(x, localOuterY + 0.04f, z);
+                vertices[i * 2 + 1] = new Vector3(x * inner, localInnerY + 0.04f, z * inner);
                 int next = ((i + 1) % segments) * 2;
                 int t = i * 6;
                 triangles[t] = i * 2; triangles[t + 1] = next; triangles[t + 2] = i * 2 + 1;

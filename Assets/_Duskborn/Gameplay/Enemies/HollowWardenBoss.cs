@@ -167,10 +167,10 @@ namespace Duskborn.Gameplay.Enemies
             }
         }
 
-        public override void TakeDamage(float amount, bool isCrit = false)
+        public override void TakeDamage(float amount, bool isCrit = false, Duskborn.Gameplay.Player.PlayerStats attacker = null)
         {
             if (!IsServerStarted || !IsAlive || amount <= 0 || float.IsNaN(amount) || float.IsInfinity(amount)) return;
-            base.TakeDamage(amount * _clock.IncomingDamageScale, isCrit);
+            base.TakeDamage(amount * _clock.IncomingDamageScale, isCrit, attacker);
         }
 
         protected override void Die()

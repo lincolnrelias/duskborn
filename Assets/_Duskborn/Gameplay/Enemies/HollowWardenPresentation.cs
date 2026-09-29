@@ -41,6 +41,9 @@ namespace Duskborn.Gameplay.Enemies
         private Mesh _spikeMesh;
         private Material _spikeMaterial;
         private HollowWardenChannelVisual _channelVisual;
+        private HollowWardenLocomotion _locomotion;
+        private HollowWardenSweepVisual _sweepVisual;
+        private HollowWardenGroundImpact _groundImpact;
 
         private sealed class SpikeVisual
         {
@@ -73,7 +76,7 @@ namespace Duskborn.Gameplay.Enemies
             }
         }
 
-        private static float SampleGround(Vector3 worldPos, float referenceY, out Vector3 normal)
+        internal static float SampleGround(Vector3 worldPos, float referenceY, out Vector3 normal)
         {
             int mask = GroundMask;
             float rayStartY = referenceY + 30f;
@@ -157,6 +160,8 @@ namespace Duskborn.Gameplay.Enemies
             _spikeMaterial = boss != null ? boss.SpikeMaterial : null;
             _spikeMesh = BuildSpikeMesh();
             _channelVisual = new HollowWardenChannelVisual(transform, animator, rightPlate, leftPlate, openRight, openLeft, telegraphMaterial);
+            _locomotion = new HollowWardenLocomotion(transform, animator);
+            _sweepVisual = new HollowWardenSweepVisual(transform, animator);
         }
 
         private MeshRenderer CreateTelegraph(string label, out Mesh mesh)
@@ -176,15 +181,22 @@ namespace Duskborn.Gameplay.Enemies
 
         private void Update()
         {
+            _sweepVisual?.Restore();
+            _locomotion?.Restore();
             if (boss == null || !boss.IsSpawned || !boss.IsClientStarted)
             {
                 _line.enabled = _arc.enabled = false;
                 if (hud != null) hud.enabled = false;
                 HideSpikes();
                 _channelVisual?.Hide();
+                _groundImpact?.Hide();
                 return;
             }
             var view = boss.ActionView;
+            // Lazily allocate only on a rendering client, including in player builds.
+            if (_groundImpact == null && (view.State == WardenState.HarvestSweep || view.State == WardenState.Rootbreaker))
+                _groundImpact = new HollowWardenGroundImpact(telegraphMaterial, _spikeMaterial);
+            _groundImpact?.Update(boss);
             UpdateSpikeVisuals();
             if (hud != null) hud.enabled = view.State != WardenState.Dormant && view.State != WardenState.Dead;
             if (healthFill != null) healthFill.fillAmount = Mathf.Clamp01(boss.CurrentHP / Mathf.Max(1,boss.DisplayMaxHP));
@@ -193,7 +205,8 @@ namespace Duskborn.Gameplay.Enemies
                     : view.State == WardenState.RootPlant ? "Preparing spike channel"
                     : view.PhaseTwo ? "The heart awakens" : "Hollow Warden";
 
-            string clip = view.State == WardenState.Ready ? (boss.Moving ? "HW_Walk" : "HW_Idle")
+            // Locomotion is layered over idle using observed travel on both host and clients.
+            string clip = view.State == WardenState.Ready ? "HW_Idle"
                 : "HW_" + (view.State == WardenState.Dead ? "Death" : view.State.ToString());
             if (animator != null && view.State != WardenState.Dormant && (_sequence != view.Sequence || _clip != clip))
             {
@@ -203,7 +216,10 @@ namespace Duskborn.Gameplay.Enemies
                 if (view.State == WardenState.Ready) normalized = 0;
                 else if (view.State == WardenState.Rooted || view.State == WardenState.Exposed) normalized %= 1;
                 else normalized = Mathf.Clamp01(normalized);
-                animator.Play(clip, 0, normalized);
+                if (view.State == WardenState.Ready)
+                    animator.CrossFadeInFixedTime(clip, .18f, 0, 0);
+                else
+                    animator.Play(clip, 0, normalized);
                 _sequence = view.Sequence;
                 _clip = clip;
             }
@@ -282,9 +298,13 @@ namespace Duskborn.Gameplay.Enemies
 
         private void LateUpdate()
         {
-            if (boss == null || !boss.IsSpawned || !boss.IsClientStarted) return;
+            bool active = boss != null && boss.IsSpawned && boss.IsClientStarted;
+            _locomotion?.Apply(active && boss.ActionView.State == WardenState.Ready, Time.deltaTime);
+            if (!active) return;
             _channelVisual?.Apply(boss.ActionView.State, (float)boss.ActionAge);
+            _sweepVisual?.Apply(boss.ActionView.State, (float)boss.ActionAge * Mathf.Max(1, boss.ActionView.Rate));
         }
+
         private static float ClipLength(string clip)
         {
             switch (clip)
@@ -301,6 +321,7 @@ namespace Duskborn.Gameplay.Enemies
 
         private void OnDestroy()
         {
+            _groundImpact?.Dispose();
             _channelVisual?.Dispose();
             foreach (var visual in _spikePool)
             {
@@ -317,6 +338,9 @@ namespace Duskborn.Gameplay.Enemies
 
         private void OnDisable()
         {
+            _sweepVisual?.Restore();
+            _groundImpact?.Hide();
+            _locomotion?.Restore();
             _channelVisual?.Hide();
             HideSpikes();
             if (_line != null) _line.enabled=false;

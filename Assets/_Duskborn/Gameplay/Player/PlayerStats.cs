@@ -196,7 +196,10 @@ namespace Duskborn.Gameplay.Player
             if (thorns > 0f && attacker != null && actual > 0f)
             {
                 float reflected = actual * thorns;
-                attacker.TakeDamage(reflected, false);
+                if (attacker is Duskborn.Gameplay.Enemies.EnemyBase eb)
+                    eb.TakeDamage(reflected, false, this);
+                else
+                    attacker.TakeDamage(reflected, false);
                 DuskLog.Log(LogChannel.Combat, $"{name}: reflected {reflected:F1} thorns damage.");
             }
 

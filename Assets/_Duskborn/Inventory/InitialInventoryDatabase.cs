@@ -299,6 +299,10 @@ namespace Duskborn.Inventory
             if (appleDef != null)
                 actionBarItems.Add(new InitialItemEntry(appleDef, 3));
 
+            var testBow = UnityEditor.AssetDatabase.LoadAssetAtPath<ItemDefinitionBase>(
+                "Assets/_Duskborn/Resources/Weapons/weapon_wooden_bow.asset");
+            if (testBow != null) actionBarItems.Add(new InitialItemEntry(testBow, 1));
+
             // 2. Mochila Inicial (Recursos Iniciais)
             var wood = UnityEditor.AssetDatabase.LoadAssetAtPath<ItemDefinitionBase>(
                 "Assets/_Duskborn/ScriptableObjects/Resources/material_wood.asset");

@@ -31,6 +31,7 @@ namespace Duskborn.Editor
             RunTest(Test_DroppedItemVisuals_FloatingBehavior_CommonRareVsEpic, ref passed, ref total);
             RunTest(Test_TestItemsAndTables_AssetIntegrity, ref passed, ref total);
             RunTest(Test_StaticTierTestNodes_Configuration, ref passed, ref total);
+            RunTest(Test_DroppedItemVisuals_RarityAdjustments_WhiteGreenAndSkyward, ref passed, ref total);
 
             Debug.Log($"<color=#55FF55><b>[ItemTierDropTests] {passed}/{total} testes passaram com sucesso!</b></color>");
         }
@@ -346,6 +347,66 @@ namespace Duskborn.Editor
                 visuals.Setup(ItemRarity.Epic);
                 if (!ItemTierHelper.ShouldFloatInAir(visuals.CurrentRarity))
                     throw new Exception("Item Épico deveria ter ShouldFloatInAir ativo.");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(go);
+            }
+        }
+
+        private static void Test_DroppedItemVisuals_RarityAdjustments_WhiteGreenAndSkyward()
+        {
+            var go = new GameObject("TestRarityRulesItem");
+            try
+            {
+                var mf = go.AddComponent<MeshFilter>();
+                mf.sharedMesh = Resources.GetBuiltinResource<Mesh>("Cube.fbx");
+                var mr = go.AddComponent<MeshRenderer>();
+                var rb = go.AddComponent<Rigidbody>();
+                var visuals = go.AddComponent<DroppedItemVisuals>();
+
+                // 1) Comum: Nenhum efeito visual (sem beam, halo, light ou overlay)
+                visuals.Setup(ItemRarity.Common);
+                if (visuals.BeamObject != null)
+                    throw new Exception("Item Comum não deve possuir BeamObject!");
+                if (visuals.HaloObject != null)
+                    throw new Exception("Item Comum não deve possuir HaloObject!");
+                if (visuals.PointLight != null)
+                    throw new Exception("Item Comum não deve possuir PointLight!");
+                if (visuals.OverlayObjects.Count > 0)
+                    throw new Exception("Item Comum não deve possuir RarityWaveOverlay!");
+
+                // 2) Incomum: Apenas shader de onda/outline verde (sem sky beam, halo ou light)
+                visuals.Setup(ItemRarity.Uncommon);
+                if (visuals.BeamObject != null)
+                    throw new Exception("Item Incomum não deve possuir BeamObject (sem feixe pro céu)!");
+                if (visuals.HaloObject != null)
+                    throw new Exception("Item Incomum não deve possuir HaloObject!");
+                if (visuals.PointLight != null)
+                    throw new Exception("Item Incomum não deve possuir PointLight!");
+                if (visuals.OverlayObjects.Count == 0)
+                    throw new Exception("Item Incomum DEVE possuir RarityWaveOverlay!");
+
+                // 3) Raro e acima: Mantêm o feixe vertical pro céu e halo, e também têm o shader de onda
+                visuals.Setup(ItemRarity.Rare);
+                if (visuals.BeamObject == null)
+                    throw new Exception("Item Raro DEVE possuir BeamObject direcionado ao céu!");
+                if (visuals.HaloObject == null)
+                    throw new Exception("Item Raro DEVE possuir HaloObject!");
+                if (visuals.OverlayObjects.Count == 0)
+                    throw new Exception("Item Raro DEVE possuir RarityWaveOverlay!");
+
+                visuals.Setup(ItemRarity.Epic);
+                if (visuals.BeamObject == null)
+                    throw new Exception("Item Épico DEVE possuir BeamObject direcionado ao céu!");
+                if (visuals.OverlayObjects.Count == 0)
+                    throw new Exception("Item Épico DEVE possuir RarityWaveOverlay!");
+
+                visuals.Setup(ItemRarity.Legendary);
+                if (visuals.BeamObject == null)
+                    throw new Exception("Item Lendário DEVE possuir BeamObject direcionado ao céu!");
+                if (visuals.OverlayObjects.Count == 0)
+                    throw new Exception("Item Lendário DEVE possuir RarityWaveOverlay!");
             }
             finally
             {

@@ -175,7 +175,7 @@ namespace Duskborn.Gameplay.Loot
             }
 
             // Instantly burst-throw all items from the body simultaneously
-            SpawnAllLootInstant(spawnList, spawnGold, goldAmount, origin, total, rng, rarestItemIndex, rarestItemRarity);
+            SpawnAllLootInstant(spawnList, spawnGold, goldAmount, origin, total, rng, rarestItemIndex, rarestItemRarity, harvester);
 
             DuskLog.Log(LogChannel.Loot,
                 $"LootManager: dropping {spawnList.Count} item(s) at {origin} (rarest: {rarestItemRarity}, night {currentNight}).");
@@ -233,7 +233,8 @@ namespace Duskborn.Gameplay.Loot
             int total,
             SeededRNG rng,
             int rarestItemIndex,
-            ItemRarity rarestRarity)
+            ItemRarity rarestRarity,
+            PlayerStats harvester = null)
         {
             float baseAngle = RandRange(rng, 0f, 360f);
             var spawnedColliders = new List<Collider>();
@@ -242,7 +243,7 @@ namespace Duskborn.Gameplay.Loot
             {
                 var (prefab, id, rarity) = spawnList[i];
                 bool isRarest = (i == rarestItemIndex);
-                var go = SpawnItem(prefab, id, rarity, origin, i, total, baseAngle, rng, isRarest);
+                var go = SpawnItem(prefab, id, rarity, origin, i, total, baseAngle, rng, isRarest, harvester);
                 if (go != null)
                     RegisterAndIgnoreCollisions(go, spawnedColliders);
             }
@@ -279,7 +280,8 @@ namespace Duskborn.Gameplay.Loot
             int total,
             float baseAngle,
             SeededRNG rng,
-            bool isRarest)
+            bool isRarest,
+            PlayerStats harvester = null)
         {
             Vector3 throwVelocity = ComputeThrowDirection(index, total, baseAngle, rng, out float azimuth);
             Vector3 spawnPos       = CalculateSpawnPosition(origin, azimuth, total);
@@ -289,7 +291,8 @@ namespace Duskborn.Gameplay.Loot
             var pickup = go.GetComponent<WorldItemPickup>();
             if (pickup != null)
             {
-                pickup.ServerInitialize(id, 1, rarity);
+                NetworkObject targetPlayerNob = harvester != null ? harvester.GetComponent<NetworkObject>() : null;
+                pickup.ServerInitialize(id, 1, rarity, targetPlayerNob);
                 pickup.ServerThrow(throwVelocity, throwTorque);
                 if (isRarest)
                 {

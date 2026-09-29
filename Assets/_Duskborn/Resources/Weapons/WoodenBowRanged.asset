@@ -1,0 +1,12 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_Script: {fileID: 11500000, guid: 44a2d0944e1057309e6bad60bcf79b71, type: 3}
+  m_Name: WoodenBowRanged
+  m_EditorClassIdentifier: 
+  projectile: {fileID: 11400000, guid: a37952153533f28d63f8718740dc1c7e, type: 2}
+  preferredRange: 15

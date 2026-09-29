@@ -18,7 +18,7 @@ MonoBehaviour:
   category: Armas
   tier: 1
   isAlwaysDiscovered: 1
-  outputItem: {fileID: 0}
+  outputItem: {fileID: 11400000, guid: c4c56a0fcf2437566ec0298d24e48c13, type: 2}
   outputAmount: 1
   ingredients:
   - material: {fileID: 11400000, guid: bf7b5f988956014458ebc1a8ae0e761e, type: 2}

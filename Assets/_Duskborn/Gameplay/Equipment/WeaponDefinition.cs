@@ -21,21 +21,28 @@ namespace Duskborn.Gameplay.Equipment
         [SerializeField] private WeaponSkill[]      skills;
         [SerializeField] private WeaponAudioProfile  audioProfile;
         [SerializeField] private WeaponEffectProfile effectProfile;
+        [SerializeField] private ItemAttachmentProfile attachmentProfile;
+        [Tooltip("Overrides the upper-body action mask while this weapon is equipped. Full-body actions still use the full-body mask.")]
+        [SerializeField] private AvatarMask actionMask;
 
-        public GameObject               Prefab         => prefab;
-        public IReadOnlyList<StatBonus> Bonuses        => bonuses;
+        public GameObject               Prefab            => prefab;
+        public IReadOnlyList<StatBonus> Bonuses           => bonuses;
         public IReadOnlyList<TypeDamageModifier> TypeModifiers => typeModifiers;
-        public WeaponBehaviour          Behaviour      => behaviour;
-        public WeaponActionData[]       Actions        => actions;
-        public WeaponSkill[]            Skills         => skills;
-        public WeaponAudioProfile       AudioProfile   => audioProfile;
-        public WeaponEffectProfile      EffectProfile  => effectProfile;
+        public WeaponBehaviour          Behaviour         => behaviour;
+        public WeaponActionData[]       Actions           => actions;
+        public WeaponSkill[]            Skills            => skills;
+        public WeaponAudioProfile       AudioProfile      => audioProfile;
+        public WeaponEffectProfile      EffectProfile     => effectProfile;
+        public ItemAttachmentProfile    AttachmentProfile => attachmentProfile;
+        public AvatarMask               ActionMask        => actionMask;
+
+        public void SetAttachmentProfile(ItemAttachmentProfile profile) => attachmentProfile = profile;
 
         public override IInventoryItem CreateRuntimeItem()
         {
             string iconId = Icon != null ? Icon.name : string.Empty;
             string description = BuildDescription(Description, bonuses, typeModifiers);
-            return new WeaponItem(Id, DisplayName, description, iconId, bonuses, typeModifiers, prefab, behaviour, actions, skills, audioProfile, effectProfile);
+            return new WeaponItem(Id, DisplayName, description, iconId, bonuses, typeModifiers, prefab, behaviour, actions, skills, audioProfile, effectProfile, attachmentProfile, actionMask);
         }
 
         // Composes the displayed description from, in order: stat bonuses (line by line),

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Duskborn.Gameplay.Loot
@@ -9,6 +10,7 @@ namespace Duskborn.Gameplay.Loot
     /// - Camada 3: Motes/centelhas que sobem pelo feixe em direção aos céus (Raro, Épico, Lendário).
     /// - Camada 4: Flash/spike inicial no impacto que assenta na coluna estável.
     /// - Camada 5: Luz pontual suave ("dim light") com pulsação orgânica.
+    /// - Camada 6: Shader de outline e onda gradiente animada sobre a malha do item (Incomum e superior).
     /// 
     /// IMPORTANTE: Todo o conjunto visual é isolado em um GameObject raiz de mundo independente (_vfxRoot)
     /// com escala fixa (1, 1, 1), tornando-o 100% imune a prefabs com escalas arbitrárias
@@ -33,6 +35,10 @@ namespace Duskborn.Gameplay.Loot
         private ParticleSystem  _particles;
         private Rigidbody       _rb;
 
+        private readonly List<GameObject> _overlayObjects = new();
+        private static Shader             _waveOverlayShader;
+        private static Dictionary<ItemRarity, Material> _sharedWaveMaterials;
+
         private float _baseIntensity;
         private float _baseRange;
         private float _pulseOffset;
@@ -41,6 +47,7 @@ namespace Duskborn.Gameplay.Loot
         private bool  _isSettled;
         private Vector3 _settledPosition;
         private float _spawnTime;
+        private bool  _isSetup;
 
         // Ancoragem ao terreno
         private Vector3 _groundNormal = Vector3.up;
@@ -54,11 +61,12 @@ namespace Duskborn.Gameplay.Loot
         private static Material _sharedBeamMaterial;
         private static Material _sharedHaloMaterial;
 
-        public ItemRarity CurrentRarity => currentRarity;
-        public GameObject VfxRoot      => _vfxRoot;
-        public GameObject BeamObject   => _beamObject;
-        public GameObject HaloObject   => _haloObject;
-        public Light      PointLight   => _pointLight;
+        public ItemRarity CurrentRarity       => currentRarity;
+        public GameObject VfxRoot             => _vfxRoot;
+        public GameObject BeamObject          => _beamObject;
+        public GameObject HaloObject          => _haloObject;
+        public Light      PointLight          => _pointLight;
+        public IReadOnlyList<GameObject> OverlayObjects => _overlayObjects;
 
         private void Awake()
         {
@@ -73,7 +81,7 @@ namespace Duskborn.Gameplay.Loot
 
         private void Start()
         {
-            if (_pointLight == null)
+            if (!_isSetup)
             {
                 Setup(currentRarity);
             }
@@ -109,22 +117,65 @@ namespace Duskborn.Gameplay.Loot
 
         public void Setup(ItemRarity rarity)
         {
+            _isSetup       = true;
             currentRarity  = rarity;
             _baseIntensity = ItemTierHelper.GetLightIntensity(rarity);
             _baseRange     = ItemTierHelper.GetLightRange(rarity);
 
             Color tierColor = ItemTierHelper.GetColor(rarity);
 
+            // 1. Itens Brancos (Comum): NENHUM efeito visual
+            if (rarity == ItemRarity.Common)
+            {
+                CleanupLight();
+                CleanupBeam();
+                CleanupHalo();
+                CleanupParticles();
+                ClearWaveOverlays();
+                if (_vfxRoot != null) _vfxRoot.SetActive(false);
+
+                _isSettled = false;
+                if (_rb != null)
+                {
+                    _rb.isKinematic = false;
+                    _rb.useGravity = true;
+                }
+                return;
+            }
+
+            // 2. Itens Verdes (Incomum): Apenas o shader com outline verde e gradiente de onda animada
+            if (rarity == ItemRarity.Uncommon)
+            {
+                CleanupLight();
+                CleanupBeam();
+                CleanupHalo();
+                CleanupParticles();
+                if (_vfxRoot != null) _vfxRoot.SetActive(false);
+                SetupWaveOverlay(rarity);
+
+                _isSettled = false;
+                if (_rb != null)
+                {
+                    _rb.isKinematic = false;
+                    _rb.useGravity = true;
+                }
+                return;
+            }
+
+            // 3. Azul e acima (Raro, Épico, Lendário):
+            // Mantêm o feixe vertical que vai aos céus, halo no chão, luz pontual, partículas
+            // e TAMBÉM recebem o shader de outline + onda em suas respectivas cores!
             EnsureVfxRoot();
+            if (_vfxRoot != null) _vfxRoot.SetActive(true);
             EnsureSharedMaterials();
             SetupPointLight(tierColor);
             SetupVerticalBeam(rarity, tierColor);
             SetupGroundHalo(rarity, tierColor);
             SetupParticles(rarity, tierColor);
+            SetupWaveOverlay(rarity);
 
             if (!ItemTierHelper.ShouldFloatInAir(rarity))
             {
-                // Itens Comuns e Incomuns devem cair fisicamente no chão com gravidade como de costume
                 _isSettled = false;
                 if (_rb != null)
                 {
@@ -132,6 +183,131 @@ namespace Duskborn.Gameplay.Loot
                     _rb.useGravity = true;
                 }
             }
+            else
+            {
+                _isSettled = false;
+                if (_rb != null)
+                {
+                    _rb.useGravity = false;
+                }
+            }
+        }
+
+        private void CleanupLight()
+        {
+            if (_pointLight != null)
+            {
+                Destroy(_pointLight.gameObject);
+                _pointLight = null;
+            }
+        }
+
+        private void CleanupBeam()
+        {
+            if (_beamObject != null)
+            {
+                Destroy(_beamObject);
+                _beamObject = null;
+                _beamTransform = null;
+            }
+            if (_beamMesh != null)
+            {
+                Destroy(_beamMesh);
+                _beamMesh = null;
+            }
+        }
+
+        private void CleanupHalo()
+        {
+            if (_haloObject != null)
+            {
+                Destroy(_haloObject);
+                _haloObject = null;
+                _haloTransform = null;
+            }
+            if (_haloMesh != null)
+            {
+                Destroy(_haloMesh);
+                _haloMesh = null;
+            }
+        }
+
+        private void CleanupParticles()
+        {
+            if (_particles != null)
+            {
+                Destroy(_particles.gameObject);
+                _particles = null;
+            }
+        }
+
+        private static Material GetSharedWaveMaterial(ItemRarity rarity)
+        {
+            if (_waveOverlayShader == null)
+            {
+                _waveOverlayShader = Shader.Find("Duskborn/Loot/ItemRarityWaveOverlay")
+                                  ?? Shader.Find("Universal Render Pipeline/Lit")
+                                  ?? Shader.Find("Sprites/Default");
+            }
+            if (_waveOverlayShader == null) return null;
+
+            _sharedWaveMaterials ??= new Dictionary<ItemRarity, Material>();
+            if (!_sharedWaveMaterials.TryGetValue(rarity, out var mat) || mat == null)
+            {
+                mat = new Material(_waveOverlayShader) { name = $"M_ItemRarityWaveOverlay_{rarity}" };
+                Color col = ItemTierHelper.GetColor(rarity);
+                mat.SetColor("_Color", col);
+                mat.SetColor("_OutlineColor", col);
+                _sharedWaveMaterials[rarity] = mat;
+            }
+            return mat;
+        }
+
+        private void SetupWaveOverlay(ItemRarity rarity)
+        {
+            ClearWaveOverlays();
+
+            if (rarity < ItemRarity.Uncommon)
+            {
+                return;
+            }
+
+            var mat = GetSharedWaveMaterial(rarity);
+            if (mat == null) return;
+
+            var meshFilters = GetComponentsInChildren<MeshFilter>(true);
+            foreach (var mf in meshFilters)
+            {
+                if (mf == null || mf.sharedMesh == null) continue;
+                if (_vfxRoot != null && (mf.transform == _vfxRoot.transform || mf.transform.IsChildOf(_vfxRoot.transform))) continue;
+                if (mf.gameObject.name.Contains("Diablo") || mf.gameObject.name.Contains("Halo") || mf.gameObject.name.Contains("Overlay")) continue;
+
+                var overlayObj = new GameObject("RarityWaveOverlay");
+                overlayObj.transform.SetParent(mf.transform, false);
+                overlayObj.transform.localPosition = Vector3.zero;
+                overlayObj.transform.localRotation = Quaternion.identity;
+                overlayObj.transform.localScale = Vector3.one;
+
+                var overlayMf = overlayObj.AddComponent<MeshFilter>();
+                overlayMf.sharedMesh = mf.sharedMesh;
+
+                var overlayMr = overlayObj.AddComponent<MeshRenderer>();
+                overlayMr.sharedMaterial = mat;
+                overlayMr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                overlayMr.receiveShadows = false;
+
+                _overlayObjects.Add(overlayObj);
+            }
+        }
+
+        private void ClearWaveOverlays()
+        {
+            for (int i = 0; i < _overlayObjects.Count; i++)
+            {
+                if (_overlayObjects[i] != null)
+                    Destroy(_overlayObjects[i]);
+            }
+            _overlayObjects.Clear();
         }
 
         private static void EnsureSharedMaterials()
@@ -441,7 +617,7 @@ namespace Duskborn.Gameplay.Loot
 
         private void LateUpdate()
         {
-            if (_vfxRoot == null) return;
+            if (_vfxRoot == null || !_vfxRoot.activeSelf) return;
 
             float time = Time.time;
             _beamYaw = (_beamYaw + 18f * Time.deltaTime) % 360f;
@@ -508,43 +684,57 @@ namespace Duskborn.Gameplay.Loot
                 return;
             }
 
+            // Épicos e Lendários que ficam no ar giram continuamente ao longo do tempo enquanto suspensos
+            transform.Rotate(Vector3.up, 38f * Time.deltaTime, Space.World);
+
             if (!_isSettled)
             {
                 if (_rb != null)
                 {
                     bool isSlow = _rb.linearVelocity.sqrMagnitude < 0.04f;
-                    bool timeout = (time - _spawnTime) > 0.85f;
+                    bool timeout = (time - _spawnTime) > 0.5f;
 
                     if (isSlow || timeout)
                     {
                         _isSettled = true;
-                        _settledPosition = transform.position;
+                        _rb.linearVelocity = Vector3.zero;
+                        _rb.angularVelocity = Vector3.zero;
                         _rb.isKinematic = true;
+                        _rb.useGravity = false;
                         CheckGround();
+                        float hoverY = _hasGroundHit
+                            ? _groundPoint.y + ItemTierHelper.GetHoverHeight(currentRarity)
+                            : transform.position.y;
+                        _settledPosition = new Vector3(transform.position.x, hoverY, transform.position.z);
                     }
                 }
                 else
                 {
                     _isSettled = true;
-                    _settledPosition = transform.position;
                     CheckGround();
+                    float hoverY = _hasGroundHit
+                        ? _groundPoint.y + ItemTierHelper.GetHoverHeight(currentRarity)
+                        : transform.position.y;
+                    _settledPosition = new Vector3(transform.position.x, hoverY, transform.position.z);
                 }
             }
 
             if (_isSettled)
             {
-                // Levitação suave senoidal com leve rotação contínua do modelo do item
-                float bobY = Mathf.Sin((time + _pulseOffset) * 2.2f) * 0.035f;
+                // Levitação suave senoidal no ar
+                float bobY = Mathf.Sin((time + _pulseOffset) * 2.2f) * 0.04f;
                 transform.position = _settledPosition + Vector3.up * bobY;
-                transform.Rotate(Vector3.up, 28f * Time.deltaTime, Space.World);
             }
         }
 
         private void OnDestroy()
         {
+            CleanupLight();
+            CleanupBeam();
+            CleanupHalo();
+            CleanupParticles();
+            ClearWaveOverlays();
             if (_vfxRoot != null) Destroy(_vfxRoot);
-            if (_beamMesh != null) Destroy(_beamMesh);
-            if (_haloMesh != null) Destroy(_haloMesh);
         }
     }
 }

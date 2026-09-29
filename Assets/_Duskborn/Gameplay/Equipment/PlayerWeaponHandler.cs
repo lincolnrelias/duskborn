@@ -11,6 +11,7 @@ namespace Duskborn.Gameplay.Equipment
     public class PlayerWeaponHandler : MonoBehaviour
     {
         [SerializeField] private Transform holdPoint;
+        [SerializeField] private Animator  animator;
 
         private const float DebounceSeconds = 0.5f;
 
@@ -35,6 +36,8 @@ namespace Duskborn.Gameplay.Equipment
 
         private void Update()
         {
+            var combat = GetComponent<PlayerCombat>();
+            if (combat != null && !combat.IsOwner) return;
             if (!_subscribed) TryCacheActionBar();
 
             if (_debounceTimer > 0f)
@@ -83,6 +86,11 @@ namespace Duskborn.Gameplay.Equipment
             }
 
             _pendingWeapon = candidate;
+            if (_activeWeapon?.Behaviour is RangedWeaponBehaviour)
+                GetComponent<PlayerCombat>()?.CancelRangedAttack();
+            var actionPlayer = GetComponent<WeaponActionPlayer>();
+            if (actionPlayer != null && actionPlayer.CurrentWeapon?.Behaviour is RangedWeaponBehaviour)
+                actionPlayer.CancelAction();
             _debounceTimer = DebounceSeconds;
             DuskLog.Log(LogChannel.Inventory,
                 candidate != null
@@ -93,6 +101,7 @@ namespace Duskborn.Gameplay.Equipment
         private void CommitWeaponSwap()
         {
             _activeWeapon = _pendingWeapon;
+            GetComponent<WeaponActionPlayer>()?.SetEquippedWeapon(_activeWeapon);
 
             if (_heldInstance != null)
             {
@@ -100,8 +109,36 @@ namespace Duskborn.Gameplay.Equipment
                 _heldInstance = null;
             }
 
-            if (_activeWeapon?.Prefab != null && holdPoint != null)
-                _heldInstance = Instantiate(_activeWeapon.Prefab, holdPoint);
+            if (_activeWeapon?.Prefab != null)
+            {
+                Transform socket = holdPoint;
+                var profile = _activeWeapon.AttachmentProfile;
+                if (profile != null)
+                {
+                    var anim = animator != null ? animator : GetComponentInChildren<Animator>(true);
+                    if (anim != null && anim.isHuman)
+                    {
+                        var boneTransform = anim.GetBoneTransform(profile.Bone);
+                        if (boneTransform != null) socket = boneTransform;
+                    }
+                }
+
+                if (socket != null)
+                {
+                    _heldInstance = Instantiate(_activeWeapon.Prefab, socket);
+                    if (profile != null)
+                    {
+                        profile.ApplyToTransform(_heldInstance.transform);
+                        DuskLog.Log(LogChannel.Inventory,
+                            $"Weapon '{_activeWeapon.DisplayName}' attached using profile '{profile.name}' to '{socket.name}' (Pos: {_heldInstance.transform.localPosition}, Rot: {_heldInstance.transform.localEulerAngles}, Scale: {_heldInstance.transform.localScale}).");
+                    }
+                    else
+                    {
+                        DuskLog.Log(LogChannel.Inventory,
+                            $"Weapon '{_activeWeapon.DisplayName}' has NO profile; attached to fallback socket '{socket.name}'.");
+                    }
+                }
+            }
 
             DuskLog.Log(LogChannel.Inventory,
                 _activeWeapon != null
@@ -109,6 +146,25 @@ namespace Duskborn.Gameplay.Equipment
                     : "Active weapon: none");
 
             _buffs.ApplyAll();
+        }
+
+        // Observer weapon presentation is supplied by the shooter's network event,
+        // never by another player's local action bar.
+        public void ShowObservedWeapon(WeaponDefinition definition)
+        {
+            var combat = GetComponent<PlayerCombat>();
+            if (combat == null || combat.IsOwner || definition == null) return;
+            if (_activeWeapon?.Id == definition.Id) return;
+            _pendingWeapon = (WeaponItem)definition.CreateRuntimeItem();
+            CommitWeaponSwap();
+        }
+
+        public void ClearObservedRangedWeapon()
+        {
+            var combat = GetComponent<PlayerCombat>();
+            if (combat == null || combat.IsOwner || !(_activeWeapon?.Behaviour is RangedWeaponBehaviour)) return;
+            _pendingWeapon = null;
+            CommitWeaponSwap();
         }
 
         // Called by PlayerBuffContainer.ApplyAll() between gear and buffs.

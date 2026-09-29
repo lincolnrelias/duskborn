@@ -1,0 +1,192 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &100
+GameObject:
+  m_ObjectHideFlags: 0
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 101}
+  - component: {fileID: 11400000}
+  m_Layer: 0
+  m_Name: WoodenBow
+  m_TagString: Untagged
+  m_IsActive: 1
+--- !u!4 &101
+Transform:
+  m_ObjectHideFlags: 0
+  m_GameObject: {fileID: 100}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 111}
+  - {fileID: 121}
+  - {fileID: 131}
+  - {fileID: 141}
+  m_Father: {fileID: 0}
+--- !u!1 &110
+GameObject:
+  m_ObjectHideFlags: 0
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 111}
+  - component: {fileID: 112}
+  - component: {fileID: 113}
+  m_Layer: 0
+  m_Name: BowWood
+  m_TagString: Untagged
+  m_IsActive: 1
+--- !u!4 &111
+Transform:
+  m_ObjectHideFlags: 0
+  m_GameObject: {fileID: 110}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 101}
+--- !u!33 &112
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_GameObject: {fileID: 110}
+  m_Mesh: {fileID: 4300000, guid: 0be134f6802bb48ffdaac8a07133955c, type: 2}
+--- !u!23 &113
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_GameObject: {fileID: 110}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_RenderingLayerMask: 1
+  m_Materials:
+  - {fileID: 2100000, guid: 6077ece575ea40fe618b4bff44d4d1f7, type: 2}
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+--- !u!1 &120
+GameObject:
+  m_ObjectHideFlags: 0
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 121}
+  - component: {fileID: 122}
+  - component: {fileID: 123}
+  m_Layer: 0
+  m_Name: BowGrip
+  m_TagString: Untagged
+  m_IsActive: 1
+--- !u!4 &121
+Transform:
+  m_ObjectHideFlags: 0
+  m_GameObject: {fileID: 120}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 101}
+--- !u!33 &122
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_GameObject: {fileID: 120}
+  m_Mesh: {fileID: 4300000, guid: 20e059ee095db1e16f000dc40ae56cb2, type: 2}
+--- !u!23 &123
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_GameObject: {fileID: 120}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_RenderingLayerMask: 1
+  m_Materials:
+  - {fileID: 2100000, guid: ac6b583c5ed5694ee9048fc01fd72a43, type: 2}
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+--- !u!1 &130
+GameObject:
+  m_ObjectHideFlags: 0
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 131}
+  - component: {fileID: 132}
+  - component: {fileID: 133}
+  m_Layer: 0
+  m_Name: BowBinding
+  m_TagString: Untagged
+  m_IsActive: 1
+--- !u!4 &131
+Transform:
+  m_ObjectHideFlags: 0
+  m_GameObject: {fileID: 130}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 101}
+--- !u!33 &132
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_GameObject: {fileID: 130}
+  m_Mesh: {fileID: 4300000, guid: 32cedd72c3cb3d35675fc02dacaca0fd, type: 2}
+--- !u!23 &133
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_GameObject: {fileID: 130}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_RenderingLayerMask: 1
+  m_Materials:
+  - {fileID: 2100000, guid: 3376cd3c19d77035073baf1b2dd79200, type: 2}
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+--- !u!1 &140
+GameObject:
+  m_ObjectHideFlags: 0
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 141}
+  - component: {fileID: 142}
+  - component: {fileID: 143}
+  m_Layer: 0
+  m_Name: BowCord
+  m_TagString: Untagged
+  m_IsActive: 1
+--- !u!4 &141
+Transform:
+  m_ObjectHideFlags: 0
+  m_GameObject: {fileID: 140}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 101}
+--- !u!33 &142
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_GameObject: {fileID: 140}
+  m_Mesh: {fileID: 4300000, guid: f5919b00481736ea01236ee7005f45f1, type: 2}
+--- !u!23 &143
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_GameObject: {fileID: 140}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_RenderingLayerMask: 1
+  m_Materials:
+  - {fileID: 2100000, guid: 40d8e3500d2bba5107c4da795100cadf, type: 2}
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_GameObject: {fileID: 100}
+  m_Enabled: 1
+  m_Script: {fileID: 11500000, guid: 4ac094911450c253de18fb304aa265cd, type: 3}
+  m_EditorClassIdentifier:
+  arrowPrefab: {fileID: 100, guid: e6432b6e07ce2e432b2f295b70cf6a4f, type: 3}
+  cordMaterial: {fileID: 2100000, guid: 40d8e3500d2bba5107c4da795100cadf, type: 2}

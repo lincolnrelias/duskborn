@@ -15,7 +15,7 @@ using Duskborn.Gameplay.Player;
 namespace Duskborn.Gameplay.Enemies
 {
     [RequireComponent(typeof(NavMeshAgent))]
-    public abstract class EnemyBase : NetworkBehaviour, ICombatEntity, IDamageable, IHealthProvider, ITypedTarget
+    public abstract partial class EnemyBase : NetworkBehaviour, ICombatEntity, IDamageable, IHealthProvider, ITypedTarget
     {
         public Transform Transform => transform;
         [Header("Stats")]
@@ -35,7 +35,7 @@ namespace Duskborn.Gameplay.Enemies
         [SerializeField] private Transform        holdPoint;
 
         [Header("Death")]
-        [SerializeField] private float deathDelay = 1.5f;
+        [SerializeField] private float deathDelay = 10f;
 
         [Header("Damage Numbers")]
         [SerializeField] private DamageNumberConfig _damageNumberConfig;
@@ -81,7 +81,17 @@ namespace Duskborn.Gameplay.Enemies
 
         private static readonly Collider[] CleaveHitBuffer = new Collider[32];
         private static readonly System.Collections.Generic.List<PlayerStats> CleaveHitPlayers = new(8);
-        private static readonly WaitForSeconds WaitDeathDelay = new(0.4f);
+        private static readonly System.Collections.Generic.Dictionary<float, WaitForSeconds> WaitCache = new();
+
+        private static WaitForSeconds GetWait(float seconds)
+        {
+            if (!WaitCache.TryGetValue(seconds, out var wait))
+            {
+                wait = new WaitForSeconds(seconds);
+                WaitCache[seconds] = wait;
+            }
+            return wait;
+        }
 
         private const float ScanIntervalMin = 0.25f;
         private const float ScanIntervalMax = 0.40f;
@@ -92,6 +102,8 @@ namespace Duskborn.Gameplay.Enemies
         private GameObject          _weaponInstance;
         private EnemyAudioFeedback  _audioFeedback;
         private PlayerStats         _currentTargetStats;
+        private PlayerStats         _lastAttacker;
+        public  PlayerStats         LastAttacker => _lastAttacker;
         private float[]             _skillCooldowns = Array.Empty<float>();
         private float    _baseMaxHP;
         private uint     _outlineMask;
@@ -173,6 +185,7 @@ namespace Duskborn.Gameplay.Enemies
 
             if (_staggerTimer > 0f)
             {
+                if (weapon?.Behaviour is RangedWeaponBehaviour) _weaponActionPlayer?.CancelAction();
                 TickStagger();
                 return;
             }
@@ -216,7 +229,8 @@ namespace Duskborn.Gameplay.Enemies
             }
 
             float sqrDist = (transform.position - CurrentTarget.position).sqrMagnitude;
-            float sqrAttackRange = attackRange * attackRange;
+            float effectiveRange = weapon?.Behaviour is RangedWeaponBehaviour ranged ? ranged.preferredRange : attackRange;
+            float sqrAttackRange = effectiveRange * effectiveRange;
             bool  skillUsed = TryUseSkill();
 
             if (sqrDist <= sqrAttackRange)
@@ -264,11 +278,23 @@ namespace Duskborn.Gameplay.Enemies
         protected virtual void TryBasicMelee()
         {
             if (MeleeCooldown > 0f) return;
+            if (weapon?.Behaviour is RangedWeaponBehaviour && !CanStartRangedAttack()) return;
             MeleeCooldown = 1f / Mathf.Max(AttackSpeed, 0.01f);
 
+            Vector3 facing = CurrentTarget != null ? CurrentTarget.position - transform.position : transform.forward;
+            facing.y = 0f;
+            if (facing.sqrMagnitude > 0.001f) transform.rotation = Quaternion.LookRotation(facing);
+
             if (_weaponActionPlayer != null && _weaponItem?.Actions?.Length > 0)
+            {
+                if (weapon?.Behaviour is RangedWeaponBehaviour)
+                {
+                    rangedShotReleased = false;
+                    ShowEnemyRangedWindupRpc();
+                }
                 _weaponActionPlayer.PlayAction(0, _weaponItem, BuildContext());
-            else
+            }
+            else if (!(weapon?.Behaviour is RangedWeaponBehaviour))
                 PerformBasicMelee();
         }
 
@@ -334,11 +360,14 @@ namespace Duskborn.Gameplay.Enemies
 
         // ── Damage / death ────────────────────────────────────────────────────
 
-        public void TakeDamage(float amount, bool isCrit, Vector3 hitPoint, Vector3 hitDirection)
+        void IDamageable.TakeDamage(float amount, bool isCrit) => TakeDamage(amount, isCrit, null);
+
+        public void TakeDamage(float amount, bool isCrit, Vector3 hitPoint, Vector3 hitDirection, PlayerStats attacker = null)
         {
+            if (attacker != null) _lastAttacker = attacker;
             _deathHitPoint     = hitPoint;
             _deathHitDirection = hitDirection.normalized;
-            TakeDamage(amount, isCrit);
+            TakeDamage(amount, isCrit, attacker);
             if (IsServerStarted && IsAlive) ApplyKnockback(hitDirection);
         }
 
@@ -368,10 +397,11 @@ namespace Duskborn.Gameplay.Enemies
             Agent.Move(_knockbackDir * (speed * Time.deltaTime));
         }
 
-        public virtual void TakeDamage(float amount, bool isCrit = false)
+        public virtual void TakeDamage(float amount, bool isCrit = false, PlayerStats attacker = null)
         {
             if (!IsServerStarted) return;
             if (!IsAlive) return;
+            if (attacker != null) _lastAttacker = attacker;
             float actual = amount * IncomingDamageMultiplier;
             _currentHP.Value = Mathf.Max(0f, _currentHP.Value - actual);
             RpcShowDamageNumber(transform.position, actual, isCrit);
@@ -390,6 +420,10 @@ namespace Duskborn.Gameplay.Enemies
             OnHealthChanged?.Invoke(next, MaxHP);
             if (next <= 0f)
             {
+                SetOutline(false);
+                var col = GetComponent<Collider>();
+                if (col != null) col.enabled = false;
+
                 if (_ragdoll != null)
                     _ragdoll.EnableRagdoll();
                 else if (_animator != null)
@@ -401,6 +435,8 @@ namespace Duskborn.Gameplay.Enemies
         {
             SetOutline(false);
             Agent.enabled = false;
+            var col = GetComponent<Collider>();
+            if (col != null) col.enabled = false;
             OnDied?.Invoke(this);
             if (_ragdoll != null) RpcApplyRagdollImpulse(_deathHitPoint, _deathHitDirection);
             StartCoroutine(DespawnAfterDelay());
@@ -412,7 +448,7 @@ namespace Duskborn.Gameplay.Enemies
 
         protected virtual IEnumerator DespawnAfterDelay()
         {
-            yield return WaitDeathDelay;
+            yield return GetWait(deathDelay);
             if (IsSpawned)
                 InstanceFinder.ServerManager.Despawn(NetworkObject, DespawnType.Pool);
         }
@@ -468,6 +504,7 @@ namespace Duskborn.Gameplay.Enemies
             OnDied              = null;
             CurrentTarget       = null;
             _currentTargetStats = null;
+            _lastAttacker       = null;
             MeleeCooldown       = 0f;
             _knockbackTimer     = 0f;
             _staggerTimer       = 0f;
@@ -505,7 +542,11 @@ namespace Duskborn.Gameplay.Enemies
             var prefab  = weapon?.Prefab;
             if (prefab == null) return;
             var parent = holdPoint != null ? holdPoint : transform;
+            var attachment = weapon.AttachmentProfile;
+            if (attachment != null && _animator != null && _animator.isHuman)
+                parent = _animator.GetBoneTransform(attachment.Bone) ?? parent;
             _weaponInstance = Instantiate(prefab, parent);
+            if (attachment != null) attachment.ApplyToTransform(_weaponInstance.transform);
 
             // Rebuild renderer list so weapon renderers are included in outline.
             outlineRenderers   = GetComponentsInChildren<Renderer>();

@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 246cd6b673e021a47849a992f2ab04ec, type: 3}
+  m_Name: weapon_wooden_bow
+  m_EditorClassIdentifier: 
+  id: weapon_wooden_bow
+  displayName: Arco de Madeira
+  description: Arco de treino. Dispara flechas fisicas; municao ilimitada nesta versao
+    de teste.
+  icon: {fileID: 2800000, guid: c56b55f8622d5db41a014ddd812b7caa, type: 3}
+  dropPrefab: {fileID: 0}
+  rarity: 0
+  prefab: {fileID: 100, guid: 65ec66befbabd717f3eb1150553d6424, type: 3}
+  bonuses: []
+  typeModifiers: []
+  behaviour: {fileID: 11400000, guid: 3f8aadfe57a2427e382097403bb307ba, type: 2}
+  actions:
+  - BaseSpeed: 1
+    PreserveLocomotion: 1
+    ComboChain: 0
+    ComboResetTime: 0.8
+    Entries:
+    - Clip: {fileID: 7400000, guid: 6298c5d5d86d2ab4ebb14f617495f1c9, type: 3}
+      DamageMultiplier: 1
+      Events:
+      - Type: 2
+        NormalizedTime: 0.67418647
+    Clips: []
+    Events: []
+    ComboDamageMultipliers: []
+  skills: []
+  audioProfile: {fileID: 0}
+  effectProfile: {fileID: 0}
+  attachmentProfile: {fileID: 11400000, guid: 17e4bb03017c8d7c4f7422ba21114837, type: 2}
+  actionMask: {fileID: 31900000, guid: c5241c7e977b4e4cbb6af786ce7c1257, type: 2}

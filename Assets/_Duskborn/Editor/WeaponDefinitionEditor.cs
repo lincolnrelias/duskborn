@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using Duskborn.Gameplay.Equipment;
 using UnityEditor;
+using UnityEngine;
 
 namespace Duskborn.Editor
 {
@@ -13,6 +14,12 @@ namespace Duskborn.Editor
             serializedObject.Update();
             DrawPropertiesExcluding(serializedObject, "dropPrefab");
             serializedObject.ApplyModifiedProperties();
+
+            EditorGUILayout.Space(8);
+            if (GUILayout.Button("Abrir no Estúdio de Ajuste de Itens", GUILayout.Height(28)))
+            {
+                ItemFittingStudioWindow.OpenWithWeapon((WeaponDefinition)target);
+            }
         }
     }
 }

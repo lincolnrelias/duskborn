@@ -12,22 +12,27 @@ namespace Duskborn.Gameplay.Loot
         [SerializeField] private Renderer  outlineRenderer;
         [SerializeField] private AudioClip pickupClip;
 
-        private readonly SyncVar<string>     _resourceId   = new();
-        private readonly SyncVar<int>        _amount       = new();
-        private readonly SyncVar<bool>       _collectible  = new();
-        private readonly SyncVar<ItemRarity> _rarity       = new();
+        private readonly SyncVar<string>        _resourceId   = new();
+        private readonly SyncVar<int>           _amount       = new();
+        private readonly SyncVar<bool>          _collectible  = new();
+        private readonly SyncVar<ItemRarity>    _rarity       = new();
+        private readonly SyncVar<NetworkObject> _targetPlayer = new();
         private bool _collected;
+        private float _spawnTime;
+        private bool  _isFlying;
 
         private DroppedItemVisuals _visuals;
 
-        public bool       IsCollectible => _collectible.Value;
-        public ItemRarity Rarity        => _rarity.Value;
+        public bool          IsCollectible => _collectible.Value;
+        public ItemRarity    Rarity        => _rarity.Value;
+        public NetworkObject TargetPlayer  => _targetPlayer.Value;
 
         private uint _outlineMask;
         private uint _baseMask;
 
         private void Awake()
         {
+            _spawnTime = Time.time;
             if (outlineRenderer == null)
                 outlineRenderer = GetComponentInChildren<Renderer>();
 
@@ -67,15 +72,17 @@ namespace Duskborn.Gameplay.Loot
         public override void OnStartServer()
         {
             base.OnStartServer();
-            Invoke(nameof(SetCollectible), 1f);
+            if (_targetPlayer.Value == null || (_rarity.Value != ItemRarity.Common && _rarity.Value != ItemRarity.Uncommon))
+                Invoke(nameof(SetCollectible), 1f);
         }
 
         private void SetCollectible() => _collectible.Value = true;
 
-        public void ServerInitialize(string resourceId, int amount, ItemRarity rarity = ItemRarity.Common)
+        public void ServerInitialize(string resourceId, int amount, ItemRarity rarity = ItemRarity.Common, NetworkObject targetPlayer = null)
         {
-            _resourceId.Value = resourceId;
-            _amount.Value     = amount;
+            _resourceId.Value   = resourceId;
+            _amount.Value       = amount;
+            _targetPlayer.Value = targetPlayer;
 
             if (rarity == ItemRarity.Common && !string.IsNullOrEmpty(resourceId) && WorldDropRegistry.Instance != null)
             {
@@ -86,8 +93,73 @@ namespace Duskborn.Gameplay.Loot
 
             _rarity.Value = rarity;
 
+            if (targetPlayer != null && (rarity == ItemRarity.Common || rarity == ItemRarity.Uncommon))
+            {
+                CancelInvoke(nameof(SetCollectible));
+                _collectible.Value = true;
+            }
+
             if (_visuals != null)
                 _visuals.Setup(rarity);
+        }
+
+        private void Update()
+        {
+            if (_targetPlayer.Value != null && (Rarity == ItemRarity.Common || Rarity == ItemRarity.Uncommon))
+            {
+                UpdateFlyTowardsTarget();
+            }
+        }
+
+        private void UpdateFlyTowardsTarget()
+        {
+            if (_collected) return;
+            var targetNob = _targetPlayer.Value;
+            if (targetNob == null || !targetNob.gameObject.activeInHierarchy)
+            {
+                var rb = GetComponent<Rigidbody>();
+                if (rb != null && rb.isKinematic)
+                {
+                    rb.isKinematic = false;
+                    rb.useGravity = true;
+                }
+                return;
+            }
+
+            float elapsed = Time.time - _spawnTime;
+            if (elapsed < 0.16f) return;
+
+            if (!_isFlying)
+            {
+                _isFlying = true;
+                var rb = GetComponent<Rigidbody>();
+                if (rb != null)
+                {
+                    rb.linearVelocity = Vector3.zero;
+                    rb.angularVelocity = Vector3.zero;
+                    rb.isKinematic = true;
+                    rb.useGravity = false;
+                }
+            }
+
+            Vector3 targetPos = targetNob.transform.position + Vector3.up * 0.85f;
+            float flightDuration = elapsed - 0.16f;
+            float currentSpeed = Mathf.Lerp(7.0f, 24.0f, flightDuration * 2.0f);
+
+            transform.position = Vector3.MoveTowards(transform.position, targetPos, currentSpeed * Time.deltaTime);
+
+            if (IsServerStarted && !_collected)
+            {
+                float sqrDist = (transform.position - targetPos).sqrMagnitude;
+                if (sqrDist <= 1.2f * 1.2f)
+                {
+                    var resInv = targetNob.GetComponent<ResourceInventory>();
+                    if (resInv != null)
+                    {
+                        ServerCollect(targetNob.Owner, resInv);
+                    }
+                }
+            }
         }
 
         [ObserversRpc(RunLocally = true)]

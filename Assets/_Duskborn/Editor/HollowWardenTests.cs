@@ -23,6 +23,8 @@ namespace Duskborn.Editor
             var collider=boss.GetComponent<CapsuleCollider>();
             Check(collider!=null && collider.height>3,"Boss collider scale incorrect.");
             CheckImportedScaleAndGround();
+            CheckWalkingFootPlant();
+            CheckSweepArc();
             CheckRootWithoutAnimator();
             CheckProductionIntegration(boss);
 
@@ -55,6 +57,90 @@ namespace Duskborn.Editor
         private static void Check(bool condition,string message)
         {
             if(!condition)throw new InvalidOperationException(message);
+        }
+
+        private static void CheckWalkingFootPlant()
+        {
+            var source = AssetDatabase.LoadAssetAtPath<GameObject>(HollowWardenBuilder.ModelFolder + "/HollowWarden.fbx");
+            var instance = UnityEngine.Object.Instantiate(source);
+            try
+            {
+                var idle = AssetDatabase.LoadAllAssetsAtPath(HollowWardenBuilder.ModelFolder + "/HollowWarden.fbx")
+                    .OfType<AnimationClip>().Single(c => c.name == "HW_Idle");
+                idle.SampleAnimation(instance, 0);
+                var type = typeof(HollowWardenBoss).Assembly.GetType("Duskborn.Gameplay.Enemies.HollowWardenLocomotion", true);
+                var gait = Activator.CreateInstance(type, instance.transform, instance.GetComponent<Animator>());
+                var apply = type.GetMethod("Apply");
+                var restore = type.GetMethod("Restore");
+                var bones = instance.GetComponentsInChildren<Transform>();
+                var foot = bones.Single(t => t.name == "Foot.R");
+                var hips = bones.Single(t => t.name == "Hips");
+                var restPosition = hips.localPosition;
+                var restRotation = hips.localRotation;
+                Vector3 planted = default;
+                // Reach full blend before sampling several points within the right support phase.
+                for (int frame = 0; frame < 30; frame++)
+                {
+                    restore.Invoke(gait, null);
+                    idle.SampleAnimation(instance, 0);
+                    instance.transform.position += Vector3.forward * .02f;
+                    apply.Invoke(gait, new object[] { true, 1f / 60 });
+                    if (frame == 12) planted = foot.position;
+                    if (frame > 12)
+                        Check(Vector3.Distance(foot.position, planted) < .008f,
+                            "Walking support foot must stay planted during straight travel.");
+                }
+                restore.Invoke(gait, null);
+                Check(Vector3.Distance(hips.localPosition, restPosition) < .0001f &&
+                    Quaternion.Angle(hips.localRotation, restRotation) < .01f,
+                    "Walking offsets must restore without accumulating.");
+                apply.Invoke(gait, new object[] { false, 1f / 60 });
+                Check(Vector3.Distance(hips.localPosition, restPosition) < .0001f,
+                    "Walking must not override attack or channel poses.");
+            }
+            finally { UnityEngine.Object.DestroyImmediate(instance); }
+        }
+
+        private static void CheckSweepArc()
+        {
+            var source = AssetDatabase.LoadAssetAtPath<GameObject>(HollowWardenBuilder.ModelFolder + "/HollowWarden.fbx");
+            var instance = UnityEngine.Object.Instantiate(source);
+            try
+            {
+                var clips = AssetDatabase.LoadAllAssetsAtPath(HollowWardenBuilder.ModelFolder + "/HollowWarden.fbx").OfType<AnimationClip>();
+                var idle = clips.Single(c => c.name == "HW_Idle");
+                var attack = clips.Single(c => c.name == "HW_HarvestSweep");
+                idle.SampleAnimation(instance, 0);
+                var type = typeof(HollowWardenBoss).Assembly.GetType("Duskborn.Gameplay.Enemies.HollowWardenSweepVisual", true);
+                var visual = Activator.CreateInstance(type, instance.transform, instance.GetComponent<Animator>());
+                var apply = type.GetMethod("Apply");
+                var restore = type.GetMethod("Restore");
+                var bones = instance.GetComponentsInChildren<Transform>();
+                var hand = bones.Single(t => t.name == "Hand.R");
+                var foot = bones.Single(t => t.name == "Foot.R");
+                var chest = bones.Single(t => t.name == "Chest");
+                var positions = new Vector3[3];
+                float[] times = { .72f, .9f, 1.08f };
+                for (int i = 0; i < times.Length; i++)
+                {
+                    restore.Invoke(visual, null);
+                    attack.SampleAnimation(instance, times[i]);
+                    var chestBefore = chest.localRotation;
+                    var planted = foot.position;
+                    apply.Invoke(visual, new object[] { WardenState.HarvestSweep, times[i] });
+                    positions[i] = instance.transform.InverseTransformPoint(hand.position);
+                    Check(Vector3.Distance(foot.position, planted) < .0001f, "Sweep must preserve planted feet.");
+                    restore.Invoke(visual, null);
+                    Check(Quaternion.Angle(chest.localRotation, chestBefore) < .01f, "Sweep must restore the Animator pose without accumulating.");
+                }
+                Check(positions[0].x - positions[2].x > 1, "Swipe fist must travel across the front, from right to left.");
+                Check(positions[1].z > positions[0].z && positions[1].z > positions[2].z,
+                    "Swipe must reach forward at the authoritative impact time.");
+                var unchanged = hand.position;
+                apply.Invoke(visual, new object[] { WardenState.Rootbreaker, .9f });
+                Check(Vector3.Distance(hand.position, unchanged) < .0001f, "Swipe must not override the straight attack.");
+            }
+            finally { UnityEngine.Object.DestroyImmediate(instance); }
         }
 
         private static void CheckProductionIntegration(GameObject boss)

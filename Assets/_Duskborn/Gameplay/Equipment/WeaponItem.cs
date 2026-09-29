@@ -23,8 +23,10 @@ namespace Duskborn.Gameplay.Equipment
         public WeaponBehaviour            Behaviour     { get; }
         public WeaponActionData[]         Actions       { get; }
         public IReadOnlyList<WeaponSkill> Skills        { get; }
-        public WeaponAudioProfile         AudioProfile  { get; }
-        public WeaponEffectProfile        EffectProfile { get; }
+        public WeaponAudioProfile         AudioProfile      { get; }
+        public WeaponEffectProfile        EffectProfile     { get; }
+        public ItemAttachmentProfile      AttachmentProfile { get; }
+        public AvatarMask                 ActionMask        { get; }
 
         public override InventoryItemKind Kind => InventoryItemKind.Equipment;
 
@@ -34,17 +36,21 @@ namespace Duskborn.Gameplay.Equipment
                           GameObject prefab, WeaponBehaviour behaviour,
                           WeaponActionData[] actions, WeaponSkill[] skills = null,
                           WeaponAudioProfile audioProfile = null,
-                          WeaponEffectProfile effectProfile = null)
+                          WeaponEffectProfile effectProfile = null,
+                          ItemAttachmentProfile attachmentProfile = null,
+                          AvatarMask actionMask = null)
             : base(id, displayName, description, iconId)
         {
-            Bonuses       = bonuses ?? Array.Empty<StatBonus>();
-            TypeModifiers = typeModifiers ?? Array.Empty<TypeDamageModifier>();
-            Prefab        = prefab;
-            Behaviour     = behaviour;
-            Actions       = actions ?? Array.Empty<WeaponActionData>();
-            Skills        = skills  ?? Array.Empty<WeaponSkill>();
-            AudioProfile  = audioProfile;
-            EffectProfile = effectProfile;
+            Bonuses           = bonuses ?? Array.Empty<StatBonus>();
+            TypeModifiers     = typeModifiers ?? Array.Empty<TypeDamageModifier>();
+            Prefab            = prefab;
+            Behaviour         = behaviour;
+            Actions           = actions ?? Array.Empty<WeaponActionData>();
+            Skills            = skills  ?? Array.Empty<WeaponSkill>();
+            AudioProfile      = audioProfile;
+            EffectProfile     = effectProfile;
+            AttachmentProfile = attachmentProfile;
+            ActionMask        = actionMask;
         }
 
         public float GetTypeDamageMultiplier(TargetType targetTypes) =>

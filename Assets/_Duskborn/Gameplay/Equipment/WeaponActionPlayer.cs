@@ -28,6 +28,7 @@ namespace Duskborn.Gameplay.Equipment
         private AnimationLayerMixerPlayable _layerMixer;
         private AnimationClipPlayable       _clipPlayable;
         private AvatarMask                  _fullBodyMask;
+        private AvatarMask                  _equippedActionMask;
         private bool                        _originalRootMotion;
         private PlayerController            _playerController;
 
@@ -35,6 +36,7 @@ namespace Duskborn.Gameplay.Equipment
         private WeaponSkill        _activeSkill;
         private WeaponActionData   _activeData;
         private AnimationClip      _activeClip;
+        private bool               _ownsActiveClip;
         private CombatContext      _activeCtx;
         private int                _activeActionIndex;
         private WeaponActionEvent[] _sortedEvents;
@@ -51,6 +53,8 @@ namespace Duskborn.Gameplay.Equipment
         private float _comboExpiry;
 
         public bool              IsPlaying     => _isPlaying;
+        public float NormalizedTime => _isPlaying && _clipPlayable.IsValid() && _activeClip != null
+            ? Mathf.Clamp01((float)(_clipPlayable.GetTime() / _activeClip.length)) : 0f;
         public float             CurrentComboMultiplier { get; private set; } = 1f;
         public WeaponItem        CurrentWeapon => _activeWeapon;
         public WeaponSkill       CurrentSkill  => _activeSkill;
@@ -91,6 +95,8 @@ namespace Duskborn.Gameplay.Equipment
         private void OnDestroy()
         {
             if (_graph.IsValid()) _graph.Destroy();
+            if (_ownsActiveClip && _activeClip != null) Destroy(_activeClip);
+            if (_fullBodyMask != null) Destroy(_fullBodyMask);
         }
 
         private void BuildGraph()
@@ -108,6 +114,7 @@ namespace Duskborn.Gameplay.Equipment
             _fullBodyMask = new AvatarMask();
             for (int i = 0; i < (int)AvatarMaskBodyPart.LastBodyPart; i++)
                 _fullBodyMask.SetHumanoidBodyPartActive((AvatarMaskBodyPart)i, true);
+            _layerMixer.SetLayerMaskFromAvatarMask(1, ResolveMask(true, _equippedActionMask));
 
             _originalRootMotion = animator.applyRootMotion;
             _playerController   = GetComponent<PlayerController>();
@@ -152,14 +159,24 @@ namespace Duskborn.Gameplay.Equipment
             _blendWeight       = 0f;
             _isPlaying         = true;
 
+            if (weapon.Behaviour is RangedWeaponBehaviour)
+            {
+                // Vendor clips contain OnShoot/OnFinishAttack events for their demo
+                // controller. Our typed timeline owns release, so strip the clone only.
+                _activeClip = Instantiate(clip);
+                _activeClip.events = Array.Empty<AnimationEvent>();
+                _ownsActiveClip = true;
+                ctx.Combat?.BeginRangedAttack(weapon);
+            }
+
             // Sorted defensive copy so we never mutate the SO array.
             _sortedEvents = SortedEvents(entry.Events);
 
             DuskLog.Log(LogChannel.Audio, $"PlayAction [{actionIndex}]: firing swing audio. audioPlayer={(object)_audioPlayer ?? "null"} profile={weapon?.AudioProfile?.name ?? "null"}.");
             _audioPlayer?.PlaySwing(weapon?.AudioProfile);
 
-            ApplyMask(data.PreserveLocomotion);
-            _clipPlayable = AnimationClipPlayable.Create(_graph, clip);
+            ApplyMask(data.PreserveLocomotion, weapon.ActionMask);
+            _clipPlayable = AnimationClipPlayable.Create(_graph, _activeClip);
             _clipPlayable.SetSpeed(data.BaseSpeed * _runtimeSpeedMultiplier);
             _layerMixer.ConnectInput(1, _clipPlayable, 0, 0f);
 
@@ -200,10 +217,22 @@ namespace Duskborn.Gameplay.Equipment
             return sorted;
         }
 
-        private void ApplyMask(bool preserveLocomotion)
+        public void SetEquippedWeapon(WeaponItem weapon)
         {
-            var mask = (preserveLocomotion && upperBodyMask != null) ? upperBodyMask : _fullBodyMask;
-            _layerMixer.SetLayerMaskFromAvatarMask(1, mask);
+            _equippedActionMask = weapon?.ActionMask;
+            if (_graph.IsValid() && !_isPlaying)
+                _layerMixer.SetLayerMaskFromAvatarMask(1, ResolveMask(true, _equippedActionMask));
+        }
+
+        private AvatarMask ResolveMask(bool preserveLocomotion, AvatarMask weaponMask)
+        {
+            if (!preserveLocomotion) return _fullBodyMask;
+            return weaponMask != null ? weaponMask : upperBodyMask != null ? upperBodyMask : _fullBodyMask;
+        }
+
+        private void ApplyMask(bool preserveLocomotion, AvatarMask weaponMask)
+        {
+            _layerMixer.SetLayerMaskFromAvatarMask(1, ResolveMask(preserveLocomotion, weaponMask));
             animator.applyRootMotion = !preserveLocomotion;
             if (!preserveLocomotion)
                 _playerController?.SetInputEnabled(false);
@@ -226,8 +255,23 @@ namespace Duskborn.Gameplay.Equipment
             if (_layerMixer.GetInput(1).IsValid()) _layerMixer.DisconnectInput(1);
             if (_clipPlayable.IsValid()) _clipPlayable.Destroy();
             _clipPlayable = default;
-            OnActionComplete?.Invoke();
+            if (_ownsActiveClip) Destroy(_activeClip);
+            _ownsActiveClip = false;
+            _layerMixer.SetLayerMaskFromAvatarMask(1, ResolveMask(true, _equippedActionMask));
+            if (!_cancelling) OnActionComplete?.Invoke();
         }
+
+        private bool _cancelling;
+        public void CancelAction()
+        {
+            if (!_isPlaying) return;
+            if (_activeWeapon?.Behaviour is RangedWeaponBehaviour) _activeCtx?.Combat?.CancelRangedAttack();
+            _cancelling = true;
+            StopCurrentAction();
+            _cancelling = false;
+        }
+
+        private void OnDisable() => CancelAction();
 
         public void PlaySkillAction(WeaponSkill skill, CombatContext ctx)
         {
@@ -263,7 +307,7 @@ namespace Duskborn.Gameplay.Equipment
 
             _sortedEvents = SortedEvents(entry.Events);
 
-            ApplyMask(data.PreserveLocomotion);
+            ApplyMask(data.PreserveLocomotion, _equippedActionMask);
             _clipPlayable = AnimationClipPlayable.Create(_graph, clip);
             _clipPlayable.SetSpeed(data.BaseSpeed * _runtimeSpeedMultiplier);
             _layerMixer.ConnectInput(1, _clipPlayable, 0, 0f);
@@ -274,6 +318,9 @@ namespace Duskborn.Gameplay.Equipment
         private void Update()
         {
             if (!_isPlaying) return;
+            if ((_activeCtx?.Stats != null && !_activeCtx.Stats.IsAlive) ||
+                (_activeCtx?.Caster is Duskborn.Gameplay.Enemies.EnemyBase enemy && !enemy.IsAlive))
+            { CancelAction(); return; }
 
             float clipLength = _activeClip.length;
             float normalized = clipLength > 0f ? (float)(_clipPlayable.GetTime() / clipLength) : 1f;

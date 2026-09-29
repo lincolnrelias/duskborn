@@ -42,15 +42,16 @@ namespace Duskborn.Gameplay.Loot
             if (_node  != null) _node.OnDepleted -= TriggerDrop;
         }
 
-        private void OnEnemyDied(EnemyBase _) => TriggerDrop();
+        private void OnEnemyDied(EnemyBase enemy) => TriggerDrop(enemy != null ? enemy.LastAttacker : null);
 
-        private void TriggerDrop()
+        private void TriggerDrop() => TriggerDrop(_node != null ? _node.LastHarvester : null);
+
+        private void TriggerDrop(PlayerStats destroyer)
         {
             if (lootTable == null) return;
             // LootManager is server-only; Instance is null on clients, so no double-spawning.
-            PlayerStats harvester = _node != null ? _node.LastHarvester : null;
             TargetType nodeTypes = _node != null ? _node.Types : TargetType.None;
-            LootManager.Instance?.ServerDropLoot(lootTable, GetDropPosition(), harvester, nodeTypes);
+            LootManager.Instance?.ServerDropLoot(lootTable, GetDropPosition(), destroyer, nodeTypes);
         }
 
         private Vector3 GetDropPosition()

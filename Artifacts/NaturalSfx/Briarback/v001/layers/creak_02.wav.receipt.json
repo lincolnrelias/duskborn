@@ -1,0 +1,35 @@
+{
+  "recipe": {
+    "source": {
+      "file": "source\\creak2.ogg",
+      "sha256": "8a990afdc03aebb91d528f5385e2f95582dbfa8e2c12c71098ab01be9142294a"
+    },
+    "start": 0,
+    "duration": null,
+    "playback_rate": 1,
+    "gain_db": -15,
+    "lowpass_hz": 4500
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\source\\creak2.ogg",
+    "-af",
+    "atrim=start=0,asetpts=PTS-STARTPTS,aresample=48000,lowpass=f=4500,highpass=f=45,volume=-15dB,afade=t=in:d=0.003,afade=t=out:st=0.8121458333333333:d=0.018"
+  ],
+  "output": {
+    "file": "layers\\creak_02.wav",
+    "sha256": "76fe6b21e99ec24bf47ec661df3c49231cb99508aa4d93745c2581326821a87c"
+  },
+  "inspection": {
+    "duration_seconds": 0.8301458333333334,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -21.26124122855954,
+    "rms_dbfs": -38.63840923262479,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.011208333333333334,
+    "tail_below_minus50db_seconds": 0.13797916666666668
+  }
+}

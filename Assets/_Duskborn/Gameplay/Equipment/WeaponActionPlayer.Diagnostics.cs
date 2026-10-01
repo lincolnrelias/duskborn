@@ -19,6 +19,8 @@ namespace Duskborn.Gameplay.Equipment
             public float time, deltaTime, actionWeight, actionTime, actionSpeed, releaseTime, aimPitch;
             public string weapon, actionClip, mask, phase;
             public bool aiming, rootMotion, preserveLocomotion, humanoid, actionConnected, shotRequested, bowFacingEnabled;
+            public bool controllerGrounded, animationGrounded;
+            public float movementPhase;
             public Vector3 localVelocity;
             public float torsoLeftLean, bowAnchorWeight, bowSpineReferenceError, bowSpineTiltError, bowUpperChestReferenceError;
             public List<DiagnosticLayer> layers = new List<DiagnosticLayer>();
@@ -88,7 +90,12 @@ namespace Duskborn.Gameplay.Equipment
                     !_shotRequested ? (_clipPlayable.GetSpeed() == 0 ? "Hold" : "Draw") : "ReleaseRequested"
             };
             var cc = GetComponent<CharacterController>();
-            if (cc != null) sample.localVelocity = transform.InverseTransformDirection(cc.velocity);
+            if (cc != null)
+            {
+                sample.localVelocity = transform.InverseTransformDirection(cc.velocity);
+                sample.controllerGrounded = cc.isGrounded;
+            }
+            sample.animationGrounded = _controllerPlayable.GetBool("IsGrounded");
             for (int i = 0; i < _controllerPlayable.GetLayerCount(); i++)
             {
                 var current = _controllerPlayable.GetCurrentAnimatorStateInfo(i);
@@ -112,8 +119,9 @@ namespace Duskborn.Gameplay.Equipment
             var movementSource = _authoredBow ?? _retainedBowMovement;
             if (movementSource != null)
             {
+                sample.movementPhase=movementSource.MovementPhase;
                 var movement = new DiagnosticLayer { name = "Authored Aim Locomotion", weight = _aimLocomotionMixer.GetInputWeight(1) };
-                for (int i = 0; i < 5; i++)
+                for (int i = 0; i < movementSource.MovementClipCount; i++)
                     movement.currentClips.Add(new DiagnosticClip { name = movementSource.MovementClipName(i), weight = movementSource.Movement.GetInputWeight(i) });
                 sample.layers.Add(movement);
             }

@@ -15,11 +15,15 @@ and builds. The wrapper reads the required Unity version from
 .\Tools\unity.ps1 all
 .\Tools\unity.ps1 build-windows
 .\Tools\unity.ps1 build-warden
+.\Tools\unity.ps1 build-briarback
 .\Tools\unity.ps1 build-ironroot
 .\Tools\unity.ps1 test-ironroot
 ```
 
 - `compile` imports changed assets, compiles scripts, and requires a success marker.
+- `build-briarback` imports the original rigged woodland charger and its sounds, builds
+  materials/controller/prefab/loot, registers the FishNet and enemy prefab collections,
+  installs night 2-6 definitions, and checks the model, attack clock and seeded budgets.
 - `build-ironroot` imports the original Ironroot Humanoid, creates URP materials, replaces
   both player prefab visuals while preserving gameplay/controller references, and validates
   skinning and sampled locomotion clips. Requires `Artifacts/Ironroot/v002/Ironroot.fbx`.

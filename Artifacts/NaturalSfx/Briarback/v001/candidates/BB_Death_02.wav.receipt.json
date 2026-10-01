@@ -1,0 +1,70 @@
+{
+  "recipe": {
+    "brief": "Uneven grumbling exhale trailing off into a soft heavy body landing, woody plates settling and a grass rustle; intended for ragdoll collapse.",
+    "layers": [
+      {
+        "file": "layers\\death_voice_02.wav",
+        "sha256": "bb72a84db4736b3e5bd28fec8c39506f54d9fa4be45850ce1f93a06fa14df879",
+        "delay_ms": 0,
+        "gain_db": 0
+      },
+      {
+        "file": "layers\\body_02.wav",
+        "sha256": "c7aa7cfb496da9a04567e52a68d9093ab3a1f2990beb514cfdcc13157c0f4049",
+        "delay_ms": 520,
+        "gain_db": 0
+      },
+      {
+        "file": "layers\\wood_02.wav",
+        "sha256": "09a517e6bf06e5a00e68a979fb0153e61c516208a49f25145550f32560c5f148",
+        "delay_ms": 565,
+        "gain_db": -3
+      },
+      {
+        "file": "layers\\grass_02.wav",
+        "sha256": "3dfbd06661138abdcebe5bdf5cd31aafe1ee0016c41096e56ee75ac8250cbb40",
+        "delay_ms": 620,
+        "gain_db": -6
+      },
+      {
+        "file": "layers\\cloth_02.wav",
+        "sha256": "45677773c527973b7c1c6f0f2a017ed03aa5f92bf629e45319ed1d81f4785fe7",
+        "delay_ms": 760,
+        "gain_db": 0
+      }
+    ],
+    "duration_seconds": 1.45
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\layers\\death_voice_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\layers\\body_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\layers\\wood_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\layers\\grass_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\layers\\cloth_02.wav",
+    "-filter_complex",
+    "[0:a]volume=0dB,adelay=0:all=1[a0];[1:a]volume=0dB,adelay=520:all=1[a1];[2:a]volume=-3dB,adelay=565:all=1[a2];[3:a]volume=-6dB,adelay=620:all=1[a3];[4:a]volume=0dB,adelay=760:all=1[a4];[a0][a1][a2][a3][a4]amix=inputs=5:normalize=0:duration=longest,apad,atrim=duration=1.45,afade=t=out:st=1.425:d=0.025[out]",
+    "-map",
+    "[out]"
+  ],
+  "output": {
+    "file": "candidates\\BB_Death_02.wav",
+    "sha256": "3c844910d90b056906d7a82a78cd091f9ebf31edb0c249df68d817aee9696950"
+  },
+  "inspection": {
+    "duration_seconds": 1.45,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -7.161154963733668,
+    "rms_dbfs": -25.47492164796564,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.012125,
+    "tail_below_minus50db_seconds": 0.394125
+  }
+}

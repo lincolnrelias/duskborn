@@ -1,0 +1,35 @@
+{
+  "recipe": {
+    "source": {
+      "file": "source\\1659.wav",
+      "sha256": "15748ea4c1947063a388c41a082957fcb0c00374c765049e81bb5eb680bab0f7"
+    },
+    "start": 0.57,
+    "duration": 0.22,
+    "playback_rate": 0.96,
+    "gain_db": -7,
+    "lowpass_hz": null
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v002\\source\\1659.wav",
+    "-af",
+    "atrim=start=0.57:duration=0.22,asetpts=PTS-STARTPTS,aresample=48000,asetrate=46080,aresample=48000,highpass=f=45,volume=-7dB,afade=t=in:d=0.003,afade=t=out:st=0.2111666666666667:d=0.018"
+  ],
+  "output": {
+    "file": "layers\\headbutt_voice_01.wav",
+    "sha256": "8a4a3d1967f66843456a05e036c00890aec280beb20cf40f97b0b1e49e03d838"
+  },
+  "inspection": {
+    "duration_seconds": 0.22916666666666666,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -11.705843597021836,
+    "rms_dbfs": -29.221795609937008,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.006395833333333333,
+    "tail_below_minus50db_seconds": 0.007895833333333333
+  }
+}

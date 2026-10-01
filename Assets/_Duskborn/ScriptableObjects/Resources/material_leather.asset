@@ -16,6 +16,6 @@ MonoBehaviour:
   displayName: Couro
   description: Couro
   icon: {fileID: 0}
-  dropPrefab: {fileID: 0}
+  dropPrefab: {fileID: 2943510941128590080, guid: 2273c6666db4c534092f088f899f8e1f, type: 3}
   rarity: 0
   category: combat_drop

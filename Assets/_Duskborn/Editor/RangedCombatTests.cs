@@ -47,6 +47,8 @@ namespace Duskborn.Editor
                 !ProjectileFlight.IsFinite(new Vector3(0, float.PositiveInfinity, 0)), "Non-finite aim accepted.");
             TestSweptImpact(data, true);
             TestSweptImpact(data, false);
+            TestSweptImpact(data, true, true);
+            TestScaledNockAlignment(data);
             TestArrowLimbAttachmentAndRagdoll(data);
             TestRangedSpawnOffsetControls();
             Debug.Log("[RangedCombatTests] Assets, timing, invalid aim, thin-wall obstruction, one-hit impact, limb attachment, ragdoll following and spawn controls passed.");
@@ -66,7 +68,24 @@ namespace Duskborn.Editor
             finally { UnityEngine.Object.DestroyImmediate(shot.gameObject); }
         }
 
-        private static void TestSweptImpact(ProjectileDefinition source, bool wallFirst)
+        private static void TestScaledNockAlignment(ProjectileDefinition source)
+        {
+            var data = UnityEngine.Object.Instantiate(source);
+            try
+            {
+                data.visualScale = new Vector3(0.8f, 1.2f, 1.75f);
+                Vector3 hand = new Vector3(3f, 1.4f, -2f);
+                Quaternion rotation = Quaternion.Euler(-35f, 70f, 5f);
+                Vector3 tip = data.TipPositionFromNock(hand, rotation);
+                Vector3 scale = Vector3.Scale(data.visualPrefab.transform.localScale, data.visualScale);
+                Vector3 nock = tip + rotation * Vector3.Scale(data.nockLocalPosition, scale);
+                Check(Vector3.Distance(nock, hand) < 0.0001f, "Scaled, pitched arrow detached from its drawing hand.");
+                Check(Vector3.Dot(tip - hand, rotation * Vector3.forward) > 1f, "Arrow tip must lead its nock.");
+            }
+            finally { UnityEngine.Object.DestroyImmediate(data); }
+        }
+
+        private static void TestSweptImpact(ProjectileDefinition source, bool wallFirst, bool handLaunch = false)
         {
             // Isolated far-away fixtures. Manual physics simulation does not enter Play Mode.
             var mode = Physics.simulationMode;
@@ -85,15 +104,17 @@ namespace Duskborn.Editor
                 target.transform.position = origin + Vector3.forward * 3f;
                 target.AddComponent<BoxCollider>();
                 target.AddComponent<SphereCollider>(); // Multiple colliders must still yield one damage callback.
-                wall.transform.position = origin + Vector3.forward * (wallFirst ? 1.5f : 5f);
+                wall.transform.position = origin + Vector3.forward * (handLaunch ? 0.6f : wallFirst ? 1.5f : 5f);
                 wall.AddComponent<BoxCollider>().size = new Vector3(2f, 2f, 0.01f);
                 data.speed = 250f; // Crosses both obstacles in one tick: catches tunnelling/regression.
                 data.gravityScale = 0f;
                 Physics.SyncTransforms();
                 int impacts = 0;
                 Collider struck = null;
+                Vector3 tip = handLaunch ? data.TipPositionFromNock(origin, Quaternion.identity) : origin;
                 shot = ProjectileFlight.Launch(ProjectileFlight.NextId(), data, owner.transform, true,
-                    origin, Vector3.forward, true, (col, point, direction) => { impacts++; struck = col; });
+                    tip, Vector3.forward, true, (col, point, direction) => { impacts++; struck = col; },
+                    clearanceOrigin: handLaunch ? origin : (Vector3?)null);
                 Check(!shot.CanHit(self), "Shooter collider was not ignored.");
                 var tick = typeof(ProjectileFlight).GetMethod("FixedUpdate", BindingFlags.Instance | BindingFlags.NonPublic);
                 tick.Invoke(shot, null);

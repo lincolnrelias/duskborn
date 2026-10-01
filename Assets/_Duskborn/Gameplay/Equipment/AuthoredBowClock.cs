@@ -20,6 +20,12 @@ namespace Duskborn.Gameplay.Equipment
             LoadDuration=load; ReleaseDuration=release;
         }
         public void RequestRelease() => requested=true;
+        public void RestartDraw()
+        {
+            Phase=Stage.Load;
+            Time=0;
+            requested=false;
+        }
         public void Advance(double dt)
         {
             if (double.IsNaN(dt) || double.IsInfinity(dt) || dt<0 || Phase==Stage.Complete) return;

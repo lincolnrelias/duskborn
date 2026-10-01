@@ -1,0 +1,26 @@
+{
+  "source": "Artifacts\\NaturalSfx\\Briarback\\v003\\candidates\\BB_Windup_02.wav",
+  "source_sha256": "570b4f532d8c3aa550ae202103ebe82b9b5e019e827a933eb6dbb6733afc1be0",
+  "command": [
+    "ffmpeg",
+    "-nostdin",
+    "-v",
+    "error",
+    "-n",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v003\\candidates\\BB_Windup_02.wav",
+    "-af",
+    "atrim=duration=0.38,asetpts=PTS-STARTPTS,afade=t=out:st=0.30:d=0.08",
+    "-ar",
+    "48000",
+    "-ac",
+    "1",
+    "-c:a",
+    "pcm_s24le",
+    "-map_metadata",
+    "-1",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v003\\unity\\BB_HeadbuttWindup_02.wav"
+  ],
+  "output_sha256": "e0198faa39df76f4d5975e19431933170ff6cad2212e432346ac1272ed3a69de",
+  "license": "CC0 1.0"
+}

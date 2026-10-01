@@ -6,6 +6,7 @@ namespace Duskborn.Gameplay.Enemies
         Runner,
         Spitter,
         Brute,
-        Elite
+        Elite,
+        Briarback
     }
 }

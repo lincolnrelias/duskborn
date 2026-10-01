@@ -10,11 +10,17 @@ namespace Duskborn.Gameplay.Enemies
 
         [SerializeField] private float _impulseScale = 5f;
         [SerializeField] private float _settleDuration = 2.5f;
+        [SerializeField] private bool _disableBoneCollidersWhileAlive;
+        [SerializeField] private bool _restorePoseOnReset;
+        [SerializeField] private bool _ignoreSelfCollisions;
 
         private Rigidbody[] _bones;
         private Collider[]  _boneColliders;
         private Collider[]  _rootColliders;
         private Coroutine   _freezeCoroutine;
+        private Vector3[] _restPositions;
+        private Quaternion[] _restRotations;
+        public bool IsRagdoll { get; private set; }
 
         private static readonly Dictionary<float, WaitForSeconds> WaitCache = new();
 
@@ -32,6 +38,8 @@ namespace Duskborn.Gameplay.Enemies
         {
             EnsureInitialized();
             SetKinematic(true);
+            if (_disableBoneCollidersWhileAlive)
+                foreach (var col in _boneColliders) if (col != null) col.enabled = false;
         }
 
         public void EnsureInitialized()
@@ -57,6 +65,10 @@ namespace Duskborn.Gameplay.Enemies
             }
             _rootColliders = rootCols.ToArray();
             _boneColliders = boneCols.ToArray();
+            _restPositions = new Vector3[_bones.Length];
+            _restRotations = new Quaternion[_bones.Length];
+            for (int i = 0; i < _bones.Length; i++)
+            { _restPositions[i] = _bones[i].transform.localPosition; _restRotations[i] = _bones[i].transform.localRotation; }
         }
 
         private void OnDisable()
@@ -70,6 +82,8 @@ namespace Duskborn.Gameplay.Enemies
 
         public void EnableRagdoll()
         {
+            EnsureInitialized();
+            IsRagdoll = true;
             if (_freezeCoroutine != null)
             {
                 StopCoroutine(_freezeCoroutine);
@@ -82,24 +96,37 @@ namespace Duskborn.Gameplay.Enemies
                 if (col != null) col.enabled = false;
             foreach (var col in _boneColliders)
                 if (col != null) col.enabled = true;
+            if (_ignoreSelfCollisions)
+                for (int i = 0; i < _boneColliders.Length; i++)
+                    for (int j = i + 1; j < _boneColliders.Length; j++)
+                        if (_boneColliders[i] != null && _boneColliders[j] != null)
+                            Physics.IgnoreCollision(_boneColliders[i], _boneColliders[j]);
 
-            _freezeCoroutine = StartCoroutine(FreezeAfterDelay());
+            if (Application.isPlaying) _freezeCoroutine = StartCoroutine(FreezeAfterDelay());
         }
 
         public void DisableRagdoll()
         {
+            EnsureInitialized();
+            IsRagdoll = false;
             if (_freezeCoroutine != null)
             {
                 StopCoroutine(_freezeCoroutine);
                 _freezeCoroutine = null;
             }
 
+            foreach (var rb in _bones)
+                if (rb != null && !rb.isKinematic) { rb.linearVelocity = Vector3.zero; rb.angularVelocity = Vector3.zero; }
             SetKinematic(true);
+            if (_restorePoseOnReset)
+                for (int i = 0; i < _bones.Length; i++)
+                    if (_bones[i] != null)
+                    { _bones[i].transform.localPosition = _restPositions[i]; _bones[i].transform.localRotation = _restRotations[i]; }
             if (_animator != null) _animator.enabled = true;
             foreach (var col in _rootColliders)
                 if (col != null) col.enabled = true;
             foreach (var col in _boneColliders)
-                if (col != null) col.enabled = true;
+                if (col != null) col.enabled = !_disableBoneCollidersWhileAlive;
         }
 
         private IEnumerator FreezeAfterDelay()
@@ -114,6 +141,8 @@ namespace Duskborn.Gameplay.Enemies
         public void ApplyImpulse(Vector3 hitPoint, Vector3 direction)
         {
             EnsureInitialized();
+            // The death RPC can arrive before the HP callback on a remote observer.
+            if (!IsRagdoll) EnableRagdoll();
             Rigidbody nearest  = null;
             float     bestDist = float.MaxValue;
             foreach (var rb in _bones)
@@ -122,7 +151,8 @@ namespace Duskborn.Gameplay.Enemies
                 float d = (rb.position - hitPoint).sqrMagnitude;
                 if (d < bestDist) { bestDist = d; nearest = rb; }
             }
-            nearest?.AddForce(direction * _impulseScale, ForceMode.Impulse);
+            if (nearest != null && !nearest.isKinematic)
+                nearest.AddForce(direction * _impulseScale, ForceMode.Impulse);
         }
 
         public bool TryGetLimbAttachment(Vector3 hitPoint, Vector3 direction, out Transform limbTransform, out Vector3 embedPoint)

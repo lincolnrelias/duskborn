@@ -22,19 +22,26 @@ namespace Duskborn.Gameplay.Projectiles
             if (!Application.isPlaying || Application.isBatchMode || definition.trailMaterial == null) return null;
             var trail = arrow.gameObject.AddComponent<TrailRenderer>();
             trail.sharedMaterial = definition.trailMaterial;
-            trail.time = 0.14f;
-            trail.minVertexDistance = 0.05f;
-            trail.widthCurve = AnimationCurve.EaseInOut(0f, 0.065f, 1f, 0f);
-            trail.numCapVertices = 2;
+            trail.time = 0.3f;
+            trail.minVertexDistance = 0.08f;
+            trail.widthCurve = new AnimationCurve(new Keyframe(0f, 0.12f),
+                new Keyframe(0.35f, 0.09f), new Keyframe(1f, 0f));
+            trail.numCapVertices = 4;
+            trail.numCornerVertices = 2;
+            trail.textureMode = LineTextureMode.Stretch;
             trail.alignment = LineAlignment.View;
             trail.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             trail.receiveShadows = false;
             var gradient = new Gradient();
             gradient.SetKeys(new[] {
-                new GradientColorKey(new Color(1f, 0.97f, 0.78f), 0),
-                new GradientColorKey(new Color(1f, 0.64f, 0.22f), 1)
-            }, new[] { new GradientAlphaKey(0.85f, 0), new GradientAlphaKey(0f, 1) });
+                new GradientColorKey(new Color(1.8f, 1.7f, 1.25f), 0),
+                new GradientColorKey(new Color(1.2f, 0.7f, 0.25f), 1)
+            }, new[] { new GradientAlphaKey(1f, 0), new GradientAlphaKey(0.9f, 0.35f),
+                new GradientAlphaKey(0f, 1) });
             trail.colorGradient = gradient;
+            // Include the launch point before the first physics step so close shots
+            // also leave a readable segment instead of starting midway through flight.
+            trail.AddPosition(arrow.position);
             return trail;
         }
 

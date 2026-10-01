@@ -1,0 +1,54 @@
+{
+  "recipe": {
+    "brief": "Close guttural pig effort with quiet bark creak and a planted grass scrape; warning begins immediately, completes within 0.9 seconds.",
+    "layers": [
+      {
+        "file": "layers\\warning_voice_02.wav",
+        "sha256": "23edfe3cc58a82afa4c4225d1c2d1d930eaf319be651c272f55cf1e8c74cb42c",
+        "delay_ms": 0,
+        "gain_db": 0
+      },
+      {
+        "file": "layers\\creak_02.wav",
+        "sha256": "76fe6b21e99ec24bf47ec661df3c49231cb99508aa4d93745c2581326821a87c",
+        "delay_ms": 35,
+        "gain_db": 0
+      },
+      {
+        "file": "layers\\grass_02.wav",
+        "sha256": "3dfbd06661138abdcebe5bdf5cd31aafe1ee0016c41096e56ee75ac8250cbb40",
+        "delay_ms": 60,
+        "gain_db": -6
+      }
+    ],
+    "duration_seconds": 0.88
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\layers\\warning_voice_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\layers\\creak_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\layers\\grass_02.wav",
+    "-filter_complex",
+    "[0:a]volume=0dB,adelay=0:all=1[a0];[1:a]volume=0dB,adelay=35:all=1[a1];[2:a]volume=-6dB,adelay=60:all=1[a2];[a0][a1][a2]amix=inputs=3:normalize=0:duration=longest,apad,atrim=duration=0.88,afade=t=out:st=0.855:d=0.025[out]",
+    "-map",
+    "[out]"
+  ],
+  "output": {
+    "file": "candidates\\BB_Windup_02.wav",
+    "sha256": "1514e58fc8e9734285461b4aa815bb83eddc9819a30f7a325aca53bfa3f95bc7"
+  },
+  "inspection": {
+    "duration_seconds": 0.88,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -6.981580673423057,
+    "rms_dbfs": -24.404446811922664,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.015354166666666667,
+    "tail_below_minus50db_seconds": 0.122875
+  }
+}

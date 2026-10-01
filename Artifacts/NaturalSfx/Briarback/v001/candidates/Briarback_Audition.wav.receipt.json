@@ -1,0 +1,126 @@
+{
+  "recipe": {
+    "brief": "Windup 1/2, charge 1/2, headbutt 1/2, hurt 1/2, death 1/2, hoof 1/2; 0.65-second gaps. Fixed delivery gains, no loudness normalization.",
+    "layers": [
+      {
+        "file": "candidates\\BB_Windup_01.wav",
+        "sha256": "7af1ac8dd65d07f6f84cd587f2603a29448ea5d8b5a8470ff3f62f15df085eb5",
+        "delay_ms": 0,
+        "gain_db": 0
+      },
+      {
+        "file": "candidates\\BB_Windup_02.wav",
+        "sha256": "1514e58fc8e9734285461b4aa815bb83eddc9819a30f7a325aca53bfa3f95bc7",
+        "delay_ms": 1530,
+        "gain_db": 0
+      },
+      {
+        "file": "candidates\\BB_Charge_01.wav",
+        "sha256": "82a463bc437792554c4a183910a2e142d50e81b9ab2443d105d1ab6a58bec74d",
+        "delay_ms": 3060,
+        "gain_db": 0
+      },
+      {
+        "file": "candidates\\BB_Charge_02.wav",
+        "sha256": "db7719d10faf5e89be61c6c0bb291db311770c99686125651fd8172dc82be1e7",
+        "delay_ms": 4490,
+        "gain_db": 0
+      },
+      {
+        "file": "candidates\\BB_Headbutt_01.wav",
+        "sha256": "02bf57d67c9f67ebbd91efc32d6903c5fd06486f95cbc56f102d3fcead7eb6fb",
+        "delay_ms": 5920,
+        "gain_db": 0
+      },
+      {
+        "file": "candidates\\BB_Headbutt_02.wav",
+        "sha256": "e9e825056f7469585f4be5ea7e7c0875df8a3cb48f2c4a0a58f7ae6e1f21914a",
+        "delay_ms": 6950,
+        "gain_db": 0
+      },
+      {
+        "file": "candidates\\BB_Hurt_01.wav",
+        "sha256": "1277b69970913f0f3180bc6e66996545e01e72ccc5a7b42a01767ebc40e7234a",
+        "delay_ms": 7980,
+        "gain_db": 0
+      },
+      {
+        "file": "candidates\\BB_Hurt_02.wav",
+        "sha256": "c17547f61c78f909c971381730303819c87cb3d6c2af4a21833e01712791a671",
+        "delay_ms": 8970,
+        "gain_db": 0
+      },
+      {
+        "file": "candidates\\BB_Death_01.wav",
+        "sha256": "8ef97730038e978017aa3f7f6c0cb3f64a78c4b16334db2c6254ecbaddd377ad",
+        "delay_ms": 9960,
+        "gain_db": 0
+      },
+      {
+        "file": "candidates\\BB_Death_02.wav",
+        "sha256": "3c844910d90b056906d7a82a78cd091f9ebf31edb0c249df68d817aee9696950",
+        "delay_ms": 12060,
+        "gain_db": 0
+      },
+      {
+        "file": "candidates\\BB_Hoof_01.wav",
+        "sha256": "0d60f2c5bd1afa62035ee8d02a41bbf103aa3b336e35c8509bfacdf3eb58efd3",
+        "delay_ms": 14160,
+        "gain_db": 0
+      },
+      {
+        "file": "candidates\\BB_Hoof_02.wav",
+        "sha256": "2aa7f904c01729f039e9504181677e90f8253db86545f53c9154a1325ad1929f",
+        "delay_ms": 15090,
+        "gain_db": 0
+      }
+    ],
+    "duration_seconds": 16.02
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\candidates\\BB_Windup_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\candidates\\BB_Windup_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\candidates\\BB_Charge_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\candidates\\BB_Charge_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\candidates\\BB_Headbutt_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\candidates\\BB_Headbutt_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\candidates\\BB_Hurt_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\candidates\\BB_Hurt_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\candidates\\BB_Death_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\candidates\\BB_Death_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\candidates\\BB_Hoof_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\candidates\\BB_Hoof_02.wav",
+    "-filter_complex",
+    "[0:a]volume=0dB,adelay=0:all=1[a0];[1:a]volume=0dB,adelay=1530:all=1[a1];[2:a]volume=0dB,adelay=3060:all=1[a2];[3:a]volume=0dB,adelay=4490:all=1[a3];[4:a]volume=0dB,adelay=5920:all=1[a4];[5:a]volume=0dB,adelay=6950:all=1[a5];[6:a]volume=0dB,adelay=7980:all=1[a6];[7:a]volume=0dB,adelay=8970:all=1[a7];[8:a]volume=0dB,adelay=9960:all=1[a8];[9:a]volume=0dB,adelay=12060:all=1[a9];[10:a]volume=0dB,adelay=14160:all=1[a10];[11:a]volume=0dB,adelay=15090:all=1[a11];[a0][a1][a2][a3][a4][a5][a6][a7][a8][a9][a10][a11]amix=inputs=12:normalize=0:duration=longest,apad,atrim=duration=16.02,afade=t=out:st=15.995:d=0.025[out]",
+    "-map",
+    "[out]"
+  ],
+  "output": {
+    "file": "candidates\\Briarback_Audition.wav",
+    "sha256": "72ae1ec5978b103cdec785b5086fced4046fe8f4f1ef1f70b03d73ff34bc4326"
+  },
+  "inspection": {
+    "duration_seconds": 16.02,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -4.627594116826636,
+    "rms_dbfs": -28.36505646693723,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.010770833333333334,
+    "tail_below_minus50db_seconds": 0.6646458333333334
+  }
+}

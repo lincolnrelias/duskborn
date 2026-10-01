@@ -1,0 +1,48 @@
+{
+  "recipe": {
+    "brief": "Short rough intake/effort before the close-range strike; no wood or chair-like creak.",
+    "layers": [
+      {
+        "file": "layers\\head_warning_voice_01.wav",
+        "sha256": "ce5e7b66b9bd3e93d1e621d10e11715de8179f141fe2d53ab3891523f3c71f58",
+        "delay_ms": 0,
+        "gain_db": 0
+      },
+      {
+        "file": "layers\\grass_01.wav",
+        "sha256": "b7839d861a8d7a5a4ffd653ae33b40378b64ad27b4c9b8ee9cc71f7aaa2c994b",
+        "delay_ms": 0,
+        "gain_db": -6
+      }
+    ],
+    "duration_seconds": 0.38
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v004\\layers\\head_warning_voice_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v004\\layers\\grass_01.wav",
+    "-filter_complex",
+    "[0:a]volume=0dB,adelay=0:all=1[a0];[1:a]volume=-6dB,adelay=0:all=1[a1];[a0][a1]amix=inputs=2:normalize=0:duration=longest,apad=whole_dur=0.38,atrim=duration=0.38,afade=t=out:st=0.355:d=0.025[out]",
+    "-map",
+    "[out]",
+    "-t",
+    "0.38"
+  ],
+  "output": {
+    "file": "candidates\\BB_HeadbuttWindup_01.wav",
+    "sha256": "e1bf77faf15f09ca61de224aa35d4c2f570df6c1501b7ea7ceb6308050ad369d"
+  },
+  "inspection": {
+    "duration_seconds": 0.38,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -14.230877244731401,
+    "rms_dbfs": -26.96998119638134,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 8.333333333333333e-05,
+    "tail_below_minus50db_seconds": 0.051375
+  }
+}

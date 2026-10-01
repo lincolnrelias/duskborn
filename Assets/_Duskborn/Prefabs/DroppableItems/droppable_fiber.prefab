@@ -67,7 +67,7 @@ MonoBehaviour:
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 31
+  <PrefabId>k__BackingField: 33
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 16153704831064023988
   SceneId: 0
@@ -94,7 +94,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584109262639322094
+  _initializedTimestamp: -8584107375529432779
 --- !u!54 &4903646720888488186
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -140,6 +140,7 @@ MonoBehaviour:
   outlineLayerName: GreenOutline
   outlineRenderer: {fileID: 0}
   pickupClip: {fileID: 8300000, guid: 452769a2c783fded9ca057e50ed7b6cf, type: 3}
+  lingerDuration: 1.3
 --- !u!23 &2745176785061572893
 MeshRenderer:
   m_ObjectHideFlags: 0

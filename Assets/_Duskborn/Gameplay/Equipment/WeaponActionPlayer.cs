@@ -37,6 +37,7 @@ namespace Duskborn.Gameplay.Equipment
         private AvatarMask                  _fullBodyMask;
         private AvatarMask                  _equippedActionMask;
         private BowPoseAnchor               _bowPoseAnchor;
+        private BowLocomotionBodyAnchor     _bowLocomotionBodyAnchor;
         private bool                        _anchorBowPose;
         private bool                        _originalRootMotion;
         private PlayerController            _playerController;
@@ -61,6 +62,18 @@ namespace Duskborn.Gameplay.Equipment
         private float _bowReleaseTime;
         private float _bowDuration;
         private float _aimPitch;
+
+        private Transform _rangedDrawingHand;
+        public Transform RangedDrawingHand
+        {
+            get
+            {
+                if (_rangedDrawingHand == null && animator != null && animator.isHuman)
+                    _rangedDrawingHand = animator.GetBoneTransform(HumanBodyBones.RightHand);
+                return _rangedDrawingHand;
+            }
+        }
+        public Quaternion RangedAimRotation => transform.rotation * Quaternion.Euler(_aimPitch, 0f, 0f);
 
         public void SetRangedAimPitch(float pitch) => _aimPitch = Mathf.Clamp(pitch, -70f, 70f);
 
@@ -135,6 +148,7 @@ namespace Duskborn.Gameplay.Equipment
             _retainedBowMovement?.Dispose();
             _retainedBowMovement = null;
             _bowPoseAnchor?.Dispose();
+            _bowLocomotionBodyAnchor?.Dispose();
             if (_fullBodyMask != null)
             {
                 if (Application.isPlaying) Destroy(_fullBodyMask);
@@ -153,7 +167,9 @@ namespace Duskborn.Gameplay.Equipment
             _layerMixer = AnimationLayerMixerPlayable.Create(_graph, 2);
             _aimLocomotionMixer = AnimationMixerPlayable.Create(_graph, 2);
             _aimLocomotionMixer.ConnectInput(0, _controllerPlayable, 0, 1f);
-            _layerMixer.ConnectInput(0, _aimLocomotionMixer, 0, 1f);
+            if (BowPoseAnchor.Supports(animator))
+                _bowLocomotionBodyAnchor = new BowLocomotionBodyAnchor(_graph,_aimLocomotionMixer,_layerMixer);
+            _layerMixer.ConnectInput(0, _bowLocomotionBodyAnchor != null ? _bowLocomotionBodyAnchor.Locomotion : (Playable)_aimLocomotionMixer, 0, 1f);
             _layerMixer.SetLayerAdditive(1, false);
 
             _fullBodyMask = new AvatarMask();
@@ -166,7 +182,7 @@ namespace Duskborn.Gameplay.Equipment
 
             var output = AnimationPlayableOutput.Create(_graph, "WeaponAnimation", animator);
             if (BowPoseAnchor.Supports(animator))
-                _bowPoseAnchor = new BowPoseAnchor(_graph, animator, _layerMixer);
+                _bowPoseAnchor = new BowPoseAnchor(_graph, animator, _bowLocomotionBodyAnchor.Output);
             output.SetSourcePlayable(_bowPoseAnchor != null ? _bowPoseAnchor.Output : (Playable)_layerMixer);
 
             _graph.Play();
@@ -196,7 +212,11 @@ namespace Duskborn.Gameplay.Equipment
             }
 
             StopCurrentAction();
-            ClearRetainedBowMovement();
+            // Reuse the complete movement branch, not just its clip times.
+            // Recreating humanoid playables also resets their evaluation history.
+            bool reuseMovement = holdRangedDraw && _retainedBowMovement != null &&
+                _activeWeapon == weapon && _retainedBowMovement.Set == data.BowAnimations;
+            if (!reuseMovement) ClearRetainedBowMovement();
 
             _activeWeapon      = weapon;
             _activeData        = data;
@@ -234,9 +254,18 @@ namespace Duskborn.Gameplay.Equipment
             Playable actionPose = _clipPlayable;
             if (_rangedAimAction && data.BowAnimations != null && data.BowAnimations.IsValid)
             {
-                _authoredBow = new AuthoredBowPlayback(_graph, data.BowAnimations);
+                if (reuseMovement)
+                {
+                    _authoredBow = _retainedBowMovement;
+                    _retainedBowMovement = null;
+                    _authoredBow.RestartDraw();
+                }
+                else _authoredBow = new AuthoredBowPlayback(_graph, data.BowAnimations);
+                _authoredBow.Advance(0f, 1f,
+                    new Vector2(_controllerPlayable.GetFloat("VelocityX"), _controllerPlayable.GetFloat("VelocityY")));
                 actionPose = _authoredBow.Pose;
-                _aimLocomotionMixer.ConnectInput(1, _authoredBow.Movement, 0, 0f);
+                if (!reuseMovement) _aimLocomotionMixer.ConnectInput(1, _authoredBow.Movement, 0, 0f);
+                SetAimLocomotionWeight();
                 _clipPlayable.SetSpeed(0);
             }
             _bowPoseAnchor?.SetFacing(_authoredBow != null);
@@ -327,8 +356,7 @@ namespace Duskborn.Gameplay.Equipment
             if (retainMovement)
             {
                 _retainedBowMovement = _authoredBow;
-                _aimLocomotionMixer.SetInputWeight(0, 0f);
-                _aimLocomotionMixer.SetInputWeight(1, 1f);
+                SetAimLocomotionWeight();
             }
             else
             {
@@ -346,10 +374,21 @@ namespace Duskborn.Gameplay.Equipment
 
         private void ResetAimLocomotion()
         {
+            _bowLocomotionBodyAnchor?.SetEnabled(false);
             if (!_aimLocomotionMixer.IsValid()) return;
             _aimLocomotionMixer.SetInputWeight(0, 1f);
             _aimLocomotionMixer.SetInputWeight(1, 0f);
             if (_aimLocomotionMixer.GetInput(1).IsValid()) _aimLocomotionMixer.DisconnectInput(1);
+        }
+
+        private void SetAimLocomotionWeight()
+        {
+            _bowLocomotionBodyAnchor?.SetEnabled(true);
+            // Load/release only blend the upper body. The stride must continue
+            // at full weight while grounded, including between repeated shots.
+            float weight = _controllerPlayable.GetBool("IsGrounded") ? 1f : 0f;
+            _aimLocomotionMixer.SetInputWeight(0, 1f - weight);
+            _aimLocomotionMixer.SetInputWeight(1, weight);
         }
 
         private void ClearRetainedBowMovement()
@@ -361,11 +400,19 @@ namespace Duskborn.Gameplay.Equipment
         }
 
         private bool _cancelling;
-        public void CancelAction(bool blendOut = false)
+        public void CancelAction(bool blendOut = false, bool preserveAimMovement = false)
         {
-            if (!_isPlaying) { ClearRetainedBowMovement(); return; }
+            bool keepMovement = preserveAimMovement && _activeCtx?.Combat?.IsAiming == true;
+            if (!_isPlaying)
+            {
+                if (!keepMovement) ClearRetainedBowMovement();
+                return;
+            }
             if (_activeWeapon?.Behaviour is RangedWeaponBehaviour) _activeCtx?.Combat?.CancelRangedAttack();
-            _cancelling = true;
+            // A server recovery retry rejects this shot, not the held aim gait.
+            // Ordinary cancellation (dodge, death, weapon change, aim release)
+            // still tears down both branches.
+            _cancelling = !keepMovement;
             StopCurrentAction();
             _cancelling = false;
         }
@@ -434,10 +481,9 @@ namespace Duskborn.Gameplay.Equipment
                     else
                     {
                         _retainedBowMovement.Advance(Time.deltaTime, 1f,
-                            new Vector2(_controllerPlayable.GetFloat("VelocityX"), _controllerPlayable.GetFloat("VelocityY")));
-                        float weight = _controllerPlayable.GetBool("IsGrounded") ? 1f : 0f;
-                        _aimLocomotionMixer.SetInputWeight(0, 1f - weight);
-                        _aimLocomotionMixer.SetInputWeight(1, weight);
+                            new Vector2(_controllerPlayable.GetFloat("VelocityX"), _controllerPlayable.GetFloat("VelocityY")),
+                            _playerController != null && _playerController.IsOwner ? _playerController.PlanarSpeed : -1f);
+                        SetAimLocomotionWeight();
                     }
                 }
                 return;
@@ -450,7 +496,8 @@ namespace Duskborn.Gameplay.Equipment
 
             if (_authoredBow != null)
                 _authoredBow.Advance(Time.deltaTime, _activeData.BaseSpeed * _runtimeSpeedMultiplier,
-                    new Vector2(_controllerPlayable.GetFloat("VelocityX"), _controllerPlayable.GetFloat("VelocityY")));
+                    new Vector2(_controllerPlayable.GetFloat("VelocityX"), _controllerPlayable.GetFloat("VelocityY")),
+                    _playerController != null && _playerController.IsOwner ? _playerController.PlanarSpeed : -1f);
 
             if (_authoredBow == null && _rangedAimAction && !_shotRequested && _clipPlayable.IsValid())
             {
@@ -477,10 +524,10 @@ namespace Duskborn.Gameplay.Equipment
 
             if (_authoredBow != null)
             {
-                float movementWeight = _controllerPlayable.GetBool("IsGrounded") ? _blendWeight : 0f;
-                _aimLocomotionMixer.SetInputWeight(0, 1f - movementWeight);
-                _aimLocomotionMixer.SetInputWeight(1, movementWeight);
-                _bowPoseAnchor?.SetFacing(movementWeight > 0f);
+                SetAimLocomotionWeight();
+                // Jump locomotion still needs the same bounded upper-body bow
+                // correction. Ground contact only selects the lower-body gait.
+                _bowPoseAnchor?.SetFacing(true);
             }
             _layerMixer.SetInputWeight(1, _blendWeight);
             _bowPoseAnchor?.SetWeight(_anchorBowPose && stabilizeBowPose ? _blendWeight : 0f);

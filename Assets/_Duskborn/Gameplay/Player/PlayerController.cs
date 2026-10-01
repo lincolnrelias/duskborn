@@ -32,6 +32,7 @@ namespace Duskborn.Gameplay.Player
         private CharacterController             _cc;
         private PlayerStats                     _stats;
         private PlayerCameraController          _camController;
+        private PlayerCombat                    _combat;
         private PlayerWaterInteraction          _waterInteraction;
         private Duskborn.Audio.FootstepAudio    _footstepAudio;
 
@@ -45,18 +46,22 @@ namespace Duskborn.Gameplay.Player
         private int     _lastToggleFrame = -1;
 
         private float   _lastGroundedTimer;
+        private float   _animationGroundedTimer;
+        private const float AnimationGroundContactGrace = 0.1f;
         private float   _jumpBufferTimer;
         private bool    _hasJumpedInAir;
 
         public bool  IsMoving    => _moveInput.sqrMagnitude > 0.01f;
         public float CameraYaw   => _camController != null ? _camController.CurrentYaw : transform.eulerAngles.y;
-        public bool  IsSprinting => _isSprinting;
+        public bool  IsSprinting => _isSprinting && !(_combat != null && _combat.IsAiming);
+        public float PlanarSpeed => _cc != null ? new Vector2(_cc.velocity.x,_cc.velocity.z).magnitude : 0f;
 
         private void Awake()
         {
             _isSprinting   = false;
             _cc            = GetComponent<CharacterController>();
             _stats         = GetComponent<PlayerStats>();
+            _combat        = GetComponent<PlayerCombat>();
             _camController = GetComponent<PlayerCameraController>();
             if (_camController == null)
             {
@@ -211,6 +216,7 @@ namespace Duskborn.Gameplay.Player
             _jumpBufferTimer   = 0f;
             _lastGroundedTimer = 0f;
             _hasJumpedInAir    = true;
+            _animationGroundedTimer = 0f;
 
             float effectiveGravity = Mathf.Abs(Physics.gravity.y * gravityMultiplier);
             _velocity.y = Mathf.Sqrt(2f * jumpHeight * effectiveGravity);
@@ -229,12 +235,22 @@ namespace Duskborn.Gameplay.Player
 
         private void SmoothInput()
         {
-            float speedFactor = _isSprinting ? sprintMultiplier : runMultiplier;
+            bool aiming = _combat != null && _combat.IsAiming;
+            float speedFactor = IsSprinting ? sprintMultiplier : runMultiplier;
             Vector2 targetInput = _moveInput * speedFactor;
 
             float smoothTime = _moveInput.sqrMagnitude > 0.01f ? accelTime : decelTime;
             _smoothedInput = Vector2.SmoothDamp(
                 _smoothedInput, targetInput, ref _inputSmoothVelocity, smoothTime);
+            if (aiming)
+            {
+                // Apply the cap immediately even when entering aim at sprint speed.
+                if (_smoothedInput.sqrMagnitude > runMultiplier * runMultiplier)
+                {
+                    _smoothedInput = Vector2.ClampMagnitude(_smoothedInput, runMultiplier);
+                    _inputSmoothVelocity = Vector2.zero;
+                }
+            }
         }
 
         private void HandleMovement()
@@ -285,7 +301,14 @@ namespace Duskborn.Gameplay.Player
             _animator.SetFloat(HashVelocityX, _smoothedInput.x);
             _animator.SetFloat(HashVelocityY, _smoothedInput.y);
 
-            bool groundedForAnim = _cc.isGrounded && !_hasJumpedInAir;
+            // Downhill movement can briefly lose controller contact between steps.
+            // Keep both the controller and authored aim locomotion on the same gait
+            // through those gaps. Actual jumps bypass the grace immediately.
+            _animationGroundedTimer = _cc.isGrounded
+                ? AnimationGroundContactGrace
+                : Mathf.Max(0f, _animationGroundedTimer - Time.deltaTime);
+            bool groundedForAnim = !_hasJumpedInAir &&
+                (_cc.isGrounded || _animationGroundedTimer > 0f);
             _animator.SetBool(HashIsGrounded, groundedForAnim);
         }
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Natural Game SFX"
+  short_description: "Free foley and samples for natural game sounds"
+  default_prompt: "Use $natural-game-sfx to create organic sound effects from free recorded sources, with distinct variations and playable previews."

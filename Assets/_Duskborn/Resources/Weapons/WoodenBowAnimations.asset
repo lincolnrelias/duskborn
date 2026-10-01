@@ -11,7 +11,14 @@ MonoBehaviour:
   hold: {fileID: 7400004, guid: 6298c5d5d86d2ab4ebb14f617495f1c9, type: 3}
   release: {fileID: 7400006, guid: 6298c5d5d86d2ab4ebb14f617495f1c9, type: 3}
   idle: {fileID: 7400002, guid: a3422ad278cd9a94aa3da8e6bff9deea, type: 3}
-  forward: {fileID: 7400000, guid: 46d5b47e60163f148ada32ff97c7aa32, type: 3}
-  backward: {fileID: 7400010, guid: 46d5b47e60163f148ada32ff97c7aa32, type: 3}
-  left: {fileID: 7400000, guid: 746837b598388314184f258020b9d9e3, type: 3}
-  right: {fileID: 7400004, guid: 746837b598388314184f258020b9d9e3, type: 3}
+  forward: {fileID: 7400000, guid: 3930864feafc8aa4591c39da7b54363b, type: 3}
+  backward: {fileID: 7400010, guid: 3930864feafc8aa4591c39da7b54363b, type: 3}
+  left: {fileID: 7400006, guid: 3930864feafc8aa4591c39da7b54363b, type: 3}
+  right: {fileID: 7400008, guid: 3930864feafc8aa4591c39da7b54363b, type: 3}
+  forwardLeft: {fileID: 7400002, guid: 3930864feafc8aa4591c39da7b54363b, type: 3}
+  forwardRight: {fileID: 7400004, guid: 3930864feafc8aa4591c39da7b54363b, type: 3}
+  backwardLeft: {fileID: 7400012, guid: 3930864feafc8aa4591c39da7b54363b, type: 3}
+  backwardRight: {fileID: 7400014, guid: 3930864feafc8aa4591c39da7b54363b, type: 3}
+  movementPhaseOffsets: {x: 0, y: 0.7578125, z: 0, w: 0}
+  diagonalPhaseOffsets: {x: 0, y: 0, z: 0.7578125, w: 0.7578125}
+  movementStrideLength: 3.1800653

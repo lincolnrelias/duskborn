@@ -262,7 +262,7 @@ MonoBehaviour:
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 0
+  <PrefabId>k__BackingField: 1
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 550837297904362479
   SceneId: 0
@@ -290,7 +290,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584109262639322094
+  _initializedTimestamp: -8584107375529432779
 --- !u!114 &6069308860891105275
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -305,6 +305,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.WeaponActionPlayer
   animator: {fileID: 7111733941174250581}
   upperBodyMask: {fileID: 31900000, guid: 2ddd804e8c71cb548b8ffe11b0f2770f, type: 2}
+  stabilizeBowPose: 1
 --- !u!114 &-3413405807121627896
 MonoBehaviour:
   m_ObjectHideFlags: 0

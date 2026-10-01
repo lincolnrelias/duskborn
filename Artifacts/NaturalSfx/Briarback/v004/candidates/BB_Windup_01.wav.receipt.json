@@ -1,0 +1,48 @@
+{
+  "recipe": {
+    "brief": "Rough throat growl and restrained planted earth contact; no creak, wooden resonance, nasal pig imitation or added reverb.",
+    "layers": [
+      {
+        "file": "layers\\warning_voice_01.wav",
+        "sha256": "ecaa478a73b19fb803876a38a1d6a042184d25197056b8ce1723252c407a6ef0",
+        "delay_ms": 0,
+        "gain_db": 0
+      },
+      {
+        "file": "layers\\grass_01.wav",
+        "sha256": "b7839d861a8d7a5a4ffd653ae33b40378b64ad27b4c9b8ee9cc71f7aaa2c994b",
+        "delay_ms": 0,
+        "gain_db": -3
+      }
+    ],
+    "duration_seconds": 0.88
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v004\\layers\\warning_voice_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v004\\layers\\grass_01.wav",
+    "-filter_complex",
+    "[0:a]volume=0dB,adelay=0:all=1[a0];[1:a]volume=-3dB,adelay=0:all=1[a1];[a0][a1]amix=inputs=2:normalize=0:duration=longest,apad=whole_dur=0.88,atrim=duration=0.88,afade=t=out:st=0.855:d=0.025[out]",
+    "-map",
+    "[out]",
+    "-t",
+    "0.88"
+  ],
+  "output": {
+    "file": "candidates\\BB_Windup_01.wav",
+    "sha256": "be72055504ece8c3ae1497ab6c2f880bad7fa97c1c7e04b515e0f52558e51e61"
+  },
+  "inspection": {
+    "duration_seconds": 0.88,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -15.656092120554671,
+    "rms_dbfs": -31.976742398849854,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.00020833333333333335,
+    "tail_below_minus50db_seconds": 0.11708333333333333
+  }
+}

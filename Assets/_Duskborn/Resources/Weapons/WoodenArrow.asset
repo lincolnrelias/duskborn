@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   visualPrefab: {fileID: 100, guid: e6432b6e07ce2e432b2f295b70cf6a4f, type: 3}
   visualScale: {x: 1.5, y: 1.5, z: 1.5}
+  nockLocalPosition: {x: 0, y: 0, z: -0.81}
   impact: {fileID: 11400000, guid: 9d2a05e7b31c15f2b9545cccabbfb2ba, type: 2}
   trailMaterial: {fileID: 2100000, guid: b169d9a588614a898f9fa27dffbb98b9, type: 2}
   impactParticleMaterial: {fileID: 2100000, guid: b30ca544bcaf4a1abf5c8a61bf29ad18, type: 2}

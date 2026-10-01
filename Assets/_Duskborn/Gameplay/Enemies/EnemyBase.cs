@@ -61,7 +61,7 @@ namespace Duskborn.Gameplay.Enemies
         private static readonly int HashDead      = Animator.StringToHash("Dead");
 
         // ── Stat accessors (delegate to EntityStats) ──────────────────────────
-        public float MaxHP          => _entity.MaxHP;
+        public virtual float MaxHP  => _entity.MaxHP;
         public float Damage         => _entity.Damage;
         public float AttackSpeed    => _entity.AttackSpeed;
         public float MoveSpeed      => _entity.MoveSpeed;

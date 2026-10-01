@@ -24,6 +24,7 @@ namespace Duskborn.Gameplay.Projectiles
         private int id;
         private float rollOffset;
         private TrailRenderer trail;
+        private Vector3? launchClearanceOrigin;
         private Action<Collider, Vector3, Vector3> damage;
         private Action<int, Vector3, Vector3, NetworkObject, string, bool, string> notifyImpact;
         public bool IsAuthoritative => authoritative;
@@ -38,7 +39,7 @@ namespace Duskborn.Gameplay.Projectiles
             bool fromPlayer, Vector3 position, Vector3 direction, bool server,
             Action<Collider, Vector3, Vector3> dealDamage = null,
             Action<int, Vector3, Vector3, NetworkObject, string, bool, string> onImpact = null,
-            Quaternion? rotation = null)
+            Quaternion? rotation = null, Vector3? clearanceOrigin = null)
         {
             if (data == null || data.visualPrefab == null) return null;
             var go = new GameObject("Projectile_" + shotId);
@@ -55,6 +56,7 @@ namespace Duskborn.Gameplay.Projectiles
             flight.velocity = direction.normalized * data.speed;
             flight.damage = dealDamage;
             flight.notifyImpact = onImpact;
+            flight.launchClearanceOrigin = clearanceOrigin;
             flight.trail = ArrowFeedback.AddTrail(go.transform, data);
             flight.body = go.AddComponent<Rigidbody>();
             flight.body.isKinematic = true;
@@ -100,9 +102,18 @@ namespace Duskborn.Gameplay.Projectiles
             Vector3 start = body.position;
             Vector3 acceleration = Physics.gravity * definition.gravityScale;
             Vector3 step = velocity * Time.fixedDeltaTime + acceleration * (0.5f * Time.fixedDeltaTime * Time.fixedDeltaTime);
+            Vector3 end = start + step;
             velocity += acceleration * Time.fixedDeltaTime;
             if (authoritative)
             {
+                // The arrow's pivot is its tip. Sweep from the drawing hand on the
+                // first tick so the shaft length cannot place that tip through a wall.
+                if (launchClearanceOrigin.HasValue)
+                {
+                    start = launchClearanceOrigin.Value;
+                    step = end - start;
+                    launchClearanceOrigin = null;
+                }
                 // Casts do not report colliders containing the origin. This prevents
                 // spawning through walls when the shooter's chest is obstructed.
                 int count = Physics.OverlapSphereNonAlloc(start, definition.radius, overlaps,
@@ -131,7 +142,7 @@ namespace Duskborn.Gameplay.Projectiles
                     if (selected >= 0) { Impact(results[selected].collider, results[selected].point); return; }
                 }
             }
-            body.MovePosition(start + step);
+            body.MovePosition(end);
             if (velocity.sqrMagnitude > 0.0001f)
             {
                 Quaternion look = Quaternion.LookRotation(velocity);

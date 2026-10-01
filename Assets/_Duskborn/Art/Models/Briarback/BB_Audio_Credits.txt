@@ -1,0 +1,16 @@
+Briarback natural sound effects for Duskborn
+
+Vocal foley: Joseph Sardin / BigSoundBank. Human mouth performances imitating pigs.
+https://bigsoundbank.com/grumpy-pig-1-s1658.html
+https://bigsoundbank.com/cochon-qui-grogne-2-s1659.html
+Attack growl performances: Joseph Sardin (human creature growls), replacing pig imitation/creaks.
+https://bigsoundbank.com/zombie-6-s2111.html
+https://bigsoundbank.com/zombie-7-s2112.html
+Material recordings: Kenney, Impact Sounds and RPG Audio.
+https://kenney.nl/assets/impact-sounds
+https://kenney.nl/assets/rpg-audio
+All source recordings: CC0 1.0. Attribution optional.
+https://creativecommons.org/publicdomain/zero/1.0/
+Edited/layered; shortened headbutt warnings. Sources, hashes and recipes:
+Artifacts/NaturalSfx/Briarback/v003/manifest.json (hurt/death/hoof)
+Artifacts/NaturalSfx/Briarback/v004/manifest.json (attacks and warnings).

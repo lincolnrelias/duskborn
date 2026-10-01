@@ -12,7 +12,7 @@ namespace Duskborn.Editor
         [Serializable]
         private sealed class Capture
         {
-            public int version = 5;
+            public int version = 7;
             public string utc, label, player, controller, avatar, mask;
             public string sampling = "WeaponActionPlayer.LateUpdate; quaternion rotations; positive lean = left; positions in Animator space";
             public List<string> humanoidMask = new List<string>();
@@ -78,6 +78,7 @@ namespace Duskborn.Editor
             EditorGUILayout.LabelField("Action weight / time", frame.actionWeight.ToString("F3") + " / " + frame.actionTime.ToString("F3"));
             EditorGUILayout.LabelField("Torso lean (+ left)", frame.torsoLeftLean.ToString("F2") + " degrees");
             EditorGUILayout.LabelField("Local velocity", frame.localVelocity.ToString("F2"));
+            EditorGUILayout.LabelField("Grounded: controller / animation", frame.controllerGrounded + " / " + frame.animationGrounded);
             EditorGUILayout.LabelField("Bow anchor / tilt error", frame.bowAnchorWeight.ToString("F3") + " / " + frame.bowSpineTiltError.ToString("F2") + " degrees");
             foreach (var layer in frame.layers)
             {

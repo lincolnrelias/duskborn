@@ -1,0 +1,46 @@
+{
+  "recipe": {
+    "brief": "Brief interrupted throaty grunt with a restrained bark contact; fast readable pain response without a long scream.",
+    "layers": [
+      {
+        "file": "layers\\hurt_voice_01.wav",
+        "sha256": "bc63fab3b02dc537c9ade3df54d07446e259c5be315200aae1d07c5a35bccc82",
+        "delay_ms": 0,
+        "gain_db": 0
+      },
+      {
+        "file": "layers\\wood_01.wav",
+        "sha256": "7a4a6155e8571ae2002e6f59f5c42e9bca22e5425c4331e8fe43c0e14cffadca",
+        "delay_ms": 8,
+        "gain_db": -9
+      }
+    ],
+    "duration_seconds": 0.34
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\layers\\hurt_voice_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\layers\\wood_01.wav",
+    "-filter_complex",
+    "[0:a]volume=0dB,adelay=0:all=1[a0];[1:a]volume=-9dB,adelay=8:all=1[a1];[a0][a1]amix=inputs=2:normalize=0:duration=longest,apad,atrim=duration=0.34,afade=t=out:st=0.315:d=0.025[out]",
+    "-map",
+    "[out]"
+  ],
+  "output": {
+    "file": "candidates\\BB_Hurt_01.wav",
+    "sha256": "1277b69970913f0f3180bc6e66996545e01e72ccc5a7b42a01767ebc40e7234a"
+  },
+  "inspection": {
+    "duration_seconds": 0.34,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -20.551632885338055,
+    "rms_dbfs": -35.429420222794384,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.0066458333333333335,
+    "tail_below_minus50db_seconds": 0.07497916666666667
+  }
+}

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using FishNet;
 using UnityEngine;
+using UnityEngine.AI;
 using Duskborn.Core;
 
 namespace Duskborn.Gameplay.Enemies
@@ -162,8 +163,15 @@ namespace Duskborn.Gameplay.Enemies
                 return;
             }
 
-            pool.Spawn(GetSpawnPosition(), _currentPlayerCount);
-            _aliveCount++;
+            for (int attempt = 0; attempt < 12; attempt++)
+            {
+                Vector3 candidate = GetSpawnPosition();
+                candidate.y = HollowWardenPresentation.SampleGround(candidate, candidate.y, out _);
+                if (!NavMesh.SamplePosition(candidate, out var hit, 6f, NavMesh.AllAreas)) continue;
+                if (pool.Spawn(hit.position, _currentPlayerCount) != null) _aliveCount++;
+                return;
+            }
+            DuskLog.Warn(LogChannel.Wave, $"No reachable perimeter spawn for {evt.EnemyType}; event skipped.");
         }
 
         private void HandleEnemyDied(EnemyBase _)

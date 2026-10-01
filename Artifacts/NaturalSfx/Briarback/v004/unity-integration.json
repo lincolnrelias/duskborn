@@ -1,0 +1,105 @@
+{
+  "clips": [
+    {
+      "file": "Assets\\_Duskborn\\Art\\Models\\Briarback\\BB_Windup.wav",
+      "sha256": "be72055504ece8c3ae1497ab6c2f880bad7fa97c1c7e04b515e0f52558e51e61",
+      "guid": "3418aa51e0294744bab1bccceb7d4d28",
+      "staged_source": "Artifacts\\NaturalSfx\\Briarback\\v004\\unity\\BB_Windup.wav",
+      "license": "CC0 1.0"
+    },
+    {
+      "file": "Assets\\_Duskborn\\Art\\Models\\Briarback\\BB_Windup_02.wav",
+      "sha256": "418fda5cd0529c05ad4e70a2fadcc4761117c7f1f1d2f971e05b59b50e39cbdd",
+      "guid": "16e8bce9b72f415a8a2bf82134748411",
+      "staged_source": "Artifacts\\NaturalSfx\\Briarback\\v004\\unity\\BB_Windup_02.wav",
+      "license": "CC0 1.0"
+    },
+    {
+      "file": "Assets\\_Duskborn\\Art\\Models\\Briarback\\BB_Charge.wav",
+      "sha256": "249c20f5874c582a090cd79040356256652c84483ff875a068d1eeee074367ce",
+      "guid": "9b00898191056344a8a74d35472207f6",
+      "staged_source": "Artifacts\\NaturalSfx\\Briarback\\v004\\unity\\BB_Charge.wav",
+      "license": "CC0 1.0"
+    },
+    {
+      "file": "Assets\\_Duskborn\\Art\\Models\\Briarback\\BB_Charge_02.wav",
+      "sha256": "b39960b1dabc44feebee33ca1aae705a35735c6f0422e558122574b1db8c2c23",
+      "guid": "f89749874d35419b954b6dbb1080c0f0",
+      "staged_source": "Artifacts\\NaturalSfx\\Briarback\\v004\\unity\\BB_Charge_02.wav",
+      "license": "CC0 1.0"
+    },
+    {
+      "file": "Assets\\_Duskborn\\Art\\Models\\Briarback\\BB_HeadbuttWindup_01.wav",
+      "sha256": "e1bf77faf15f09ca61de224aa35d4c2f570df6c1501b7ea7ceb6308050ad369d",
+      "guid": "1dda680d36544a73bf0819df0b87ee8d",
+      "staged_source": "Artifacts\\NaturalSfx\\Briarback\\v004\\unity\\BB_HeadbuttWindup_01.wav",
+      "license": "CC0 1.0"
+    },
+    {
+      "file": "Assets\\_Duskborn\\Art\\Models\\Briarback\\BB_HeadbuttWindup_02.wav",
+      "sha256": "4a3d41192f8b9e2a65a6b784bd56ff0aaaec96628d75e443980d9f9b72837daf",
+      "guid": "cc899be979d34437822afa9c66028250",
+      "staged_source": "Artifacts\\NaturalSfx\\Briarback\\v004\\unity\\BB_HeadbuttWindup_02.wav",
+      "license": "CC0 1.0"
+    },
+    {
+      "file": "Assets\\_Duskborn\\Art\\Models\\Briarback\\BB_Headbutt_01.wav",
+      "sha256": "ec5679b3bc475fd77793394139dc27fd3ac6614d0e04ac1fe162741f380bcfd2",
+      "guid": "9107007fa9ed4715ab118cc310ec6edd",
+      "staged_source": "Artifacts\\NaturalSfx\\Briarback\\v004\\unity\\BB_Headbutt_01.wav",
+      "license": "CC0 1.0"
+    },
+    {
+      "file": "Assets\\_Duskborn\\Art\\Models\\Briarback\\BB_Headbutt_02.wav",
+      "sha256": "538d90889b45d7ec95c318d47355480e53f5e370176deb48795efe8c3f19dc32",
+      "guid": "72a72f0a1dbe4c3bac9e9e1eef206b9e",
+      "staged_source": "Artifacts\\NaturalSfx\\Briarback\\v004\\unity\\BB_Headbutt_02.wav",
+      "license": "CC0 1.0"
+    },
+    {
+      "file": "Assets\\_Duskborn\\Art\\Models\\Briarback\\BB_Hurt.wav",
+      "sha256": "8f5d45e3aa87ca926c469e27e96eea373c41e4606d15c554d2ff3cc196846e42",
+      "guid": "b89f6c0e809d05e4cad2213149a1fa04",
+      "staged_source": "Artifacts\\NaturalSfx\\Briarback\\v004\\unity\\BB_Hurt.wav",
+      "license": "CC0 1.0"
+    },
+    {
+      "file": "Assets\\_Duskborn\\Art\\Models\\Briarback\\BB_Hurt_02.wav",
+      "sha256": "7576c350d6644da6f12c6c45658de9ac9f0d07f1dec07b76eee42ae89ed67a20",
+      "guid": "540c82e6fe7a45edbc2a1899bdbccb5b",
+      "staged_source": "Artifacts\\NaturalSfx\\Briarback\\v004\\unity\\BB_Hurt_02.wav",
+      "license": "CC0 1.0"
+    },
+    {
+      "file": "Assets\\_Duskborn\\Art\\Models\\Briarback\\BB_Death.wav",
+      "sha256": "86691bb73776f0ba4175d552127181b1f9eb733ac53786555fd05a67505162a7",
+      "guid": "f09d72c38b78a75488af143fcb2e6951",
+      "staged_source": "Artifacts\\NaturalSfx\\Briarback\\v004\\unity\\BB_Death.wav",
+      "license": "CC0 1.0"
+    },
+    {
+      "file": "Assets\\_Duskborn\\Art\\Models\\Briarback\\BB_Death_02.wav",
+      "sha256": "84eac0f3e9f3b1e137f8a9b6fab269f70816ed992cc10a44d1a934713104c053",
+      "guid": "625352eb3d1e4b6a977cb359515947b0",
+      "staged_source": "Artifacts\\NaturalSfx\\Briarback\\v004\\unity\\BB_Death_02.wav",
+      "license": "CC0 1.0"
+    },
+    {
+      "file": "Assets\\_Duskborn\\Art\\Models\\Briarback\\BB_Hoof_01.wav",
+      "sha256": "0d60f2c5bd1afa62035ee8d02a41bbf103aa3b336e35c8509bfacdf3eb58efd3",
+      "guid": "4939aba0bb484d7f9c5fa2828b5c0250",
+      "staged_source": "Artifacts\\NaturalSfx\\Briarback\\v004\\unity\\BB_Hoof_01.wav",
+      "license": "CC0 1.0"
+    },
+    {
+      "file": "Assets\\_Duskborn\\Art\\Models\\Briarback\\BB_Hoof_02.wav",
+      "sha256": "2aa7f904c01729f039e9504181677e90f8253db86545f53c9154a1325ad1929f",
+      "guid": "2bbdecdf4be24d6eaac87f833b954f29",
+      "staged_source": "Artifacts\\NaturalSfx\\Briarback\\v004\\unity\\BB_Hoof_02.wav",
+      "license": "CC0 1.0"
+    }
+  ],
+  "prefab": "Assets\\_Duskborn\\Prefabs\\Enemies\\Briarback.prefab",
+  "headbutt_warning_seconds": 0.38,
+  "unity_import_validation": "Pending: Unity is open; installed files and GUIDs checked offline"
+}

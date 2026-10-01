@@ -1,0 +1,37 @@
+[
+  {
+    "clip": "BB_Charge",
+    "lowest_z": 4.276631671018549e-08,
+    "sample_hz": 60
+  },
+  {
+    "clip": "BB_Death",
+    "lowest_z": -5.960464477539063e-08,
+    "sample_hz": 60
+  },
+  {
+    "clip": "BB_Hurt",
+    "lowest_z": -2.9802322387695312e-08,
+    "sample_hz": 60
+  },
+  {
+    "clip": "BB_Idle",
+    "lowest_z": 4.276631671018549e-08,
+    "sample_hz": 60
+  },
+  {
+    "clip": "BB_Recover",
+    "lowest_z": 4.276631671018549e-08,
+    "sample_hz": 60
+  },
+  {
+    "clip": "BB_Walk",
+    "lowest_z": 4.276631671018549e-08,
+    "sample_hz": 60
+  },
+  {
+    "clip": "BB_Windup",
+    "lowest_z": 4.276631671018549e-08,
+    "sample_hz": 60
+  }
+]

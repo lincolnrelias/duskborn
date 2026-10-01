@@ -1,0 +1,35 @@
+{
+  "recipe": {
+    "source": {
+      "file": "source\\footstep_grass_000.ogg",
+      "sha256": "9d49497777405d78d7cf7f2888e28277f3a23192300cfd1d79d54876b20f479f"
+    },
+    "start": 0,
+    "duration": null,
+    "playback_rate": 1,
+    "gain_db": -10,
+    "lowpass_hz": null
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v003\\source\\footstep_grass_000.ogg",
+    "-af",
+    "atrim=start=0,asetpts=PTS-STARTPTS,aresample=48000,highpass=f=45,volume=-10dB,afade=t=in:d=0.003,afade=t=out:st=0.7566875:d=0.018"
+  ],
+  "output": {
+    "file": "layers\\grass_01.wav",
+    "sha256": "6c6248585bf7fd707523a15705575a9a46e9c11695d97ecc2c28521bab2909ab"
+  },
+  "inspection": {
+    "duration_seconds": 0.7746875,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -17.29230393095298,
+    "rms_dbfs": -41.36802875611748,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.00016666666666666666,
+    "tail_below_minus50db_seconds": 0.6582916666666667
+  }
+}

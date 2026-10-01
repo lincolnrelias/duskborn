@@ -1,0 +1,54 @@
+{
+  "recipe": {
+    "brief": "One compact heavy hoof plant on grass and soil, subtle hard contact and wood armor movement; no resonant metal.",
+    "layers": [
+      {
+        "file": "layers\\grass_01.wav",
+        "sha256": "6c6248585bf7fd707523a15705575a9a46e9c11695d97ecc2c28521bab2909ab",
+        "delay_ms": 0,
+        "gain_db": 0
+      },
+      {
+        "file": "layers\\body_01.wav",
+        "sha256": "6b0613c90354b8859575a8d3e9b85fd2ae4fee96537b5e44278aa43fc692c381",
+        "delay_ms": 3,
+        "gain_db": -4
+      },
+      {
+        "file": "layers\\wood_01.wav",
+        "sha256": "7a4a6155e8571ae2002e6f59f5c42e9bca22e5425c4331e8fe43c0e14cffadca",
+        "delay_ms": 10,
+        "gain_db": -10
+      }
+    ],
+    "duration_seconds": 0.28
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\layers\\grass_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\layers\\body_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\layers\\wood_01.wav",
+    "-filter_complex",
+    "[0:a]volume=0dB,adelay=0:all=1[a0];[1:a]volume=-4dB,adelay=3:all=1[a1];[2:a]volume=-10dB,adelay=10:all=1[a2];[a0][a1][a2]amix=inputs=3:normalize=0:duration=longest,apad,atrim=duration=0.28,afade=t=out:st=0.255:d=0.025[out]",
+    "-map",
+    "[out]"
+  ],
+  "output": {
+    "file": "candidates\\BB_Hoof_01.wav",
+    "sha256": "0d60f2c5bd1afa62035ee8d02a41bbf103aa3b336e35c8509bfacdf3eb58efd3"
+  },
+  "inspection": {
+    "duration_seconds": 0.28,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -12.094251723543291,
+    "rms_dbfs": -26.725684324278017,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.00016666666666666666,
+    "tail_below_minus50db_seconds": 0.020083333333333335
+  }
+}

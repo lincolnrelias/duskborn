@@ -1,0 +1,62 @@
+{
+  "recipe": {
+    "brief": "Short nasal effort and dense head strike with a dry bark knock; physical impact at 0.06 seconds after the strike phase begins.",
+    "layers": [
+      {
+        "file": "layers\\headbutt_voice_02.wav",
+        "sha256": "9d954ac15ded3a2e1756ce09852201cc1c92d68a0e0b4061573b71679cc36468",
+        "delay_ms": 0,
+        "gain_db": 0
+      },
+      {
+        "file": "layers\\punch_02.wav",
+        "sha256": "f8d1f09b8138601b7a225e629931027e10d5a0c9e329d1d4b2707bab5d544bcc",
+        "delay_ms": 60,
+        "gain_db": 0
+      },
+      {
+        "file": "layers\\wood_02.wav",
+        "sha256": "09a517e6bf06e5a00e68a979fb0153e61c516208a49f25145550f32560c5f148",
+        "delay_ms": 65,
+        "gain_db": -5
+      },
+      {
+        "file": "layers\\cloth_02.wav",
+        "sha256": "45677773c527973b7c1c6f0f2a017ed03aa5f92bf629e45319ed1d81f4785fe7",
+        "delay_ms": 20,
+        "gain_db": 0
+      }
+    ],
+    "duration_seconds": 0.38
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v002\\layers\\headbutt_voice_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v002\\layers\\punch_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v002\\layers\\wood_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v002\\layers\\cloth_02.wav",
+    "-filter_complex",
+    "[0:a]volume=0dB,adelay=0:all=1[a0];[1:a]volume=0dB,adelay=60:all=1[a1];[2:a]volume=-5dB,adelay=65:all=1[a2];[3:a]volume=0dB,adelay=20:all=1[a3];[a0][a1][a2][a3]amix=inputs=4:normalize=0:duration=longest,apad,atrim=duration=0.38,afade=t=out:st=0.355:d=0.025[out]",
+    "-map",
+    "[out]"
+  ],
+  "output": {
+    "file": "candidates\\BB_Headbutt_02.wav",
+    "sha256": "e9e825056f7469585f4be5ea7e7c0875df8a3cb48f2c4a0a58f7ae6e1f21914a"
+  },
+  "inspection": {
+    "duration_seconds": 0.38,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -10.973921463719362,
+    "rms_dbfs": -26.752708973289913,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.0038125,
+    "tail_below_minus50db_seconds": 0.05622916666666666
+  }
+}

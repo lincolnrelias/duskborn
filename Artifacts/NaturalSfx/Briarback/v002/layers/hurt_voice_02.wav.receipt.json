@@ -1,0 +1,35 @@
+{
+  "recipe": {
+    "source": {
+      "file": "source\\1659.wav",
+      "sha256": "15748ea4c1947063a388c41a082957fcb0c00374c765049e81bb5eb680bab0f7"
+    },
+    "start": 0.96,
+    "duration": 0.19,
+    "playback_rate": 0.98,
+    "gain_db": -7,
+    "lowpass_hz": null
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v002\\source\\1659.wav",
+    "-af",
+    "atrim=start=0.96:duration=0.19,asetpts=PTS-STARTPTS,aresample=48000,asetrate=47040,aresample=48000,highpass=f=45,volume=-7dB,afade=t=in:d=0.003,afade=t=out:st=0.17587755102040817:d=0.018"
+  ],
+  "output": {
+    "file": "layers\\hurt_voice_02.wav",
+    "sha256": "024c774af06f575266e42ede229e175a5a29f4ebae5f0ae35a013683366da596"
+  },
+  "inspection": {
+    "duration_seconds": 0.19389583333333332,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -19.850551855464637,
+    "rms_dbfs": -34.45730256516714,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.0010208333333333332,
+    "tail_below_minus50db_seconds": 0.012416666666666666
+  }
+}

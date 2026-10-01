@@ -1,0 +1,35 @@
+{
+  "recipe": {
+    "source": {
+      "file": "source\\impactSoft_heavy_000.ogg",
+      "sha256": "49e7ca88743fca974bb8676ea138b751cfd8f9033b5e7af8736c2a215d6edbc1"
+    },
+    "start": 0,
+    "duration": null,
+    "playback_rate": 1,
+    "gain_db": -10,
+    "lowpass_hz": 3000
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v003\\source\\impactSoft_heavy_000.ogg",
+    "-af",
+    "atrim=start=0,asetpts=PTS-STARTPTS,aresample=48000,lowpass=f=3000,highpass=f=45,volume=-10dB,afade=t=in:d=0.003,afade=t=out:st=0.5088125:d=0.018"
+  ],
+  "output": {
+    "file": "layers\\body_01.wav",
+    "sha256": "6b0613c90354b8859575a8d3e9b85fd2ae4fee96537b5e44278aa43fc692c381"
+  },
+  "inspection": {
+    "duration_seconds": 0.5268125,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -8.170672643334838,
+    "rms_dbfs": -25.284461069340875,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.000375,
+    "tail_below_minus50db_seconds": 0.193625
+  }
+}

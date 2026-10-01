@@ -1,0 +1,128 @@
+{
+  "recipe": {
+    "brief": "Windup 1/2, charge 1/2, headbutt 1/2, hurt 1/2, death 1/2, hoof 1/2; 0.65-second gaps. Gain matched within each pair by RMS with at least 3 dB headroom; no compression.",
+    "layers": [
+      {
+        "file": "candidates\\BB_Windup_01.wav",
+        "sha256": "d5eddc04f9acf1b083d99a2d934da3a812d699d853d33e6d0dad99e8f5ece6b0",
+        "delay_ms": 0,
+        "gain_db": -1.1887489989375837
+      },
+      {
+        "file": "candidates\\BB_Windup_02.wav",
+        "sha256": "570b4f532d8c3aa550ae202103ebe82b9b5e019e827a933eb6dbb6733afc1be0",
+        "delay_ms": 1530,
+        "gain_db": 1.1887489989375908
+      },
+      {
+        "file": "candidates\\BB_Charge_01.wav",
+        "sha256": "a7037bd1e76fc921a01059081902a069b9f971b4623315415b92b76fe8691228",
+        "delay_ms": 3060,
+        "gain_db": -0.2975423395869221
+      },
+      {
+        "file": "candidates\\BB_Charge_02.wav",
+        "sha256": "246f71d2acd61410d9da67fcc119fdd7499eb7afe2c2b3958269d837be33df60",
+        "delay_ms": 4490,
+        "gain_db": 0.29754233958691856
+      },
+      {
+        "file": "candidates\\BB_Headbutt_01.wav",
+        "sha256": "02bf57d67c9f67ebbd91efc32d6903c5fd06486f95cbc56f102d3fcead7eb6fb",
+        "delay_ms": 5920,
+        "gain_db": -0.5593494652177284
+      },
+      {
+        "file": "candidates\\BB_Headbutt_02.wav",
+        "sha256": "e9e825056f7469585f4be5ea7e7c0875df8a3cb48f2c4a0a58f7ae6e1f21914a",
+        "delay_ms": 6950,
+        "gain_db": 0.5593494652177284
+      },
+      {
+        "file": "candidates\\BB_Hurt_01.wav",
+        "sha256": "8f5d45e3aa87ca926c469e27e96eea373c41e4606d15c554d2ff3cc196846e42",
+        "delay_ms": 7980,
+        "gain_db": -2.884182330279053
+      },
+      {
+        "file": "candidates\\BB_Hurt_02.wav",
+        "sha256": "7576c350d6644da6f12c6c45658de9ac9f0d07f1dec07b76eee42ae89ed67a20",
+        "delay_ms": 8970,
+        "gain_db": 2.884182330279053
+      },
+      {
+        "file": "candidates\\BB_Death_01.wav",
+        "sha256": "86691bb73776f0ba4175d552127181b1f9eb733ac53786555fd05a67505162a7",
+        "delay_ms": 9960,
+        "gain_db": -0.14890015248519362
+      },
+      {
+        "file": "candidates\\BB_Death_02.wav",
+        "sha256": "84eac0f3e9f3b1e137f8a9b6fab269f70816ed992cc10a44d1a934713104c053",
+        "delay_ms": 12060,
+        "gain_db": 0.14890015248519717
+      },
+      {
+        "file": "candidates\\BB_Hoof_01.wav",
+        "sha256": "0d60f2c5bd1afa62035ee8d02a41bbf103aa3b336e35c8509bfacdf3eb58efd3",
+        "delay_ms": 14160,
+        "gain_db": 0.08977085475215674
+      },
+      {
+        "file": "candidates\\BB_Hoof_02.wav",
+        "sha256": "2aa7f904c01729f039e9504181677e90f8253db86545f53c9154a1325ad1929f",
+        "delay_ms": 15090,
+        "gain_db": -0.08977085475216029
+      }
+    ],
+    "duration_seconds": 16.02
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v003\\candidates\\BB_Windup_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v003\\candidates\\BB_Windup_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v003\\candidates\\BB_Charge_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v003\\candidates\\BB_Charge_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v003\\candidates\\BB_Headbutt_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v003\\candidates\\BB_Headbutt_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v003\\candidates\\BB_Hurt_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v003\\candidates\\BB_Hurt_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v003\\candidates\\BB_Death_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v003\\candidates\\BB_Death_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v003\\candidates\\BB_Hoof_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v003\\candidates\\BB_Hoof_02.wav",
+    "-filter_complex",
+    "[0:a]volume=-1.1887489989375837dB,adelay=0:all=1[a0];[1:a]volume=1.1887489989375908dB,adelay=1530:all=1[a1];[2:a]volume=-0.2975423395869221dB,adelay=3060:all=1[a2];[3:a]volume=0.29754233958691856dB,adelay=4490:all=1[a3];[4:a]volume=-0.5593494652177284dB,adelay=5920:all=1[a4];[5:a]volume=0.5593494652177284dB,adelay=6950:all=1[a5];[6:a]volume=-2.884182330279053dB,adelay=7980:all=1[a6];[7:a]volume=2.884182330279053dB,adelay=8970:all=1[a7];[8:a]volume=-0.14890015248519362dB,adelay=9960:all=1[a8];[9:a]volume=0.14890015248519717dB,adelay=12060:all=1[a9];[10:a]volume=0.08977085475215674dB,adelay=14160:all=1[a10];[11:a]volume=-0.08977085475216029dB,adelay=15090:all=1[a11];[a0][a1][a2][a3][a4][a5][a6][a7][a8][a9][a10][a11]amix=inputs=12:normalize=0:duration=longest,apad=whole_dur=16.02,atrim=duration=16.02,afade=t=out:st=15.995:d=0.025[out]",
+    "-map",
+    "[out]",
+    "-t",
+    "16.02"
+  ],
+  "output": {
+    "file": "candidates\\Briarback_Audition_Matched.wav",
+    "sha256": "24fbf16aa375c25f85f2c1c627806813aaf0753ee1980ed2f1ff17203cf932fa"
+  },
+  "inspection": {
+    "duration_seconds": 16.02,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -7.476527708938332,
+    "rms_dbfs": -31.524598564214806,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.00675,
+    "tail_below_minus50db_seconds": 0.6646666666666666
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "recipe": {
+    "source": {
+      "file": "source\\2112.wav",
+      "sha256": "6b593f3f7f2a9c8c39ae5daf780cd762a4108111a2d44f86251f4ea0088607dc"
+    },
+    "start": 0.66,
+    "duration": 0.73,
+    "playback_rate": 0.94,
+    "gain_db": -8,
+    "lowpass_hz": 3500
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v004\\source\\2112.wav",
+    "-af",
+    "atrim=start=0.66:duration=0.73,asetpts=PTS-STARTPTS,aresample=48000,asetrate=45120,aresample=48000,lowpass=f=3500,highpass=f=45,volume=-8dB,afade=t=in:d=0.003,afade=t=out:st=0.7585957446808511:d=0.018"
+  ],
+  "output": {
+    "file": "layers\\warning_voice_02.wav",
+    "sha256": "8a5f1d5e5f3012d25827fdf1ea2b51955d57d169601f84d65d54350eb6302bea"
+  },
+  "inspection": {
+    "duration_seconds": 0.7766041666666667,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -27.42756536553592,
+    "rms_dbfs": -40.93352413449573,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.0007916666666666666,
+    "tail_below_minus50db_seconds": 0.015333333333333332
+  }
+}

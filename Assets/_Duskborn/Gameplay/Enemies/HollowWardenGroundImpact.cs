@@ -14,6 +14,12 @@ namespace Duskborn.Gameplay.Enemies
         private readonly MaterialPropertyBlock _properties = new();
         private int _sequence = -1;
         private bool _emitted;
+        private float _trailTime;
+        private int _trailSite, _trailStamp;
+        private int _headbuttSequence = -1;
+        private bool _trailReady;
+        private Vector3 _trailPreviousPoint;
+        private readonly System.Random _trailRandom = new(401);
 
         private sealed class Piece
         {
@@ -22,11 +28,13 @@ namespace Duskborn.Gameplay.Enemies
             public Vector3 Origin, Velocity, Spin;
             public float Delay, Size;
             public bool Dust;
+            public bool TrailActive;
+            public float TrailStarted;
         }
 
-        public HollowWardenGroundImpact(Material dustMaterial, Material stoneMaterial)
+        public HollowWardenGroundImpact(Material dustMaterial, Material stoneMaterial, string label = "Warden ground impacts")
         {
-            _root = new GameObject("Warden ground impacts");
+            _root = new GameObject(label);
             // Flat-shaded, irregular octahedra match the Warden's faceted art style.
             Vector3[] corners = { Vector3.up, Vector3.down * .7f, Vector3.left,
                 Vector3.right * .8f, Vector3.forward, Vector3.back * .8f };
@@ -74,24 +82,109 @@ namespace Duskborn.Gameplay.Enemies
             foreach (var piece in _pieces)
             {
                 float t = age - piece.Delay;
-                float lifetime = piece.Dust ? 1.05f : .8f;
-                piece.Renderer.enabled = t >= 0 && t < lifetime;
-                if (!piece.Renderer.enabled) continue;
-                float progress = t / lifetime;
-                Vector3 displacement = piece.Velocity * t;
-                if (!piece.Dust) displacement += Vector3.down * (4.9f * t * t);
-                // End below-ground travel at the impact surface and shrink settled fragments away.
-                displacement.y = Mathf.Max(0, displacement.y);
-                piece.Transform.position = piece.Origin + displacement;
-                piece.Transform.rotation = Quaternion.Euler(piece.Spin * t);
-                float size = piece.Size * (piece.Dust ? Mathf.Lerp(.5f, 2.5f, progress)
-                    : 1 - Mathf.SmoothStep(0, 1, (progress - .65f) / .35f));
-                piece.Transform.localScale = new Vector3(1, piece.Dust ? .65f : .7f, 1.15f) * size;
-                Color color = piece.Dust ? new Color(.48f, .39f, .27f, .38f * (1 - progress) * Mathf.Clamp01(t / .035f))
-                    : new Color(.31f, .28f, .23f, 1);
-                _properties.SetColor("_BaseColor", color);
-                piece.Renderer.SetPropertyBlock(_properties);
+                Animate(piece, t);
             }
+        }
+
+        // The same Warden puffs, stone mesh, ballistics and fade, distributed at
+        // hoof-sized impact sites along a moving enemy's actual path.
+        public void UpdateTrail(Vector3 position, Vector3 forward, float delta, bool emitting)
+        {
+            _trailTime += Mathf.Max(0, delta);
+            if (!emitting) _trailReady = false;
+            else if (!_trailReady)
+            {
+                _trailReady = true;
+                _trailPreviousPoint = position;
+                EmitTrail(position, forward);
+            }
+            else
+            {
+                Vector3 travel = position - _trailPreviousPoint;
+                travel.y = 0;
+                // Teleports/pool reuse must not draw a bridge across the map.
+                if (travel.sqrMagnitude > 16) _trailPreviousPoint = position;
+                else
+                {
+                    const float spacing = .65f;
+                    int count = Mathf.Min(4, Mathf.FloorToInt(travel.magnitude / spacing));
+                    Vector3 direction = travel.sqrMagnitude > .001f ? travel.normalized : forward;
+                    for (int site = 0; site < count; site++)
+                    {
+                        _trailPreviousPoint += direction * spacing;
+                        _trailPreviousPoint.y = position.y;
+                        EmitTrail(_trailPreviousPoint, forward);
+                    }
+                }
+            }
+            bool active = false;
+            foreach (var piece in _pieces)
+            {
+                if (!piece.TrailActive) { piece.Renderer.enabled = false; continue; }
+                Animate(piece, _trailTime - piece.TrailStarted);
+                piece.TrailActive = piece.Renderer.enabled;
+                active |= piece.TrailActive;
+            }
+            _root.SetActive(active);
+        }
+
+        public bool EmitHeadbutt(Vector3 position, Vector3 forward, int sequence, float age)
+        {
+            // Match the upward strike pose; emit once and never replay stale attacks.
+            if (sequence == _headbuttSequence || age < .06f || age >= BriarbackCharge.HeadbuttSeconds) return false;
+            _headbuttSequence = sequence;
+            for (int site = 0; site < 3; site++)
+                EmitTrail(position + forward * (.9f + site * .3f), forward);
+            return true;
+        }
+
+        private void EmitTrail(Vector3 point, Vector3 forward)
+        {
+            Vector3 right = Vector3.Cross(Vector3.up, forward);
+            point += right * ((_trailStamp++ % 2 == 0 ? -1 : 1) * .40f);
+            point.y = HollowWardenPresentation.SampleGround(point, point.y, out var normal);
+            for (int j = 0; j < 5; j++)
+            {
+                var piece = _pieces[_trailSite * 5 + j];
+                float jitter = (float)_trailRandom.NextDouble();
+                Vector3 sideways = right * ((j - 2) * .09f);
+                piece.Origin = point + normal * .04f + sideways;
+                piece.Velocity = -forward * (.25f + jitter * .65f) + sideways * 2 +
+                    normal * (piece.Dust ? .35f + jitter * .35f : 1.6f + jitter);
+                piece.Size = piece.Dust ? .13f + jitter * .10f : .045f + jitter * .065f;
+                piece.Spin = new Vector3(170 + jitter * 200, _trailSite * 29, 220 - jitter * 300);
+                piece.TrailStarted = _trailTime;
+                piece.TrailActive = true;
+            }
+            _trailSite = (_trailSite + 1) % Sites;
+        }
+
+        private void Animate(Piece piece, float t)
+        {
+            float lifetime = piece.Dust ? 1.05f : .8f;
+            piece.Renderer.enabled = t >= 0 && t < lifetime;
+            if (!piece.Renderer.enabled) return;
+            float progress = t / lifetime;
+            Vector3 displacement = piece.Velocity * t;
+            if (!piece.Dust) displacement += Vector3.down * (4.9f * t * t);
+            displacement.y = Mathf.Max(0, displacement.y);
+            piece.Transform.position = piece.Origin + displacement;
+            piece.Transform.rotation = Quaternion.Euler(piece.Spin * t);
+            float size = piece.Size * (piece.Dust ? Mathf.Lerp(.5f, 2.5f, progress)
+                : 1 - Mathf.SmoothStep(0, 1, (progress - .65f) / .35f));
+            piece.Transform.localScale = new Vector3(1, piece.Dust ? .65f : .7f, 1.15f) * size;
+            Color color = piece.Dust ? new Color(.48f, .39f, .27f, .38f * (1 - progress) * Mathf.Clamp01(t / .035f))
+                : new Color(.31f, .28f, .23f, 1);
+            _properties.SetColor("_BaseColor", color);
+            piece.Renderer.SetPropertyBlock(_properties);
+        }
+
+        public void ResetTrail()
+        {
+            Hide();
+            _trailReady = false; _trailSite = _trailStamp = 0; _trailTime = 0;
+            _headbuttSequence = -1;
+            foreach (var piece in _pieces) { piece.TrailActive = false; piece.Renderer.enabled = false; }
         }
 
         private void Seed(HollowWardenBoss boss, WardenActionView view, bool sweep)
@@ -125,8 +218,10 @@ namespace Duskborn.Gameplay.Enemies
         public void Hide() => _root.SetActive(false);
         public void Dispose()
         {
-            UnityEngine.Object.Destroy(_root);
-            UnityEngine.Object.Destroy(_mesh);
+            if (Application.isPlaying)
+            { UnityEngine.Object.Destroy(_root); UnityEngine.Object.Destroy(_mesh); }
+            else
+            { UnityEngine.Object.DestroyImmediate(_root); UnityEngine.Object.DestroyImmediate(_mesh); }
         }
     }
 }

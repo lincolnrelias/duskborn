@@ -1,0 +1,96 @@
+{
+  "recipe": {
+    "brief": "Two each: charge warning, headbutt warning, charge, headbutt. Pairwise gain-matched preview with 0.6-second gaps.",
+    "layers": [
+      {
+        "file": "candidates\\BB_Windup_01.wav",
+        "sha256": "be72055504ece8c3ae1497ab6c2f880bad7fa97c1c7e04b515e0f52558e51e61",
+        "delay_ms": 0,
+        "gain_db": -4.406003748878927
+      },
+      {
+        "file": "candidates\\BB_Windup_02.wav",
+        "sha256": "418fda5cd0529c05ad4e70a2fadcc4761117c7f1f1d2f971e05b59b50e39cbdd",
+        "delay_ms": 1480,
+        "gain_db": 4.4060037488789305
+      },
+      {
+        "file": "candidates\\BB_HeadbuttWindup_01.wav",
+        "sha256": "e1bf77faf15f09ca61de224aa35d4c2f570df6c1501b7ea7ceb6308050ad369d",
+        "delay_ms": 2960,
+        "gain_db": 0.14144349758993968
+      },
+      {
+        "file": "candidates\\BB_HeadbuttWindup_02.wav",
+        "sha256": "4a3d41192f8b9e2a65a6b784bd56ff0aaaec96628d75e443980d9f9b72837daf",
+        "delay_ms": 3940,
+        "gain_db": -0.14144349758993613
+      },
+      {
+        "file": "candidates\\BB_Charge_01.wav",
+        "sha256": "249c20f5874c582a090cd79040356256652c84483ff875a068d1eeee074367ce",
+        "delay_ms": 4920,
+        "gain_db": -0.05778639050004841
+      },
+      {
+        "file": "candidates\\BB_Charge_02.wav",
+        "sha256": "b39960b1dabc44feebee33ca1aae705a35735c6f0422e558122574b1db8c2c23",
+        "delay_ms": 6300,
+        "gain_db": 0.05778639050004486
+      },
+      {
+        "file": "candidates\\BB_Headbutt_01.wav",
+        "sha256": "ec5679b3bc475fd77793394139dc27fd3ac6614d0e04ac1fe162741f380bcfd2",
+        "delay_ms": 7680,
+        "gain_db": -0.26367774352002726
+      },
+      {
+        "file": "candidates\\BB_Headbutt_02.wav",
+        "sha256": "538d90889b45d7ec95c318d47355480e53f5e370176deb48795efe8c3f19dc32",
+        "delay_ms": 8660,
+        "gain_db": 0.26367774352002726
+      }
+    ],
+    "duration_seconds": 9.64
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v004\\candidates\\BB_Windup_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v004\\candidates\\BB_Windup_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v004\\candidates\\BB_HeadbuttWindup_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v004\\candidates\\BB_HeadbuttWindup_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v004\\candidates\\BB_Charge_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v004\\candidates\\BB_Charge_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v004\\candidates\\BB_Headbutt_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v004\\candidates\\BB_Headbutt_02.wav",
+    "-filter_complex",
+    "[0:a]volume=-4.406003748878927dB,adelay=0:all=1[a0];[1:a]volume=4.4060037488789305dB,adelay=1480:all=1[a1];[2:a]volume=0.14144349758993968dB,adelay=2960:all=1[a2];[3:a]volume=-0.14144349758993613dB,adelay=3940:all=1[a3];[4:a]volume=-0.05778639050004841dB,adelay=4920:all=1[a4];[5:a]volume=0.05778639050004486dB,adelay=6300:all=1[a5];[6:a]volume=-0.26367774352002726dB,adelay=7680:all=1[a6];[7:a]volume=0.26367774352002726dB,adelay=8660:all=1[a7];[a0][a1][a2][a3][a4][a5][a6][a7]amix=inputs=8:normalize=0:duration=longest,apad=whole_dur=9.64,atrim=duration=9.64,afade=t=out:st=9.615:d=0.025[out]",
+    "-map",
+    "[out]",
+    "-t",
+    "9.64"
+  ],
+  "output": {
+    "file": "candidates\\Briarback_Attacks_v004.wav",
+    "sha256": "3df5089c11b90dcfcd95325432d4bde29b7b49cc67793c824c5fe0ed72cdb7b7"
+  },
+  "inspection": {
+    "duration_seconds": 9.64,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -7.563892605878052,
+    "rms_dbfs": -30.08681665978977,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.00025,
+    "tail_below_minus50db_seconds": 0.6147708333333334
+  }
+}

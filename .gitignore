@@ -60,6 +60,10 @@ ExportedObj/
 ehthumbs.db
 Thumbs.db
 desktop.ini
+__pycache__/
+*.pyc
+*.pyo
+
 
 # ===========================
 # IDE directories

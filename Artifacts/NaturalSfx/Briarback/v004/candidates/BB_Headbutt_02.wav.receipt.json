@@ -1,0 +1,64 @@
+{
+  "recipe": {
+    "brief": "Abrupt coarse effort, compact dull body impact at +60 ms and a short earth scuff; no wood creak or squeaky pig imitation.",
+    "layers": [
+      {
+        "file": "layers\\headbutt_voice_02.wav",
+        "sha256": "6c3bd5bbf7bb616dddb119a84a71e5dc89c5179dd21e1f79d836a056a20eb847",
+        "delay_ms": 0,
+        "gain_db": 0
+      },
+      {
+        "file": "layers\\body_02.wav",
+        "sha256": "9edd2bae9775d3a1e44c5904d749ffa4ce492be7fc7ebe25fd0a60da981e41a0",
+        "delay_ms": 60,
+        "gain_db": 0
+      },
+      {
+        "file": "layers\\punch_02.wav",
+        "sha256": "d0f92856560b7ce36b6bc94698f9d386a3c92d944c472248ae3e8b0047c8b4f5",
+        "delay_ms": 60,
+        "gain_db": 0
+      },
+      {
+        "file": "layers\\grass_02.wav",
+        "sha256": "162fa04a8870fd61137c5226f46ddcc3566c309cb871e0474886ed2595dbfc0e",
+        "delay_ms": 75,
+        "gain_db": -4
+      }
+    ],
+    "duration_seconds": 0.38
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v004\\layers\\headbutt_voice_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v004\\layers\\body_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v004\\layers\\punch_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v004\\layers\\grass_02.wav",
+    "-filter_complex",
+    "[0:a]volume=0dB,adelay=0:all=1[a0];[1:a]volume=0dB,adelay=60:all=1[a1];[2:a]volume=0dB,adelay=60:all=1[a2];[3:a]volume=-4dB,adelay=75:all=1[a3];[a0][a1][a2][a3]amix=inputs=4:normalize=0:duration=longest,apad=whole_dur=0.38,atrim=duration=0.38,afade=t=out:st=0.355:d=0.025[out]",
+    "-map",
+    "[out]",
+    "-t",
+    "0.38"
+  ],
+  "output": {
+    "file": "candidates\\BB_Headbutt_02.wav",
+    "sha256": "538d90889b45d7ec95c318d47355480e53f5e370176deb48795efe8c3f19dc32"
+  },
+  "inspection": {
+    "duration_seconds": 0.38,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -7.827571494748426,
+    "rms_dbfs": -22.919917035138212,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.00047916666666666664,
+    "tail_below_minus50db_seconds": 0.014895833333333334
+  }
+}

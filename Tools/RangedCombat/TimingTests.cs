@@ -67,6 +67,13 @@ static class TimingTests
         Check(bowClock.Phase == AuthoredBowClock.Stage.Complete, "Release completes once");
         bowClock.RequestRelease(); bowClock.Advance(1);
         Check(bowClock.Phase == AuthoredBowClock.Stage.Complete, "Duplicate request cannot replay release");
+        bowClock.RestartDraw();
+        Check(bowClock.Phase == AuthoredBowClock.Stage.Load && bowClock.Time==0,"Reused playback starts a fresh draw");
+        bowClock.Advance(2);
+        Check(bowClock.Phase==AuthoredBowClock.Stage.Hold,"Reused playback discards the prior release request");
+        bowClock.RequestRelease(); bowClock.Advance(.01);
+        bowClock.RestartDraw(); bowClock.Advance(2);
+        Check(bowClock.Phase==AuthoredBowClock.Stage.Hold,"Rejected draw retry clears an unfinished release request");
         bowClock = new AuthoredBowClock(40.0/30,23.0/30);
         bowClock.RequestRelease(); bowClock.Advance(.1);
         Check(bowClock.Phase == AuthoredBowClock.Stage.Load, "Early LMB waits for load");

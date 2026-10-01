@@ -1,0 +1,44 @@
+[
+  {
+    "clip": "BB_Charge",
+    "lowest_z": -4.0978193283081055e-08,
+    "highest_z": 1.9365692138671875,
+    "sample_hz": 60
+  },
+  {
+    "clip": "BB_Death",
+    "lowest_z": -8.940696716308594e-08,
+    "highest_z": 2.167942523956299,
+    "sample_hz": 60
+  },
+  {
+    "clip": "BB_Hurt",
+    "lowest_z": -2.2351741790771484e-08,
+    "highest_z": 1.9601218700408936,
+    "sample_hz": 60
+  },
+  {
+    "clip": "BB_Idle",
+    "lowest_z": -1.937152660502761e-08,
+    "highest_z": 1.9075171947479248,
+    "sample_hz": 60
+  },
+  {
+    "clip": "BB_Recover",
+    "lowest_z": -1.937152660502761e-08,
+    "highest_z": 1.9075171947479248,
+    "sample_hz": 60
+  },
+  {
+    "clip": "BB_Walk",
+    "lowest_z": -2.9802322387695312e-08,
+    "highest_z": 1.9203100204467773,
+    "sample_hz": 60
+  },
+  {
+    "clip": "BB_Windup",
+    "lowest_z": -2.939486876130104e-08,
+    "highest_z": 1.9182305335998535,
+    "sample_hz": 60
+  }
+]

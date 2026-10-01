@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-01",
+  "unityVersion": "6000.4.1f1",
+  "compile": "passed",
+  "assetValidation": "passed",
+  "suitesPassed": 16,
+  "suitesFailed": 0,
+  "independentClockChecks": 125,
+  "fbxSha256": "420B22634F69AAB14E070129BA37E7F3406F5F7EDF5FB8541A3746EBF43888A6",
+  "installedFbxSha256": "420B22634F69AAB14E070129BA37E7F3406F5F7EDF5FB8541A3746EBF43888A6",
+  "triangles": 1842,
+  "bones": 17,
+  "clips": 7,
+  "sourceAnimationSampleHz": 60,
+  "importedAnimationSampleHz": 60,
+  "importedGroundToleranceMeters": 0.02,
+  "nightSoloAverage": {
+    "night4": 3.96,
+    "night5": 5.21,
+    "night2": 2.35,
+    "night6": 6.47
+  },
+  "spawnSeedsPerNightAndPlayerCount": 128,
+  "testedPlayerCounts": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "liveGameplay": "unverified; manual checklist in Docs/briarback.md",
+  "committed": false,
+  "ragdoll": "10 rigid bodies, 9 joints; two-second isolated editor physics simulation passed gravity, impulse, floor collision and pose/collider reset",
+  "trample": "Shared Hollow Warden facets/materials/animation; 60-piece reusable pool, spaced world impacts, fade and reset passed",
+  "modelVersion": 3,
+  "headbutt": "2.2m, 120-degree frontal sector, 12 base damage; 0.4s warning with final 0.2s facing lock, 0.18s active, 0.7s recovery, independent 1.5s cooldown; close/far selection, arc and three grounded animation states passed",
+  "generatedHeadbuttClips": 3,
+  "controllerStates": 10,
+  "headbuttGroundEffect": "Three ground sites, 15 shared Warden dust/stone pieces; strike timing, single emission, fade, stale playback rejection and pooled reset passed in the 16/16 suite run"
+}

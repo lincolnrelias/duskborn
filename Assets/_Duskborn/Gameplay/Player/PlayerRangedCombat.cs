@@ -25,8 +25,20 @@ namespace Duskborn.Gameplay.Player
         public Vector3 RangedSpawnRotationOffset { get => rangedSpawnRotationOffset; set => rangedSpawnRotationOffset = value; }
 
         public void GetRangedSpawn(RangedWeaponBehaviour ranged, out Vector3 position, out Quaternion rotation, Vector3? targetAimDirection = null)
-            => ResolveRangedSpawn(transform, rangedSpawnPoint, rangedSpawnOffset, rangedSpawnRotationOffset,
+        {
+            var hand = _weaponActionPlayer != null ? _weaponActionPlayer.RangedDrawingHand : null;
+            if (ranged?.projectile != null && !ranged.useCustomSpawnOffset && rangedSpawnPoint == null && hand != null)
+            {
+                rotation = targetAimDirection.HasValue && targetAimDirection.Value.sqrMagnitude > 0.0001f
+                    ? Quaternion.LookRotation(targetAimDirection.Value) : _weaponActionPlayer.RangedAimRotation;
+                // Bone-driven bows use the aim directly; old body-offset fitting rotations
+                // would make the held arrow jump sideways on release.
+                position = ranged.projectile.TipPositionFromNock(hand.position, rotation);
+                return;
+            }
+            ResolveRangedSpawn(transform, rangedSpawnPoint, rangedSpawnOffset, rangedSpawnRotationOffset,
                 ranged, out position, out rotation, targetAimDirection);
+        }
 
         public static void ResolveRangedSpawn(Transform player, Transform spawnPoint, Vector3 posOffset,
             Vector3 rotOffset, RangedWeaponBehaviour ranged, out Vector3 position, out Quaternion rotation,
@@ -125,7 +137,7 @@ namespace Duskborn.Gameplay.Player
             // Network jitter may put the next local draw slightly ahead of server recovery.
             // Remove the unaccepted pose and retry held aim after the authoritative delay.
             _nextAimedDrawAt = Time.time + retryAfter;
-            _weaponActionPlayer?.CancelAction();
+            _weaponActionPlayer?.CancelAction(preserveAimMovement: true);
         }
 
         [ObserversRpc(ExcludeOwner = true)]
@@ -156,7 +168,10 @@ namespace Duskborn.Gameplay.Player
             // Send the unadjusted aim. The server applies authored rotation once.
             var ranged = selected.Behaviour as RangedWeaponBehaviour;
             Vector3 aim = rangedSpawnPoint != null && !(ranged != null && ranged.useCustomSpawnOffset)
-                ? rangedSpawnPoint.forward : transform.forward;
+                ? rangedSpawnPoint.forward : _weaponActionPlayer.RangedAimRotation * Vector3.forward;
+            var hand = _weaponActionPlayer.RangedDrawingHand;
+            bool handSpawn = hand != null && rangedSpawnPoint == null && ranged != null && !ranged.useCustomSpawnOffset;
+            if (handSpawn) origin = hand.position;
             if (camera != null)
             {
                 var ray = camera.ViewportPointToRay(new Vector3(0.5f, 0.5f));
@@ -198,9 +213,13 @@ namespace Duskborn.Gameplay.Player
             direction = spawnRotation * Vector3.forward;
 
             ShowPlayerProjectileRpc(shot, weapon.Id, origin, direction, spawnRotation);
+            var ranged = (RangedWeaponBehaviour)weapon.Behaviour;
+            var hand = _weaponActionPlayer != null ? _weaponActionPlayer.RangedDrawingHand : null;
+            Vector3? clearanceOrigin = hand != null && rangedSpawnPoint == null && !ranged.useCustomSpawnOffset
+                ? hand.position : (Vector3?)null;
             ProjectileFlight.Launch(shot, definition, transform, true, origin, direction, true,
                 (col, point, forward) => ProjectileDamage.Apply(col, point, forward, amount, crit, this, item),
-                BroadcastProjectileImpact, spawnRotation);
+                BroadcastProjectileImpact, spawnRotation, clearanceOrigin);
         }
 
         [ObserversRpc]

@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-01",
+  "unityVersion": "6000.4.1f1",
+  "compile": "passed",
+  "assetValidation": "passed",
+  "suitesPassed": 16,
+  "suitesFailed": 0,
+  "independentClockChecks": 76,
+  "fbxSha256": "CEEAE05E66BA8564311B0246BC915F086887F59D0839A3259194DB38F1130FBB",
+  "installedFbxSha256": "CEEAE05E66BA8564311B0246BC915F086887F59D0839A3259194DB38F1130FBB",
+  "triangles": 1586,
+  "bones": 17,
+  "clips": 7,
+  "sourceAnimationSampleHz": 60,
+  "importedAnimationSampleHz": 60,
+  "importedGroundToleranceMeters": 0.02,
+  "nightSoloAverage": {
+    "night4": 3.96,
+    "night5": 5.21,
+    "night2": 2.35,
+    "night6": 6.47
+  },
+  "spawnSeedsPerNightAndPlayerCount": 128,
+  "testedPlayerCounts": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "liveGameplay": "unverified; manual checklist in Docs/briarback.md",
+  "committed": false
+}

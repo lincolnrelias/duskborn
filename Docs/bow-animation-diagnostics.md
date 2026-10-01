@@ -1,5 +1,169 @@
 # Bow animation diagnostics
 
+## Remaining body-solve flicker and executed regressions (2026-10-01)
+
+Latest capture `bow-20261001-143554-110.json` contains 1,885 frames. The player
+is stationary (movement phase and planar speed zero), with full idle-locomotion
+weight. Interrupted Load frames 8426, 9084, 9308 and 9621 produce roughly
+10.8–11.9 degree hip/foot rotation steps. The same rotation in the hips and feet
+isolates a body-solve change rather than a directional stride reset.
+
+BowLocomotionBodyAnchor samples humanoid bodyLocalPosition/bodyLocalRotation
+after locomotion mixing, then restores them after the masked action mix, before
+final humanoid evaluation. A humanoid Body mask can otherwise change the body
+pose that drives the hip solve even with both legs excluded. This preserves the
+locomotion body pose instead of compensating leg transforms in LateUpdate.
+The existing bounded upper-body correction still runs after Animator evaluation.
+The new anchor is enabled only for authored bow locomotion (including retained
+movement through retries/cooldown). Other actions keep their original body solve.
+Graph destruction precedes native pose-storage disposal.
+
+After the Editor was closed, `Tools/unity.ps1 all` completed successfully:
+compilation, asset validation and all 15 test suites passed. The new comparison
+checks 1,620 poses in idle and all eight directions, with partial/full bow weights,
+abrupt cancellation and redraw. Hips, upper legs and feet match locomotion-only
+playback: maximum recorded difference is 0.000 degrees / 0.000000 metres.
+Foot-contact calibration checks and all 81 direction/idle transition pairs also
+executed successfully (maximum foot rotation per 60 Hz frame: 30.84 degrees).
+
+Executing the previously compile-only eight-direction tests also exposed an
+overly broad convergence assertion. Some retargeted poses require more than the
+existing 60-degree distributed correction budget; a measured case retains 69.32
+degrees of reference error. Tests continue to require exact bounded reduction
+and unchanged lower-body poses, and require less than 5 degrees of held reference
+error when the input is within the budget. Larger twists are not forced through
+the waist. Perfect torso reference alignment outside that budget is not claimed.
+
+These are non-interactive graph tests, not visual verification. Repeat stationary
+aim/repeated shots from the latest capture, then strafe, reverse and move diagonally.
+Check that feet/hips no longer twitch during rejected draw retries. Also inspect
+torso heading/skin deformation, jump, release aim, dodge and switch weapons.
+
+## Full directional gait review (2026-10-01)
+
+Latest capture `bow-20261001-121058-550.json` contains 2,109 frames spanning
+forward/backward, left strafe and left diagonals. The interrupted-draw 100+ degree
+foot snaps are gone; full authored movement weight is retained. Maximum foot
+rotation between consecutive moving samples is about 17.2 degrees. Rightward
+directions are absent from this capture, so it cannot establish their appearance.
+
+The earlier movement setup mixed Basic Run (16 frames per cycle) with Strafe
+(28 frames). An offline reconstruction of the ASCII FBX hierarchy/linear key
+curves revealed mismatched left/right foot lift phases, especially backward and
+left strafe. Source curve analysis is not Unity humanoid retargeting validation.
+
+WoodenBowAnimations now references all eight vendor Archer Run takes, including
+dedicated diagonals. These share a 20-frame cycle and consistent upper-body
+heading while the pelvis turns. Source forward/side/forward-diagonal foot-height
+profiles align. Backward and backward-diagonal samples require a 0.7578125 cycle
+offset; normalized contact mismatch falls from about 0.246 to 0.011 in source
+sampling. The runtime blends only adjacent directions around eight octants.
+
+The same movement playables now survive shot completion/retry/redraw: only the
+action clock restarts, discarding stale shot requests. Idle has an independent
+clock, and walking phase stops at zero movement. The Archer root-motion variants
+cover 3.180065 metres per cycle; this distance calibrates cadence against actual
+local player horizontal speed, without applying root motion. Non-owner playback
+retains input-driven cadence. Capture version 7 records movement phase and all
+nine movement inputs (idle plus eight directions).
+
+Validation: offline runtime/editor compilation and 50 timing assertions pass.
+Unity graph checks now include eight-direction asset selection, diagonal weights,
+stride continuity/identity, idle cadence, distance-based cadence, retargeted foot
+contact alignment and all 81 direction/idle transition pairs. These checks have
+compiled but not executed while Unity is open. Run the documented Unity CLI after
+closing the project. No natural-looking final result is claimed from source math.
+
+Visual check: while holding aim, move in all eight directions, reverse forward
+to backward and left to right, sweep through diagonals, then repeat while firing.
+Inspect foot planting/sliding, knee bending, leg crossing, pelvis/waist turning,
+shot/redraw seams and start/stop motion. Repeat downhill and with jumps; release
+aim, dodge and switch weapons to verify cleanup.
+
+## Residual snap during rejected draw retry (2026-10-01)
+
+Latest capture `bow-20261001-120245-660.json` retains full movement weight across
+normal shot completion/redraw. It also contains interrupted Load phases at
+frames 2829, 3131, 3283 and 3442: the authored movement layer disappears, then
+returns on a fresh Load. At frame 2829 the left foot changes approximately
+153.7 degrees between consecutive samples. This is distinct from the original
+action-weight dip. The capture does not record the cancellation caller.
+
+Source inspection identifies RejectRangedDrawTarget as a retry path that calls
+full CancelAction while aim remains held. It now requests movement preservation:
+the rejected action disconnects, but the current gait keeps advancing through
+the authoritative retry delay. Ordinary cancellation still removes movement;
+preservation is conditional on Combat.IsAiming. The existing phase transfer
+continues that same stride into the next accepted/retried draw.
+
+Offline runtime/editor compilation passes. Unity remains open, so graph execution
+and visual quality are unverified. Repeat sustained strafe with repeated shots
+until a recovery retry occurs; the authored movement layer should remain present
+at weight 1 while grounded even when Load is interrupted. Release aim and dodge
+after a retry to check cleanup.
+
+## Strafe flicker at redraw (2026-10-01)
+
+Version 6 capture `bow-20261001-115220-921.json` shows steady grounded strafe
+through repeated shots. At redraw frames 716, 863, 1015 and 1164, authored
+movement weight falls from 1 to 0.175, 0.215, 0.217 and 0.204 respectively.
+The movement mixer was following the upper-body action blend, briefly returning
+the legs to the base controller on every Load/Release. A new playback also
+restarted its stride phase on every draw.
+
+Grounded authored movement now stays at full weight independently of the shot
+blend, including the completion/cooldown handoff. A redraw of the same bow/set
+inherits the retained movement phase and initializes its clip times and blend
+weights before evaluation. Upper-body action timing still restarts normally.
+Completion uses the actual animation ground flag instead of forcing a grounded
+gait, preserving airborne locomotion during cooldown.
+
+Offline runtime/editor compilation passes. Added a Unity regression for stride
+times/weights across completed shot, cooldown and redraw; execution is pending
+while Unity is open. Visual verification: hold aim, strafe left/right/diagonally
+and fire repeatedly through several redraws. Legs should continue their stride
+without snapping to the run controller at each shot boundary. Also jump during
+shot completion and release aim to check movement cleanup.
+
+## Airborne aiming and sprint cap (2026-10-01)
+
+Authored bow facing correction now remains enabled during jumps. Ground contact
+selects the lower-body movement source only; it no longer switches the upper
+body back to the older spine-only tilt correction. Existing distributed joint
+limits and action blending still apply. The regression fixture adds 180 sampled
+bow poses over the vendor jump clip, checking bounded reference correction and
+unchanged hips/feet. These new Unity graph checks are compiled but not executed
+because Unity is open.
+
+PlayerController suppresses effective sprint while PlayerCombat.IsAiming and
+caps smoothed input immediately at runMultiplier, including sprint-to-aim
+transitions. Releasing aim restores the stored sprint toggle. Offline runtime
+and editor compilation passes. Visual checks: aim and jump while moving left,
+right and forward; start aiming during a sprint, toggle sprint while aiming,
+and release aim to verify regular run speed during aim and sprint restoration.
+
+## Downhill contact gaps (2026-10-01)
+
+Latest saved capture inspected: `bow-20260930-164407-259.json` (version 4).
+Its 244 Hold frames have no base-controller transitions; it predates authored
+aim locomotion and does not record ground contact. It cannot establish the
+cause of flicker in the current setup.
+
+Current source switched authored aim locomotion and facing correction off on
+each false IsGrounded frame. PlayerController now retains animation grounding
+for 100 ms after contact loss, preventing brief downhill contact gaps from
+switching the gait. Explicit jumps clear the grace immediately. Walking off a
+ledge can retain the grounded animation for at most 100 ms; movement physics
+and jump eligibility are unchanged. Version 6 records controllerGrounded and
+animationGrounded alongside aim-layer weight to distinguish contact chatter
+from action blending in the next reproduction.
+
+Offline runtime/editor compilation passes. Visual behavior remains unverified.
+In a user-started session, hold aim and walk downhill in several directions,
+then jump and walk off a ledge. Check stable gait on slopes, immediate jump
+animation, and prompt airborne animation at ledges; save a new capture if
+flicker persists.
+
 The bow asset currently references Kevin Iglesias's
 `Archer Animations/Animations/Combat/Archer@BowShot01.fbx`.
 The unused custom RangedPoseTimeline was removed. The asset generator now

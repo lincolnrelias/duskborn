@@ -1,0 +1,35 @@
+{
+  "recipe": {
+    "source": {
+      "file": "source\\cloth2.ogg",
+      "sha256": "8a7451193c38bc05483aec25dd193e163a15d44cf7fff04ac7912573231b0201"
+    },
+    "start": 0,
+    "duration": null,
+    "playback_rate": 1,
+    "gain_db": -18,
+    "lowpass_hz": null
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v003\\source\\cloth2.ogg",
+    "-af",
+    "atrim=start=0,asetpts=PTS-STARTPTS,aresample=48000,highpass=f=45,volume=-18dB,afade=t=in:d=0.003,afade=t=out:st=0.3970625:d=0.018"
+  ],
+  "output": {
+    "file": "layers\\cloth_02.wav",
+    "sha256": "45677773c527973b7c1c6f0f2a017ed03aa5f92bf629e45319ed1d81f4785fe7"
+  },
+  "inspection": {
+    "duration_seconds": 0.4150625,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -25.407965112002348,
+    "rms_dbfs": -44.98093417168815,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.06347916666666667,
+    "tail_below_minus50db_seconds": 0.11922916666666666
+  }
+}

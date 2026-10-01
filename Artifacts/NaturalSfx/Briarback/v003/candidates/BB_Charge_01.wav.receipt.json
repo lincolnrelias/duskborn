@@ -1,0 +1,80 @@
+{
+  "recipe": {
+    "brief": "Forceful breathy grunt over a short burst of hooves on earth and woody armor chatter; one-shot rush cue, no bass boom.",
+    "layers": [
+      {
+        "file": "layers\\charge_voice_01.wav",
+        "sha256": "b116bda13e36e2ddd2a7ace7c82cb32bebe6910dab3359e74b8b4d9bd40f81ce",
+        "delay_ms": 0,
+        "gain_db": 0
+      },
+      {
+        "file": "layers\\grass_01.wav",
+        "sha256": "6c6248585bf7fd707523a15705575a9a46e9c11695d97ecc2c28521bab2909ab",
+        "delay_ms": 10,
+        "gain_db": 0
+      },
+      {
+        "file": "layers\\body_01.wav",
+        "sha256": "6b0613c90354b8859575a8d3e9b85fd2ae4fee96537b5e44278aa43fc692c381",
+        "delay_ms": 20,
+        "gain_db": -5
+      },
+      {
+        "file": "layers\\wood_01.wav",
+        "sha256": "7a4a6155e8571ae2002e6f59f5c42e9bca22e5425c4331e8fe43c0e14cffadca",
+        "delay_ms": 200,
+        "gain_db": -5
+      },
+      {
+        "file": "layers\\grass_01.wav",
+        "sha256": "6c6248585bf7fd707523a15705575a9a46e9c11695d97ecc2c28521bab2909ab",
+        "delay_ms": 380,
+        "gain_db": -3
+      },
+      {
+        "file": "layers\\cloth_01.wav",
+        "sha256": "99fafb1c02a251181fa5407878acdb119fac3a3727bd9198789e656187777eb7",
+        "delay_ms": 45,
+        "gain_db": 0
+      }
+    ],
+    "duration_seconds": 0.78
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v003\\layers\\charge_voice_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v003\\layers\\grass_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v003\\layers\\body_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v003\\layers\\wood_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v003\\layers\\grass_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v003\\layers\\cloth_01.wav",
+    "-filter_complex",
+    "[0:a]volume=0dB,adelay=0:all=1[a0];[1:a]volume=0dB,adelay=10:all=1[a1];[2:a]volume=-5dB,adelay=20:all=1[a2];[3:a]volume=-5dB,adelay=200:all=1[a3];[4:a]volume=-3dB,adelay=380:all=1[a4];[5:a]volume=0dB,adelay=45:all=1[a5];[a0][a1][a2][a3][a4][a5]amix=inputs=6:normalize=0:duration=longest,apad=whole_dur=0.78,atrim=duration=0.78,afade=t=out:st=0.755:d=0.025[out]",
+    "-map",
+    "[out]",
+    "-t",
+    "0.78"
+  ],
+  "output": {
+    "file": "candidates\\BB_Charge_01.wav",
+    "sha256": "a7037bd1e76fc921a01059081902a069b9f971b4623315415b92b76fe8691228"
+  },
+  "inspection": {
+    "duration_seconds": 0.78,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -9.362904947390069,
+    "rms_dbfs": -28.949101706519013,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.0010833333333333333,
+    "tail_below_minus50db_seconds": 0.21541666666666667
+  }
+}

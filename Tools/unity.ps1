@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Position = 0)]
-    [ValidateSet('help', 'compile', 'validate', 'test', 'test-warden', 'build-windows', 'build-warden', 'build-ironroot', 'test-ironroot', 'clear-terrain', 'all')]
+    [ValidateSet('help', 'compile', 'validate', 'test', 'test-warden', 'build-windows', 'build-warden', 'build-briarback', 'build-ironroot', 'test-ironroot', 'clear-terrain', 'all')]
     [string]$Command = 'help',
 
     [string]$UnityPath,
@@ -25,6 +25,7 @@ Unity CLI workflow
   .\Tools\unity.ps1 test-warden
   .\Tools\unity.ps1 build-windows
   .\Tools\unity.ps1 build-warden
+  .\Tools\unity.ps1 build-briarback
   .\Tools\unity.ps1 build-ironroot
   .\Tools\unity.ps1 test-ironroot
   .\Tools\unity.ps1 clear-terrain
@@ -138,6 +139,12 @@ if ($Command -eq 'help') {
 $script:resolvedUnityPath = Resolve-UnityExecutable
 
 switch ($Command) {
+    'build-briarback' {
+        Invoke-UnityTask -Name 'build-briarback' `
+            -TaskArguments @('-quit', '-executeMethod', 'Duskborn.Editor.DuskbornCli.BuildBriarback') `
+            -SuccessMarker '[DuskbornCli] Briarback build succeeded.' `
+            -ExpectedOutput (Join-Path $projectRoot 'Assets/_Duskborn/Prefabs/Enemies/Briarback.prefab')
+    }
     'build-ironroot' {
         Invoke-UnityTask -Name 'build-ironroot' `
             -TaskArguments @('-quit', '-executeMethod', 'Duskborn.Editor.DuskbornCli.BuildIronroot') `

@@ -1,0 +1,35 @@
+{
+  "recipe": {
+    "source": {
+      "file": "source\\impactWood_heavy_001.ogg",
+      "sha256": "f1b07a53ac10c615fff9ba470511fdeb722b5902e1a8520759fc20ad6f546015"
+    },
+    "start": 0,
+    "duration": null,
+    "playback_rate": 1,
+    "gain_db": -15,
+    "lowpass_hz": 4500
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\source\\impactWood_heavy_001.ogg",
+    "-af",
+    "atrim=start=0,asetpts=PTS-STARTPTS,aresample=48000,lowpass=f=4500,highpass=f=45,volume=-15dB,afade=t=in:d=0.003,afade=t=out:st=0.2921458333333333:d=0.018"
+  ],
+  "output": {
+    "file": "layers\\wood_02.wav",
+    "sha256": "09a517e6bf06e5a00e68a979fb0153e61c516208a49f25145550f32560c5f148"
+  },
+  "inspection": {
+    "duration_seconds": 0.31014583333333334,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -13.442026326297103,
+    "rms_dbfs": -33.09481066982284,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.00022916666666666666,
+    "tail_below_minus50db_seconds": 0.15404166666666666
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "recipe": {
+    "brief": "Sustained coarse throat effort above dry hoof thuds and muted grass contact. No wooden plates, creaks or pitched synthetic layer.",
+    "layers": [
+      {
+        "file": "layers\\charge_voice_01.wav",
+        "sha256": "78bc29c4142ebf2a8b32beea0a85c3349c2ebe623373372c5ffc922edbb77762",
+        "delay_ms": 0,
+        "gain_db": 0
+      },
+      {
+        "file": "layers\\body_01.wav",
+        "sha256": "a26a0796fe593c07d727474b6f36a044d703253324264bc8bfad032c9591545c",
+        "delay_ms": 5,
+        "gain_db": -3
+      },
+      {
+        "file": "layers\\grass_01.wav",
+        "sha256": "b7839d861a8d7a5a4ffd653ae33b40378b64ad27b4c9b8ee9cc71f7aaa2c994b",
+        "delay_ms": 5,
+        "gain_db": 0
+      },
+      {
+        "file": "layers\\body_01.wav",
+        "sha256": "a26a0796fe593c07d727474b6f36a044d703253324264bc8bfad032c9591545c",
+        "delay_ms": 250,
+        "gain_db": -5
+      },
+      {
+        "file": "layers\\grass_01.wav",
+        "sha256": "b7839d861a8d7a5a4ffd653ae33b40378b64ad27b4c9b8ee9cc71f7aaa2c994b",
+        "delay_ms": 265,
+        "gain_db": -2
+      },
+      {
+        "file": "layers\\body_01.wav",
+        "sha256": "a26a0796fe593c07d727474b6f36a044d703253324264bc8bfad032c9591545c",
+        "delay_ms": 480,
+        "gain_db": -7
+      },
+      {
+        "file": "layers\\grass_01.wav",
+        "sha256": "b7839d861a8d7a5a4ffd653ae33b40378b64ad27b4c9b8ee9cc71f7aaa2c994b",
+        "delay_ms": 485,
+        "gain_db": -4
+      }
+    ],
+    "duration_seconds": 0.78
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v004\\layers\\charge_voice_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v004\\layers\\body_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v004\\layers\\grass_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v004\\layers\\body_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v004\\layers\\grass_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v004\\layers\\body_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v004\\layers\\grass_01.wav",
+    "-filter_complex",
+    "[0:a]volume=0dB,adelay=0:all=1[a0];[1:a]volume=-3dB,adelay=5:all=1[a1];[2:a]volume=0dB,adelay=5:all=1[a2];[3:a]volume=-5dB,adelay=250:all=1[a3];[4:a]volume=-2dB,adelay=265:all=1[a4];[5:a]volume=-7dB,adelay=480:all=1[a5];[6:a]volume=-4dB,adelay=485:all=1[a6];[a0][a1][a2][a3][a4][a5][a6]amix=inputs=7:normalize=0:duration=longest,apad=whole_dur=0.78,atrim=duration=0.78,afade=t=out:st=0.755:d=0.025[out]",
+    "-map",
+    "[out]",
+    "-t",
+    "0.78"
+  ],
+  "output": {
+    "file": "candidates\\BB_Charge_01.wav",
+    "sha256": "249c20f5874c582a090cd79040356256652c84483ff875a068d1eeee074367ce"
+  },
+  "inspection": {
+    "duration_seconds": 0.78,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -10.768992496067222,
+    "rms_dbfs": -26.630578244206575,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 8.333333333333333e-05,
+    "tail_below_minus50db_seconds": 0.0585625
+  }
+}

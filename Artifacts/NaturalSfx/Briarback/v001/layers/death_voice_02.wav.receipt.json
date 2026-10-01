@@ -1,0 +1,35 @@
+{
+  "recipe": {
+    "source": {
+      "file": "source\\1659.wav",
+      "sha256": "15748ea4c1947063a388c41a082957fcb0c00374c765049e81bb5eb680bab0f7"
+    },
+    "start": 2.25,
+    "duration": 0.91,
+    "playback_rate": 0.9,
+    "gain_db": -8,
+    "lowpass_hz": 6000
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Briarback\\v001\\source\\1659.wav",
+    "-af",
+    "atrim=start=2.25:duration=0.91,asetpts=PTS-STARTPTS,aresample=48000,asetrate=43200,aresample=48000,lowpass=f=6000,highpass=f=45,volume=-8dB,afade=t=in:d=0.003,afade=t=out:st=0.9931111111111111:d=0.018"
+  ],
+  "output": {
+    "file": "layers\\death_voice_02.wav",
+    "sha256": "bb72a84db4736b3e5bd28fec8c39506f54d9fa4be45850ce1f93a06fa14df879"
+  },
+  "inspection": {
+    "duration_seconds": 1.011125,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -7.122165024888777,
+    "rms_dbfs": -26.394401938091406,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.012125,
+    "tail_below_minus50db_seconds": 0.008791666666666666
+  }
+}

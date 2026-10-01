@@ -1,0 +1,57 @@
+{
+  "name": "Briarback",
+  "provenance": "Original locally authored procedural model and synthesized sounds; no external assets",
+  "triangles": 1586,
+  "vertices": 885,
+  "bones": 17,
+  "materials": 2,
+  "dimensions_m": [
+    1.4668254852294922,
+    2.882969856262207,
+    1.9075171947479248
+  ],
+  "non_manifold_edges": 0,
+  "clips": [
+    {
+      "name": "BB_Idle",
+      "duration": 2,
+      "loop": true
+    },
+    {
+      "name": "BB_Walk",
+      "duration": 0.8,
+      "loop": true
+    },
+    {
+      "name": "BB_Windup",
+      "duration": 0.9,
+      "loop": false
+    },
+    {
+      "name": "BB_Charge",
+      "duration": 0.4,
+      "loop": true
+    },
+    {
+      "name": "BB_Recover",
+      "duration": 1.4,
+      "loop": false
+    },
+    {
+      "name": "BB_Hurt",
+      "duration": 0.3,
+      "loop": false
+    },
+    {
+      "name": "BB_Death",
+      "duration": 2,
+      "loop": false
+    }
+  ],
+  "root_motion": false,
+  "forward": "-Y Blender; FBX -Z forward/Y up, Unity +Z",
+  "uv": "one compact eight-swatch palette",
+  "visual_status": "Blender neutral/death previews inspected; Unity import and 60Hz animation samples passed within 2cm tolerance; live gameplay unverified",
+  "version": 2,
+  "animation_grounding": "All seven actions corrected and sampled at 60Hz, lowest Z above -0.003m"
+}

@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InventorySystem.Data.MaterialDefinition
   id: material_sap
   displayName: Seiva Pegajosa
-  description: Seiva organica espessa extraida da flora local. Usada em tonicos e ligas.
+  description: Seiva organica espessa extraida da flora local. Usada em tonicos e
+    ligas.
   icon: {fileID: 0}
-  dropPrefab: {fileID: 0}
+  dropPrefab: {fileID: 1633976836810583460, guid: f08d06e07efdb3d4dad9d5f8c80663e6, type: 3}
   rarity: 1
   category: organic

@@ -37,7 +37,7 @@ namespace Duskborn.Editor
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[FAIL] {testMethod.Method.Name}: {ex.Message}");
+                Debug.LogError($"[FAIL] {testMethod.Method.Name}: {ex}");
             }
         }
 
@@ -302,12 +302,18 @@ namespace Duskborn.Editor
         {
             // Cria um GameObject temporário com DayNightCycle para testar modulação de neblina e atmosfera
             GameObject go = new GameObject("Test_DayNightCycle_Atmosphere");
+            var lightGO = new GameObject("Test_Sun");
             try
             {
-                var cycle = go.AddComponent<DayNightCycle>();
-                var lightGO = new GameObject("Test_Sun");
                 var dirLight = lightGO.AddComponent<Light>();
                 dirLight.type = LightType.Directional;
+                var networkObject = go.AddComponent<FishNet.Object.NetworkObject>();
+                var cycle = go.AddComponent<DayNightCycle>();
+                // FishNet normally serializes this reference when authoring a prefab.
+                typeof(FishNet.Object.NetworkBehaviour).GetMethod("SerializeComponents", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                    .Invoke(cycle, new object[] { networkObject, (byte)0 });
+                typeof(DayNightCycle).GetField("directionalLight", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                    .SetValue(cycle, dirLight);
 
                 // Teste 1: Meio-dia (visibilidade aberta e névoa mínima límpida)
                 cycle.SetPhaseAndProgressForEditor(true, 0.5f, 1);
@@ -334,12 +340,11 @@ namespace Duskborn.Editor
                 atmoGO.AddComponent<Duskborn.Gameplay.World.WorldAtmosphereController>();
                 EnvironmentVisualBootstrapper.RemoveWorldAtmosphere();
                 AssertTrue(GameObject.Find("WorldAtmosphere") == null, "WorldAtmosphere deve ser removido com sucesso");
-
-                UnityEngine.Object.DestroyImmediate(lightGO);
             }
             finally
             {
                 UnityEngine.Object.DestroyImmediate(go);
+                UnityEngine.Object.DestroyImmediate(lightGO);
             }
         }
 

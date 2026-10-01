@@ -12,35 +12,96 @@ namespace Duskborn.Gameplay.Player
         private WeaponDefinition pendingRangedWeapon;
         private readonly RangedAttackGate rangedGate = new();
 
-        public void BeginRangedAttack(WeaponItem item)
+        [Header("Ranged Projectile Spawn")]
+        [Tooltip("Optional transform for spawn origin. If assigned, its world position and rotation serve as the spawn basis.")]
+        [SerializeField] private Transform rangedSpawnPoint;
+        [Tooltip("Spawn position offset relative to player (X=Right, Y=Up, Z=Forward). Defaults to (0, 1.3, 0).")]
+        [SerializeField] private Vector3 rangedSpawnOffset = new Vector3(0f, 1.3f, 0f);
+        [Tooltip("Spawn rotation offset in Euler angles (Pitch, Yaw, Roll) relative to the player/aim direction.")]
+        [SerializeField] private Vector3 rangedSpawnRotationOffset = Vector3.zero;
+
+        public Transform RangedSpawnPoint { get => rangedSpawnPoint; set => rangedSpawnPoint = value; }
+        public Vector3 RangedSpawnOffset { get => rangedSpawnOffset; set => rangedSpawnOffset = value; }
+        public Vector3 RangedSpawnRotationOffset { get => rangedSpawnRotationOffset; set => rangedSpawnRotationOffset = value; }
+
+        public void GetRangedSpawn(RangedWeaponBehaviour ranged, out Vector3 position, out Quaternion rotation, Vector3? targetAimDirection = null)
+            => ResolveRangedSpawn(transform, rangedSpawnPoint, rangedSpawnOffset, rangedSpawnRotationOffset,
+                ranged, out position, out rotation, targetAimDirection);
+
+        public static void ResolveRangedSpawn(Transform player, Transform spawnPoint, Vector3 posOffset,
+            Vector3 rotOffset, RangedWeaponBehaviour ranged, out Vector3 position, out Quaternion rotation,
+            Vector3? targetAimDirection = null)
         {
-            if (IsOwner && _stats.IsAlive) BeginRangedRpc(item.Id);
+            bool weaponOverride = ranged != null && ranged.useCustomSpawnOffset;
+            if (weaponOverride)
+            {
+                posOffset = ranged.spawnPositionOffset;
+                rotOffset = ranged.spawnRotationOffset;
+            }
+
+            if (spawnPoint != null && !weaponOverride)
+            {
+                position = spawnPoint.position;
+                Quaternion baseRot = targetAimDirection.HasValue && targetAimDirection.Value.sqrMagnitude > 0.0001f
+                    ? Quaternion.LookRotation(targetAimDirection.Value)
+                    : spawnPoint.rotation;
+                rotation = baseRot * Quaternion.Euler(rotOffset);
+            }
+            else
+            {
+                position = player.TransformPoint(posOffset);
+                Quaternion baseRot = targetAimDirection.HasValue && targetAimDirection.Value.sqrMagnitude > 0.0001f
+                    ? Quaternion.LookRotation(targetAimDirection.Value)
+                    : player.rotation;
+                rotation = baseRot * Quaternion.Euler(rotOffset);
+            }
         }
 
-        public void CancelRangedAttack()
-        {
-            if (IsOwner) CancelRangedRpc();
-        }
+        public void GetRangedSpawn(WeaponDefinition weapon, out Vector3 position, out Quaternion rotation, Vector3? targetAimDirection = null)
+            => GetRangedSpawn(weapon?.Behaviour as RangedWeaponBehaviour, out position, out rotation, targetAimDirection);
+
+        public void GetRangedSpawn(WeaponItem weapon, out Vector3 position, out Quaternion rotation, Vector3? targetAimDirection = null)
+            => GetRangedSpawn(weapon?.Behaviour as RangedWeaponBehaviour, out position, out rotation, targetAimDirection);
 
         [ServerRpc]
-        private void CancelRangedRpc()
+        private void SetRangedAimPitchRpc(float pitch)
         {
-            pendingRangedWeapon = null;
-            rangedGate.Cancel();
-            _weaponHandler?.ClearObservedRangedWeapon();
-            CancelRangedWindupRpc();
+            if (!_stats.IsAlive || float.IsNaN(pitch) || float.IsInfinity(pitch)) return;
+            ShowRangedAimPitchRpc(Mathf.Clamp(pitch, -70f, 70f));
         }
 
         [ObserversRpc(ExcludeOwner = true)]
-        private void CancelRangedWindupRpc()
+        private void ShowRangedAimPitchRpc(float pitch) => _weaponActionPlayer?.SetRangedAimPitch(pitch);
+
+        public void BeginRangedAttack(WeaponItem item, bool holdDraw = false)
         {
-            if (_weaponActionPlayer?.CurrentWeapon?.Behaviour is RangedWeaponBehaviour)
-                _weaponActionPlayer.CancelAction();
-            _weaponHandler?.ClearObservedRangedWeapon();
+            if (IsOwner && _stats.IsAlive) BeginRangedRpc(item.Id, holdDraw);
+        }
+
+        public void CancelRangedAttack(bool hideWeapon = false)
+        {
+            if (IsOwner) CancelRangedRpc(hideWeapon);
         }
 
         [ServerRpc]
-        private void BeginRangedRpc(string weaponId)
+        private void CancelRangedRpc(bool hideWeapon)
+        {
+            pendingRangedWeapon = null;
+            rangedGate.Cancel();
+            if (hideWeapon) _weaponHandler?.ClearObservedRangedWeapon();
+            CancelRangedWindupRpc(hideWeapon);
+        }
+
+        [ObserversRpc(ExcludeOwner = true)]
+        private void CancelRangedWindupRpc(bool hideWeapon)
+        {
+            if (_weaponActionPlayer?.CurrentWeapon?.Behaviour is RangedWeaponBehaviour)
+                _weaponActionPlayer.CancelAction();
+            if (hideWeapon) _weaponHandler?.ClearObservedRangedWeapon();
+        }
+
+        [ServerRpc]
+        private void BeginRangedRpc(string weaponId, bool holdDraw)
         {
             if (!_stats.IsAlive || string.IsNullOrEmpty(weaponId) || weaponId.Contains("/") || weaponId.Contains("\\")) return;
             // Only server-authored definitions in this catalog can be fired. Inventory
@@ -48,29 +109,54 @@ namespace Duskborn.Gameplay.Player
             var definition = Resources.Load<WeaponDefinition>("Weapons/" + weaponId);
             if (definition == null || !(definition.Behaviour is RangedWeaponBehaviour ranged) || ranged.projectile == null) return;
             if (!RangedWeaponBehaviour.TryGetTiming(definition.Actions, out float release, out float duration)) return;
-            if (!rangedGate.TryBegin(Time.timeAsDouble, release, duration, 1f / Mathf.Max(0.01f, _stats.AttackSpeed))) return;
+            if (!rangedGate.TryBegin(Time.timeAsDouble, release, duration, 1f / Mathf.Max(0.01f, _stats.AttackSpeed), holdDraw))
+            {
+                RejectRangedDrawTarget(Owner, (float)System.Math.Max(0.1, rangedGate.NextAttackAt - Time.timeAsDouble));
+                return;
+            }
             pendingRangedWeapon = definition;
             _weaponHandler?.ShowObservedWeapon(definition);
-            ShowRangedWindupRpc(weaponId);
+            ShowRangedWindupRpc(weaponId, holdDraw);
+        }
+
+        [TargetRpc]
+        private void RejectRangedDrawTarget(NetworkConnection connection, float retryAfter)
+        {
+            // Network jitter may put the next local draw slightly ahead of server recovery.
+            // Remove the unaccepted pose and retry held aim after the authoritative delay.
+            _nextAimedDrawAt = Time.time + retryAfter;
+            _weaponActionPlayer?.CancelAction();
         }
 
         [ObserversRpc(ExcludeOwner = true)]
-        private void ShowRangedWindupRpc(string weaponId)
+        private void ShowRangedWindupRpc(string weaponId, bool holdDraw)
         {
             var definition = Resources.Load<WeaponDefinition>("Weapons/" + weaponId);
             _weaponHandler?.ShowObservedWeapon(definition);
             if (definition != null && _weaponActionPlayer != null)
-                _weaponActionPlayer.PlayAction(0, (WeaponItem)definition.CreateRuntimeItem(), BuildContext());
+                _weaponActionPlayer.PlayAction(0, (WeaponItem)definition.CreateRuntimeItem(), BuildContext(), holdDraw);
         }
 
         public void ReleaseRangedAttack()
         {
             if (!IsOwner || !_stats.IsAlive) return;
+            if (RangedInputBlocked || (_aimDodge != null && _aimDodge.IsRecovering))
+            { _weaponActionPlayer.CancelAction(); return; }
             var selected = actionBarInstaller?.Service.GetSelectedItem() as WeaponItem;
             if (selected == null || selected != _weaponActionPlayer.CurrentWeapon) { CancelRangedAttack(); return; }
-            Vector3 origin = transform.position + Vector3.up * 1.3f;
+            _rangedShotAt = Time.unscaledTime;
+            if (_weaponActionPlayer.IsRangedAimAction &&
+                RangedWeaponBehaviour.TryGetTiming(selected.Actions, out float releaseTime, out float duration))
+            {
+                _cooldown = Mathf.Max(duration - releaseTime, 1f / Mathf.Max(0.01f, _stats.AttackSpeed));
+                _nextAimedDrawAt = Time.time + _cooldown;
+            }
+            GetRangedSpawn(selected, out Vector3 origin, out _);
             var camera = Camera.main;
-            Vector3 aim = camera != null ? camera.transform.forward : transform.forward;
+            // Send the unadjusted aim. The server applies authored rotation once.
+            var ranged = selected.Behaviour as RangedWeaponBehaviour;
+            Vector3 aim = rangedSpawnPoint != null && !(ranged != null && ranged.useCustomSpawnOffset)
+                ? rangedSpawnPoint.forward : transform.forward;
             if (camera != null)
             {
                 var ray = camera.ViewportPointToRay(new Vector3(0.5f, 0.5f));
@@ -101,44 +187,65 @@ namespace Duskborn.Gameplay.Player
                 !rangedGate.TryConsume(generation, Time.timeAsDouble)) yield break;
             var weapon = pendingRangedWeapon;
             pendingRangedWeapon = null;
+            ReleaseObservedDrawRpc();
             var definition = ((RangedWeaponBehaviour)weapon.Behaviour).projectile;
             var item = (WeaponItem)weapon.CreateRuntimeItem();
             bool crit = Random.value < _stats.CritChance;
             float amount = _stats.Damage * definition.damageMultiplier * (crit ? _stats.CritMultiplier : 1f);
             int shot = ProjectileFlight.NextId();
-            Vector3 origin = transform.position + Vector3.up * 1.3f;
-            ShowPlayerProjectileRpc(shot, weapon.Id, origin, direction);
+
+            GetRangedSpawn(weapon, out Vector3 origin, out Quaternion spawnRotation, direction);
+            direction = spawnRotation * Vector3.forward;
+
+            ShowPlayerProjectileRpc(shot, weapon.Id, origin, direction, spawnRotation);
             ProjectileFlight.Launch(shot, definition, transform, true, origin, direction, true,
                 (col, point, forward) => ProjectileDamage.Apply(col, point, forward, amount, crit, this, item),
-                BroadcastProjectileImpact);
+                BroadcastProjectileImpact, spawnRotation);
         }
 
         [ObserversRpc]
-        private void ShowPlayerProjectileRpc(int shot, string weaponId, Vector3 origin, Vector3 direction)
+        private void ShowPlayerProjectileRpc(int shot, string weaponId, Vector3 origin, Vector3 direction, Quaternion rotation)
         {
             if (IsServerStarted) return;
             var weapon = Resources.Load<WeaponDefinition>("Weapons/" + weaponId);
             if (weapon?.Behaviour is RangedWeaponBehaviour ranged)
-                ProjectileFlight.Launch(shot, ranged.projectile, transform, true, origin, direction, false);
+                ProjectileFlight.Launch(shot, ranged.projectile, transform, true, origin, direction, false, null, null, rotation);
         }
 
         // Route impacts through each connected player's object, so arrows remain
         // authoritative even after the firing enemy has died and returned to its pool.
-        public static void BroadcastProjectileImpact(int shot, Vector3 point, Vector3 direction, NetworkObject target, string path)
+        public static void BroadcastProjectileImpact(int shot, Vector3 point, Vector3 direction, NetworkObject target, string path,
+            bool flesh, string surfaceTag)
         {
             foreach (var stats in PlayerRegistry.All)
             {
                 if (stats == null) continue;
                 var combat = stats.GetComponent<PlayerCombat>();
                 if (combat != null && combat.IsServerStarted && combat.IsSpawned && combat.Owner.IsActive)
-                    combat.PlayerProjectileImpactTarget(combat.Owner, shot, point, direction, target, path);
+                    combat.PlayerProjectileImpactTarget(combat.Owner, shot, point, direction, target, path, flesh, surfaceTag);
             }
         }
 
-        [TargetRpc]
-        private void PlayerProjectileImpactTarget(NetworkConnection connection, int shot, Vector3 point, Vector3 direction, NetworkObject target, string path)
+        [ObserversRpc(ExcludeOwner = true)]
+        private void ReleaseObservedDrawRpc() => _weaponActionPlayer?.RequestAimedShot();
+
+        public void ConfirmRangedHit(bool critical)
         {
-            if (!IsServerStarted) ProjectileFlight.ReceiveImpact(shot, point, direction, target, path);
+            if (IsServerStarted && IsSpawned && Owner.IsActive) ConfirmRangedHitTarget(Owner, critical);
+        }
+
+        [TargetRpc]
+        private void ConfirmRangedHitTarget(NetworkConnection connection, bool critical)
+        {
+            _rangedHitAt = Time.unscaledTime;
+            _rangedHitCritical = critical;
+        }
+
+        [TargetRpc]
+        private void PlayerProjectileImpactTarget(NetworkConnection connection, int shot, Vector3 point, Vector3 direction,
+            NetworkObject target, string path, bool flesh, string surfaceTag)
+        {
+            if (!IsServerStarted) ProjectileFlight.ReceiveImpact(shot, point, direction, target, path, flesh, surfaceTag);
         }
     }
 }

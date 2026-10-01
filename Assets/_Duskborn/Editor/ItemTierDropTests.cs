@@ -387,15 +387,18 @@ namespace Duskborn.Editor
                 if (visuals.OverlayObjects.Count == 0)
                     throw new Exception("Item Incomum DEVE possuir RarityWaveOverlay!");
 
-                // 3) Raro e acima: Mantêm o feixe vertical pro céu e halo, e também têm o shader de onda
+                // 3) Raro: Sem feixe pro céu, apenas wave overlay azul
                 visuals.Setup(ItemRarity.Rare);
-                if (visuals.BeamObject == null)
-                    throw new Exception("Item Raro DEVE possuir BeamObject direcionado ao céu!");
-                if (visuals.HaloObject == null)
-                    throw new Exception("Item Raro DEVE possuir HaloObject!");
+                if (visuals.BeamObject != null)
+                    throw new Exception("Item Raro NÃO deve possuir BeamObject (sem feixe pro céu)!");
+                if (visuals.HaloObject != null)
+                    throw new Exception("Item Raro NÃO deve possuir HaloObject!");
+                if (visuals.PointLight != null)
+                    throw new Exception("Item Raro NÃO deve possuir PointLight!");
                 if (visuals.OverlayObjects.Count == 0)
                     throw new Exception("Item Raro DEVE possuir RarityWaveOverlay!");
 
+                // 4) Épico e Lendário: Mantêm o feixe vertical pro céu e halo, e também têm o shader de onda
                 visuals.Setup(ItemRarity.Epic);
                 if (visuals.BeamObject == null)
                     throw new Exception("Item Épico DEVE possuir BeamObject direcionado ao céu!");

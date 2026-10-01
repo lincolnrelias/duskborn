@@ -72,11 +72,22 @@ namespace Duskborn.Gameplay.Loot
         public override void OnStartServer()
         {
             base.OnStartServer();
-            if (_targetPlayer.Value == null || (_rarity.Value != ItemRarity.Common && _rarity.Value != ItemRarity.Uncommon))
+            if (_targetPlayer.Value == null || !CanFlyToPlayer(_rarity.Value))
                 Invoke(nameof(SetCollectible), 1f);
         }
 
+        [SerializeField] private float lingerDuration = 2.6f;
+
         private void SetCollectible() => _collectible.Value = true;
+
+        public static bool CanFlyToPlayer(ItemRarity rarity) => rarity <= ItemRarity.Rare;
+
+        private float GetLingerDuration()
+        {
+            int seed = NetworkObject != null ? (int)NetworkObject.ObjectId : gameObject.GetInstanceID();
+            float jitter = (seed & 7) * 0.05f; // 0.00 a 0.35s de variação para cascata orgânica
+            return lingerDuration + jitter;
+        }
 
         public void ServerInitialize(string resourceId, int amount, ItemRarity rarity = ItemRarity.Common, NetworkObject targetPlayer = null)
         {
@@ -93,10 +104,11 @@ namespace Duskborn.Gameplay.Loot
 
             _rarity.Value = rarity;
 
-            if (targetPlayer != null && (rarity == ItemRarity.Common || rarity == ItemRarity.Uncommon))
+            if (targetPlayer != null && CanFlyToPlayer(rarity))
             {
+                // Permite que os itens scatterem e pousem com física livre pelo dobro do tempo antes de voarem
                 CancelInvoke(nameof(SetCollectible));
-                _collectible.Value = true;
+                Invoke(nameof(SetCollectible), GetLingerDuration());
             }
 
             if (_visuals != null)
@@ -105,7 +117,7 @@ namespace Duskborn.Gameplay.Loot
 
         private void Update()
         {
-            if (_targetPlayer.Value != null && (Rarity == ItemRarity.Common || Rarity == ItemRarity.Uncommon))
+            if (_targetPlayer.Value != null && CanFlyToPlayer(Rarity))
             {
                 UpdateFlyTowardsTarget();
             }
@@ -126,8 +138,11 @@ namespace Duskborn.Gameplay.Loot
                 return;
             }
 
+            float linger = GetLingerDuration();
             float elapsed = Time.time - _spawnTime;
-            if (elapsed < 0.16f) return;
+
+            // Permanece em física livre saltando e assentando no chão pelo período de linger
+            if (elapsed < linger) return;
 
             if (!_isFlying)
             {
@@ -143,8 +158,8 @@ namespace Duskborn.Gameplay.Loot
             }
 
             Vector3 targetPos = targetNob.transform.position + Vector3.up * 0.85f;
-            float flightDuration = elapsed - 0.16f;
-            float currentSpeed = Mathf.Lerp(7.0f, 24.0f, flightDuration * 2.0f);
+            float flightDuration = elapsed - linger;
+            float currentSpeed = Mathf.Lerp(8.0f, 26.0f, flightDuration * 2.2f);
 
             transform.position = Vector3.MoveTowards(transform.position, targetPos, currentSpeed * Time.deltaTime);
 

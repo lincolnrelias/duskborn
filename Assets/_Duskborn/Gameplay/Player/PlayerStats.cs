@@ -116,6 +116,16 @@ namespace Duskborn.Gameplay.Player
             OnHPChanged?.Invoke(next, MaxHP);
             OnHealthChanged?.Invoke(next, MaxHP);
             if (!asServer && IsOwner && next < prev) CameraShake.ShakeTaken();
+            var animator=GetComponentInChildren<Animator>();
+            if(animator!=null)
+            {
+                animator.SetBool("Dead",next<=0);
+                var action=GetComponent<Duskborn.Gameplay.Equipment.WeaponActionPlayer>();
+                if(next<=0) action?.CancelAction();
+                else if(next<prev && (action==null || !action.IsPlaying) &&
+                    !(GetComponent<PlayerDodge>()?.IsRecovering ?? false)) animator.SetTrigger("Hit");
+            }
+
         }
 
         private void Start()

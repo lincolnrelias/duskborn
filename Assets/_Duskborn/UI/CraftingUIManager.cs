@@ -1696,7 +1696,7 @@ namespace Duskborn.UI
 
         private void PlaySound(AudioClip clip, float volume = 1.0f)
         {
-            if (clip == null) return;
+            if (!Application.isPlaying || clip == null) return;
             if (AudioManager.Instance != null)
                 AudioManager.Instance.PlayAtPoint(clip, Camera.main != null ? Camera.main.transform.position : transform.position, volume);
             else

@@ -18,6 +18,7 @@ namespace Duskborn.Gameplay.Equipment
     [Serializable]
     public class WeaponActionData
     {
+        public BowAnimationSet BowAnimations;
         public float BaseSpeed          = 1f;
         public bool  PreserveLocomotion = true;
 

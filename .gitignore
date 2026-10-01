@@ -46,6 +46,8 @@ ExportedObj/
 *.user
 *.bak
 *.bak.meta
+*.blend1
+*.blend1.meta
 
 # ===========================
 # OS generated files

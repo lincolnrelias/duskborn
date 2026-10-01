@@ -20,6 +20,7 @@ namespace Duskborn.Gameplay.Projectiles
                 if (ability != null) amount = ability.ModifyDamage(amount, enemy);
                 amount *= weapon?.GetTypeDamageMultiplier(enemy.Types) ?? 1f;
                 enemy.TakeDamage(amount, crit, point, direction, stats);
+                if (amount > 0f) player.ConfirmRangedHit(crit);
                 ability?.OnAttackCompleted(new System.Collections.Generic.List<EnemyBase> { enemy });
                 if (stats != null && stats.IsAlive && stats.EffectiveLifesteal > 0f)
                     stats.Heal(amount * stats.EffectiveLifesteal);

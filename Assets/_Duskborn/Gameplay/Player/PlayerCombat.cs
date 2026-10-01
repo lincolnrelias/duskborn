@@ -130,6 +130,7 @@ namespace Duskborn.Gameplay.Player
 
         public override void OnStopClient()
         {
+            StopRangedAim();
             base.OnStopClient();
             if (!IsOwner) return;
             var hk = HotkeyManager.Instance;
@@ -148,6 +149,7 @@ namespace Duskborn.Gameplay.Player
 
         private void OnDisable()
         {
+            StopRangedAim();
             if (attackTrigger != null)
             {
                 attackTrigger.OnEnter -= HandleTriggerEnter;
@@ -210,6 +212,7 @@ namespace Duskborn.Gameplay.Player
                 for (int i = 0; i < 8; i++)
                     if (kb[(Key)(Key.Digit1 + i)].wasPressedThisFrame)
                         { actionBarInstaller?.Service.SelectSlot(i); break; }
+            UpdateRangedAim();
         }
 
         private bool IsActionLocked => _weaponActionPlayer != null && _weaponActionPlayer.IsPlaying;
@@ -236,9 +239,11 @@ namespace Duskborn.Gameplay.Player
 
         // ── Primary Action (LMB) ─────────────────────────────────────────────
 
-        public void OnAttack(InputValue _)
+        public void OnAttack(InputValue value)
         {
             if (!IsOwner) return;
+            if (HasRangedWeaponEquipped) { UpdateRangedAim(); return; }
+            if (!value.isPressed) return;
             TryPrimaryAction();
         }
 
@@ -247,6 +252,9 @@ namespace Duskborn.Gameplay.Player
             if (Duskborn.Gameplay.Building.BuildingController.BlocksGameplay) return;
             if (Cursor.lockState != CursorLockMode.Locked) return;
             if (PlayerCameraController.LocalInstance != null && PlayerCameraController.LocalInstance.JustLockedCursorThisFrame) return;
+            UpdateRangedAim();
+            if (RangedInputBlocked || (_aimDodge != null && _aimDodge.IsRecovering)) return;
+            if (HasRangedWeaponEquipped) return; // Bow release is the LMB-up edge.
             if (!_stats.IsAlive || _cooldown > 0f) return;
             if (IsActionLocked) { BufferAction(TryPrimaryAction); return; }
 
@@ -272,6 +280,8 @@ namespace Duskborn.Gameplay.Player
 
         private void TrySecondaryAction()
         {
+            // Ranged secondary input is a held aim state, never a buffered action.
+            if ((actionBarInstaller?.Service.GetSelectedItem() as WeaponItem)?.Behaviour is RangedWeaponBehaviour) return;
             if (Duskborn.Gameplay.Building.BuildingController.BlocksGameplay) return;
             if (Cursor.lockState != CursorLockMode.Locked) return;
             if (PlayerCameraController.LocalInstance != null && PlayerCameraController.LocalInstance.JustLockedCursorThisFrame) return;
@@ -311,10 +321,13 @@ namespace Duskborn.Gameplay.Player
             if (_linkedNode != null)
                 RequestNodeHitRpc(_linkedNode.NetworkObject);
 
-            RequestAttackRpc(1f);
+            RequestAttackRpc(1f, true);
         }
 
         // ICombatEntity — fired by MeleeWeaponBehaviour at HitboxOpen.
+        [ObserversRpc(RunLocally = true)]
+        private void ShowUnarmedAttackRpc() => GetComponentInChildren<Animator>()?.SetTrigger("Attack");
+
         public void ExecuteBasicMelee()
         {
             if (_linkedNode != null) RequestNodeHitRpc(_linkedNode.NetworkObject);
@@ -388,8 +401,9 @@ namespace Duskborn.Gameplay.Player
         }
 
         [ServerRpc]
-        private void RequestAttackRpc(float comboMultiplier)
+        private void RequestAttackRpc(float comboMultiplier, bool unarmed = false)
         {
+            if(unarmed) ShowUnarmedAttackRpc();
             Vector3 origin = transform.position + transform.forward * (attackRange * 0.5f);
             int hitCount = Physics.OverlapSphereNonAlloc(origin, attackRange, CombatHitBuffer, enemyLayer);
             HitEnemiesCache.Clear();

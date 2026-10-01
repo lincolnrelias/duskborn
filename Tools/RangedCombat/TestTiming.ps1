@@ -8,7 +8,7 @@ try {
     $runtime = Get-ChildItem "$UnityData/NetCoreRuntime/shared/Microsoft.NETCore.App" -Directory | Select-Object -First 1
     $compileArgs = @('-target:exe', '-nostdlib+', '-langversion:latest', ('-out:"'+$output+'/TimingTests.dll"'))
     $compileArgs += Get-ChildItem $runtime.FullName -Filter '*.dll' | Where-Object { try { [Reflection.AssemblyName]::GetAssemblyName($_.FullName) | Out-Null; $true } catch { $false } } | ForEach-Object { '-r:"'+$_.FullName+'"' }
-    $compileArgs += 'Tools/RangedCombat/TimingTests.cs', 'Assets/_Duskborn/Gameplay/Projectiles/RangedAttackGate.cs'
+    $compileArgs += 'Tools/RangedCombat/TimingTests.cs', 'Assets/_Duskborn/Gameplay/Projectiles/RangedAttackGate.cs', 'Assets/_Duskborn/Gameplay/Equipment/AuthoredBowClock.cs'
     $compileArgs | Set-Content "$output/timing.rsp"
     & "$UnityData/NetCoreRuntime/dotnet.exe" "$UnityData/DotNetSdkRoslyn/csc.dll" "@$output/timing.rsp"
     if ($LASTEXITCODE -ne 0) { throw 'Timing test compilation failed' }

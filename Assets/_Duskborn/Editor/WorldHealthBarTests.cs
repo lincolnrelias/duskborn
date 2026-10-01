@@ -69,6 +69,8 @@ namespace Duskborn.Editor
             var barGo = new GameObject("WorldHealthBar");
             barGo.transform.SetParent(parentGo.transform, false);
             var bar = barGo.AddComponent<WorldHealthBar>();
+            barGo.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
+            barGo.GetComponent<RectTransform>().sizeDelta = new Vector2(1.8f, 0.16f);
 
             var method = typeof(WorldHealthBar).GetMethod("ComputeAnchorOffset",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
@@ -103,6 +105,8 @@ namespace Duskborn.Editor
             var barGo = new GameObject("WorldHealthBar");
             barGo.transform.SetParent(parentGo.transform, false);
             var bar = barGo.AddComponent<WorldHealthBar>();
+            barGo.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
+            barGo.GetComponent<RectTransform>().sizeDelta = new Vector2(1.8f, 0.16f);
 
             var configField = typeof(WorldHealthBar).GetField("config",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
@@ -131,6 +135,8 @@ namespace Duskborn.Editor
 
             var barGo = new GameObject("WorldHealthBar");
             var bar = barGo.AddComponent<WorldHealthBar>();
+            barGo.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
+            barGo.GetComponent<RectTransform>().sizeDelta = new Vector2(1.8f, 0.16f);
 
             var configField = typeof(WorldHealthBar).GetField("config",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
@@ -144,7 +150,7 @@ namespace Duskborn.Editor
 
             Color cMid = (Color)method.Invoke(bar, new object[] { 0.5f });
             AssertApproximately(cMid.r, 1.0f, 0.05f, "HP a 50% deve conter canal R alto (Amarelo)");
-            AssertApproximately(cMid.g, 1.0f, 0.05f, "HP a 50% deve conter canal G alto (Amarelo)");
+            AssertApproximately(cMid.g, config.midColor.g, 0.05f, "HP a 50% deve conter canal G alto (Amarelo)");
 
             Color cLow = (Color)method.Invoke(bar, new object[] { 0.1f });
             AssertApproximately(cLow.r, 1.0f, 0.05f, "HP critico deve ser Vermelho");
@@ -158,6 +164,8 @@ namespace Duskborn.Editor
         {
             var barGo = new GameObject("WorldHealthBar");
             var bar = barGo.AddComponent<WorldHealthBar>();
+            barGo.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
+            barGo.GetComponent<RectTransform>().sizeDelta = new Vector2(1.8f, 0.16f);
             var method = typeof(WorldHealthBar).GetMethod("ResolveDisplayName",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
@@ -227,6 +235,8 @@ namespace Duskborn.Editor
             var barGo = new GameObject("WorldHealthBar");
             barGo.transform.SetParent(parentGo.transform, false);
             var bar = barGo.AddComponent<WorldHealthBar>();
+            barGo.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
+            barGo.GetComponent<RectTransform>().sizeDelta = new Vector2(1.8f, 0.16f);
 
             var configField = typeof(WorldHealthBar).GetField("config",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
@@ -282,6 +292,8 @@ namespace Duskborn.Editor
             var barGo = new GameObject("WorldHealthBar");
             barGo.transform.SetParent(parentGo.transform, false);
             var bar = barGo.AddComponent<WorldHealthBar>();
+            barGo.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
+            barGo.GetComponent<RectTransform>().sizeDelta = new Vector2(1.8f, 0.16f);
 
             var configField = typeof(WorldHealthBar).GetField("config",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);

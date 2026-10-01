@@ -148,7 +148,8 @@ bow=asset('weapon_wooden_bow',CODE+'/Equipment/WeaponDefinition.cs',f'''  id: we
   typeModifiers: []
   behaviour: {ref(behaviour)}
   actions:
-  - BaseSpeed: 1
+  - BowAnimations: {ref(DATA+'/WoodenBowAnimations.asset')}
+    BaseSpeed: 1
     PreserveLocomotion: 1
     ComboChain: 0
     ComboResetTime: 0.8

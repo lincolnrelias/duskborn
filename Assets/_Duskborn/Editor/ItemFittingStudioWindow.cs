@@ -16,7 +16,7 @@ namespace Duskborn.Editor
     /// de armas e equipamentos no avatar do jogador.
     /// Utiliza o prefab real do jogador (Player 1.prefab) e renderiza em ambiente isolado via PreviewRenderUtility.
     /// </summary>
-    public sealed class ItemFittingStudioWindow : EditorWindow
+    public sealed partial class ItemFittingStudioWindow : EditorWindow
     {
         private const string DefaultCharacterPath = "Assets/_Duskborn/Prefabs/Player/Player 1.prefab";
         private const string FallbackCharacterPath = "Assets/_Duskborn/Art/Models/modelTextures/char.fbx";
@@ -115,6 +115,7 @@ namespace Duskborn.Editor
         {
             _lastUpdateTime = EditorApplication.timeSinceStartup;
             EditorApplication.update += OnEditorUpdate;
+            Undo.undoRedoPerformed += OnProjectileUndoRedo;
             bool loaded = LoadWindowState();
             InitPreview();
             RefreshWeaponAndClips(resetOffsetsFromProfile: !loaded);
@@ -124,6 +125,7 @@ namespace Duskborn.Editor
         {
             SaveWindowState();
             EditorApplication.update -= OnEditorUpdate;
+            Undo.undoRedoPerformed -= OnProjectileUndoRedo;
             DestroyPlayableGraph();
             CleanupPreview();
         }
@@ -349,6 +351,7 @@ namespace Duskborn.Editor
 
         private void CleanupPreview()
         {
+            CleanupProjectilePreview();
             if (_weaponInstance != null)
             {
                 DestroyImmediate(_weaponInstance);
@@ -530,6 +533,7 @@ namespace Duskborn.Editor
 
             SpawnWeaponModel();
             UpdateCurrentClipPlayable();
+            RebuildProjectilePreview();
         }
 
         private void SpawnWeaponModel()
@@ -545,7 +549,7 @@ namespace Duskborn.Editor
             Transform targetParent = null;
             if (_animator != null && _animator.isHuman)
             {
-                targetParent = _animator.GetBoneTransform(_targetBone);
+                targetParent = Duskborn.Gameplay.Player.IronrootAppearance.EquipmentBone(_animator, _targetBone);
             }
 
             if (targetParent == null)
@@ -599,6 +603,7 @@ namespace Duskborn.Editor
             double now = EditorApplication.timeSinceStartup;
             float dt = Mathf.Min(0.08f, (float)(now - _lastUpdateTime));
             _lastUpdateTime = now;
+            UpdateProjectilePlayback(dt);
 
             if (_isPlaying)
             {
@@ -662,6 +667,8 @@ namespace Duskborn.Editor
 
             if (Event.current.type == EventType.Repaint)
             {
+                EnsureProjectilePreview();
+                ApplyProjectilePreviewPose();
                 Quaternion camRot = Quaternion.Euler(_camPitch, _camYaw, 0f);
                 Vector3 camPos = _camTarget + camRot * new Vector3(0f, 0f, -_camDistance);
                 _preview.camera.transform.position = camPos;
@@ -746,7 +753,7 @@ namespace Duskborn.Editor
             }
             else if (_animator != null && _animator.isHuman)
             {
-                Transform bone = _animator.GetBoneTransform(_targetBone);
+                Transform bone = Duskborn.Gameplay.Player.IronrootAppearance.EquipmentBone(_animator, _targetBone);
                 if (bone != null)
                 {
                     _camTarget = bone.position;
@@ -874,6 +881,8 @@ namespace Duskborn.Editor
             DrawTransformEditingSection();
             GUILayout.Space(8);
             DrawAnimationSection();
+            GUILayout.Space(8);
+            DrawProjectileSection();
             GUILayout.Space(8);
             DrawAvatarSection();
             GUILayout.Space(12);

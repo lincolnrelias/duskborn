@@ -117,6 +117,19 @@ namespace Duskborn.Editor
             Debug.Log("[DuskbornCli] Hollow Warden build succeeded.");
         }
 
+        public static void BuildIronroot()
+        {
+            EnsureCompilationSucceeded();
+            IronrootPlayerBuilder.Build();
+        }
+
+        public static void TestIronroot()
+        {
+            EnsureCompilationSucceeded();
+            IronrootPlayerBuilder.Validate();
+            Debug.Log("[Ironroot] Player validation succeeded.");
+        }
+
         public static void TestHollowWarden()
         {
             EnsureCompilationSucceeded();
@@ -154,6 +167,16 @@ namespace Duskborn.Editor
         {
             EnsureCompilationSucceeded();
 
+            // Batch tests must not inherit the last interactive scene. A saved empty
+            // scratch scene also permits suites to open additive scenes in edit mode.
+            if (Application.isBatchMode)
+            {
+                var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+                Directory.CreateDirectory("Temp");
+                if (!EditorSceneManager.SaveScene(scene, "Temp/DuskbornCliTests.unity"))
+                    throw new InvalidOperationException("Could not save the CLI test scene.");
+            }
+
             var suites = new[]
             {
                 new TestSuite(nameof(RangedCombatTests), RangedCombatTests.RunAllTests),
@@ -169,7 +192,8 @@ namespace Duskborn.Editor
                 new TestSuite(nameof(ResourceGatheringTests), ResourceGatheringTests.RunAllTests),
                 new TestSuite(nameof(SpatialOccupancyMapTests), SpatialOccupancyMapTests.RunAllTests),
                 new TestSuite(nameof(UIResolutionScalingTests), UIResolutionScalingTests.RunAllTests),
-                new TestSuite(nameof(WorldHealthBarTests), WorldHealthBarTests.RunAllTests)
+                new TestSuite(nameof(WorldHealthBarTests), WorldHealthBarTests.RunAllTests),
+                new TestSuite(nameof(ItemFittingStudioTests), ItemFittingStudioTests.RunAllTests)
             };
 
             var failures = new List<string>();

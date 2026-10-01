@@ -147,7 +147,7 @@ namespace Duskborn.Effects
 
             // 5. Determina raio horizontal e centro para projetar a barra à frente da superfície.
             // Avalia tanto colisores quanto renderers para cobrir copas largas de árvores que ultrapassam o colisor.
-            _horizontalRadius = 0.5f;
+            _horizontalRadius = 0f;
             _localCenter = Vector3.zero;
 
             foreach (var col in colliders)
@@ -196,6 +196,8 @@ namespace Duskborn.Effects
                 _horizontalRadius = Mathf.Max(_horizontalRadius, totalR);
             }
 
+            // Use the default only when no bounds were found, not as a minimum trunk radius.
+            if (_horizontalRadius <= 0f) _horizontalRadius = 0.5f;
             _horizontalRadius = Mathf.Clamp(_horizontalRadius, 0.35f, 6.0f);
             _localAnchorOffsetY = localY;
             _localAnchorOffset = new Vector3(_localCenter.x, localY, _localCenter.z);

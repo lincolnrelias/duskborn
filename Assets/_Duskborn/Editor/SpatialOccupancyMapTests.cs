@@ -359,7 +359,9 @@ namespace Duskborn.Editor
             // 3. Tall Stalk Weed
             Mesh tallStalk = Gameplay.World.Foliage.FoliageMeshUtility.CreateTallStalkWeedMesh(stalkCount: 3);
             Assert(tallStalk != null, "Malha CreateTallStalkWeedMesh não deve ser nula.");
-            Assert(tallStalk.vertexCount >= 24, $"TallStalkWeed deve ter pelo menos 24 vértices. Obtido: {tallStalk.vertexCount}");
+            // Each stalk has three vertex pairs and a single plume tip.
+            Assert(tallStalk.vertexCount == 3 * 7, $"TallStalkWeed deve ter 7 vértices por haste. Obtido: {tallStalk.vertexCount}");
+            Assert(tallStalk.triangles.Length > 0 && Array.TrueForAll(tallStalk.triangles, index => index >= 0 && index < tallStalk.vertexCount), "Índices da malha TallStalkWeed devem ser válidos.");
 
             // 4. Clover Patch
             Mesh clover = Gameplay.World.Foliage.FoliageMeshUtility.CreateCloverPatchMesh(cloverCount: 4);

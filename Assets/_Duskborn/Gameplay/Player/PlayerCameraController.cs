@@ -86,6 +86,9 @@ namespace Duskborn.Gameplay.Player
         [SerializeField] private float fovTransitionSpeed = 8f;
 
         [Header("Controle do Cursor")]
+        [SerializeField, Range(0.3f, 1f)] private float aimDistanceMultiplier = 0.7f;
+        [SerializeField, Range(0.5f, 1f)] private float aimFovMultiplier = 0.85f;
+
         [Tooltip("Travar o cursor automaticamente durante a gameplay de combate.")]
         [SerializeField] private bool autoLockCursor = true;
 
@@ -93,6 +96,7 @@ namespace Duskborn.Gameplay.Player
         private Camera           _mainCam;
         private PlayerController _controller;
         private PlayerDodge      _dodge;
+        private PlayerCombat     _combat;
 
         // Estado de rotação e mira
         private float   _targetYaw;
@@ -129,6 +133,7 @@ namespace Duskborn.Gameplay.Player
         {
             _controller = GetComponent<PlayerController>();
             _dodge      = GetComponent<PlayerDodge>();
+            _combat     = GetComponent<PlayerCombat>();
             _mainCam    = Camera.main;
 
             _targetYaw        = transform.eulerAngles.y;
@@ -401,7 +406,10 @@ namespace Duskborn.Gameplay.Player
             bool cursorWasLocked = _isCursorLocked && Cursor.lockState == CursorLockMode.Locked && !Cursor.visible;
             // Atalho de conveniência: pressionar Alt Esquerdo alterna temporariamente o cursor durante testes
             var kb = Keyboard.current;
-            if (kb != null && kb.leftAltKey.wasPressedThisFrame && !_isRotationLocked)
+            // Alt is also the default dodge key. Never unlock the cursor during a
+            // ranged dodge, otherwise holding RMB cannot resume aim afterwards.
+            if (kb != null && kb.leftAltKey.wasPressedThisFrame && !_isRotationLocked &&
+                !(_combat != null && _combat.HasRangedWeaponEquipped))
             {
                 _isAltUnlocked = !_isCursorLocked;
                 SetCursorLocked(!_isCursorLocked);
@@ -555,7 +563,7 @@ namespace Duskborn.Gameplay.Player
             // Distância desejada com suavização de zoom
             float desiredDistance = Mathf.SmoothDamp(
                 _currentDistance,
-                _targetDistance,
+                _combat != null && _combat.IsAiming ? Mathf.Max(minDistance, _targetDistance * aimDistanceMultiplier) : _targetDistance,
                 ref _distanceVelocity,
                 zoomDampTime);
 
@@ -618,7 +626,9 @@ namespace Duskborn.Gameplay.Player
             bool isMovingFast   = _controller != null && _controller.IsMoving;
 
             float targetFov = defaultFov;
-            if (isDodgeRolling)
+            if (_combat != null && _combat.IsAiming)
+                targetFov *= aimFovMultiplier;
+            else if (isDodgeRolling)
                 targetFov += dynamicFovKick;
             else if (isMovingFast)
                 targetFov += dynamicFovKick * 0.5f;

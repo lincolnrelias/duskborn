@@ -15,9 +15,16 @@ and builds. The wrapper reads the required Unity version from
 .\Tools\unity.ps1 all
 .\Tools\unity.ps1 build-windows
 .\Tools\unity.ps1 build-warden
+.\Tools\unity.ps1 build-ironroot
+.\Tools\unity.ps1 test-ironroot
 ```
 
 - `compile` imports changed assets, compiles scripts, and requires a success marker.
+- `build-ironroot` imports the original Ironroot Humanoid, creates URP materials, replaces
+  both player prefab visuals while preserving gameplay/controller references, and validates
+  skinning and sampled locomotion clips. Requires `Artifacts/Ironroot/v002/Ironroot.fbx`.
+  Already-installed Ironroot visuals retain their prefab overrides and sockets on model refresh.
+- `test-ironroot` validates the installed player prefabs without rebuilding them.
 - `build-warden` imports the grounded v002 Hollow Warden model, creates its materials,
   Animator, boss/root prefabs and HUD, registers FishNet prefabs, and validates references.
   Run it before `all` when setting up or regenerating the boss assets.
@@ -26,6 +33,9 @@ and builds. The wrapper reads the required Unity version from
   ScriptableObject assets under `Assets/_Duskborn/Resources`.
 - `test` executes the project's existing static Editor test suites and turns any
   logged error, assertion, exception, or thrown exception into a failed process.
+  Batch tests start from an empty scratch scene in Temp/DuskbornCliTests.unity.
+  Edit-mode UI tests initialize their fixtures explicitly and check requested cursor
+  state; native cursor locking and visible rendering still require a manual check.
 - `all` runs compile, validation, and tests, but does not build a player.
 - `build-windows` invokes the project's synchronous `BuildPipeline` entry point
   and creates `Builds/Windows/Mugg.exe` by default.

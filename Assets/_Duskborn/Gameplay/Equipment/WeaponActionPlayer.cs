@@ -15,37 +15,71 @@ namespace Duskborn.Gameplay.Equipment
     /// AnimatorController via an upper-body avatar mask. Fires WeaponBehaviour events
     /// at the normalised times defined on each WeaponActionData.
     /// </summary>
-    public class WeaponActionPlayer : MonoBehaviour
+    public partial class WeaponActionPlayer : MonoBehaviour
     {
         [SerializeField] private Animator    animator;
         [SerializeField] private AvatarMask  upperBodyMask;
 
+        [Tooltip("Reduce bow spine tilt without locking torso heading against the hips. Disable to compare the original blend.")]
+        [SerializeField] private bool stabilizeBowPose = true;
+
         private const float BlendInTime  = 0.08f;
         private const float BlendOutTime = 0.12f;
 
+        private AuthoredBowPlayback _authoredBow;
+        private AuthoredBowPlayback _retainedBowMovement;
+        private AnimationMixerPlayable _aimLocomotionMixer;
+        private double ActionTime => _authoredBow != null ? _authoredBow.Clock.ActionTime : _clipPlayable.IsValid() ? _clipPlayable.GetTime() : 0;
         private PlayableGraph               _graph;
         private AnimatorControllerPlayable  _controllerPlayable;
         private AnimationLayerMixerPlayable _layerMixer;
         private AnimationClipPlayable       _clipPlayable;
         private AvatarMask                  _fullBodyMask;
         private AvatarMask                  _equippedActionMask;
+        private BowPoseAnchor               _bowPoseAnchor;
+        private bool                        _anchorBowPose;
         private bool                        _originalRootMotion;
         private PlayerController            _playerController;
 
-        private WeaponItem         _activeWeapon;
-        private WeaponSkill        _activeSkill;
-        private WeaponActionData   _activeData;
-        private AnimationClip      _activeClip;
-        private bool               _ownsActiveClip;
-        private CombatContext      _activeCtx;
-        private int                _activeActionIndex;
+        private WeaponItem          _activeWeapon;
+        private WeaponSkill         _activeSkill;
+        private WeaponActionData    _activeData;
+        private AnimationClip       _activeClip;
+        private bool                _ownsActiveClip;
+        private CombatContext       _activeCtx;
+        private int                 _activeActionIndex;
         private WeaponActionEvent[] _sortedEvents;
-        private int                _eventCursor;
-        private float              _blendWeight;
-        private bool               _isPlaying;
-        private bool               _skillFired;
-        private float              _runtimeSpeedMultiplier = 1f;
-        private WeaponHitNotifier  _hitNotifier;
+        private int                 _eventCursor;
+        private float               _blendWeight;
+        private bool                _isPlaying;
+        private bool                _skillFired;
+        private float               _runtimeSpeedMultiplier = 1f;
+        private WeaponHitNotifier   _hitNotifier;
+
+        private bool  _rangedAimAction;
+        private bool  _shotRequested;
+        private float _bowReleaseTime;
+        private float _bowDuration;
+        private float _aimPitch;
+
+        public void SetRangedAimPitch(float pitch) => _aimPitch = Mathf.Clamp(pitch, -70f, 70f);
+
+        public bool IsRangedAimAction => _isPlaying && _rangedAimAction;
+        public bool IsDrawingBow => _isPlaying && (_activeWeapon?.Behaviour is RangedWeaponBehaviour) &&
+            (!_shotRequested || (ActionTime < _bowReleaseTime));
+        public float RangedDrawProgress => IsDrawingBow && _bowReleaseTime > 0f && _clipPlayable.IsValid()
+            ? Mathf.Clamp01((_authoredBow != null && _authoredBow.Clock.Phase != AuthoredBowClock.Stage.Load ? 1f : (float)(ActionTime / (_authoredBow != null ? _authoredBow.Clock.LoadDuration : _bowReleaseTime)))) : 0f;
+
+        public void RequestAimedShot()
+        {
+            if (IsRangedAimAction)
+            {
+                _shotRequested = true;
+                _authoredBow?.Clock.RequestRelease();
+                if (_clipPlayable.IsValid() && _activeData != null)
+                    _clipPlayable.SetSpeed(_activeData.BaseSpeed * _runtimeSpeedMultiplier);
+            }
+        }
 
         // Combo chain state (see WeaponActionData.ComboChain).
         private int   _comboStep;
@@ -53,8 +87,6 @@ namespace Duskborn.Gameplay.Equipment
         private float _comboExpiry;
 
         public bool              IsPlaying     => _isPlaying;
-        public float NormalizedTime => _isPlaying && _clipPlayable.IsValid() && _activeClip != null
-            ? Mathf.Clamp01((float)(_clipPlayable.GetTime() / _activeClip.length)) : 0f;
         public float             CurrentComboMultiplier { get; private set; } = 1f;
         public WeaponItem        CurrentWeapon => _activeWeapon;
         public WeaponSkill       CurrentSkill  => _activeSkill;
@@ -64,13 +96,16 @@ namespace Duskborn.Gameplay.Equipment
         public event Action         OnActionComplete;
         public event Action<float>  OnSpeedChanged;
 
+        public float NormalizedTime => _isPlaying && _activeClip != null && _activeClip.length > 0f && _clipPlayable.IsValid()
+            ? (float)(ActionTime / _activeClip.length) : 0f;
+
         public float RuntimeSpeedMultiplier
         {
             get => _runtimeSpeedMultiplier;
             set
             {
                 _runtimeSpeedMultiplier = value;
-                if (_isPlaying && _clipPlayable.IsValid())
+                if (_isPlaying && !_rangedAimAction && _clipPlayable.IsValid())
                     _clipPlayable.SetSpeed(_activeData.BaseSpeed * value);
                 OnSpeedChanged?.Invoke(_activeData != null ? _activeData.BaseSpeed * value : value);
             }
@@ -95,8 +130,16 @@ namespace Duskborn.Gameplay.Equipment
         private void OnDestroy()
         {
             if (_graph.IsValid()) _graph.Destroy();
-            if (_ownsActiveClip && _activeClip != null) Destroy(_activeClip);
-            if (_fullBodyMask != null) Destroy(_fullBodyMask);
+            _authoredBow?.Dispose();
+            _authoredBow = null;
+            _retainedBowMovement?.Dispose();
+            _retainedBowMovement = null;
+            _bowPoseAnchor?.Dispose();
+            if (_fullBodyMask != null)
+            {
+                if (Application.isPlaying) Destroy(_fullBodyMask);
+                else DestroyImmediate(_fullBodyMask);
+            }
         }
 
         private void BuildGraph()
@@ -108,7 +151,9 @@ namespace Duskborn.Gameplay.Equipment
 
             // Layer 0: full-body locomotion. Layer 1: upper-body weapon actions.
             _layerMixer = AnimationLayerMixerPlayable.Create(_graph, 2);
-            _layerMixer.ConnectInput(0, _controllerPlayable, 0, 1f);
+            _aimLocomotionMixer = AnimationMixerPlayable.Create(_graph, 2);
+            _aimLocomotionMixer.ConnectInput(0, _controllerPlayable, 0, 1f);
+            _layerMixer.ConnectInput(0, _aimLocomotionMixer, 0, 1f);
             _layerMixer.SetLayerAdditive(1, false);
 
             _fullBodyMask = new AvatarMask();
@@ -120,13 +165,15 @@ namespace Duskborn.Gameplay.Equipment
             _playerController   = GetComponent<PlayerController>();
 
             var output = AnimationPlayableOutput.Create(_graph, "WeaponAnimation", animator);
-            output.SetSourcePlayable(_layerMixer);
+            if (BowPoseAnchor.Supports(animator))
+                _bowPoseAnchor = new BowPoseAnchor(_graph, animator, _layerMixer);
+            output.SetSourcePlayable(_bowPoseAnchor != null ? _bowPoseAnchor.Output : (Playable)_layerMixer);
 
             _graph.Play();
         }
 
         // Called by WeaponItem.OnLeftClick / OnRightClick.
-        public void PlayAction(int actionIndex, WeaponItem weapon, CombatContext ctx)
+        public void PlayAction(int actionIndex, WeaponItem weapon, CombatContext ctx, bool holdRangedDraw = false)
         {
             if (!_graph.IsValid())
             {
@@ -149,6 +196,7 @@ namespace Duskborn.Gameplay.Equipment
             }
 
             StopCurrentAction();
+            ClearRetainedBowMovement();
 
             _activeWeapon      = weapon;
             _activeData        = data;
@@ -159,14 +207,17 @@ namespace Duskborn.Gameplay.Equipment
             _blendWeight       = 0f;
             _isPlaying         = true;
 
-            if (weapon.Behaviour is RangedWeaponBehaviour)
+            bool ranged = weapon.Behaviour is RangedWeaponBehaviour;
+            _rangedAimAction = holdRangedDraw && ranged &&
+                RangedWeaponBehaviour.TryGetTiming(weapon.Actions, out _bowReleaseTime, out _bowDuration);
+            _shotRequested = !_rangedAimAction;
+
+            if (ranged)
             {
                 // Vendor clips contain OnShoot/OnFinishAttack events for their demo
                 // controller. Our typed timeline owns release, so strip the clone only.
-                _activeClip = Instantiate(clip);
-                _activeClip.events = Array.Empty<AnimationEvent>();
+                _activeClip = AuthoredBowPlayback.CloneClip(clip);
                 _ownsActiveClip = true;
-                ctx.Combat?.BeginRangedAttack(weapon);
             }
 
             // Sorted defensive copy so we never mutate the SO array.
@@ -177,11 +228,25 @@ namespace Duskborn.Gameplay.Equipment
 
             ApplyMask(data.PreserveLocomotion, weapon.ActionMask);
             _clipPlayable = AnimationClipPlayable.Create(_graph, _activeClip);
+            _clipPlayable.SetApplyFootIK(false);
             _clipPlayable.SetSpeed(data.BaseSpeed * _runtimeSpeedMultiplier);
-            _layerMixer.ConnectInput(1, _clipPlayable, 0, 0f);
+            _anchorBowPose = ranged && data.PreserveLocomotion && _bowPoseAnchor != null;
+            Playable actionPose = _clipPlayable;
+            if (_rangedAimAction && data.BowAnimations != null && data.BowAnimations.IsValid)
+            {
+                _authoredBow = new AuthoredBowPlayback(_graph, data.BowAnimations);
+                actionPose = _authoredBow.Pose;
+                _aimLocomotionMixer.ConnectInput(1, _authoredBow.Movement, 0, 0f);
+                _clipPlayable.SetSpeed(0);
+            }
+            _bowPoseAnchor?.SetFacing(_authoredBow != null);
+            _layerMixer.ConnectInput(1, _anchorBowPose ? _bowPoseAnchor.ConnectClip(actionPose) : actionPose, 0, 0f);
 
             DuskLog.Log(LogChannel.ActionBar,
                 $"Weapon action [{actionIndex}] '{clip.name}' on '{weapon.DisplayName}'.");
+
+            if (ranged)
+                ctx?.Combat?.BeginRangedAttack(weapon, _rangedAimAction);
         }
 
         // Combo chain: entries play in order while attacks land inside the reset window.
@@ -241,10 +306,13 @@ namespace Duskborn.Gameplay.Equipment
         private void StopCurrentAction()
         {
             if (!_isPlaying) return;
-            _isPlaying   = false;
-            _blendWeight = 0f;
-            _activeSkill = null;
-            _skillFired  = false;
+            bool retainMovement = _authoredBow != null && !_cancelling && _activeCtx?.Combat?.IsAiming == true;
+            _isPlaying        = false;
+            _rangedAimAction  = false;
+            _shotRequested    = false;
+            _blendWeight      = 0f;
+            _activeSkill      = null;
+            _skillFired       = false;
 
             // Window for the next click to continue the chain starts when this action ends.
             if (_activeData != null && _activeData.ComboChain)
@@ -253,6 +321,21 @@ namespace Duskborn.Gameplay.Equipment
             _playerController?.SetInputEnabled(true);
             _layerMixer.SetInputWeight(1, 0f);
             if (_layerMixer.GetInput(1).IsValid()) _layerMixer.DisconnectInput(1);
+            _bowPoseAnchor?.DisconnectClip();
+            _anchorBowPose = false;
+            _bowPoseAnchor?.SetFacing(false);
+            if (retainMovement)
+            {
+                _retainedBowMovement = _authoredBow;
+                _aimLocomotionMixer.SetInputWeight(0, 0f);
+                _aimLocomotionMixer.SetInputWeight(1, 1f);
+            }
+            else
+            {
+                ResetAimLocomotion();
+                _authoredBow?.Dispose();
+            }
+            _authoredBow = null;
             if (_clipPlayable.IsValid()) _clipPlayable.Destroy();
             _clipPlayable = default;
             if (_ownsActiveClip) Destroy(_activeClip);
@@ -261,10 +344,26 @@ namespace Duskborn.Gameplay.Equipment
             if (!_cancelling) OnActionComplete?.Invoke();
         }
 
-        private bool _cancelling;
-        public void CancelAction()
+        private void ResetAimLocomotion()
         {
-            if (!_isPlaying) return;
+            if (!_aimLocomotionMixer.IsValid()) return;
+            _aimLocomotionMixer.SetInputWeight(0, 1f);
+            _aimLocomotionMixer.SetInputWeight(1, 0f);
+            if (_aimLocomotionMixer.GetInput(1).IsValid()) _aimLocomotionMixer.DisconnectInput(1);
+        }
+
+        private void ClearRetainedBowMovement()
+        {
+            if (_retainedBowMovement == null) return;
+            ResetAimLocomotion();
+            _retainedBowMovement.Dispose();
+            _retainedBowMovement = null;
+        }
+
+        private bool _cancelling;
+        public void CancelAction(bool blendOut = false)
+        {
+            if (!_isPlaying) { ClearRetainedBowMovement(); return; }
             if (_activeWeapon?.Behaviour is RangedWeaponBehaviour) _activeCtx?.Combat?.CancelRangedAttack();
             _cancelling = true;
             StopCurrentAction();
@@ -293,6 +392,7 @@ namespace Duskborn.Gameplay.Equipment
             }
 
             StopCurrentAction();
+            ClearRetainedBowMovement();
 
             _activeSkill       = skill;
             _activeWeapon      = null;
@@ -309,21 +409,61 @@ namespace Duskborn.Gameplay.Equipment
 
             ApplyMask(data.PreserveLocomotion, _equippedActionMask);
             _clipPlayable = AnimationClipPlayable.Create(_graph, clip);
+            _clipPlayable.SetApplyFootIK(false);
             _clipPlayable.SetSpeed(data.BaseSpeed * _runtimeSpeedMultiplier);
             _layerMixer.ConnectInput(1, _clipPlayable, 0, 0f);
 
             DuskLog.Log(LogChannel.ActionBar, $"Skill anim '{clip.name}' for '{skill.name}'.");
         }
 
+        private void LateUpdate()
+        {
+            _bowPoseAnchor?.ApplyPose();
+#if UNITY_EDITOR
+            CaptureAnimationDiagnostics();
+#endif
+        }
+
         private void Update()
         {
-            if (!_isPlaying) return;
+            if (!_isPlaying)
+            {
+                if (_retainedBowMovement != null)
+                {
+                    if (_activeCtx?.Combat?.IsAiming != true) ClearRetainedBowMovement();
+                    else
+                    {
+                        _retainedBowMovement.Advance(Time.deltaTime, 1f,
+                            new Vector2(_controllerPlayable.GetFloat("VelocityX"), _controllerPlayable.GetFloat("VelocityY")));
+                        float weight = _controllerPlayable.GetBool("IsGrounded") ? 1f : 0f;
+                        _aimLocomotionMixer.SetInputWeight(0, 1f - weight);
+                        _aimLocomotionMixer.SetInputWeight(1, weight);
+                    }
+                }
+                return;
+            }
             if ((_activeCtx?.Stats != null && !_activeCtx.Stats.IsAlive) ||
                 (_activeCtx?.Caster is Duskborn.Gameplay.Enemies.EnemyBase enemy && !enemy.IsAlive))
             { CancelAction(); return; }
 
-            float clipLength = _activeClip.length;
-            float normalized = clipLength > 0f ? (float)(_clipPlayable.GetTime() / clipLength) : 1f;
+            float clipLength = _activeClip != null ? _activeClip.length : 1f;
+
+            if (_authoredBow != null)
+                _authoredBow.Advance(Time.deltaTime, _activeData.BaseSpeed * _runtimeSpeedMultiplier,
+                    new Vector2(_controllerPlayable.GetFloat("VelocityX"), _controllerPlayable.GetFloat("VelocityY")));
+
+            if (_authoredBow == null && _rangedAimAction && !_shotRequested && _clipPlayable.IsValid())
+            {
+                float holdTime = Mathf.Max(0f, _bowReleaseTime - 0.035f);
+                if (_clipPlayable.GetTime() >= holdTime)
+                {
+                    _clipPlayable.SetSpeed(0f);
+                    _clipPlayable.SetTime(holdTime);
+                }
+            }
+
+            float normalized = clipLength > 0f && _clipPlayable.IsValid()
+                ? (float)(ActionTime / clipLength) : 1f;
 
             // Smooth blend in at start, blend out at end.
             float blendInEnd    = Mathf.Min(BlendInTime  / clipLength, 0.5f);
@@ -335,12 +475,19 @@ namespace Duskborn.Gameplay.Equipment
                     ? Mathf.InverseLerp(1f, blendOutStart, normalized)
                     : 1f;
 
+            if (_authoredBow != null)
+            {
+                float movementWeight = _controllerPlayable.GetBool("IsGrounded") ? _blendWeight : 0f;
+                _aimLocomotionMixer.SetInputWeight(0, 1f - movementWeight);
+                _aimLocomotionMixer.SetInputWeight(1, movementWeight);
+                _bowPoseAnchor?.SetFacing(movementWeight > 0f);
+            }
             _layerMixer.SetInputWeight(1, _blendWeight);
+            _bowPoseAnchor?.SetWeight(_anchorBowPose && stabilizeBowPose ? _blendWeight : 0f);
 
             // Fire events whose threshold has been crossed this frame.
             if (_activeSkill != null)
             {
-                // Skill: Use() fires once at the first event threshold (or immediately if none).
                 if (!_skillFired)
                 {
                     bool ready = _sortedEvents.Length == 0 ||
@@ -359,7 +506,7 @@ namespace Duskborn.Gameplay.Equipment
                 }
             }
 
-            if (normalized >= 1f) StopCurrentAction();
+            if (normalized >= 1f || _authoredBow?.Clock.Phase == AuthoredBowClock.Stage.Complete) StopCurrentAction();
         }
     }
 }

@@ -67,7 +67,7 @@ namespace Duskborn.Editor
             var go = new GameObject("Test_CharacterUI");
             try
             {
-                var charUI = go.AddComponent<CharacterUIManager>();
+                var charUI = EditModeTestSupport.AddInitialized<CharacterUIManager>(go);
                 AssertTrue(CharacterUIManager.Instance == charUI, "CharacterUIManager.Instance deve apontar para a instância criada.");
                 AssertFalse(charUI.IsOpen, "Painel deve iniciar fechado.");
                 AssertTrue(charUI.LastClosedFrame == -1, "LastClosedFrame inicial deve ser -1.");
@@ -96,7 +96,7 @@ namespace Duskborn.Editor
                 camCtrl.SetRotationLocked(false);
                 AssertFalse(camCtrl.IsRotationLocked, "Câmera deve iniciar destravada.");
 
-                var charUI = go.AddComponent<CharacterUIManager>();
+                var charUI = EditModeTestSupport.AddInitialized<CharacterUIManager>(go);
                 charUI.Close();
 
                 charUI.Open();
@@ -203,7 +203,7 @@ namespace Duskborn.Editor
                 var equip = goPlayer.AddComponent<PlayerEquipmentContainer>();
                 var combat = goPlayer.AddComponent<PlayerCombat>();
 
-                var invUI = goInv.AddComponent<InventoryUIManager>();
+                var invUI = EditModeTestSupport.AddInventory(goInv);
 
                 // Configura um serviço mock de inventário
                 var grid = new InventoryGrid(4, 4);
@@ -274,9 +274,10 @@ namespace Duskborn.Editor
             try
             {
                 var menu = goMenu.AddComponent<InGameMenuController>();
-                var charUI = goChar.AddComponent<CharacterUIManager>();
+                var charUI = EditModeTestSupport.AddInitialized<CharacterUIManager>(goChar);
 
                 // Simula que o painel de personagem acabou de fechar neste frame
+                charUI.Open();
                 charUI.Close();
                 AssertTrue(charUI.LastClosedFrame == Time.frameCount, "LastClosedFrame deve registrar fechamento no frame atual.");
 

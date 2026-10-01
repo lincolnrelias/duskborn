@@ -87,7 +87,7 @@ namespace Duskborn.Gameplay.Equipment
 
             _pendingWeapon = candidate;
             if (_activeWeapon?.Behaviour is RangedWeaponBehaviour)
-                GetComponent<PlayerCombat>()?.CancelRangedAttack();
+                GetComponent<PlayerCombat>()?.CancelRangedAttack(true);
             var actionPlayer = GetComponent<WeaponActionPlayer>();
             if (actionPlayer != null && actionPlayer.CurrentWeapon?.Behaviour is RangedWeaponBehaviour)
                 actionPlayer.CancelAction();
@@ -118,7 +118,7 @@ namespace Duskborn.Gameplay.Equipment
                     var anim = animator != null ? animator : GetComponentInChildren<Animator>(true);
                     if (anim != null && anim.isHuman)
                     {
-                        var boneTransform = anim.GetBoneTransform(profile.Bone);
+                        var boneTransform = IronrootAppearance.EquipmentBone(anim, profile.Bone);
                         if (boneTransform != null) socket = boneTransform;
                     }
                 }

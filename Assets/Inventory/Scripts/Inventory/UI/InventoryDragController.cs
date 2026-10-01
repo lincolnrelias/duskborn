@@ -42,8 +42,6 @@ namespace InventorySystem.UI
             _panelBoundsRect = panelBoundsRect;
             _onDroppedOutside = onDroppedOutside;
             _dragIcon.raycastTarget = false;
-            _dragIcon.gameObject.SetActive(false);
-
             var canvasComp = _dragIcon.GetComponent<Canvas>();
             if (canvasComp == null)
             {
@@ -51,6 +49,7 @@ namespace InventorySystem.UI
             }
             canvasComp.overrideSorting = true;
             canvasComp.sortingOrder = 1000;
+            _dragIcon.gameObject.SetActive(false);
 
             var rt = _dragIcon.rectTransform;
             rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
@@ -143,6 +142,10 @@ namespace InventorySystem.UI
                 _dragIcon.color = Color.white;
                 _dragIcon.enabled = true;
                 _dragIcon.gameObject.SetActive(true);
+                // Resolve sorting after activation, including icons initially inactive in prefabs.
+                var dragCanvas = _dragIcon.GetComponent<Canvas>();
+                dragCanvas.overrideSorting = true;
+                dragCanvas.sortingOrder = 1000;
                 _dragIcon.rectTransform.SetAsLastSibling();
             }
             else

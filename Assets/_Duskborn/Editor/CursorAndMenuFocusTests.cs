@@ -46,7 +46,7 @@ namespace Duskborn.Editor
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[FAIL] {testMethod.Method.Name}: {ex.Message}");
+                Debug.LogError($"[FAIL] {testMethod.Method.Name}: {ex}");
             }
         }
 
@@ -65,7 +65,7 @@ namespace Duskborn.Editor
             var go = new GameObject("Test_GameHUD");
             try
             {
-                var hud = go.AddComponent<GameHUD>();
+                var hud = EditModeTestSupport.AddInitialized<GameHUD>(go);
                 AssertTrue(GameHUD.Instance == hud, "GameHUD.Instance deve apontar para a instância criada.");
 
                 hud.ShowStats = true;
@@ -85,7 +85,7 @@ namespace Duskborn.Editor
             var go = new GameObject("Test_HUD");
             try
             {
-                var hud = go.AddComponent<GameHUD>();
+                var hud = EditModeTestSupport.AddInitialized<GameHUD>(go);
                 hud.ShowStats = false;
                 AssertFalse(PlayerCameraController.IsAnyMenuOpen(), "Nenhum menu deve estar aberto inicialmente.");
 
@@ -106,10 +106,11 @@ namespace Duskborn.Editor
             var go = new GameObject("Test_InventoryUI");
             try
             {
-                var inv = go.AddComponent<InventoryUIManager>();
+                var inv = EditModeTestSupport.AddInventory(go);
                 AssertTrue(InventoryUIManager.Instance == inv, "InventoryUIManager.Instance deve apontar para a instância criada.");
                 AssertTrue(inv.LastClosedFrame == -1, "LastClosedFrame inicial deve ser -1.");
 
+                inv.Open();
                 inv.Close();
                 AssertTrue(inv.LastClosedFrame == Time.frameCount, "LastClosedFrame deve ser atualizado para Time.frameCount ao fechar.");
             }
@@ -121,13 +122,15 @@ namespace Duskborn.Editor
 
         private static void Test_CraftingUIManager_LastClosedFrameTracking()
         {
-            var go = new GameObject("Test_CraftingUI");
+            var go = new GameObject("Test_CraftingUI", typeof(Canvas));
             try
             {
-                var crafting = go.AddComponent<CraftingUIManager>();
+                var crafting = EditModeTestSupport.AddInitialized<CraftingUIManager>(go);
                 AssertTrue(CraftingUIManager.Instance == crafting, "CraftingUIManager.Instance deve apontar para a instância criada.");
                 AssertTrue(crafting.LastClosedFrame == -1, "LastClosedFrame inicial deve ser -1.");
 
+                var workbench = go.AddComponent<Duskborn.Gameplay.Crafting.Workbench>();
+                crafting.Open(workbench);
                 crafting.Close();
                 AssertTrue(crafting.LastClosedFrame == Time.frameCount, "LastClosedFrame deve ser atualizado ao fechar.");
             }
@@ -144,9 +147,10 @@ namespace Duskborn.Editor
             try
             {
                 var menu = goMenu.AddComponent<InGameMenuController>();
-                var inv = goInv.AddComponent<InventoryUIManager>();
+                var inv = EditModeTestSupport.AddInventory(goInv);
 
                 // Simula que o inventário acabou de fechar neste frame
+                inv.Open();
                 inv.Close();
                 AssertTrue(inv.LastClosedFrame == Time.frameCount, "Inventário deve registrar fechamento no frame atual.");
 
@@ -187,20 +191,26 @@ namespace Duskborn.Editor
         private static void Test_WhenMenuHidden_CursorDisappearsAndLocks()
         {
             var goMenu = new GameObject("Test_PauseMenu");
+            var goCamera = new GameObject("Test_MenuCamera");
+            var previousCamera = PlayerCameraController.LocalInstance;
             try
             {
+                var camera = goCamera.AddComponent<PlayerCameraController>();
+                PlayerCameraController.LocalInstance = camera;
                 var menu = goMenu.AddComponent<InGameMenuController>();
                 menu.OpenMenu();
-                AssertTrue(Cursor.lockState == CursorLockMode.None, "Cursor deve estar livre com o menu de pausa aberto.");
-                AssertTrue(Cursor.visible, "Cursor deve estar visível com o menu de pausa aberto.");
+                AssertTrue(menu.IsOpen && camera.IsRotationLocked, "Menu aberto deve bloquear rotação.");
+                EditModeTestSupport.AssertCursorRequested(camera, false);
 
                 menu.CloseMenu();
-                AssertTrue(Cursor.lockState == CursorLockMode.Locked, "Cursor deve sumir e travar ao fechar o menu de pausa.");
-                AssertFalse(Cursor.visible, "Cursor.visible deve ser false ao fechar o menu de pausa.");
+                AssertFalse(menu.IsOpen || camera.IsRotationLocked, "Menu fechado deve liberar rotação.");
+                EditModeTestSupport.AssertCursorRequested(camera, true);
             }
             finally
             {
                 UnityEngine.Object.DestroyImmediate(goMenu);
+                PlayerCameraController.LocalInstance = previousCamera;
+                UnityEngine.Object.DestroyImmediate(goCamera);
             }
         }
 
@@ -211,12 +221,12 @@ namespace Duskborn.Editor
             {
                 var cam = goCam.AddComponent<PlayerCameraController>();
                 cam.SetRotationLocked(true);
-                AssertTrue(Cursor.lockState == CursorLockMode.None, "Cursor deve estar livre quando a rotação da câmera está travada.");
-                AssertTrue(Cursor.visible, "Cursor deve estar visível quando a rotação da câmera está travada.");
+                AssertTrue(cam.IsRotationLocked, "Câmera deve bloquear rotação.");
+                EditModeTestSupport.AssertCursorRequested(cam, false);
 
                 cam.SetRotationLocked(false);
-                AssertTrue(Cursor.lockState == CursorLockMode.Locked, "Cursor deve travar e sumir quando a rotação da câmera é liberada.");
-                AssertFalse(Cursor.visible, "Cursor deve ficar invisível quando a rotação da câmera é liberada.");
+                AssertFalse(cam.IsRotationLocked, "Câmera deve liberar rotação.");
+                EditModeTestSupport.AssertCursorRequested(cam, true);
             }
             finally
             {

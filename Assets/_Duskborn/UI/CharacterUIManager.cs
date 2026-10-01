@@ -697,7 +697,7 @@ namespace Duskborn.UI
 
         private void SetupPreviewRig()
         {
-            if (_previewRig != null) return;
+            if (!Application.isPlaying || _previewRig != null) return;
 
             _previewRig = new GameObject("[CharacterPreviewRig]");
             _previewRig.transform.position = new Vector3(0f, -1000f, 0f);
@@ -1628,7 +1628,7 @@ namespace Duskborn.UI
 
         private void PlaySound(AudioClip clip)
         {
-            if (clip == null) return;
+            if (!Application.isPlaying || clip == null) return;
             if (AudioManager.Instance != null)
                 AudioManager.Instance.PlayAtPoint(clip, Camera.main != null ? Camera.main.transform.position : Vector3.zero, 1.0f);
             else

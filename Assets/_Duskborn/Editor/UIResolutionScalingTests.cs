@@ -214,8 +214,9 @@ namespace Duskborn.Editor
 
         private static void Test_CraftingUIManager_CanvasScalerScreenSpaceCheck()
         {
-            var worldCanvasGO = new GameObject("Test_WorldCanvas", typeof(Canvas)) { hideFlags = HideFlags.DontSave };
-            var screenCanvasGO = new GameObject("Test_ScreenCanvas", typeof(Canvas)) { hideFlags = HideFlags.DontSave };
+            // FindObjectsByType intentionally excludes objects marked DontSave.
+            var worldCanvasGO = new GameObject("Test_WorldCanvas", typeof(Canvas));
+            var screenCanvasGO = new GameObject("Test_ScreenCanvas", typeof(Canvas));
             var craftingManagerGO = new GameObject("Test_CraftingManager", typeof(CraftingUIManager)) { hideFlags = HideFlags.DontSave };
 
             try
@@ -278,9 +279,13 @@ namespace Duskborn.Editor
                 var craftingRoot = manager.CraftingRoot;
                 AssertTrue(craftingRoot != null, "A raiz da interface de Crafting (CraftingFrame) deve ser instanciada.");
 
-                // Valida dimensões contidas na janela (máximo 380 de largura e 370 de altura)
-                AssertApproximately(craftingRoot.sizeDelta.x, 380f, 1f, "Largura da moldura de crafting deve ser 380 unidades de canvas.");
-                AssertApproximately(craftingRoot.sizeDelta.y, 365f, 1f, "Altura da moldura de crafting deve ser 365 unidades de canvas.");
+                // The detailed two-column layout is scaled down as a whole.
+                AssertApproximately(craftingRoot.sizeDelta.x, 460f, 1f, "Largura interna deve ser 460.");
+                AssertApproximately(craftingRoot.sizeDelta.y, 420f, 1f, "Altura interna deve ser 420.");
+                AssertApproximately(craftingRoot.localScale.x, 0.67f, 0.001f, "Escala do painel deve ser 0.67.");
+                AssertApproximately(craftingRoot.localScale.y, 0.67f, 0.001f, "Escala vertical deve ser 0.67.");
+                float displayedHeight = craftingRoot.sizeDelta.y * craftingRoot.localScale.y;
+                float displayedWidth = craftingRoot.sizeDelta.x * craftingRoot.localScale.x;
 
                 // Valida que em qualquer resolução padrão (16:9, 16:10, 4:3) o painel não transborda a tela verticalmente
                 Vector2[] testResolutions = new Vector2[]
@@ -301,20 +306,19 @@ namespace Duskborn.Editor
                     float canvasH = res.y / scale;
 
                     // A altura do painel não pode exceder 85% da altura visível da tela
-                    float heightRatio = craftingRoot.sizeDelta.y / canvasH;
+                    float heightRatio = displayedHeight / canvasH;
                     AssertTrue(heightRatio <= 0.85f,
                         $"A janela de crafting ocupa {heightRatio * 100f:F1}% da altura da tela na resolução {res.x}x{res.y}, o que é excessivo (limite: 85%).");
 
                     // Valida margem livre no topo e na base (mínimo de 60 unidades totais de canvas)
-                    float remainingMarginY = canvasH - craftingRoot.sizeDelta.y;
+                    float remainingMarginY = canvasH - displayedHeight;
                     AssertTrue(remainingMarginY >= 60f,
                         $"Margem vertical insuficiente ({remainingMarginY} units) na resolução {res.x}x{res.y}.");
                 }
 
                 // Valida posicionamento horizontal lado a lado (modo duplo com inventário)
-                // Crafting posicionado à esquerda em x = -195, Inventário à direita em x = +195
-                float craftingLeft = -195f - (craftingRoot.sizeDelta.x * 0.5f);
-                float craftingRight = -195f + (craftingRoot.sizeDelta.x * 0.5f);
+                float craftingLeft = craftingRoot.anchoredPosition.x - displayedWidth * 0.5f;
+                float craftingRight = craftingRoot.anchoredPosition.x + displayedWidth * 0.5f;
                 AssertTrue(craftingLeft >= -400f, "A borda esquerda da janela de crafting não pode sair da tela (-400).");
                 AssertTrue(craftingRight <= 0f, "A borda direita da janela de crafting não pode cruzar o centro da tela (0).");
             }
@@ -385,6 +389,8 @@ namespace Duskborn.Editor
                 var controller = new InventoryDragController(service, presenter, canvasGO.GetComponent<Canvas>(), image, 0.1f);
                 try
                 {
+                    // Nested canvas sorting is resolved when the drag icon becomes active.
+                    image.gameObject.SetActive(true);
                     var canvasComp = image.GetComponent<Canvas>();
                     AssertTrue(canvasComp != null, "DragIcon deve possuir um componente Canvas dedicado.");
                     AssertTrue(canvasComp.overrideSorting, "Canvas do DragIcon deve ter overrideSorting ativado.");

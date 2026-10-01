@@ -1,0 +1,77 @@
+{
+  "heightMeters": 1.819,
+  "soleHeight": 0.015,
+  "bones": 53,
+  "meshes": [
+    {
+      "name": "IR_Legs",
+      "vertices": 195,
+      "triangles": 380,
+      "materials": [
+        "IR_Trousers"
+      ],
+      "uv": 1,
+      "unweightedVertices": 0
+    },
+    {
+      "name": "IR_Boots",
+      "vertices": 300,
+      "triangles": 568,
+      "materials": [
+        "IR_Leather",
+        "IR_Hair",
+        "IR_Iron"
+      ],
+      "uv": 1,
+      "unweightedVertices": 0
+    },
+    {
+      "name": "IR_Torso",
+      "vertices": 550,
+      "triangles": 1032,
+      "materials": [
+        "IR_Shirt",
+        "IR_Leather",
+        "IR_Iron",
+        "IR_Skin",
+        "IR_Ochre"
+      ],
+      "uv": 1,
+      "unweightedVertices": 0
+    },
+    {
+      "name": "IR_ArmsHands",
+      "vertices": 800,
+      "triangles": 1528,
+      "materials": [
+        "IR_Skin"
+      ],
+      "uv": 1,
+      "unweightedVertices": 0
+    },
+    {
+      "name": "IR_Head",
+      "vertices": 400,
+      "triangles": 744,
+      "materials": [
+        "IR_Skin",
+        "IR_Eyes",
+        "IR_Pupil",
+        "IR_Hair",
+        "IR_Lip"
+      ],
+      "uv": 1,
+      "unweightedVertices": 0
+    },
+    {
+      "name": "IR_Hair",
+      "vertices": 128,
+      "triangles": 220,
+      "materials": [
+        "IR_Hair"
+      ],
+      "uv": 1,
+      "unweightedVertices": 0
+    }
+  ]
+}

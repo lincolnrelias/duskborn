@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Position = 0)]
-    [ValidateSet('help', 'compile', 'validate', 'test', 'test-warden', 'build-windows', 'build-warden', 'clear-terrain', 'all')]
+    [ValidateSet('help', 'compile', 'validate', 'test', 'test-warden', 'build-windows', 'build-warden', 'build-ironroot', 'test-ironroot', 'clear-terrain', 'all')]
     [string]$Command = 'help',
 
     [string]$UnityPath,
@@ -25,6 +25,8 @@ Unity CLI workflow
   .\Tools\unity.ps1 test-warden
   .\Tools\unity.ps1 build-windows
   .\Tools\unity.ps1 build-warden
+  .\Tools\unity.ps1 build-ironroot
+  .\Tools\unity.ps1 test-ironroot
   .\Tools\unity.ps1 clear-terrain
   .\Tools\unity.ps1 all
 
@@ -136,6 +138,16 @@ if ($Command -eq 'help') {
 $script:resolvedUnityPath = Resolve-UnityExecutable
 
 switch ($Command) {
+    'build-ironroot' {
+        Invoke-UnityTask -Name 'build-ironroot' `
+            -TaskArguments @('-quit', '-executeMethod', 'Duskborn.Editor.DuskbornCli.BuildIronroot') `
+            -SuccessMarker '[Ironroot] Player build succeeded.'
+    }
+    'test-ironroot' {
+        Invoke-UnityTask -Name 'test-ironroot' `
+            -TaskArguments @('-quit', '-executeMethod', 'Duskborn.Editor.DuskbornCli.TestIronroot') `
+            -SuccessMarker '[Ironroot] Player validation succeeded.'
+    }
     'test-warden' {
         Invoke-UnityTask -Name 'test-warden' `
             -TaskArguments @('-quit', '-executeMethod', 'Duskborn.Editor.DuskbornCli.TestHollowWarden') `

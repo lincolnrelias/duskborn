@@ -9,6 +9,7 @@ namespace Duskborn.Gameplay.Equipment
         public Material cordMaterial;
         private WeaponActionPlayer actionPlayer;
         private GameObject arrow;
+        private GameObject activeArrowPrefab;
         private LineRenderer cord;
 
         private void Start()
@@ -22,19 +23,28 @@ namespace Duskborn.Gameplay.Equipment
             cord.positionCount = 3;
             cord.widthMultiplier = 0.005f;
             cord.sharedMaterial = cordMaterial;
-            if (arrowPrefab != null) arrow = Instantiate(arrowPrefab, transform);
         }
 
         private void LateUpdate()
         {
             if (cord == null || actionPlayer == null) return;
             bool playing = actionPlayer.IsPlaying && actionPlayer.CurrentWeapon?.Behaviour is RangedWeaponBehaviour;
-            float release = 0.67418647f;
-            if (playing && RangedWeaponBehaviour.TryGetTiming(actionPlayer.CurrentWeapon.Actions, out float seconds, out float duration))
-                release = seconds / Mathf.Max(duration, 0.001f);
-            float time = actionPlayer.NormalizedTime;
-            bool drawing = playing && time < release;
-            float pull = drawing ? Mathf.SmoothStep(0f, 0.27f, time / Mathf.Max(release, 0.001f)) : 0f;
+            bool drawing = playing && actionPlayer.IsDrawingBow;
+            var projectile = (actionPlayer.CurrentWeapon?.Behaviour as RangedWeaponBehaviour)?.projectile;
+            var visualPrefab = projectile != null ? projectile.visualPrefab : arrowPrefab;
+            if (activeArrowPrefab != visualPrefab)
+            {
+                if (arrow != null)
+                {
+                    arrow.SetActive(false);
+                    Destroy(arrow);
+                }
+                activeArrowPrefab = visualPrefab;
+                arrow = visualPrefab != null ? Instantiate(visualPrefab, transform) : null;
+            }
+            if (arrow != null && projectile != null) projectile.ApplyVisualScale(arrow.transform);
+            else if (arrow != null && visualPrefab != null) arrow.transform.localScale = visualPrefab.transform.localScale;
+            float pull = drawing ? Mathf.SmoothStep(0f, 0.27f, actionPlayer.RangedDrawProgress) : 0f;
             cord.SetPosition(0, new Vector3(0, -0.68f, -0.22f));
             cord.SetPosition(1, new Vector3(0, 0, -0.22f - pull));
             cord.SetPosition(2, new Vector3(0, 0.68f, -0.22f));

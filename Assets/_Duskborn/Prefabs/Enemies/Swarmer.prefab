@@ -290,7 +290,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584109795488231732
+  _initializedTimestamp: -8584109262639322094
 --- !u!114 &6069308860891105275
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -471,6 +471,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Enemies.EnemyRagdoll
   _animator: {fileID: 7111733941174250581}
   _impulseScale: 80
+  _settleDuration: 2.5
 --- !u!1 &8476000493214907407
 GameObject:
   m_ObjectHideFlags: 0

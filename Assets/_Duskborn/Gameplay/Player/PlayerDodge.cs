@@ -36,6 +36,7 @@ namespace Duskborn.Gameplay.Player
         private System.Action _onDodge;
 
         public bool IsRolling => _rollTimer > 0f;
+        public bool IsRecovering => IsRolling || _facingTimer > 0f;
 
         private void Awake()
         {
@@ -89,6 +90,13 @@ namespace Duskborn.Gameplay.Player
         private void TryDodge()
         {
             if (!IsOwner || !_stats.IsAlive || IsRolling || _cooldownTimer > 0f || !_cc.isGrounded) return;
+            if (PlayerCameraController.IsAnyMenuOpen() ||
+                Duskborn.Gameplay.Building.BuildingController.BlocksGameplay) return;
+
+            // Cancel the upper-body overlay before disabling locomotion: cancellation
+            // restores input, and must not undo the dodge's movement lock.
+            GetComponent<PlayerCombat>()?.InterruptRangedAimForDodge();
+            GetComponent<Duskborn.Gameplay.Equipment.WeaponActionPlayer>()?.CancelAction();
 
             _rollDir       = _controller.GetMoveDirectionWorld();
             _rollTimer     = dodgeDuration;

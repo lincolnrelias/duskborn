@@ -11,6 +11,14 @@ namespace Duskborn.Gameplay.Equipment
         public ProjectileDefinition projectile;
         [Min(1f)] public float preferredRange = 15f;
 
+        [Header("Projectile Spawn Override")]
+        [Tooltip("When enabled, overrides the player's spawn offset for this specific weapon.")]
+        public bool useCustomSpawnOffset;
+        [Tooltip("Position offset relative to the player (X = Right, Y = Up, Z = Forward).")]
+        public Vector3 spawnPositionOffset = new Vector3(0f, 1.3f, 0f);
+        [Tooltip("Rotation offset in Euler angles (Pitch, Yaw, Roll) relative to player or aim direction.")]
+        public Vector3 spawnRotationOffset = Vector3.zero;
+
         public override void OnActionEvent(WeaponEventType type, int actionIndex, CombatContext ctx)
         {
             if (type != WeaponEventType.SpawnProjectile || actionIndex != 0 || projectile == null) return;

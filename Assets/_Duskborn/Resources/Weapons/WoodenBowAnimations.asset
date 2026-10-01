@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_Script: {fileID: 11500000, guid: 37cd049f61bb44fc9a533be8e57bf650, type: 3}
+  m_Name: WoodenBowAnimations
+  load: {fileID: 7400002, guid: 6298c5d5d86d2ab4ebb14f617495f1c9, type: 3}
+  hold: {fileID: 7400004, guid: 6298c5d5d86d2ab4ebb14f617495f1c9, type: 3}
+  release: {fileID: 7400006, guid: 6298c5d5d86d2ab4ebb14f617495f1c9, type: 3}
+  idle: {fileID: 7400002, guid: a3422ad278cd9a94aa3da8e6bff9deea, type: 3}
+  forward: {fileID: 7400000, guid: 46d5b47e60163f148ada32ff97c7aa32, type: 3}
+  backward: {fileID: 7400010, guid: 46d5b47e60163f148ada32ff97c7aa32, type: 3}
+  left: {fileID: 7400000, guid: 746837b598388314184f258020b9d9e3, type: 3}
+  right: {fileID: 7400004, guid: 746837b598388314184f258020b9d9e3, type: 3}

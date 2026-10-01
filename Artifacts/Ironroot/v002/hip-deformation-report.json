@@ -1,0 +1,174 @@
+{
+  "v001": {
+    "nonManifoldTrouserEdges": 0,
+    "trouserIslands": 2,
+    "samples": [
+      {
+        "pose": "rest",
+        "shirtTrouserTriangleCrossings": 192
+      },
+      {
+        "pose": "stride_00",
+        "shirtTrouserTriangleCrossings": 192
+      },
+      {
+        "pose": "stride_01",
+        "shirtTrouserTriangleCrossings": 212
+      },
+      {
+        "pose": "stride_02",
+        "shirtTrouserTriangleCrossings": 221
+      },
+      {
+        "pose": "stride_03",
+        "shirtTrouserTriangleCrossings": 211
+      },
+      {
+        "pose": "stride_04",
+        "shirtTrouserTriangleCrossings": 204
+      },
+      {
+        "pose": "stride_05",
+        "shirtTrouserTriangleCrossings": 211
+      },
+      {
+        "pose": "stride_06",
+        "shirtTrouserTriangleCrossings": 221
+      },
+      {
+        "pose": "stride_07",
+        "shirtTrouserTriangleCrossings": 212
+      },
+      {
+        "pose": "stride_08",
+        "shirtTrouserTriangleCrossings": 192
+      },
+      {
+        "pose": "stride_09",
+        "shirtTrouserTriangleCrossings": 201
+      },
+      {
+        "pose": "stride_10",
+        "shirtTrouserTriangleCrossings": 209
+      },
+      {
+        "pose": "stride_11",
+        "shirtTrouserTriangleCrossings": 207
+      },
+      {
+        "pose": "stride_12",
+        "shirtTrouserTriangleCrossings": 198
+      },
+      {
+        "pose": "stride_13",
+        "shirtTrouserTriangleCrossings": 207
+      },
+      {
+        "pose": "stride_14",
+        "shirtTrouserTriangleCrossings": 209
+      },
+      {
+        "pose": "stride_15",
+        "shirtTrouserTriangleCrossings": 201
+      },
+      {
+        "pose": "high_step",
+        "shirtTrouserTriangleCrossings": 209
+      },
+      {
+        "pose": "crouch",
+        "shirtTrouserTriangleCrossings": 211
+      },
+      {
+        "pose": "wide_stance",
+        "shirtTrouserTriangleCrossings": 250
+      }
+    ]
+  },
+  "v002": {
+    "nonManifoldTrouserEdges": 0,
+    "trouserIslands": 1,
+    "samples": [
+      {
+        "pose": "rest",
+        "shirtTrouserTriangleCrossings": 0
+      },
+      {
+        "pose": "stride_00",
+        "shirtTrouserTriangleCrossings": 0
+      },
+      {
+        "pose": "stride_01",
+        "shirtTrouserTriangleCrossings": 0
+      },
+      {
+        "pose": "stride_02",
+        "shirtTrouserTriangleCrossings": 0
+      },
+      {
+        "pose": "stride_03",
+        "shirtTrouserTriangleCrossings": 0
+      },
+      {
+        "pose": "stride_04",
+        "shirtTrouserTriangleCrossings": 0
+      },
+      {
+        "pose": "stride_05",
+        "shirtTrouserTriangleCrossings": 0
+      },
+      {
+        "pose": "stride_06",
+        "shirtTrouserTriangleCrossings": 0
+      },
+      {
+        "pose": "stride_07",
+        "shirtTrouserTriangleCrossings": 0
+      },
+      {
+        "pose": "stride_08",
+        "shirtTrouserTriangleCrossings": 0
+      },
+      {
+        "pose": "stride_09",
+        "shirtTrouserTriangleCrossings": 0
+      },
+      {
+        "pose": "stride_10",
+        "shirtTrouserTriangleCrossings": 0
+      },
+      {
+        "pose": "stride_11",
+        "shirtTrouserTriangleCrossings": 0
+      },
+      {
+        "pose": "stride_12",
+        "shirtTrouserTriangleCrossings": 0
+      },
+      {
+        "pose": "stride_13",
+        "shirtTrouserTriangleCrossings": 0
+      },
+      {
+        "pose": "stride_14",
+        "shirtTrouserTriangleCrossings": 0
+      },
+      {
+        "pose": "stride_15",
+        "shirtTrouserTriangleCrossings": 0
+      },
+      {
+        "pose": "high_step",
+        "shirtTrouserTriangleCrossings": 0
+      },
+      {
+        "pose": "crouch",
+        "shirtTrouserTriangleCrossings": 0
+      },
+      {
+        "pose": "wide_stance",
+        "shirtTrouserTriangleCrossings": 0
+      }
+    ]
+  }
+}

@@ -143,8 +143,8 @@ namespace Duskborn.Gameplay.Loot
                 return;
             }
 
-            // 2. Itens Verdes (Incomum): Apenas o shader com outline verde e gradiente de onda animada
-            if (rarity == ItemRarity.Uncommon)
+            // 2. Itens Verdes e Azuis (Incomum e Raro): Apenas o shader com outline e gradiente de onda animada (sem feixe/raio pro céu)
+            if (rarity == ItemRarity.Uncommon || rarity == ItemRarity.Rare)
             {
                 CleanupLight();
                 CleanupBeam();
@@ -162,7 +162,7 @@ namespace Duskborn.Gameplay.Loot
                 return;
             }
 
-            // 3. Azul e acima (Raro, Épico, Lendário):
+            // 3. Épico e acima (Épico, Lendário, Amaldiçoado):
             // Mantêm o feixe vertical que vai aos céus, halo no chão, luz pontual, partículas
             // e TAMBÉM recebem o shader de outline + onda em suas respectivas cores!
             EnsureVfxRoot();
@@ -174,22 +174,11 @@ namespace Duskborn.Gameplay.Loot
             SetupParticles(rarity, tierColor);
             SetupWaveOverlay(rarity);
 
-            if (!ItemTierHelper.ShouldFloatInAir(rarity))
+            _isSettled = false;
+            if (_rb != null)
             {
-                _isSettled = false;
-                if (_rb != null)
-                {
-                    _rb.isKinematic = false;
-                    _rb.useGravity = true;
-                }
-            }
-            else
-            {
-                _isSettled = false;
-                if (_rb != null)
-                {
-                    _rb.useGravity = false;
-                }
+                _rb.isKinematic = false;
+                _rb.useGravity = true;
             }
         }
 
@@ -197,7 +186,7 @@ namespace Duskborn.Gameplay.Loot
         {
             if (_pointLight != null)
             {
-                Destroy(_pointLight.gameObject);
+                DestroyVisual(_pointLight.gameObject);
                 _pointLight = null;
             }
         }
@@ -206,13 +195,13 @@ namespace Duskborn.Gameplay.Loot
         {
             if (_beamObject != null)
             {
-                Destroy(_beamObject);
+                DestroyVisual(_beamObject);
                 _beamObject = null;
                 _beamTransform = null;
             }
             if (_beamMesh != null)
             {
-                Destroy(_beamMesh);
+                DestroyVisual(_beamMesh);
                 _beamMesh = null;
             }
         }
@@ -221,13 +210,13 @@ namespace Duskborn.Gameplay.Loot
         {
             if (_haloObject != null)
             {
-                Destroy(_haloObject);
+                DestroyVisual(_haloObject);
                 _haloObject = null;
                 _haloTransform = null;
             }
             if (_haloMesh != null)
             {
-                Destroy(_haloMesh);
+                DestroyVisual(_haloMesh);
                 _haloMesh = null;
             }
         }
@@ -236,7 +225,7 @@ namespace Duskborn.Gameplay.Loot
         {
             if (_particles != null)
             {
-                Destroy(_particles.gameObject);
+                DestroyVisual(_particles.gameObject);
                 _particles = null;
             }
         }
@@ -305,7 +294,7 @@ namespace Duskborn.Gameplay.Loot
             for (int i = 0; i < _overlayObjects.Count; i++)
             {
                 if (_overlayObjects[i] != null)
-                    Destroy(_overlayObjects[i]);
+                    DestroyVisual(_overlayObjects[i]);
             }
             _overlayObjects.Clear();
         }
@@ -389,7 +378,7 @@ namespace Duskborn.Gameplay.Loot
             else
             {
                 var mf = _beamObject.GetComponent<MeshFilter>();
-                if (_beamMesh != null) Destroy(_beamMesh);
+                if (_beamMesh != null) DestroyVisual(_beamMesh);
                 _beamMesh = CreateBeamMesh(rarity, tierColor);
                 mf.sharedMesh = _beamMesh;
             }
@@ -487,7 +476,7 @@ namespace Duskborn.Gameplay.Loot
             else
             {
                 var mf = _haloObject.GetComponent<MeshFilter>();
-                if (_haloMesh != null) Destroy(_haloMesh);
+                if (_haloMesh != null) DestroyVisual(_haloMesh);
                 _haloMesh = CreateHaloMesh(rarity, tierColor);
                 mf.sharedMesh = _haloMesh;
             }
@@ -593,9 +582,29 @@ namespace Duskborn.Gameplay.Loot
             }
         }
 
+        public Vector3 GetVisualCenter()
+        {
+            var renderers = GetComponentsInChildren<Renderer>(true);
+            foreach (var r in renderers)
+            {
+                if (r == null || !r.enabled) continue;
+                if (r.name.Contains("Diablo") || r.name.Contains("Halo") || r.name.Contains("Overlay") || r.name.Contains("VFX") || r.name.Contains("DropPointLight")) continue;
+                if (_vfxRoot != null && r.transform.IsChildOf(_vfxRoot.transform)) continue;
+                return r.bounds.center;
+            }
+
+            var col = GetComponentInChildren<Collider>();
+            if (col != null)
+            {
+                return col.bounds.center;
+            }
+            return transform.position;
+        }
+
         private void CheckGround()
         {
-            if (Physics.Raycast(transform.position + Vector3.up * 0.4f, Vector3.down, out RaycastHit hit, 2.5f, ~0, QueryTriggerInteraction.Ignore))
+            int layerMask = ~LayerMask.GetMask("Resource", "Ignore Raycast");
+            if (Physics.Raycast(transform.position + Vector3.up * 0.25f, Vector3.down, out RaycastHit hit, 60f, layerMask, QueryTriggerInteraction.Ignore))
             {
                 _groundNormal = hit.normal;
                 _groundPoint  = hit.point;
@@ -623,8 +632,10 @@ namespace Duskborn.Gameplay.Loot
             _beamYaw = (_beamYaw + 18f * Time.deltaTime) % 360f;
             _haloYaw = (_haloYaw - 12f * Time.deltaTime) % 360f;
 
-            // Raiz global isolada sincronizada com a posição do item, mantendo escala limpa (1, 1, 1)
-            _vfxRoot.transform.position = transform.position;
+            Vector3 visualCenter = GetVisualCenter();
+
+            // Raiz global isolada sincronizada com o centro geométrico do item
+            _vfxRoot.transform.position = visualCenter;
             _vfxRoot.transform.rotation = Quaternion.identity;
             _vfxRoot.transform.localScale = Vector3.one;
 
@@ -643,21 +654,23 @@ namespace Duskborn.Gameplay.Loot
                 _nextGroundCheckTime = time + 0.15f;
             }
 
-            // O FEIXE SEMPRE APONTA RIGOROSAMENTE PARA O CÉU (Vector3.up),
-            // completamente imune a inclinações do Rigidbody ou do terreno.
+            // O FEIXE SEMPRE PARTE RIGOROSAMENTE DO CENTRO VISUAL DO OBJETO PARA O CÉU (Vector3.up),
+            // perfeitamente alinhado em X, Y e Z com o centro do modelo 3D.
             if (_beamTransform != null)
             {
-                _beamTransform.position = transform.position;
+                _beamTransform.position = visualCenter;
                 _beamTransform.rotation = Quaternion.Euler(0f, _beamYaw, 0f);
 
                 float beamPulse = (1f + 0.04f * Mathf.Sin(time * 2.8f + _pulseOffset)) * dropSpike;
                 _beamTransform.localScale = new Vector3(beamPulse, 1f, beamPulse);
             }
 
-            // O HALO REPOUSA PLANO NO TERRENO (acompanhando a inclinação do solo)
+            // O HALO REPOUSA PLANO NO TERRENO diretamente abaixo do centro do objeto
             if (_haloTransform != null)
             {
-                Vector3 haloPos = _hasGroundHit ? _groundPoint + _groundNormal * 0.015f : transform.position + Vector3.up * 0.02f;
+                Vector3 haloPos = _hasGroundHit
+                    ? new Vector3(visualCenter.x, _groundPoint.y + _groundNormal.y * 0.015f, visualCenter.z)
+                    : new Vector3(visualCenter.x, transform.position.y + 0.02f, visualCenter.z);
                 _haloTransform.position = haloPos;
                 Quaternion slopeRot = Quaternion.FromToRotation(Vector3.up, _groundNormal);
                 _haloTransform.rotation = slopeRot * Quaternion.Euler(0f, _haloYaw, 0f);
@@ -666,10 +679,10 @@ namespace Duskborn.Gameplay.Loot
                 _haloTransform.localScale = new Vector3(haloPulse, 1f, haloPulse);
             }
 
-            // Luz suave ("dim light")
+            // Luz suave ("dim light") posicionada no centro do objeto
             if (_pointLight != null)
             {
-                _pointLight.transform.position = transform.position + Vector3.up * 0.15f;
+                _pointLight.transform.position = visualCenter;
                 float pulse = 1f + 0.12f * Mathf.Sin(time * 2.6f + _pulseOffset);
                 _pointLight.intensity = _baseIntensity * pulse * dropSpike;
             }
@@ -678,7 +691,6 @@ namespace Duskborn.Gameplay.Loot
         private void UpdateIdleHover(float time)
         {
             // Apenas itens de raridade Épica ou superior (Épico, Lendário) ficam flutuando no ar.
-            // Os demais (Comum, Incomum e Raro) caem no chão normalmente sob física e gravidade.
             if (!ItemTierHelper.ShouldFloatInAir(currentRarity))
             {
                 return;
@@ -687,44 +699,52 @@ namespace Duskborn.Gameplay.Loot
             // Épicos e Lendários que ficam no ar giram continuamente ao longo do tempo enquanto suspensos
             transform.Rotate(Vector3.up, 38f * Time.deltaTime, Space.World);
 
+            float hoverHeight = ItemTierHelper.GetHoverHeight(currentRarity);
+            CheckGround();
+            float targetHoverY = _hasGroundHit
+                ? _groundPoint.y + hoverHeight
+                : transform.position.y;
+
             if (!_isSettled)
             {
                 if (_rb != null)
                 {
+                    // Transiciona suavemente quando desce até a altura de flutuação,
+                    // quando a velocidade cai próximo a zero ou após um tempo limite
+                    bool reachedHoverHeight = _hasGroundHit && transform.position.y <= (targetHoverY + 0.15f) && _rb.linearVelocity.y <= 0.2f;
                     bool isSlow = _rb.linearVelocity.sqrMagnitude < 0.04f;
-                    bool timeout = (time - _spawnTime) > 0.5f;
+                    bool timeout = (time - _spawnTime) > 1.2f;
 
-                    if (isSlow || timeout)
+                    if (reachedHoverHeight || isSlow || timeout)
                     {
                         _isSettled = true;
                         _rb.linearVelocity = Vector3.zero;
                         _rb.angularVelocity = Vector3.zero;
                         _rb.isKinematic = true;
                         _rb.useGravity = false;
-                        CheckGround();
-                        float hoverY = _hasGroundHit
-                            ? _groundPoint.y + ItemTierHelper.GetHoverHeight(currentRarity)
-                            : transform.position.y;
-                        _settledPosition = new Vector3(transform.position.x, hoverY, transform.position.z);
+                        _settledPosition = new Vector3(transform.position.x, targetHoverY, transform.position.z);
                     }
                 }
                 else
                 {
                     _isSettled = true;
-                    CheckGround();
-                    float hoverY = _hasGroundHit
-                        ? _groundPoint.y + ItemTierHelper.GetHoverHeight(currentRarity)
-                        : transform.position.y;
-                    _settledPosition = new Vector3(transform.position.x, hoverY, transform.position.z);
+                    _settledPosition = new Vector3(transform.position.x, targetHoverY, transform.position.z);
                 }
             }
 
             if (_isSettled)
             {
-                // Levitação suave senoidal no ar
+                // Levitação suave senoidal no ar ancorada à altura do solo
                 float bobY = Mathf.Sin((time + _pulseOffset) * 2.2f) * 0.04f;
-                transform.position = _settledPosition + Vector3.up * bobY;
+                Vector3 desiredPos = new Vector3(_settledPosition.x, targetHoverY + bobY, _settledPosition.z);
+                transform.position = Vector3.MoveTowards(transform.position, desiredPos, 3.0f * Time.deltaTime);
             }
+        }
+
+        private static void DestroyVisual(UnityEngine.Object visual)
+        {
+            if (Application.isPlaying) Destroy(visual);
+            else DestroyImmediate(visual);
         }
 
         private void OnDestroy()
@@ -734,7 +754,7 @@ namespace Duskborn.Gameplay.Loot
             CleanupHalo();
             CleanupParticles();
             ClearWaveOverlays();
-            if (_vfxRoot != null) Destroy(_vfxRoot);
+            if (_vfxRoot != null) DestroyVisual(_vfxRoot);
         }
     }
 }

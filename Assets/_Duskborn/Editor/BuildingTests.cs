@@ -134,7 +134,8 @@ namespace Duskborn.Editor
                     var visual = BuildingWorld.CreateVisual(d);
                     try
                     {
-                        Check(visual.GetComponentsInChildren<MonoBehaviour>().Length == 0 && visual.GetComponentsInChildren<Collider>().All(c => !c.enabled), d.id + " inert preview", ref passed);
+                        // The station's visual animator is allowed; gameplay and network scripts are not.
+                        Check(visual.GetComponentsInChildren<MonoBehaviour>(true).All(b => b is Duskborn.Gameplay.Crafting.MoonwellStationAnimator) && visual.GetComponentsInChildren<Collider>(true).All(c => !c.enabled), d.id + " inert preview", ref passed);
                         Check(visual.GetComponentsInChildren<Renderer>().Length > 0, d.id + " preview graphics", ref passed);
                     }
                     finally { UnityEngine.Object.DestroyImmediate(visual); }

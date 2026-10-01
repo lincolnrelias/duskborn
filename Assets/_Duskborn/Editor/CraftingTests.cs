@@ -72,8 +72,8 @@ namespace Duskborn.Editor
             if (recipe.Ingredients == null || recipe.Ingredients.Count != 2)
                 throw new Exception("Recipe_StoneAxe deve conter exatamente 2 ingredientes (Madeira e Pedra).");
 
-            var woodIng = FindIngredient(recipe, "wood");
-            var stoneIng = FindIngredient(recipe, "stone");
+            var woodIng = FindIngredient(recipe, "material_wood");
+            var stoneIng = FindIngredient(recipe, "material_stone");
 
             if (woodIng.amount != 5 || stoneIng.amount != 5)
                 throw new Exception($"Quantidades invalidas de ingredientes: Wood={woodIng.amount}, Stone={stoneIng.amount}");
@@ -102,8 +102,8 @@ namespace Duskborn.Editor
             if (recipe.Ingredients == null || recipe.Ingredients.Count != 2)
                 throw new Exception("Recipe_StonePickaxe deve conter exatamente 2 ingredientes (Madeira e Pedra).");
 
-            var woodIng = FindIngredient(recipe, "wood");
-            var stoneIng = FindIngredient(recipe, "stone");
+            var woodIng = FindIngredient(recipe, "material_wood");
+            var stoneIng = FindIngredient(recipe, "material_stone");
 
             if (woodIng.amount != 5 || stoneIng.amount != 5)
                 throw new Exception($"Quantidades invalidas de ingredientes: Wood={woodIng.amount}, Stone={stoneIng.amount}");
@@ -524,9 +524,14 @@ namespace Duskborn.Editor
 
         private static void SetPrivateField(object target, string fieldName, object value)
         {
-            var field = target.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public);
-            if (field != null)
+            for (var type = target.GetType(); type != null; type = type.BaseType)
+            {
+                var field = type.GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
+                if (field == null) continue;
                 field.SetValue(target, value);
+                return;
+            }
+            throw new MissingFieldException(target.GetType().FullName, fieldName);
         }
     }
 }

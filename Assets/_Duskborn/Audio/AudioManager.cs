@@ -16,6 +16,8 @@ namespace Duskborn.Audio
         {
             get
             {
+                // Awake creates this runtime service's sources; edit-mode inspection must not instantiate it.
+                if (!Application.isPlaying) return null;
                 if (_instance == null)
                 {
                     _instance = FindAnyObjectByType<AudioManager>();

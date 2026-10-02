@@ -383,7 +383,9 @@ namespace Duskborn.Gameplay.Enemies
         }
 
         // Knockback slide + attack interruption while staggered. Server only.
-        private void TickStagger()
+        protected bool IsStaggered => _staggerTimer > 0f;
+
+        protected void TickStagger()
         {
             _staggerTimer -= Time.deltaTime;
             if (!Agent.isOnNavMesh) return;

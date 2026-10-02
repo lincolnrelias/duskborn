@@ -3,20 +3,15 @@ using UnityEngine;
 
 namespace Duskborn.Gameplay.Enemies
 {
-    /// <summary>Local animation, ground lane and audio; replicated phase is the only attack authority.</summary>
+    /// <summary>Local animation, ground impacts and audio; replicated phase is the only attack authority.</summary>
     public sealed class BriarbackPresentation : MonoBehaviour
     {
         [SerializeField] private Briarback enemy;
         [SerializeField] private Animator animator;
-        [SerializeField] private Material warningMaterial;
         [SerializeField] private Material impactDustMaterial, impactStoneMaterial;
         [SerializeField] private AudioClip windupClip, chargeClip, hurtClip, deathClip;
         [SerializeField] private AudioClip[] windupClips, chargeClips, headbuttWindupClips, headbuttClips,
             hurtClips, deathClips, hoofClips;
-        private Mesh _laneMesh;
-        private MeshRenderer _lane;
-        private readonly Vector3[] _vertices = new Vector3[18];
-        private MaterialPropertyBlock _properties;
         private AudioSource _source;
         private AudioSource _hurtSource, _hoofSource;
         private int _lastWindup = -1, _lastCharge = -1, _lastHeadbuttWindup = -1, _lastHeadbutt = -1,
@@ -32,24 +27,7 @@ namespace Duskborn.Gameplay.Enemies
         private void Awake()
         {
             _previousPosition = transform.position;
-            _properties = new MaterialPropertyBlock();
             _source = CreateSource(); _hurtSource = CreateSource(); _hoofSource = CreateSource();
-            var lane = new GameObject("Briarback charge warning");
-            lane.transform.SetParent(transform, false);
-            _laneMesh = new Mesh { name = "Briarback warning lane" };
-            _laneMesh.MarkDynamic();
-            lane.AddComponent<MeshFilter>().sharedMesh = _laneMesh;
-            _lane = lane.AddComponent<MeshRenderer>();
-            _lane.sharedMaterial = warningMaterial;
-            _lane.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            _lane.receiveShadows = false;
-            _lane.enabled = false;
-            var indices = new int[48];
-            for (int i = 0; i < 8; i++)
-            { int v = i * 2, t = i * 6;
-                indices[t] = v; indices[t + 1] = v + 2; indices[t + 2] = v + 1;
-                indices[t + 3] = v + 1; indices[t + 4] = v + 2; indices[t + 5] = v + 3; }
-            _laneMesh.vertices = _vertices; _laneMesh.triangles = indices;
         }
         private void OnEnable()
         {
@@ -62,8 +40,8 @@ namespace Duskborn.Gameplay.Enemies
             _trample?.ResetTrail();
         }
         private void OnDisable()
-        { if (_lane != null) _lane.enabled = false; StopAudio(); _trample?.ResetTrail(); }
-        private void OnDestroy() { if (_laneMesh != null) Destroy(_laneMesh); _trample?.Dispose(); }
+        { StopAudio(); _trample?.ResetTrail(); }
+        private void OnDestroy() { _trample?.Dispose(); }
         private AudioSource CreateSource()
         {
             var source = gameObject.AddComponent<AudioSource>();
@@ -115,7 +93,7 @@ namespace Duskborn.Gameplay.Enemies
         private void LateUpdate()
         {
             if (enemy == null || !enemy.IsSpawned || !enemy.IsClientStarted)
-            { _lane.enabled = false; StopAudio(); _hoofDistance = 0; _trample?.ResetTrail(); return; }
+            { StopAudio(); _hoofDistance = 0; _trample?.ResetTrail(); return; }
             var view = enemy.View;
             float age = (float)enemy.ActionAge;
             if (_sequence != view.Sequence)
@@ -157,7 +135,7 @@ namespace Duskborn.Gameplay.Enemies
             _trample?.UpdateTrail(transform.position, view.Forward, Time.deltaTime, trampling);
             // EnemyBase switches the skeleton to physics on replicated death. Never
             // play/sample a death clip over ragdoll transforms, even on late observers.
-            if (!enemy.IsAlive || !animator.enabled) { _lane.enabled = false; return; }
+            if (!enemy.IsAlive || !animator.enabled) return;
             string clip = view.Phase switch { BriarbackPhase.Windup => "BB_Windup", BriarbackPhase.Charge => "BB_Charge",
                 BriarbackPhase.HeadbuttWindup => "BB_HeadbuttWindup", BriarbackPhase.Headbutt => "BB_Headbutt",
                 BriarbackPhase.HeadbuttRecover => "BB_HeadbuttRecover",
@@ -176,26 +154,6 @@ namespace Duskborn.Gameplay.Enemies
                     Mathf.Clamp01((Time.time - _hurtStart) / .3f) : Mathf.Clamp01(age / duration));
             }
             animator.speed = clip == "BB_Walk" ? Mathf.Clamp(speed / 3.2f, .5f, 1.8f) : 1;
-            bool headbutt = view.Phase == BriarbackPhase.HeadbuttWindup;
-            float warningDuration = headbutt ? BriarbackCharge.HeadbuttWindupSeconds : BriarbackCharge.WindupSeconds;
-            _lane.enabled = enemy.IsAlive && (view.Phase == BriarbackPhase.Windup || headbutt) && age <= warningDuration;
-            if (!_lane.enabled) return;
-            Vector3 right = Vector3.Cross(Vector3.up, view.Forward);
-            for (int i = 0; i < 9; i++)
-                for (int side = 0; side < 2; side++)
-                {
-                    Vector3 point = headbutt ? transform.position +
-                        Quaternion.AngleAxis(Mathf.Lerp(-60, 60, i / 8f), Vector3.up) * transform.forward *
-                        (side == 0 ? 0 : BriarbackCharge.HeadbuttRange) :
-                        view.Origin + view.Forward * (-BriarbackCharge.HitRadius +
-                        i * (BriarbackCharge.ChargeLength + 2 * BriarbackCharge.HitRadius) / 8f) +
-                        right * ((side * 2 - 1) * BriarbackCharge.HitRadius);
-                    point.y = HollowWardenPresentation.SampleGround(point, view.Origin.y, out _) + .045f;
-                    _vertices[i * 2 + side] = transform.InverseTransformPoint(point);
-                }
-            _laneMesh.vertices = _vertices; _laneMesh.RecalculateBounds();
-            _properties.SetColor("_BaseColor", new Color(1, .36f, .07f, .28f + .28f * Mathf.Clamp01(age / warningDuration)));
-            _lane.SetPropertyBlock(_properties);
         }
     }
 }

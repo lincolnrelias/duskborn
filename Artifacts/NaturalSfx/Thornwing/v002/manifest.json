@@ -1,0 +1,116 @@
+{
+  "version": "v002",
+  "sources": [
+    {
+      "file": "source/0759.mp3",
+      "sha256": "818c996324c413b9ddaa54f0a8ac27d4f56b7c1e032ab7cfcdc9b39c258b557a",
+      "creator": "Joseph SARDIN",
+      "source_page": "https://bigsoundbank.com/fly-and-glass-s0759.html",
+      "download_url": "https://bigsoundbank.com/UPLOAD/mp3/0759.mp3",
+      "license": "CC0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Public MP3, mono 48 kHz; WAV export does not recover lossy detail",
+      "description": "Recorded big fly wing buzz, adapted into a wasp-like fantasy flight loop"
+    },
+    {
+      "file": "source/impactPunch_medium_001.ogg",
+      "sha256": "e71d23abcc3f10d9d6bc9615b2a431fff70b12333a5fcdd9964457564ace4349",
+      "creator": "Kenney",
+      "source_page": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Original lossy Ogg Vorbis"
+    },
+    {
+      "file": "source/impactSoft_medium_001.ogg",
+      "sha256": "7642a4fd43e547afe4f7adfadb3dabb681c0ff512f52c1674bae30a726841faf",
+      "creator": "Kenney",
+      "source_page": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Original lossy Ogg Vorbis"
+    },
+    {
+      "file": "source/cloth2.ogg",
+      "sha256": "8a7451193c38bc05483aec25dd193e163a15d44cf7fff04ac7912573231b0201",
+      "creator": "Kenney",
+      "source_page": "https://kenney.nl/assets/rpg-audio",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Original lossy Ogg Vorbis"
+    }
+  ],
+  "cues": [
+    {
+      "name": "TW_Buzz_01.wav",
+      "inspection": {
+        "duration_seconds": 4.0,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -7.999999988978489,
+        "rms_dbfs": -24.622156745929864,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.0,
+        "tail_below_minus50db_seconds": 0.0,
+        "loop_seam_jump": 0.004184542917038141
+      },
+      "sha256": "2e63872925f485f7bd3ee12609fbe5ed259c15c6bda816802cb3fb00268cc6bf"
+    },
+    {
+      "name": "TW_Buzz_02.wav",
+      "inspection": {
+        "duration_seconds": 4.0,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -7.999999988978489,
+        "rms_dbfs": -32.38641616584858,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.0,
+        "tail_below_minus50db_seconds": 0.0,
+        "loop_seam_jump": 0.00215628940062679
+      },
+      "sha256": "e3c8e7b600a3eca006b84de0ee615cffdba4c951e182b66670f6760f81e9cfa5"
+    },
+    {
+      "name": "TW_Death_01.wav",
+      "inspection": {
+        "duration_seconds": 1.05,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -4.107093072932954,
+        "rms_dbfs": -23.297668129416298,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.0007708333333333333,
+        "tail_below_minus50db_seconds": 0.4821875
+      },
+      "sha256": "5826067049295833b9e28f9ffe126d16d523590372ae856bc41c4a648961a937"
+    },
+    {
+      "name": "TW_Death_02.wav",
+      "inspection": {
+        "duration_seconds": 1.05,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -4.13682347746232,
+        "rms_dbfs": -22.95842252312342,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.0003541666666666667,
+        "tail_below_minus50db_seconds": 0.6914166666666667
+      },
+      "sha256": "5fa2e76cc3ba914a0e435f3853d8f457ae9565772becf7378f4c325b69e18662"
+    }
+  ],
+  "perceptual_validation": "Not auditioned; naturalness, loop repetition and combat mix remain unverified."
+}

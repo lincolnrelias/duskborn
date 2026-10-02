@@ -1,0 +1,72 @@
+{
+  "enemy": "Thornwing",
+  "triangles": 792,
+  "meshes": 6,
+  "materials": 2,
+  "armature": false,
+  "animation": "Runtime procedural living flight; jointed body and independent wings on death; no root motion",
+  "coordinates": "Blender -Y facing, Z up; FBX -Z forward/Y up export",
+  "issues": [],
+  "objects": [
+    {
+      "name": "Body",
+      "dimensions": [
+        0.5897383093833923,
+        0.8792746663093567,
+        0.8806337118148804
+      ],
+      "uv": true
+    },
+    {
+      "name": "Abdomen",
+      "dimensions": [
+        0.3233596682548523,
+        0.6799999475479126,
+        0.3199999928474426
+      ],
+      "uv": true
+    },
+    {
+      "name": "Head",
+      "dimensions": [
+        0.3804231584072113,
+        0.3399999737739563,
+        0.3799999952316284
+      ],
+      "uv": true
+    },
+    {
+      "name": "Eyes",
+      "dimensions": [
+        0.45994073152542114,
+        0.12759602069854736,
+        0.19999998807907104
+      ],
+      "uv": true
+    },
+    {
+      "name": "Wing.L",
+      "dimensions": [
+        0.9500000476837158,
+        0.934999942779541,
+        0.08799999952316284
+      ],
+      "uv": true
+    },
+    {
+      "name": "Wing.R",
+      "dimensions": [
+        0.9500000476837158,
+        0.934999942779541,
+        0.08799999952316284
+      ],
+      "uv": true
+    }
+  ],
+  "sha256": {
+    "preview.png": "712efe986fe1e43c7de0f96a35949b95161c05081a0e7ae710a9c41e9d7295e2",
+    "Thornwing.blend": "c897236d1958c86f2920f7935c3444add08b84d6908b23adc5f05dd0eb98699e",
+    "Thornwing.fbx": "2863f6a351429fca41f8d30fea009f92f7cf6ff8e1dcf50ec733acaa8a7e8647",
+    "TW_Palette.png": "efc6741e1a75aa71b6dd48f829157b256a63a4404ff91fb2cf47587f73c9a168"
+  }
+}

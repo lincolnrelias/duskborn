@@ -1,0 +1,52 @@
+{
+  "recipe": {
+    "brief": "Sharper dry chitin crack, body impact and leathery wing collapse",
+    "layers": [
+      [
+        "kenney_impact-sounds",
+        "impactPunch_medium_000.ogg"
+      ],
+      [
+        "kenney_impact-sounds",
+        "impactSoft_medium_000.ogg"
+      ],
+      [
+        "kenney_rpg-audio",
+        "cloth1.ogg"
+      ]
+    ],
+    "gains_db": [
+      -3,
+      -7,
+      -9
+    ]
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Thornwing\\v002\\source\\impactPunch_medium_000.ogg",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Thornwing\\v002\\source\\impactSoft_medium_000.ogg",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Thornwing\\v002\\source\\cloth1.ogg",
+    "-filter_complex",
+    "[0:a]volume=-3dB[a];[1:a]volume=-7dB,adelay=90:all=1[b];[2:a]volume=-9dB,adelay=35:all=1[c];[a][b][c]amix=inputs=3:normalize=0,apad,atrim=duration=1.05,afade=t=in:d=0.003,afade=t=out:st=0.95:d=0.1[out]",
+    "-map",
+    "[out]"
+  ],
+  "output": {
+    "file": "candidates\\TW_Death_01.wav",
+    "sha256": "5826067049295833b9e28f9ffe126d16d523590372ae856bc41c4a648961a937"
+  },
+  "inspection": {
+    "duration_seconds": 1.05,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -4.107093072932954,
+    "rms_dbfs": -23.297668129416298,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.0007708333333333333,
+    "tail_below_minus50db_seconds": 0.4821875
+  }
+}

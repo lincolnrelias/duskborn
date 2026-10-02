@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4b6e83897336e8fd4a29f219d546949, type: 3}
+  m_Name: ThornwingSpit
+  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Projectiles.ProjectileDefinition
+  visualPrefab: {fileID: 3259345905048889488, guid: 57d545f7bd0fc5a459bd1fbff19dba6e, type: 3}
+  visualScale: {x: 1, y: 1, z: 1}
+  nockLocalPosition: {x: 0, y: 0, z: 0}
+  impact: {fileID: 0}
+  trailMaterial: {fileID: 2100000, guid: 8ad225ded1f615f4196108b94af5ff42, type: 2}
+  impactParticleMaterial: {fileID: 2100000, guid: 8ad225ded1f615f4196108b94af5ff42, type: 2}
+  speed: 18
+  gravityScale: 0
+  radius: 0.08
+  lifetime: 1.2
+  embeddedLifetime: 0.1
+  damageMultiplier: 1
+  impactImpulse: 0.1
+  collisionMask:
+    serializedVersion: 2
+    m_Bits: 4294967295

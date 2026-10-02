@@ -1,0 +1,31 @@
+{
+  "recipe": {
+    "brief": "Tight dry membrane tension, a short leather rasp before spitting.",
+    "source_file": "handleSmallLeather.ogg",
+    "take": 1
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Thornwing\\v001\\source\\handleSmallLeather.ogg",
+    "-filter_complex",
+    "[0:a]atrim=start=0:duration=0.58,asetpts=PTS-STARTPTS,volume=-9dB[a];[a]apad,atrim=duration=0.58,afade=t=in:d=0.004,afade=t=out:st=0.5399999999999999:d=0.04[out]",
+    "-map",
+    "[out]"
+  ],
+  "output": {
+    "file": "candidates\\TW_Windup_01.wav",
+    "sha256": "4a82e389801e6c3b77fd184eb2e506d084ba81de594411f8abfae6d915c439c4"
+  },
+  "inspection": {
+    "duration_seconds": 0.58,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -23.633458795100065,
+    "rms_dbfs": -49.48995785344334,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.051625,
+    "tail_below_minus50db_seconds": 0.3848125
+  }
+}

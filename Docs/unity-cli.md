@@ -16,6 +16,7 @@ and builds. The wrapper reads the required Unity version from
 .\Tools\unity.ps1 build-windows
 .\Tools\unity.ps1 build-warden
 .\Tools\unity.ps1 build-briarback
+.\Tools\unity.ps1 build-thornwing
 .\Tools\unity.ps1 build-ironroot
 .\Tools\unity.ps1 test-ironroot
 ```
@@ -24,6 +25,9 @@ and builds. The wrapper reads the required Unity version from
 - `build-briarback` imports the original rigged woodland charger and its sounds, builds
   materials/controller/prefab/loot, registers the FishNet and enemy prefab collections,
   installs night 2-6 definitions, and checks the model, attack clock and seeded budgets.
+- `build-thornwing` imports the original low-hovering moth and recorded foley, creates
+  its ranged projectile/prefab/rewards, registers both FishNet collections, adds its
+  weighted pool from night 1 onward, and checks ground reach, obstacles, reuse and seeded budgets.
 - `build-ironroot` imports the original Ironroot Humanoid, creates URP materials, replaces
   both player prefab visuals while preserving gameplay/controller references, and validates
   skinning and sampled locomotion clips. Requires `Artifacts/Ironroot/v002/Ironroot.fbx`.

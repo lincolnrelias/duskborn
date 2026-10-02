@@ -30,7 +30,7 @@ namespace Duskborn.Editor
             var networkSettings = new SerializedObject(prefab.GetComponent<NetworkTransform>());
             Check(!networkSettings.FindProperty("_clientAuthoritative").boolValue, "Movement must remain server authoritative.");
             var presentation = new SerializedObject(prefab.GetComponent<BriarbackPresentation>());
-            foreach (string name in new[] { "enemy", "animator", "warningMaterial", "impactDustMaterial", "impactStoneMaterial", "windupClip", "chargeClip", "hurtClip", "deathClip" })
+            foreach (string name in new[] { "enemy", "animator", "impactDustMaterial", "impactStoneMaterial", "windupClip", "chargeClip", "hurtClip", "deathClip" })
                 Check(presentation.FindProperty(name).objectReferenceValue != null, "Missing presentation reference " + name);
             foreach (string cue in BriarbackBuilder.AudioCues)
             {

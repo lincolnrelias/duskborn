@@ -1,0 +1,33 @@
+{
+  "recipe": {
+    "brief": "Small soft body landing with dry membranes folding.",
+    "source_file": "impactSoft_medium_001.ogg",
+    "take": 2
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Thornwing\\v001\\source\\impactSoft_medium_001.ogg",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Thornwing\\v001\\source\\cloth2.ogg",
+    "-filter_complex",
+    "[0:a]atrim=start=0:duration=0.85,asetpts=PTS-STARTPTS,volume=-9dB[a];[1:a]atrim=duration=0.85,asetpts=PTS-STARTPTS,volume=-19dB[b];[a][b]amix=inputs=2:normalize=0:duration=longest[m];[m]apad,atrim=duration=0.85,afade=t=in:d=0.004,afade=t=out:st=0.8099999999999999:d=0.04[out]",
+    "-map",
+    "[out]"
+  ],
+  "output": {
+    "file": "candidates\\TW_Death_02.wav",
+    "sha256": "c8ac60a5df0dc8814ceb83d43aab4d7c686415b80e13c2302f209ca46d27fb52"
+  },
+  "inspection": {
+    "duration_seconds": 0.85,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -9.926802763975616,
+    "rms_dbfs": -30.965459473628982,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.0006041666666666667,
+    "tail_below_minus50db_seconds": 0.5623958333333333
+  }
+}

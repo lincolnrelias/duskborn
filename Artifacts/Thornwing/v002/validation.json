@@ -1,0 +1,75 @@
+{
+  "date": "2026-10-01",
+  "unity": "6000.4.1f1",
+  "commands": [
+    ".\\Tools\\unity.ps1 build-thornwing",
+    ".\\Tools\\unity.ps1 all"
+  ],
+  "compile": "passed",
+  "assetValidation": "passed",
+  "testResults": {
+    "suitesPassed": 17,
+    "suitesFailed": 0,
+    "failures": []
+  },
+  "ragdoll": {
+    "rigidbodies": 5,
+    "bodyCharacterJoints": 2,
+    "detachedWings": 2,
+    "isolatedPhysicsChecks": [
+      "gravity and death impulse",
+      "floor contact",
+      "wing separation",
+      "idempotent activation",
+      "repeated parent, pose and collider restoration"
+    ],
+    "result": "passed"
+  },
+  "alignment": {
+    "checks": [
+      "living rigidbodies disable interpolation",
+      "twenty moving and rotating root physics steps preserve body and wing offsets",
+      "hitbox center equals flight anchor",
+      "mouth socket follows the visible face",
+      "health revival reattaches a stale remote corpse",
+      "death enables interpolation and reuse disables it"
+    ],
+    "result": "passed"
+  },
+  "navigation": {
+    "result": "passed",
+    "checks": [
+      "supported flat, gradual uphill and downhill paths, including terrain-projected 30-degree slopes",
+      "physical wall absent from navigation bake",
+      "buried navigation and unsupported drop rejection",
+      "off-mesh, long and steep destination rejection"
+    ]
+  },
+  "attack": {
+    "projectileSpeed": 18,
+    "windupSeconds": 0.5,
+    "trackingSeconds": 0.4,
+    "damage": 3
+  },
+  "corpseLifetime": {
+    "seconds": 10,
+    "reference": "Swarmer prefab deathDelay"
+  },
+  "soundMix": {
+    "rolloff": "linear",
+    "minDistance": 6,
+    "maxDistance": 28,
+    "sourceGains": { "windup": 0.85, "spit": 0.9, "hurt": 0.8, "death": 0.95, "flutter": 0.3, "buzz": 0.6 },
+    "buzz": { "loopSeconds": 4, "minDistance": 3, "maxDistance": 16, "priority": 128, "masterVersion": "NaturalSfx/Thornwing/v002" },
+    "deathMasterPeakDbfs": [-4.107093072932954, -4.13682347746232],
+    "masterApplication": "AudioListener only",
+    "liveAudition": "unverified"
+  },
+  "unverified": [
+    "live dash appearance on generated terrain",
+    "live ragdoll appearance and slope contact",
+    "audition and combat sound mix",
+    "balance",
+    "host/client agreement and late joining"
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "recipe": {
+    "brief": "Quiet flutter of thin leathery wings from separate cloth performances.",
+    "source_file": "cloth3.ogg",
+    "take": 3
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Thornwing\\v001\\source\\cloth3.ogg",
+    "-filter_complex",
+    "[0:a]atrim=start=0:duration=0.38,asetpts=PTS-STARTPTS,volume=-9dB[a];[a]apad,atrim=duration=0.38,afade=t=in:d=0.004,afade=t=out:st=0.34:d=0.04[out]",
+    "-map",
+    "[out]"
+  ],
+  "output": {
+    "file": "candidates\\TW_Flutter_03.wav",
+    "sha256": "bf343c4ee346f72817b0f34ac541055c3bc9a7d5d13986e66ab3a78d91e98895"
+  },
+  "inspection": {
+    "duration_seconds": 0.38,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -20.662493990342586,
+    "rms_dbfs": -38.732439120099535,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.0243125,
+    "tail_below_minus50db_seconds": 0.019854166666666666
+  }
+}

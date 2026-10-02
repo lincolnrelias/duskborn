@@ -91,12 +91,6 @@ namespace Duskborn.Editor
             var amber = MaterialAsset("BB_Amber", "Universal Render Pipeline/Lit");
             amber.SetColor("_BaseColor", new Color(1, .47f, .035f)); amber.EnableKeyword("_EMISSION");
             amber.SetColor("_EmissionColor", new Color(1, .22f, .005f) * 1.4f);
-            var warning = MaterialAsset("BB_Warning", "Universal Render Pipeline/Unlit");
-            warning.SetFloat("_Surface", 1); warning.SetFloat("_Blend", 0);
-            warning.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
-            warning.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            warning.SetFloat("_ZWrite", 0); warning.SetFloat("_Cull", 0);
-            warning.EnableKeyword("_SURFACE_TYPE_TRANSPARENT"); warning.renderQueue = 3000;
             var impactDust = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Duskborn/Art/Models/HollowWarden/HW_Warning.mat");
             var impactStone = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Duskborn/Art/Models/HollowWarden/HW_Root.mat");
             Require(impactDust != null && impactStone != null, "Warden ground-impact materials missing.");
@@ -168,7 +162,6 @@ namespace Duskborn.Editor
                 var presentation = new SerializedObject(root.AddComponent<BriarbackPresentation>());
                 presentation.FindProperty("enemy").objectReferenceValue = enemy;
                 presentation.FindProperty("animator").objectReferenceValue = animator;
-                presentation.FindProperty("warningMaterial").objectReferenceValue = warning;
                 presentation.FindProperty("impactDustMaterial").objectReferenceValue = impactDust;
                 presentation.FindProperty("impactStoneMaterial").objectReferenceValue = impactStone;
                 foreach (var cue in new[] { "windup", "charge", "hurt", "death" })
@@ -198,7 +191,7 @@ namespace Duskborn.Editor
                 Prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath).GetComponent<Briarback>(), InitialPoolSize = 5 });
             registry.Entries = entries.ToArray(); EditorUtility.SetDirty(registry);
             BuildNightDefinitions();
-            foreach (var asset in new Object[] { palette, amber, warning, controller }) EditorUtility.SetDirty(asset);
+            foreach (var asset in new Object[] { palette, amber, controller }) EditorUtility.SetDirty(asset);
             AssetDatabase.SaveAssets();
             generator.GetMethod("GenerateFull", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)
                 .Invoke(null, new object[] { null, true, true });
@@ -363,14 +356,17 @@ namespace Duskborn.Editor
             for (int night = 2; night <= 6; night++)
             {
                 var definition = Asset<NightDefinition>(DataFolder + "/Night_" + night + "_Definition.asset");
+                // Preserve independently installed enemy pools when rebuilding Briarback.
+                var otherPools = (definition.Pools ?? Array.Empty<EnemySpawnPool>())
+                    .Where(p => p != null && p != basic && !p.name.StartsWith("Pool_Briarback_Night", StringComparison.Ordinal)).ToArray();
                 definition.NightNumber = night; definition.BaseBudget = budgets[night];
-                if (night == 3) definition.Pools = new[] { basic }; // Preserve Warden's supporting wave pressure.
+                if (night == 3) definition.Pools = new[] { basic }.Concat(otherPools).ToArray(); // Preserve Warden's supporting wave pressure.
                 else
                 {
                     var pool = Asset<EnemySpawnPool>(DataFolder + "/Pool_Briarback_Night" + night + ".asset");
                     pool.PoolName = "Briarback night " + night;
                     pool.Entries = new[] { new EnemySpawnPoolEntry { Type = EnemyType.Briarback, Cost = BudgetCost, Weight = weights[night] } };
-                    definition.Pools = new[] { basic, pool }; EditorUtility.SetDirty(pool);
+                    definition.Pools = new[] { basic, pool }.Concat(otherPools).ToArray(); EditorUtility.SetDirty(pool);
                 }
                 EditorUtility.SetDirty(definition);
             }

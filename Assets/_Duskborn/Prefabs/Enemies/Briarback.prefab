@@ -70,22 +70,24 @@ MonoBehaviour:
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 65535
+  <PrefabId>k__BackingField: 3
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 1768059387911145891
   SceneId: 0
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
-    Rotation: {x: 0, y: 0, z: 0, w: 0}
-    Scale: {x: 0, y: 0, z: 0}
-    IsValid: 0
+    Rotation: {x: 0, y: 0, z: 0, w: 1}
+    Scale: {x: 1, y: 1, z: 1}
+    IsValid: 1
   <IsNested>k__BackingField: 0
   WasActiveDuringEdit: 0
   WasActiveDuringEdit_Set1: 1
   <ComponentIndex>k__BackingField: 0
   <PredictedSpawn>k__BackingField: {fileID: 0}
   <PredictedOwner>k__BackingField: {fileID: 0}
-  NetworkBehaviours: []
+  NetworkBehaviours:
+  - {fileID: 4932080801962433153}
+  - {fileID: 7576055137689266555}
   InitializedParentNetworkBehaviour: {fileID: 0}
   InitializedNestedNetworkObjects: []
   RuntimeParentNetworkBehaviour: {fileID: 0}
@@ -96,7 +98,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: 0
+  _initializedTimestamp: -8584107125629324629
 --- !u!114 &4932080801962433153
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -109,9 +111,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: FishNet.Runtime::FishNet.Component.Transforming.NetworkTransform
-  _componentIndexCache: 255
+  _componentIndexCache: 0
   _addedNetworkObject: {fileID: 4834671264966158910}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 4834671264966158910}
   _componentConfiguration: 0
   _synchronizeParent: 0
   _packing:
@@ -200,9 +202,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9a7c85a032ebc64fab794e2908f8097, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Enemies.Briarback
-  _componentIndexCache: 255
+  _componentIndexCache: 1
   _addedNetworkObject: {fileID: 4834671264966158910}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 4834671264966158910}
   _entity:
     maxHP: 120
     damage: 18
@@ -288,7 +290,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Enemies.BriarbackPresentation
   enemy: {fileID: 7576055137689266555}
   animator: {fileID: 1545550049594573122}
-  warningMaterial: {fileID: 2100000, guid: 40fe290814aff0d439193ed6ca836721, type: 2}
   impactDustMaterial: {fileID: 2100000, guid: 14eb9050aa2e8a74c929a5c83f1f0596, type: 2}
   impactStoneMaterial: {fileID: 2100000, guid: caf98ac59dfaa09449fe632a50f9b346, type: 2}
   windupClip: {fileID: 8300000, guid: 3418aa51e0294744bab1bccceb7d4d28, type: 3}

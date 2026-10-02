@@ -1,0 +1,36 @@
+{
+  "recipe": {
+    "brief": "Close, restless recorded wing buzz with circular crossfade, no synthetic oscillator",
+    "source": "source/0759.mp3",
+    "processed_start_seconds": 2,
+    "source_rate_multiplier": 1.15,
+    "crossfade_seconds": 0.25,
+    "peak_target_dbfs": -8
+  },
+  "ffmpeg_arguments": [
+    "-f",
+    "f32le",
+    "-ar",
+    "48000",
+    "-ac",
+    "1",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Thornwing\\v002\\layers\\Buzz_01.f32"
+  ],
+  "output": {
+    "file": "candidates\\TW_Buzz_01.wav",
+    "sha256": "2e63872925f485f7bd3ee12609fbe5ed259c15c6bda816802cb3fb00268cc6bf"
+  },
+  "inspection": {
+    "duration_seconds": 4.0,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -7.999999988978489,
+    "rms_dbfs": -24.622156745929864,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.0,
+    "tail_below_minus50db_seconds": 0.0
+  }
+}

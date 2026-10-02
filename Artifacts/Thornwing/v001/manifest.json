@@ -1,0 +1,54 @@
+{
+  "enemy": "Thornwing",
+  "triangles": 792,
+  "meshes": 4,
+  "materials": 2,
+  "armature": false,
+  "animation": "Runtime procedural wing transforms, bounded bob, recoil and death collapse; no root motion",
+  "coordinates": "Blender -Y facing, Z up; FBX -Z forward/Y up export",
+  "issues": [],
+  "objects": [
+    {
+      "name": "Body",
+      "dimensions": [
+        0.5897383093833923,
+        1.2792747020721436,
+        0.8806337118148804
+      ],
+      "uv": true
+    },
+    {
+      "name": "Eyes",
+      "dimensions": [
+        0.45994073152542114,
+        0.12759602069854736,
+        0.19999998807907104
+      ],
+      "uv": true
+    },
+    {
+      "name": "Wing.L",
+      "dimensions": [
+        0.9500000476837158,
+        0.934999942779541,
+        0.08799999952316284
+      ],
+      "uv": true
+    },
+    {
+      "name": "Wing.R",
+      "dimensions": [
+        0.9500000476837158,
+        0.934999942779541,
+        0.08799999952316284
+      ],
+      "uv": true
+    }
+  ],
+  "sha256": {
+    "preview.png": "352c6680089929fdb7f7e77a596b2a698b724c02eac17c616b82553f4d94d0e2",
+    "Thornwing.blend": "9c3aabd14babaf6ce49f98e0f82369fd6c293bb06ad82441a8f344f8f9e0d913",
+    "Thornwing.fbx": "00f2a68a63f45507c2de6df52de22afc76c281802f66ab18e51d443e637b4264",
+    "TW_Palette.png": "efc6741e1a75aa71b6dd48f829157b256a63a4404ff91fb2cf47587f73c9a168"
+  }
+}

@@ -1,0 +1,313 @@
+{
+  "enemy": "Thornwing",
+  "version": "v001",
+  "sources": [
+    {
+      "file": "source\\handleSmallLeather.ogg",
+      "sha256": "ae3cbf695aa0a8b98b5a80a835be5a3ccbd5446a24db2235cd4c3cd6fc92ed96",
+      "creator": "Kenney",
+      "source_page": "https://kenney.nl/assets/rpg-audio",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Original lossy Ogg Vorbis; 48 kHz PCM export does not restore lost information."
+    },
+    {
+      "file": "source\\handleSmallLeather2.ogg",
+      "sha256": "a66f6db5918ad016c28a9f2768f127a7f39b5fa04481e5a3b4e78ebe2a1c282d",
+      "creator": "Kenney",
+      "source_page": "https://kenney.nl/assets/rpg-audio",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Original lossy Ogg Vorbis; 48 kHz PCM export does not restore lost information."
+    },
+    {
+      "file": "source\\impactSoft_medium_000.ogg",
+      "sha256": "7d3ba0bb5e60a11b5d3e558c141303dcf494256675fbf753c0d252d2cf0481e3",
+      "creator": "Kenney",
+      "source_page": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Original lossy Ogg Vorbis; 48 kHz PCM export does not restore lost information."
+    },
+    {
+      "file": "source\\cloth1.ogg",
+      "sha256": "ddb93a3671233f95da0e0b10367f082f7eb42fa6caaddcf776410aa8833c747d",
+      "creator": "Kenney",
+      "source_page": "https://kenney.nl/assets/rpg-audio",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Original lossy Ogg Vorbis; 48 kHz PCM export does not restore lost information."
+    },
+    {
+      "file": "source\\impactSoft_medium_001.ogg",
+      "sha256": "7642a4fd43e547afe4f7adfadb3dabb681c0ff512f52c1674bae30a726841faf",
+      "creator": "Kenney",
+      "source_page": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Original lossy Ogg Vorbis; 48 kHz PCM export does not restore lost information."
+    },
+    {
+      "file": "source\\cloth2.ogg",
+      "sha256": "8a7451193c38bc05483aec25dd193e163a15d44cf7fff04ac7912573231b0201",
+      "creator": "Kenney",
+      "source_page": "https://kenney.nl/assets/rpg-audio",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Original lossy Ogg Vorbis; 48 kHz PCM export does not restore lost information."
+    },
+    {
+      "file": "source\\impactPunch_medium_000.ogg",
+      "sha256": "486988aa2d6440ffc4c62a0e8ccf3c23673ba84424bd4723378d451b7255eb5c",
+      "creator": "Kenney",
+      "source_page": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Original lossy Ogg Vorbis; 48 kHz PCM export does not restore lost information."
+    },
+    {
+      "file": "source\\impactPunch_medium_001.ogg",
+      "sha256": "e71d23abcc3f10d9d6bc9615b2a431fff70b12333a5fcdd9964457564ace4349",
+      "creator": "Kenney",
+      "source_page": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Original lossy Ogg Vorbis; 48 kHz PCM export does not restore lost information."
+    },
+    {
+      "file": "source\\cloth3.ogg",
+      "sha256": "a48632d17a4f1416541d261a32a31612e01267144c407fa3ecab3ff410f0085b",
+      "creator": "Kenney",
+      "source_page": "https://kenney.nl/assets/rpg-audio",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Original lossy Ogg Vorbis; 48 kHz PCM export does not restore lost information."
+    },
+    {
+      "file": "source\\cloth4.ogg",
+      "sha256": "e7ab9a6c4466dea874196c61f59bf1da05cfe58748f42fadd695d441a154a99b",
+      "creator": "Kenney",
+      "source_page": "https://kenney.nl/assets/rpg-audio",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Original lossy Ogg Vorbis; 48 kHz PCM export does not restore lost information."
+    }
+  ],
+  "cues": [
+    {
+      "name": "TW_Windup_01.wav",
+      "brief": "Tight dry membrane tension, a short leather rasp before spitting.",
+      "inspection": {
+        "duration_seconds": 0.58,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -23.633458795100065,
+        "rms_dbfs": -49.48995785344334,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.051625,
+        "tail_below_minus50db_seconds": 0.3848125
+      },
+      "sha256": "4a82e389801e6c3b77fd184eb2e506d084ba81de594411f8abfae6d915c439c4"
+    },
+    {
+      "name": "TW_Windup_02.wav",
+      "brief": "Tight dry membrane tension, a short leather rasp before spitting.",
+      "inspection": {
+        "duration_seconds": 0.58,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -26.322252968089558,
+        "rms_dbfs": -52.17219269795742,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.0873125,
+        "tail_below_minus50db_seconds": 0.3658958333333333
+      },
+      "sha256": "7a6c2264554bb669decc643dc85be13becd3a371b3c78d085d8140e2056a77cb"
+    },
+    {
+      "name": "TW_Spit_01.wav",
+      "brief": "Small sharp organic contact and a brief papery flick; a weak thorn spit.",
+      "inspection": {
+        "duration_seconds": 0.28,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -9.96194642595716,
+        "rms_dbfs": -27.61113867396213,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.0006041666666666667,
+        "tail_below_minus50db_seconds": 0.0071875
+      },
+      "sha256": "00242a73a399e85ce215f7c08261c5d078d704c3175dbd8e8faf3ff2f5c0a096"
+    },
+    {
+      "name": "TW_Spit_02.wav",
+      "brief": "Small sharp organic contact and a brief papery flick; a weak thorn spit.",
+      "inspection": {
+        "duration_seconds": 0.28,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -9.926802763975616,
+        "rms_dbfs": -26.14568856420766,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.0006041666666666667,
+        "tail_below_minus50db_seconds": 0.0208125
+      },
+      "sha256": "93a7b766c82ca874ed7d9654c2864f8c109ef66b632f52c03ecba037b59868ab"
+    },
+    {
+      "name": "TW_Hurt_01.wav",
+      "brief": "Brief chitin contact with a soft wing crumple.",
+      "inspection": {
+        "duration_seconds": 0.32,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -10.114952608407485,
+        "rms_dbfs": -24.82988952214236,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.0013333333333333333,
+        "tail_below_minus50db_seconds": 0.028916666666666667
+      },
+      "sha256": "a7c2211ea1073e84c4826d23b574b7f5c5fb2fdd211d610dd623493b45e06fed"
+    },
+    {
+      "name": "TW_Hurt_02.wav",
+      "brief": "Brief chitin contact with a soft wing crumple.",
+      "inspection": {
+        "duration_seconds": 0.32,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -10.135152635099796,
+        "rms_dbfs": -24.86046365414331,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.0013958333333333333,
+        "tail_below_minus50db_seconds": 0.036
+      },
+      "sha256": "ad3fa5eb7ff14fba74c8b5e401aef2075d664eba3e287c7a776456199424c114"
+    },
+    {
+      "name": "TW_Death_01.wav",
+      "brief": "Small soft body landing with dry membranes folding.",
+      "inspection": {
+        "duration_seconds": 0.85,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -9.96194642595716,
+        "rms_dbfs": -32.3952578599891,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.0006041666666666667,
+        "tail_below_minus50db_seconds": 0.34191666666666665
+      },
+      "sha256": "2d8caa9010e9d684b04ef51a55709ee77a35fd01628d80f4cbc7c9fb80482427"
+    },
+    {
+      "name": "TW_Death_02.wav",
+      "brief": "Small soft body landing with dry membranes folding.",
+      "inspection": {
+        "duration_seconds": 0.85,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -9.926802763975616,
+        "rms_dbfs": -30.965459473628982,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.0006041666666666667,
+        "tail_below_minus50db_seconds": 0.5623958333333333
+      },
+      "sha256": "c8ac60a5df0dc8814ceb83d43aab4d7c686415b80e13c2302f209ca46d27fb52"
+    },
+    {
+      "name": "TW_Flutter_01.wav",
+      "brief": "Quiet flutter of thin leathery wings from separate cloth performances.",
+      "inspection": {
+        "duration_seconds": 0.38,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -13.012410723426871,
+        "rms_dbfs": -33.83482128913192,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.0348125,
+        "tail_below_minus50db_seconds": 0.017895833333333333
+      },
+      "sha256": "7b32a4b704988388e8caca12e610cad01c236f080f81528ce76296eb34d2c460"
+    },
+    {
+      "name": "TW_Flutter_02.wav",
+      "brief": "Quiet flutter of thin leathery wings from separate cloth performances.",
+      "inspection": {
+        "duration_seconds": 0.38,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -19.420486530835973,
+        "rms_dbfs": -38.22558358339796,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.060270833333333336,
+        "tail_below_minus50db_seconds": 0.05627083333333333
+      },
+      "sha256": "7dfbdf2054ff8982233667c7145433aaeb933f5c805afd818d15da7d41deb518"
+    },
+    {
+      "name": "TW_Flutter_03.wav",
+      "brief": "Quiet flutter of thin leathery wings from separate cloth performances.",
+      "inspection": {
+        "duration_seconds": 0.38,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -20.662493990342586,
+        "rms_dbfs": -38.732439120099535,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.0243125,
+        "tail_below_minus50db_seconds": 0.019854166666666666
+      },
+      "sha256": "bf343c4ee346f72817b0f34ac541055c3bc9a7d5d13986e66ab3a78d91e98895"
+    },
+    {
+      "name": "TW_Flutter_04.wav",
+      "brief": "Quiet flutter of thin leathery wings from separate cloth performances.",
+      "inspection": {
+        "duration_seconds": 0.38,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -25.237506447754903,
+        "rms_dbfs": -45.63953160542786,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.026125,
+        "tail_below_minus50db_seconds": 0.04225
+      },
+      "sha256": "5d870eef94f2f7f084afb4b75bcd2b3c36bd40a0e8aea35cc6edce598489d9c6"
+    }
+  ],
+  "perceptual_validation": "Not auditioned; user must check naturalness, repetition and combat mix."
+}

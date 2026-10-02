@@ -1,0 +1,51 @@
+{
+  "recipe": {
+    "brief": "All cue takes with silence, same mix gain as installed assets."
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Thornwing\\v001\\candidates\\TW_Windup_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Thornwing\\v001\\candidates\\TW_Windup_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Thornwing\\v001\\candidates\\TW_Spit_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Thornwing\\v001\\candidates\\TW_Spit_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Thornwing\\v001\\candidates\\TW_Hurt_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Thornwing\\v001\\candidates\\TW_Hurt_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Thornwing\\v001\\candidates\\TW_Death_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Thornwing\\v001\\candidates\\TW_Death_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Thornwing\\v001\\candidates\\TW_Flutter_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Thornwing\\v001\\candidates\\TW_Flutter_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Thornwing\\v001\\candidates\\TW_Flutter_03.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Thornwing\\v001\\candidates\\TW_Flutter_04.wav",
+    "-filter_complex",
+    "[0:a]adelay=0|0[a0];[1:a]adelay=930|930[a1];[2:a]adelay=1860|1860[a2];[3:a]adelay=2490|2490[a3];[4:a]adelay=3120|3120[a4];[5:a]adelay=3790|3790[a5];[6:a]adelay=4460|4460[a6];[7:a]adelay=5660|5660[a7];[8:a]adelay=6860|6860[a8];[9:a]adelay=7590|7590[a9];[10:a]adelay=8320|8320[a10];[11:a]adelay=9050|9050[a11];[a0][a1][a2][a3][a4][a5][a6][a7][a8][a9][a10][a11]amix=inputs=12:normalize=0[out]",
+    "-map",
+    "[out]"
+  ],
+  "output": {
+    "file": "candidates\\Thornwing_Audition.wav",
+    "sha256": "605e2e381fad128e754293be03cb3b41e055c889d3fbd69f34417d55dd90ad6d"
+  },
+  "inspection": {
+    "duration_seconds": 9.43,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -9.926802763975616,
+    "rms_dbfs": -33.00696054803344,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.051625,
+    "tail_below_minus50db_seconds": 0.04225
+  }
+}

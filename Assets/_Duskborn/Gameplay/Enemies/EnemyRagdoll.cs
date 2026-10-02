@@ -13,6 +13,8 @@ namespace Duskborn.Gameplay.Enemies
         [SerializeField] private bool _disableBoneCollidersWhileAlive;
         [SerializeField] private bool _restorePoseOnReset;
         [SerializeField] private bool _ignoreSelfCollisions;
+        [SerializeField] private bool _disableInterpolationWhileAlive;
+        [SerializeField] private Transform[] _detachOnDeath = System.Array.Empty<Transform>();
 
         private Rigidbody[] _bones;
         private Collider[]  _boneColliders;
@@ -20,6 +22,7 @@ namespace Duskborn.Gameplay.Enemies
         private Coroutine   _freezeCoroutine;
         private Vector3[] _restPositions;
         private Quaternion[] _restRotations;
+        private Transform[] _restParents;
         public bool IsRagdoll { get; private set; }
 
         private static readonly Dictionary<float, WaitForSeconds> WaitCache = new();
@@ -67,8 +70,10 @@ namespace Duskborn.Gameplay.Enemies
             _boneColliders = boneCols.ToArray();
             _restPositions = new Vector3[_bones.Length];
             _restRotations = new Quaternion[_bones.Length];
+            _restParents = new Transform[_bones.Length];
             for (int i = 0; i < _bones.Length; i++)
-            { _restPositions[i] = _bones[i].transform.localPosition; _restRotations[i] = _bones[i].transform.localRotation; }
+            { _restPositions[i] = _bones[i].transform.localPosition; _restRotations[i] = _bones[i].transform.localRotation;
+                _restParents[i] = _bones[i].transform.parent; }
         }
 
         private void OnDisable()
@@ -83,6 +88,7 @@ namespace Duskborn.Gameplay.Enemies
         public void EnableRagdoll()
         {
             EnsureInitialized();
+            if (IsRagdoll) return;
             IsRagdoll = true;
             if (_freezeCoroutine != null)
             {
@@ -91,7 +97,21 @@ namespace Duskborn.Gameplay.Enemies
             }
 
             if (_animator != null) _animator.enabled = false;
+            // Loose parts stay owned by the corpse for pooling/despawn cleanup, but no
+            // longer inherit the living visual or jointed body's transforms.
+            foreach (var part in _detachOnDeath)
+                if (part != null) part.SetParent(transform, true);
             SetKinematic(false);
+            foreach (var part in _detachOnDeath)
+            {
+                if (part == null) continue;
+                var body = part.GetComponent<Rigidbody>();
+                if (body == null) continue;
+                Vector3 outward = part.position - transform.position; outward.y = 0;
+                if (outward.sqrMagnitude < .0001f) outward = transform.right;
+                body.AddForce(outward.normalized * .65f + Vector3.up * .25f, ForceMode.VelocityChange);
+                body.AddTorque(Vector3.Cross(outward.normalized, Vector3.up) * 2, ForceMode.VelocityChange);
+            }
             foreach (var col in _rootColliders)
                 if (col != null) col.enabled = false;
             foreach (var col in _boneColliders)
@@ -121,7 +141,8 @@ namespace Duskborn.Gameplay.Enemies
             if (_restorePoseOnReset)
                 for (int i = 0; i < _bones.Length; i++)
                     if (_bones[i] != null)
-                    { _bones[i].transform.localPosition = _restPositions[i]; _bones[i].transform.localRotation = _restRotations[i]; }
+                    { _bones[i].transform.SetParent(_restParents[i], false);
+                        _bones[i].transform.localPosition = _restPositions[i]; _bones[i].transform.localRotation = _restRotations[i]; }
             if (_animator != null) _animator.enabled = true;
             foreach (var col in _rootColliders)
                 if (col != null) col.enabled = true;
@@ -247,7 +268,14 @@ namespace Duskborn.Gameplay.Enemies
         private void SetKinematic(bool value)
         {
             foreach (var rb in _bones)
-                if (rb != null) rb.isKinematic = value;
+                if (rb != null)
+                {
+                    // Animated child transforms must follow their owner immediately.
+                    // Physics interpolation otherwise writes cached world poses over them.
+                    if (_disableInterpolationWhileAlive)
+                        rb.interpolation = value ? RigidbodyInterpolation.None : RigidbodyInterpolation.Interpolate;
+                    rb.isKinematic = value;
+                }
         }
     }
 }

@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-01",
+  "unity": "6000.4.1f1",
+  "commands": [
+    ".\\Tools\\unity.ps1 build-thornwing",
+    ".\\Tools\\unity.ps1 all"
+  ],
+  "testResults": {
+    "suitesPassed": 17,
+    "suitesFailed": 0,
+    "failures": []
+  },
+  "validation": {
+    "prefabs": 48,
+    "buildScenes": 2,
+    "resourceAssets": 74
+  },
+  "unverified": [
+    "live visuals and animation transitions",
+    "slope death contact",
+    "audition and combat sound mix",
+    "balance",
+    "host/client agreement and late joining"
+  ]
+}

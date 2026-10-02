@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_IronGreaves
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_IronGreaves
-  recipeName: Grevas de Ferro
-  description: Grevas de Ferro
-  category: Armadura
+  recipeName: "Iron Greaves"
+  description: "Iron Greaves"
+  category: "Armor"
   tier: 2
   isAlwaysDiscovered: 0
   outputItem: {fileID: 11400000, guid: 8d7e3ed01d6923644951cb671fef77ae, type: 2}

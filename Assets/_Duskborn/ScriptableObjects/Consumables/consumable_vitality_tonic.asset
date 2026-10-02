@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: consumable_vitality_tonic
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.ConsumableDefinition
   id: consumable_vitality_tonic
-  displayName: "T\xF4nico de Vitalidade"
-  description: Restaura instantaneamente 70 pontos de vida.
+  displayName: "Vitality Tonic"
+  description: "Instantly restores 70 health points."
   icon: {fileID: 2800000, guid: e0b3f4090e394b82ab82cc61ea861d8e, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 1
@@ -22,4 +22,4 @@ MonoBehaviour:
   effectValue: 70
   duration: 0
   maxStack: 5
-  effectDescription: Restaura +70 HP instantaneamente.
+  effectDescription: "Instantly restores +70 HP."

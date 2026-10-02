@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_SmeltIronBar
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_SmeltIronBar
-  recipeName: Fundir Barra de Ferro
-  description: Fundir Barra de Ferro
-  category: Materiais
+  recipeName: "Smelt Iron Bar"
+  description: "Smelt Iron Bar"
+  category: "Materials"
   tier: 3
   requiredStation: 1
   isAlwaysDiscovered: 0

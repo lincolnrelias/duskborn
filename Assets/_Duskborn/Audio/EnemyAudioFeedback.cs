@@ -4,17 +4,17 @@ using Duskborn.Gameplay.Enemies;
 namespace Duskborn.Audio
 {
     /// <summary>
-    /// Feedback sonoro 3D para inimigos (grunhidos de ataque, guinchos de dor e ruído visceral de morte).
+    /// 3D audio feedback for enemies (attack grunts, pain screeches, and visceral death sounds).
     /// </summary>
     [RequireComponent(typeof(EnemyBase))]
     public class EnemyAudioFeedback : MonoBehaviour
     {
-        [Header("Vocalizações do Inimigo")]
+        [Header("Enemy Vocalizations")]
         [SerializeField] private AudioClip[] attackClips;
         [SerializeField] private AudioClip[] hurtClips;
         [SerializeField] private AudioClip[] deathClips;
 
-        [Header("Configurações")]
+        [Header("Settings")]
         [SerializeField] [Range(0f, 1f)] private float attackVolume = 0.8f;
         [SerializeField] [Range(0f, 1f)] private float hurtVolume   = 0.75f;
         [SerializeField] [Range(0f, 1f)] private float deathVolume  = 0.9f;
@@ -33,7 +33,7 @@ namespace Duskborn.Audio
             if (_audioSource == null) _audioSource = gameObject.AddComponent<AudioSource>();
 
             _audioSource.playOnAwake  = false;
-            _audioSource.spatialBlend = 1f; // 3D espacial
+            _audioSource.spatialBlend = 1f; // Spatial 3D
             _audioSource.rolloffMode  = AudioRolloffMode.Logarithmic;
             _audioSource.minDistance  = minDistance;
             _audioSource.maxDistance  = maxDistance;
@@ -114,7 +114,7 @@ namespace Duskborn.Audio
 
         private void HandleDied(EnemyBase enemy)
         {
-            // Reproduz via AudioManager 3D para o som não ser cortado se o GameObject for desativado
+            // Play through AudioManager 3D so the sound is not cut off when the GameObject is disabled.
             var clip = deathClips.RandomOrNull();
             if (clip != null && AudioManager.Instance != null)
             {

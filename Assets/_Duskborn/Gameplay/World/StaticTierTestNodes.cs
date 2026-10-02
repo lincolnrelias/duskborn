@@ -12,9 +12,9 @@ using UnityEditor;
 namespace Duskborn.Gameplay.World
 {
     /// <summary>
-    /// Gerencia o spawn estático de nós de recursos para teste do sistema de tiers:
-    /// Comum -> Incomum -> Raro -> Épico -> Lendário (+ Nó Misto).
-    /// Posicionados de forma limpa e visível próximos à zona de spawn inicial.
+    /// Manage static resource node spawning to test the tier system:
+    /// Common -> Uncommon -> Rare -> Epic -> Legendary (+ Mixed Node).
+    /// Placed cleanly and visibly near the initial spawn zone.
     /// </summary>
     public static class StaticTierTestNodes
     {
@@ -31,89 +31,89 @@ namespace Duskborn.Gameplay.World
 
         public static readonly NodeTestConfig[] TestConfigs = new NodeTestConfig[]
         {
-            // === FILA 1 (ARCO INTERNO / FRONT RANK) ===
+            // === ROW 1 (INNER ARC / FRONT RANK) ===
             new() {
                 id = "TestNode_Common_1",
-                displayName = "Nó de Teste [Comum #1]",
+                displayName = "Test Node [Common #1]",
                 rarity = ItemRarity.Common,
                 tablePath = "Assets/_Duskborn/ScriptableObjects/Loot/table_test_common.asset",
                 localOffset = new Vector3(7.5f, 0f, 5.0f)
             },
             new() {
                 id = "TestNode_Uncommon_1",
-                displayName = "Nó de Teste [Incomum #1]",
+                displayName = "Test Node [Uncommon #1]",
                 rarity = ItemRarity.Uncommon,
                 tablePath = "Assets/_Duskborn/ScriptableObjects/Loot/table_test_uncommon.asset",
                 localOffset = new Vector3(8.8f, 0f, 2.8f)
             },
             new() {
                 id = "TestNode_Rare_1",
-                displayName = "Nó de Teste [Raro #1]",
+                displayName = "Test Node [Rare #1]",
                 rarity = ItemRarity.Rare,
                 tablePath = "Assets/_Duskborn/ScriptableObjects/Loot/table_test_rare.asset",
                 localOffset = new Vector3(9.5f, 0f, 0.0f)
             },
             new() {
                 id = "TestNode_Epic_1",
-                displayName = "Nó de Teste [Épico #1]",
+                displayName = "Test Node [Epic #1]",
                 rarity = ItemRarity.Epic,
                 tablePath = "Assets/_Duskborn/ScriptableObjects/Loot/table_test_epic.asset",
                 localOffset = new Vector3(8.8f, 0f, -2.8f)
             },
             new() {
                 id = "TestNode_Legendary_1",
-                displayName = "Nó de Teste [Lendário #1]",
+                displayName = "Test Node [Legendary #1]",
                 rarity = ItemRarity.Legendary,
                 tablePath = "Assets/_Duskborn/ScriptableObjects/Loot/table_test_legendary.asset",
                 localOffset = new Vector3(7.5f, 0f, -5.0f)
             },
             new() {
                 id = "TestNode_Mixed_1",
-                displayName = "Nó de Teste [Misto #1]",
+                displayName = "Test Node [Mixed #1]",
                 rarity = ItemRarity.Legendary,
                 tablePath = "Assets/_Duskborn/ScriptableObjects/Loot/table_test_mixed.asset",
                 localOffset = new Vector3(13.5f, 0f, 2.0f)
             },
 
-            // === FILA 2 (ARCO EXTERNO / BACK RANK) ===
+            // === ROW 2 (OUTER ARC / BACK RANK) ===
             new() {
                 id = "TestNode_Common_2",
-                displayName = "Nó de Teste [Comum #2]",
+                displayName = "Test Node [Common #2]",
                 rarity = ItemRarity.Common,
                 tablePath = "Assets/_Duskborn/ScriptableObjects/Loot/table_test_common.asset",
                 localOffset = new Vector3(10.5f, 0f, 6.2f)
             },
             new() {
                 id = "TestNode_Uncommon_2",
-                displayName = "Nó de Teste [Incomum #2]",
+                displayName = "Test Node [Uncommon #2]",
                 rarity = ItemRarity.Uncommon,
                 tablePath = "Assets/_Duskborn/ScriptableObjects/Loot/table_test_uncommon.asset",
                 localOffset = new Vector3(11.8f, 0f, 3.5f)
             },
             new() {
                 id = "TestNode_Rare_2",
-                displayName = "Nó de Teste [Raro #2]",
+                displayName = "Test Node [Rare #2]",
                 rarity = ItemRarity.Rare,
                 tablePath = "Assets/_Duskborn/ScriptableObjects/Loot/table_test_rare.asset",
                 localOffset = new Vector3(12.5f, 0f, 0.0f)
             },
             new() {
                 id = "TestNode_Epic_2",
-                displayName = "Nó de Teste [Épico #2]",
+                displayName = "Test Node [Epic #2]",
                 rarity = ItemRarity.Epic,
                 tablePath = "Assets/_Duskborn/ScriptableObjects/Loot/table_test_epic.asset",
                 localOffset = new Vector3(11.8f, 0f, -3.5f)
             },
             new() {
                 id = "TestNode_Legendary_2",
-                displayName = "Nó de Teste [Lendário #2]",
+                displayName = "Test Node [Legendary #2]",
                 rarity = ItemRarity.Legendary,
                 tablePath = "Assets/_Duskborn/ScriptableObjects/Loot/table_test_legendary.asset",
                 localOffset = new Vector3(10.5f, 0f, -6.2f)
             },
             new() {
                 id = "TestNode_Mixed_2",
-                displayName = "Nó de Teste [Misto #2]",
+                displayName = "Test Node [Mixed #2]",
                 rarity = ItemRarity.Legendary,
                 tablePath = "Assets/_Duskborn/ScriptableObjects/Loot/table_test_mixed.asset",
                 localOffset = new Vector3(13.5f, 0f, -2.0f)
@@ -135,11 +135,11 @@ namespace Duskborn.Gameplay.World
 
             if (nodePrefab == null)
             {
-                DuskLog.Warn(LogChannel.World, "StaticTierTestNodes: Prefab de Node_Stone não encontrado.");
+                DuskLog.Warn(LogChannel.World, "StaticTierTestNodes: Node_Stone prefab not found.");
                 return spawned;
             }
 
-            // Remove nós de teste antigos se existirem no contêiner
+            // Remove old test nodes if present in the container.
             if (container != null)
             {
                 for (int i = container.childCount - 1; i >= 0; i--)
@@ -187,7 +187,7 @@ namespace Duskborn.Gameplay.World
 
                 go.name = cfg.id;
 
-                // Configura LootDropper com a tabela de drop correspondente ao tier
+                // Configure LootDropper with the tier's corresponding drop table.
                 DropLootTable lootTable = null;
 #if UNITY_EDITOR
                 lootTable = AssetDatabase.LoadAssetAtPath<DropLootTable>(cfg.tablePath);
@@ -202,20 +202,20 @@ namespace Duskborn.Gameplay.World
                     dropper.SetLootTable(lootTable);
                 }
 
-                // Ajusta HP baixo (25 HP) para facilitar testes rápidos com 1-2 golpes
+                // Set low HP (25 HP) for quick tests with 1-2 hits.
                 if (go.TryGetComponent<ResourceNode>(out var node))
                 {
-                    // Usa reflexão segura para sobrescrever maxHP no teste se privado
+                    // Use safe reflection to override maxHP in the test if private.
                     var hpField = typeof(ResourceNode).GetField("maxHP", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                     if (hpField != null) hpField.SetValue(node, 25f);
                 }
 
-                // Adiciona indicador visual de tier no nó (luz suave e cor temática)
+                // Add a visual tier indicator to the node (soft light and themed color).
                 var indicator = go.GetComponent<TierNodeVisualIndicator>();
                 if (indicator == null) indicator = go.AddComponent<TierNodeVisualIndicator>();
                 indicator.Setup(cfg.rarity, cfg.displayName);
 
-                // Spawn de rede no FishNet durante runtime no servidor
+                // FishNet network spawning during server runtime.
                 if (Application.isPlaying && InstanceFinder.ServerManager != null && InstanceFinder.ServerManager.Started)
                 {
                     if (go.TryGetComponent<NetworkObject>(out var nob) && !nob.IsSpawned)
@@ -227,7 +227,7 @@ namespace Duskborn.Gameplay.World
                 spawned.Add(go);
             }
 
-            DuskLog.Log(LogChannel.World, $"StaticTierTestNodes: {spawned.Count} nós de teste de tiers instanciados com sucesso.");
+            DuskLog.Log(LogChannel.World, $"StaticTierTestNodes: {spawned.Count} tier test nodes instantiated successfully.");
             return spawned;
         }
 
@@ -251,13 +251,13 @@ namespace Duskborn.Gameplay.World
             }
 
             SpawnNodes(container.transform, center);
-            Debug.Log($"<color=#55FF55><b>[StaticTierTestNodes] {TestConfigs.Length} Nós de recursos de teste (2 de cada tier) gerados com sucesso próximos ao Spawn!</b></color>");
+            Debug.Log($"<color=#55FF55><b>[StaticTierTestNodes] {TestConfigs.Length} Test resource nodes (2 of each tier) generated successfully near Spawn!</b></color>");
         }
 #endif
     }
 
     /// <summary>
-    /// Componente que adiciona um identificador visual no topo do nó de teste (luz suave na cor do tier e nome).
+    /// Component adding a visual identifier above a test node (soft tier-colored light and name).
     /// </summary>
     public class TierNodeVisualIndicator : MonoBehaviour
     {

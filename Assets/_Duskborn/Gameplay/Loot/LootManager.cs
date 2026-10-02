@@ -163,7 +163,7 @@ namespace Duskborn.Gameplay.Loot
             int total = spawnList.Count + (spawnGold ? 1 : 0);
             if (total == 0) return;
 
-            // Encontra o índice do primeiro item com a maior raridade para tocar o som de drop exclusivamente nele
+            // Find the first item with the highest rarity and play the drop sound only for that item.
             int rarestItemIndex = -1;
             for (int i = 0; i < spawnList.Count; i++)
             {
@@ -296,7 +296,7 @@ namespace Duskborn.Gameplay.Loot
                 pickup.ServerThrow(throwVelocity, throwTorque);
                 if (isRarest)
                 {
-                    // O som emitido será sempre do item de maior raridade dropado por aquele objeto!
+                    // The sound always comes from the highest-rarity item dropped by that object!
                     pickup.RpcPlayDropSound(rarity);
                 }
             }

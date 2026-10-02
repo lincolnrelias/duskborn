@@ -22,9 +22,9 @@ using InventorySystem.Data;
 namespace Duskborn.UI
 {
     /// <summary>
-    /// Gerenciador da interface de fabricação (Crafting UI) na Bancada de Trabalho (Workbench).
-    /// Integrado com o sistema de inventário (InventoryUIManager), sistema de recursos (ResourceInventory),
-    /// câmera (PlayerCameraController) e barra de ação (ActionBarInstaller).
+    /// Crafting UI manager at the Workbench.
+    /// Integrated with inventory (InventoryUIManager), resources (ResourceInventory),
+    /// camera (PlayerCameraController), and action bar (ActionBarInstaller) systems.
     /// </summary>
     public class CraftingUIManager : MonoBehaviour
     {
@@ -32,17 +32,17 @@ namespace Duskborn.UI
         private const float CraftingPanelPairedX = -160f;
         public static CraftingUIManager Instance { get; private set; }
 
-        [Header("Configuração de Áudio")]
+        [Header("Audio Configuration")]
         [SerializeField] private AudioClip openSound;
         [SerializeField] private AudioClip clickSound;
         [SerializeField] private AudioClip craftSound;
         [SerializeField] private AudioClip errorSound;
 
-        [Header("Sprites da Interface")]
+        [Header("Interface Sprites")]
         [SerializeField] private Sprite panelFrameSprite;
         [SerializeField] private Sprite slotFrameSprite;
 
-        // Estado do Sistema
+        // System state.
         public bool IsOpen { get; private set; }
         public int LastClosedFrame { get; private set; } = -1;
         public Workbench CurrentWorkbench { get; private set; }
@@ -58,7 +58,7 @@ namespace Duskborn.UI
         private RectTransform _ingredientsViewport;
         private readonly Dictionary<string, Sprite> _generatedIconSprites = new();
 
-        // Elementos de Detalhes
+        // Detail elements.
         private TextMeshProUGUI _headerTitle;
         private Image _detailIcon;
         private TextMeshProUGUI _detailTitle;
@@ -69,22 +69,22 @@ namespace Duskborn.UI
         private Button _craftButton;
         private TextMeshProUGUI _craftButtonLabel;
 
-        // Categoria Tabs
+        // Category Tabs
         private RectTransform _tabsContainer;
-        private string _activeCategory = "Todos";
-        private readonly string[] _categories = { "Todos", "Ferramentas", "Armas", "Armadura", "Acessórios", "Consumíveis", "Materiais" };
+        private string _activeCategory = "All";
+        private readonly string[] _categories = { "All", "Tools", "Weapons", "Armor", "Accessories", "Consumables", "Materials" };
         private readonly List<GameObject> _tabViews = new();
 
         private RecipeDiscoveryTracker _discoveryTracker;
 
-        // Lista de Receitas e Seleção
+        // Recipe list and selection.
         private readonly List<CraftingRecipe> _recipes = new();
         private readonly List<CraftingRecipe> _filteredRecipes = new();
         private CraftingRecipe _selectedRecipe;
         private readonly List<GameObject> _recipeEntryViews = new();
         private readonly List<GameObject> _ingredientViews = new();
 
-        // Integrações com Jogador e Inventário
+        // Player and inventory integrations.
         private ResourceInventory _playerResources;
         private InventoryUIManager _inventoryUIManager;
         private InventoryInstaller _inventoryInstaller;
@@ -141,7 +141,7 @@ namespace Duskborn.UI
         {
             if (!IsOpen) return;
 
-            // Fecha se pressionar ESC
+            // Close when ESC is pressed.
             if (IsEscapePressed())
             {
                 Close();
@@ -151,7 +151,7 @@ namespace Duskborn.UI
             HandleNavigationInput();
             HandleCraftingWheelInput();
 
-            // Fecha automaticamente se o jogador se afastar da bancada
+            // Close automatically if the player moves away from the workbench.
             if (CurrentWorkbench != null && !IsLocalPlayerNearWorkbench(4.0f))
             {
                 Close();
@@ -183,7 +183,7 @@ namespace Duskborn.UI
             _discoveryTracker = null;
         }
 
-        // ── Integrações e Cache ────────────────────────────────────────────────
+        // Integrations and Cache
 
         private void TryFindIntegrations()
         {
@@ -228,7 +228,7 @@ namespace Duskborn.UI
                 scaler.matchWidthOrHeight = 0f;
             }
 
-            // Cache do jogador local
+            // Local player cache.
             if (_playerResources == null)
             {
                 if (LocalPlayerContext.Resources != null)
@@ -292,7 +292,7 @@ namespace Duskborn.UI
             return false;
         }
 
-        // ── Abertura e Fechamento ─────────────────────────────────────────────
+        // ── Opening and Closing ──
 
         public void Toggle(Workbench workbench)
         {
@@ -310,11 +310,11 @@ namespace Duskborn.UI
             CurrentWorkbench = workbench;
             CurrentWorkbench.OpenForLocalPlayer();
 
-            // Carrega receitas padrão do banco de dados (Resources/Crafting)
+            // Load default recipes from the database (Resources/Crafting).
             _recipes.Clear();
             LoadDefaultRecipes();
 
-            // Adiciona receitas específicas da bancada (se configuradas)
+            // Add workbench-specific recipes (if configured).
             if (workbench.Recipes != null)
             {
                 foreach (var r in workbench.Recipes)
@@ -332,10 +332,10 @@ namespace Duskborn.UI
             if (_craftingRoot != null)
                 _craftingRoot.gameObject.SetActive(true);
 
-            // Ajusta posição lado a lado com o inventário
+            // Adjust position side by side with inventory.
             AdjustDualPanelPositions(true);
 
-            // Seleciona a primeira receita por padrão
+            // Select the first recipe by default.
             if (_recipes.Count > 0)
                 SelectRecipe(_recipes[0]);
 
@@ -344,7 +344,7 @@ namespace Duskborn.UI
             IsOpen = true;
             PlaySound(openSound);
 
-            // Bloqueia rotação da câmera e libera cursor
+            // Block camera rotation and release the cursor.
             PlayerCameraController.LocalInstance?.SetRotationLocked(true);
         }
 
@@ -364,17 +364,17 @@ namespace Duskborn.UI
             if (_craftingRoot != null)
                 _craftingRoot.gameObject.SetActive(false);
 
-            // Restaura posição do inventário
+            // Restore inventory position.
             AdjustDualPanelPositions(false);
 
-            // Se o inventário foi aberto apenas pela bancada, fecha-o
+            // Close inventory if it was opened only for the workbench.
             if (_inventoryOpenedByCrafting && _inventoryUIManager != null && _inventoryUIManager.IsOpen)
             {
                 _inventoryUIManager.Close();
             }
             _inventoryOpenedByCrafting = false;
 
-            // Restaura rotação da câmera e trava cursor (caso inventário também esteja fechado)
+            // Restore camera rotation and lock the cursor (if inventory is also closed).
             bool inventoryStillOpen = _inventoryUIManager != null && _inventoryUIManager.IsOpen;
             if (!inventoryStillOpen)
             {
@@ -403,27 +403,27 @@ namespace Duskborn.UI
 
                 if (opening)
                 {
-                    // Se o inventário estava fechado, abre-o
+                    // Open inventory if it was closed.
                     if (!_inventoryUIManager.IsOpen)
                     {
                         _inventoryOpenedByCrafting = true;
                         _inventoryUIManager.Open();
                     }
 
-                    // Posiciona painéis lado a lado
+                    // Position panels side by side.
                     invRect.anchoredPosition = new Vector2(235f, _originalInventoryPos.y);
                     if (_craftingRoot != null)
                         _craftingRoot.anchoredPosition = new Vector2(CraftingPanelPairedX, _originalInventoryPos.y);
                 }
                 else
                 {
-                    // Retorna o inventário para a posição centralizada
+                    // Return inventory to its centered position.
                     invRect.anchoredPosition = _originalInventoryPos;
                 }
             }
         }
 
-        // ── Seleção e Execução de Crafting ────────────────────────────────────
+        // Crafting Selection and Execution
 
         public void SelectRecipe(CraftingRecipe recipe)
         {
@@ -439,53 +439,53 @@ namespace Duskborn.UI
             if (_selectedRecipe == null) return;
             TryFindIntegrations();
             if (CurrentWorkbench == null || !IsLocalPlayerNearWorkbench(4f) || _selectedRecipe.RequiredStation != CurrentWorkbench.StationType)
-            { ShowStatusFeedback("Esta receita requer a estação correta e próxima.", true); return; }
+            { ShowStatusFeedback("This recipe requires the correct nearby station.", true); return; }
             var discovery = _playerResources != null ? _playerResources.GetComponent<RecipeDiscoveryTracker>() : null;
             if (discovery == null || !discovery.IsDiscovered(_selectedRecipe))
-            { ShowStatusFeedback("Descubra um ingrediente para desbloquear esta receita.", true); return; }
+            { ShowStatusFeedback("Discover an ingredient to unlock this recipe.", true); return; }
             if (_selectedRecipe.ProcessingSeconds > 0)
             {
                 var building = CurrentWorkbench.GetComponent<Duskborn.Gameplay.Building.PlacedBuilding>();
-                if (building == null) { ShowStatusFeedback("Construa uma estação [B] para processar este material.", true); return; }
-                if (building.Definition.station == CraftingStationType.Forja)
+                if (building == null) { ShowStatusFeedback("Build a station [B] to process this material.", true); return; }
+                if (building.Definition.station == CraftingStationType.Forge)
                 {
                     var controller = Duskborn.Gameplay.Building.BuildingController.Local;
-                    if (controller == null) { ShowStatusFeedback("Forja indisponível.", true); return; }
+                    if (controller == null) { ShowStatusFeedback("Forge unavailable.", true); return; }
                     var recipe = _selectedRecipe;
                     Close();
                     controller.OpenStation(building, recipe);
                     return;
                 }
                 Duskborn.Gameplay.Building.BuildingController.Local?.Queue(_selectedRecipe, building);
-                ShowStatusFeedback("Processamento solicitado. Retire a produção na estação.", false);
+                ShowStatusFeedback("Processing requested. Collect production at the station.", false);
                 return;
             }
 
             if (_playerResources == null)
             {
-                ShowStatusFeedback("Inventário de recursos não encontrado!", true);
+                ShowStatusFeedback("Resource inventory not found!", true);
                 PlaySound(errorSound);
                 return;
             }
 
             if (!_selectedRecipe.CanCraft(_playerResources))
             {
-                ShowStatusFeedback("Recursos insuficientes!", true);
+                ShowStatusFeedback("Insufficient resources!", true);
                 PlaySound(errorSound);
                 return;
             }
 
             if (!(_selectedRecipe.OutputItem is InventorySystem.Data.MaterialDefinition) && !HasFreeInventorySlot())
             {
-                ShowStatusFeedback("Inventário cheio! Libere um espaço.", true);
+                ShowStatusFeedback("Inventory full! Free a slot.", true);
                 PlaySound(errorSound);
                 return;
             }
 
-            // Gasta os recursos
+            // Spend resources.
             if (!_selectedRecipe.TrySpendIngredients(_playerResources))
             {
-                ShowStatusFeedback("Erro ao consumir recursos.", true);
+                ShowStatusFeedback("Error consuming resources.", true);
                 PlaySound(errorSound);
                 return;
             }
@@ -494,21 +494,21 @@ namespace Duskborn.UI
             {
                 _playerResources.Add(material.Id, _selectedRecipe.OutputAmount);
                 RefreshRecipeListStates(); RefreshDetailsView();
-                ShowStatusFeedback("Material fabricado!", false);
+                ShowStatusFeedback("Material crafted!", false);
                 return;
             }
-            // Cria e registra o item
+            // Create and register the item.
             var outputItem = _selectedRecipe.CreateOutputItem();
             if (outputItem != null)
             {
-                // Registra os ícones para que apareçam perfeitamente no inventário e na action bar
+                // Register icons so they display correctly in inventory and the action bar.
                 if (_selectedRecipe.OutputItem != null && _selectedRecipe.OutputItem.Icon != null)
                 {
                     _inventoryInstaller?.RegisterIcon(_selectedRecipe.OutputItem.Id, _selectedRecipe.OutputItem.Icon);
                     _actionBarInstaller?.RegisterIcon(_selectedRecipe.OutputItem.Id, _selectedRecipe.OutputItem.Icon);
                 }
 
-                // Insere no inventário do jogador
+                // Insert into the player's inventory.
                 if (_inventoryInstaller != null && _inventoryInstaller.Inventory != null)
                 {
                     _inventoryInstaller.Inventory.TryAddItem(outputItem, out _);
@@ -516,7 +516,7 @@ namespace Duskborn.UI
             }
 
             PlaySound(craftSound);
-            ShowStatusFeedback($"<b>{_selectedRecipe.RecipeName}</b> fabricado com sucesso!", false);
+            ShowStatusFeedback($"<b>{_selectedRecipe.RecipeName}</b> crafted successfully!", false);
             DuskLog.Log(LogChannel.Inventory, $"Crafted '{_selectedRecipe.RecipeName}' at Workbench.");
 
             RefreshRecipeListStates();
@@ -540,7 +540,7 @@ namespace Duskborn.UI
             _statusLabel.text = $"<color={colorHex}>{message}</color>";
         }
 
-        // ── Atualização Visual dos Painéis ─────────────────────────────────────
+        // Panel Visual Updates
 
         private void SetActiveCategory(string category)
         {
@@ -584,8 +584,8 @@ namespace Duskborn.UI
                 if (CurrentWorkbench != null && recipe.RequiredStation != CurrentWorkbench.StationType)
                     continue;
 
-                // Filtragem por categoria selecionada
-                if (_activeCategory != "Todos" && recipe.Category != _activeCategory)
+                // Filter by the selected category.
+                if (_activeCategory != "All" && recipe.Category != _activeCategory)
                     continue;
 
                 _filteredRecipes.Add(recipe);
@@ -685,24 +685,24 @@ namespace Duskborn.UI
                 if (bg != null)
                 {
                     if (isSelected)
-                        bg.color = new Color(0.22f, 0.30f, 0.42f, 1f); // Destaque azul/cinza
+                        bg.color = new Color(0.22f, 0.30f, 0.42f, 1f); // Blue/gray highlight
                     else
                         bg.color = new Color(0.12f, 0.14f, 0.18f, 0.95f);
                 }
 
-                // Borda de seleção
+                // Selection border.
                 var outline = view.GetComponent<Outline>();
                 if (outline != null)
                 {
                     outline.enabled = isSelected;
-                    outline.effectColor = new Color(0.96f, 0.72f, 0.22f, 1f); // Ouro brilhante
+                    outline.effectColor = new Color(0.96f, 0.72f, 0.22f, 1f); // Bright gold.
                 }
 
-                // Indicador de craftabilidade (filho "Indicator")
+                // Craftability indicator ("Indicator" child).
                 var indicator = view.transform.Find("Indicator")?.GetComponent<TextMeshProUGUI>();
                 if (indicator != null)
                 {
-                    indicator.text = canCraft ? "<color=#4ade80>● Pronto</color>" : "<color=#64748b>Falta</color>";
+                    indicator.text = canCraft ? "<color=#4ade80>● Ready</color>" : "<color=#64748b>Missing</color>";
                 }
             }
         }
@@ -711,14 +711,14 @@ namespace Duskborn.UI
         {
             if (_selectedRecipe == null)
             {
-                if (_detailTitle != null) _detailTitle.text = "Selecione uma receita";
+                if (_detailTitle != null) _detailTitle.text = "Select a recipe";
                 if (_detailStats != null) _detailStats.text = string.Empty;
                 if (_detailDescription != null) _detailDescription.text = string.Empty;
                 if (_craftButton != null) _craftButton.interactable = false;
                 return;
             }
 
-            // Título e Categoria
+            // Title and category.
             if (_detailTitle != null)
                 _detailTitle.text = _selectedRecipe.RecipeName;
 
@@ -726,30 +726,30 @@ namespace Duskborn.UI
             {
                 string tierStr = _selectedRecipe.Tier switch
                 {
-                    CraftingTier.Primitivo => "Tier 1",
-                    CraftingTier.Ferro => "Tier 2",
-                    CraftingTier.Reforcado => "Tier 3",
-                    CraftingTier.Espinheiro => "Tier 4",
+                    CraftingTier.Primitive => "Tier 1",
+                    CraftingTier.Iron => "Tier 2",
+                    CraftingTier.Reinforced => "Tier 3",
+                    CraftingTier.Thornheart => "Tier 4",
                     _ => ""
                 };
                 string stationStr = _selectedRecipe.RequiredStation switch
                 {
-                    CraftingStationType.Forja => "Forja",
-                    CraftingStationType.Caldeirao => "Caldeirão",
-                    CraftingStationType.MesaArcana => "Mesa Arcana",
-                    _ => "Bancada"
+                    CraftingStationType.Forge => "Forge",
+                    CraftingStationType.Cauldron => "Cauldron",
+                    CraftingStationType.ArcaneTable => "Arcane Table",
+                    _ => "Workbench"
                 };
                 _detailCategory.text = $"{_selectedRecipe.Category} • {tierStr} • {stationStr}";
             }
 
-            // Ícone grande
+            // Large icon.
             if (_detailIcon != null)
             {
                 _detailIcon.sprite = GetRecipeSprite(_selectedRecipe);
                 _detailIcon.color = Color.white;
             }
 
-            // Estatísticas e Descrição
+            // Statistics and description.
             if (_detailStats != null)
             {
                 _detailStats.text = BuildStatsString(_selectedRecipe);
@@ -760,10 +760,10 @@ namespace Duskborn.UI
                 _detailDescription.text = _selectedRecipe.Description;
             }
 
-            // Lista de Ingredientes Requeridos
+            // Required ingredients list.
             RefreshIngredientsList(_selectedRecipe);
 
-            // Botão Fabricar e Status
+            // Craft button and status.
             bool canCraft = _playerResources != null && _selectedRecipe.CanCraft(_playerResources);
             bool discovered = _discoveryTracker != null && _discoveryTracker.IsDiscovered(_selectedRecipe);
             bool hasProcessor = _selectedRecipe.ProcessingSeconds <= 0 || (CurrentWorkbench != null && CurrentWorkbench.GetComponent<Duskborn.Gameplay.Building.PlacedBuilding>() != null);
@@ -773,20 +773,20 @@ namespace Duskborn.UI
             if (_craftButton != null)
                 _craftButton.interactable = canCraft && hasSpace;
 
-            if (!discovered) ShowStatusFeedback("Descubra os ingredientes desta receita.", true);
-            else if (!hasProcessor) ShowStatusFeedback("Construa esta estação [B] para processar materiais.", true);
-            else if (!canCraft) ShowStatusFeedback("Recursos insuficientes", true);
+            if (!discovered) ShowStatusFeedback("Discover this recipe's ingredients.", true);
+            else if (!hasProcessor) ShowStatusFeedback("Build this station [B] to process materials.", true);
+            else if (!canCraft) ShowStatusFeedback("Insufficient resources", true);
             else if (!hasSpace)
-                ShowStatusFeedback("Inventário cheio", true);
+                ShowStatusFeedback("Inventory full", true);
             else
-                ShowStatusFeedback("Pronto para fabricar!", false);
+                ShowStatusFeedback("Ready to craft!", false);
         }
 
         private string BuildStatsString(CraftingRecipe recipe)
         {
             if (recipe.OutputItem is ConsumableDefinition consumable)
             {
-                return $"<color=#67e8f9><b>Efeito:</b> {consumable.EffectDescription}</color>\n<color=#94a3b8>Pilha máx: {consumable.MaxStack}</color>";
+                return $"<color=#67e8f9><b>Effect:</b> {consumable.EffectDescription}</color>\n<color=#94a3b8>Max stack: {consumable.MaxStack}</color>";
             }
 
             if (recipe.OutputItem is GearDefinition gear)
@@ -816,17 +816,17 @@ namespace Duskborn.UI
                 {
                     string sign = mod.Bonus >= 0 ? "+" : "";
                     string targetName = mod.Type.ToString();
-                    if (mod.Type == Duskborn.Gameplay.TargetType.Tree) targetName = "Árvores (Madeira)";
-                    else if (mod.Type == Duskborn.Gameplay.TargetType.MiningNode || (int)mod.Type == 512) targetName = "Rochas / Minérios";
-                    else if (mod.Type == Duskborn.Gameplay.TargetType.Humanoid) targetName = "Humanoides";
+                    if (mod.Type == Duskborn.Gameplay.TargetType.Tree) targetName = "Trees (Wood)";
+                    else if (mod.Type == Duskborn.Gameplay.TargetType.MiningNode || (int)mod.Type == 512) targetName = "Rocks / Ores";
+                    else if (mod.Type == Duskborn.Gameplay.TargetType.Humanoid) targetName = "Humanoids";
 
-                    lines.Add($"<color=#fde047>{sign}{mod.Bonus * 100:F0}% Dano vs {targetName}</color>");
+                    lines.Add($"<color=#fde047>{sign}{mod.Bonus * 100:F0}% Damage vs {targetName}</color>");
                 }
 
                 return string.Join("\n", lines);
             }
 
-            return "<color=#94a3b8>Item padrão</color>";
+            return "<color=#94a3b8>Default item</color>";
         }
 
         private void RefreshIngredientsList(CraftingRecipe recipe)
@@ -863,7 +863,7 @@ namespace Duskborn.UI
             scrollRect.verticalNormalizedPosition = 1f;
         }
 
-        // ── Construção Dinâmica da Hierarquia UI ───────────────────────────────
+        // Dynamic UI Hierarchy Construction
 
         public void EnsureUIHierarchy()
         {
@@ -874,12 +874,12 @@ namespace Duskborn.UI
                 TryFindIntegrations();
                 if (_canvas == null)
                 {
-                    DuskLog.Error(LogChannel.Inventory, "CraftingUIManager: Nenhum Canvas encontrado para renderizar a UI.");
+                    DuskLog.Error(LogChannel.Inventory, "CraftingUIManager: No Canvas found to render the UI.");
                     return;
                 }
             }
 
-            // 1. Painel Principal (Moldura de Pedra/Ferro Medieval)
+            // 1. Main Panel (Medieval Stone / Iron Frame).
             var frameGO = new GameObject("CraftingFrame", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             frameGO.transform.SetParent(_canvas.transform, false);
 
@@ -914,11 +914,11 @@ namespace Duskborn.UI
                 frameImg.color = new Color(0.055f, 0.07f, 0.10f, 0.985f);
             }
 
-            // Arraste pelo corpo da moldura
+            // Drag using the frame body.
             var frameDrag = frameGO.AddComponent<DraggablePanel>();
             frameDrag.TargetPanel = _craftingRoot;
 
-            // 2. Barra de Cabeçalho / Título (Área dedicada para arrastar a janela)
+            // 2. Header / Title Bar (dedicated window drag area).
             var headerGO = new GameObject("HeaderBar", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             headerGO.transform.SetParent(frameGO.transform, false);
 
@@ -937,8 +937,8 @@ namespace Duskborn.UI
             var headerDrag = headerGO.AddComponent<DraggablePanel>();
             headerDrag.TargetPanel = _craftingRoot;
 
-            // Título dentro do Cabeçalho
-            var titleGO = CreateText("Title", headerGO.transform, "BANCADA DE TRABALHO", 13, FontStyles.Bold, new Color(0.98f, 0.82f, 0.38f, 1f), TextAlignmentOptions.Left);
+            // Title inside the header.
+            var titleGO = CreateText("Title", headerGO.transform, "WORKBENCH", 13, FontStyles.Bold, new Color(0.98f, 0.82f, 0.38f, 1f), TextAlignmentOptions.Left);
             _headerTitle = titleGO.GetComponent<TextMeshProUGUI>();
             var titleRect = titleGO.GetComponent<RectTransform>();
             titleRect.anchorMin = new Vector2(0, 0.40f);
@@ -947,7 +947,7 @@ namespace Duskborn.UI
             titleRect.anchoredPosition = new Vector2(18, -1);
             titleRect.sizeDelta = new Vector2(-60, 0);
 
-            var subtitleGO = CreateText("Subtitle", headerGO.transform, "CATÁLOGO DE FABRICAÇÃO", 7.5f, FontStyles.Bold,
+            var subtitleGO = CreateText("Subtitle", headerGO.transform, "CRAFTING CATALOG", 7.5f, FontStyles.Bold,
                 new Color(0.74f, 0.66f, 0.52f, 1f), TextAlignmentOptions.Left);
             var subtitleRect = subtitleGO.GetComponent<RectTransform>();
             subtitleRect.anchorMin = new Vector2(0, 0);
@@ -956,7 +956,7 @@ namespace Duskborn.UI
             subtitleRect.anchoredPosition = new Vector2(18, 4);
             subtitleRect.sizeDelta = new Vector2(-66, 12);
 
-            // Botão Fechar (X) dentro do Cabeçalho
+            // Close button (X) inside the header.
             var closeBtnGO = CreateButton("CloseButton", headerGO.transform, "X", new Vector2(24, 24), new Color(0.7f, 0.2f, 0.2f, 1f));
             var closeRect = closeBtnGO.GetComponent<RectTransform>();
             closeRect.anchorMin = new Vector2(1, 0.5f);
@@ -965,7 +965,7 @@ namespace Duskborn.UI
             closeRect.anchoredPosition = new Vector2(-12, 0);
             closeBtnGO.GetComponent<Button>().onClick.AddListener(() => { PlaySound(clickSound); Close(); });
 
-            // Divisória do Cabeçalho
+            // Header divider.
             var headerDiv = CreatePanel("HeaderDivider", frameGO.transform, new Color(0.24f, 0.28f, 0.36f, 0.8f));
             headerDiv.anchorMin = new Vector2(0, 1);
             headerDiv.anchorMax = new Vector2(1, 1);
@@ -973,7 +973,7 @@ namespace Duskborn.UI
             headerDiv.sizeDelta = new Vector2(-28, 2);
             headerDiv.anchoredPosition = new Vector2(0, -42);
 
-            // ── Barra de Categorias ──────────────────────────────────────────
+            // Category Bar
             var tabBarGO = new GameObject("TabBar", typeof(RectTransform), typeof(Image), typeof(HorizontalLayoutGroup));
             tabBarGO.transform.SetParent(frameGO.transform, false);
             _tabsContainer = tabBarGO.GetComponent<RectTransform>();
@@ -1012,7 +1012,7 @@ namespace Duskborn.UI
                 _tabViews.Add(tabGO);
             }
 
-            // 3. Coluna Esquerda: Lista de Receitas
+            // 3. Left Column: Recipe List.
             var leftCol = CreatePanel("LeftColumn", frameGO.transform, new Color(0.08f, 0.09f, 0.12f, 0.7f));
             leftCol.anchorMin = new Vector2(0, 0);
             leftCol.anchorMax = new Vector2(0, 1);
@@ -1021,7 +1021,7 @@ namespace Duskborn.UI
             leftCol.anchoredPosition = new Vector2(14f, -34f);
             AddFrameOutline(leftCol.gameObject, new Color(0.24f, 0.30f, 0.40f, 0.85f), new Vector2(1f, -1f));
 
-            var recipesTitle = CreateText("RecipesHeader", leftCol.transform, "RECEITAS", 10, FontStyles.Bold, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
+            var recipesTitle = CreateText("RecipesHeader", leftCol.transform, "RECIPES", 10, FontStyles.Bold, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
             var rTitleRect = recipesTitle.GetComponent<RectTransform>();
             rTitleRect.anchorMin = new Vector2(0, 1);
             rTitleRect.anchorMax = new Vector2(1, 1);
@@ -1113,7 +1113,7 @@ namespace Duskborn.UI
             scrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
             _recipeScrollRect = scrollRect;
 
-            // 4. Coluna Direita: Detalhes da Receita Selecionada
+            // 4. Right Column: Selected Recipe Details.
             var rightCol = CreatePanel("RightColumn", frameGO.transform, new Color(0.08f, 0.09f, 0.12f, 0.7f));
             rightCol.anchorMin = new Vector2(1, 0);
             rightCol.anchorMax = new Vector2(1, 1);
@@ -1122,7 +1122,7 @@ namespace Duskborn.UI
             rightCol.anchoredPosition = new Vector2(-14f, -34f);
             AddFrameOutline(rightCol.gameObject, new Color(0.24f, 0.30f, 0.40f, 0.85f), new Vector2(1f, -1f));
 
-            var detailsTitle = CreateText("DetailsHeader", rightCol.transform, "DETALHES", 10, FontStyles.Bold, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
+            var detailsTitle = CreateText("DetailsHeader", rightCol.transform, "DETAILS", 10, FontStyles.Bold, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
             var dTitleRect = detailsTitle.GetComponent<RectTransform>();
             dTitleRect.anchorMin = new Vector2(0, 1);
             dTitleRect.anchorMax = new Vector2(1, 1);
@@ -1130,7 +1130,7 @@ namespace Duskborn.UI
             dTitleRect.anchoredPosition = new Vector2(8, -6);
             dTitleRect.sizeDelta = new Vector2(-16, 18);
 
-            // Caixa de Preview (Ícone + Título + Categoria)
+            // Preview box (icon + title + category).
             var previewBox = CreatePanel("PreviewBox", rightCol.transform, new Color(0.12f, 0.14f, 0.18f, 0.85f));
             previewBox.anchorMin = new Vector2(0, 1);
             previewBox.anchorMax = new Vector2(1, 1);
@@ -1139,7 +1139,7 @@ namespace Duskborn.UI
             previewBox.sizeDelta = new Vector2(-14, 48);
             AddFrameOutline(previewBox.gameObject, new Color(0.34f, 0.42f, 0.55f, 0.65f), new Vector2(1f, -1f));
 
-            // Slot do Ícone Grande
+            // Large icon slot.
             var iconSlot = CreatePanel("IconSlot", previewBox.transform, new Color(0.06f, 0.07f, 0.09f, 1f));
             iconSlot.anchorMin = new Vector2(0, 0.5f);
             iconSlot.anchorMax = new Vector2(0, 0.5f);
@@ -1162,8 +1162,8 @@ namespace Duskborn.UI
             _detailIcon = iconInnerGO.GetComponent<Image>();
             _detailIcon.preserveAspect = true;
 
-            // Título do Item
-            var itemTitleGO = CreateText("ItemTitle", previewBox.transform, "Machado de Pedra", 12, FontStyles.Bold, Color.white, TextAlignmentOptions.Left);
+            // Item title.
+            var itemTitleGO = CreateText("ItemTitle", previewBox.transform, "Stone Axe", 12, FontStyles.Bold, Color.white, TextAlignmentOptions.Left);
             var itemTitleRect = itemTitleGO.GetComponent<RectTransform>();
             itemTitleRect.anchorMin = new Vector2(0, 0.5f);
             itemTitleRect.anchorMax = new Vector2(1, 0.5f);
@@ -1174,8 +1174,8 @@ namespace Duskborn.UI
             _detailTitle.textWrappingMode = TextWrappingModes.NoWrap;
             _detailTitle.overflowMode = TextOverflowModes.Ellipsis;
 
-            // Categoria do Item
-            var itemCatGO = CreateText("ItemCategory", previewBox.transform, "Ferramenta • Nível 1", 9, FontStyles.Normal, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
+            // Item category.
+            var itemCatGO = CreateText("ItemCategory", previewBox.transform, "Tool • Level 1", 9, FontStyles.Normal, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
             var itemCatRect = itemCatGO.GetComponent<RectTransform>();
             itemCatRect.anchorMin = new Vector2(0, 0.5f);
             itemCatRect.anchorMax = new Vector2(1, 0.5f);
@@ -1186,7 +1186,7 @@ namespace Duskborn.UI
             _detailCategory.textWrappingMode = TextWrappingModes.NoWrap;
             _detailCategory.overflowMode = TextOverflowModes.Ellipsis;
 
-            // Caixa de Atributos & Bônus
+            // Attributes & Bonuses box.
             var statsBox = CreatePanel("StatsBox", rightCol.transform, new Color(0.05f, 0.06f, 0.08f, 0.9f));
             statsBox.anchorMin = new Vector2(0, 1);
             statsBox.anchorMax = new Vector2(1, 1);
@@ -1195,7 +1195,7 @@ namespace Duskborn.UI
             statsBox.sizeDelta = new Vector2(-14, 60);
             AddFrameOutline(statsBox.gameObject, new Color(0.19f, 0.27f, 0.37f, 0.8f), new Vector2(1f, -1f));
 
-            var statsTextGO = CreateText("StatsText", statsBox.transform, "+15% Dano\n+300% Dano vs Árvores", 9.5f, FontStyles.Normal, new Color(0.85f, 0.9f, 0.95f, 1f), TextAlignmentOptions.TopLeft);
+            var statsTextGO = CreateText("StatsText", statsBox.transform, "+15% Damage\n+300% Damage vs Trees", 9.5f, FontStyles.Normal, new Color(0.85f, 0.9f, 0.95f, 1f), TextAlignmentOptions.TopLeft);
             var statsTextRect = statsTextGO.GetComponent<RectTransform>();
             statsTextRect.anchorMin = Vector2.zero;
             statsTextRect.anchorMax = Vector2.one;
@@ -1204,8 +1204,8 @@ namespace Duskborn.UI
             _detailStats = statsTextGO.GetComponent<TextMeshProUGUI>();
             _detailStats.overflowMode = TextOverflowModes.Ellipsis;
 
-            // Descrição Flavour
-            var descGO = CreateText("Description", rightCol.transform, "Descrição da ferramenta...", 9, FontStyles.Italic, new Color(0.55f, 0.60f, 0.68f, 1f), TextAlignmentOptions.TopLeft);
+            // Flavor description.
+            var descGO = CreateText("Description", rightCol.transform, "Tool description...", 9, FontStyles.Italic, new Color(0.55f, 0.60f, 0.68f, 1f), TextAlignmentOptions.TopLeft);
             var descRect = descGO.GetComponent<RectTransform>();
             descRect.anchorMin = new Vector2(0, 1);
             descRect.anchorMax = new Vector2(1, 1);
@@ -1217,8 +1217,8 @@ namespace Duskborn.UI
             _detailDescription.maxVisibleLines = 2;
             _detailDescription.overflowMode = TextOverflowModes.Ellipsis;
 
-            // Seção de Ingredientes
-            var reqHeader = CreateText("ReqHeader", rightCol.transform, "MATERIAIS NECESSÁRIOS", 9.5f, FontStyles.Bold, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
+            // Ingredients section.
+            var reqHeader = CreateText("ReqHeader", rightCol.transform, "REQUIRED MATERIALS", 9.5f, FontStyles.Bold, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
             var reqHeaderRect = reqHeader.GetComponent<RectTransform>();
             reqHeaderRect.anchorMin = new Vector2(0, 1);
             reqHeaderRect.anchorMax = new Vector2(1, 1);
@@ -1311,7 +1311,7 @@ namespace Duskborn.UI
             ingScrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
             _ingredientsScrollRect = ingScrollRect;
 
-            // Status de Fabricação
+            // Crafting status.
             var statusGO = CreateText("StatusLabel", rightCol.transform, string.Empty, 9.5f, FontStyles.Bold, Color.white, TextAlignmentOptions.Center);
             var statusRect = statusGO.GetComponent<RectTransform>();
             statusRect.anchorMin = new Vector2(0, 0);
@@ -1321,8 +1321,8 @@ namespace Duskborn.UI
             statusRect.sizeDelta = new Vector2(-14, 18);
             _statusLabel = statusGO.GetComponent<TextMeshProUGUI>();
 
-            // Botão Fabricar
-            var craftBtnGO = CreateButton("CraftButton", rightCol.transform, "FABRICAR", new Vector2(-20, 30), new Color(0.85f, 0.55f, 0.12f, 1f));
+            // Craft button.
+            var craftBtnGO = CreateButton("CraftButton", rightCol.transform, "CRAFT", new Vector2(-20, 30), new Color(0.85f, 0.55f, 0.12f, 1f));
             var craftBtnRect = craftBtnGO.GetComponent<RectTransform>();
             craftBtnRect.anchorMin = new Vector2(0, 0);
             craftBtnRect.anchorMax = new Vector2(1, 0);
@@ -1333,7 +1333,7 @@ namespace Duskborn.UI
             _craftButtonLabel = craftBtnGO.GetComponentInChildren<TextMeshProUGUI>();
             if (_craftButtonLabel != null) _craftButtonLabel.fontSize = 11.5f;
 
-            // Cores do Botão Fabricar
+            // Craft button colors.
             var btnColors = _craftButton.colors;
             btnColors.normalColor = new Color(0.85f, 0.55f, 0.12f, 1f);
             btnColors.highlightedColor = new Color(0.98f, 0.72f, 0.22f, 1f);
@@ -1341,7 +1341,7 @@ namespace Duskborn.UI
             btnColors.disabledColor = new Color(0.25f, 0.28f, 0.35f, 0.7f);
             _craftButton.colors = btnColors;
 
-            // Inicia oculto até ser ativado explicitamente via Open()
+            // Start hidden until explicitly activated through Open().
             frameGO.SetActive(false);
         }
 
@@ -1365,7 +1365,7 @@ namespace Duskborn.UI
             cardShadow.effectColor = new Color(0f, 0f, 0f, 0.55f);
             cardShadow.effectDistance = new Vector2(1.5f, -2f);
 
-            // Ícone do Item
+            // Item icon.
             var iconGO = new GameObject("Icon", typeof(RectTransform), typeof(Image));
             iconGO.transform.SetParent(go.transform, false);
             var iconRect = iconGO.GetComponent<RectTransform>();
@@ -1380,8 +1380,8 @@ namespace Duskborn.UI
             iconImg.preserveAspect = true;
             if (isHidden) iconImg.color = new Color(1, 1, 1, 0.2f);
 
-            // Nome da Receita
-            string displayName = isHidden ? "??? Receita Desconhecida" : recipe.RecipeName;
+            // Recipe name.
+            string displayName = isHidden ? "??? Unknown Recipe" : recipe.RecipeName;
             var labelGO = CreateText("Name", go.transform, displayName, 11, FontStyles.Bold, Color.white, TextAlignmentOptions.Left);
             var labelRect = labelGO.GetComponent<RectTransform>();
             labelRect.anchorMin = new Vector2(0, 0.5f);
@@ -1393,8 +1393,8 @@ namespace Duskborn.UI
             labelTmp.textWrappingMode = TextWrappingModes.NoWrap;
             labelTmp.overflowMode = TextOverflowModes.Ellipsis;
 
-            // Indicador de Status (Pronto / Falta)
-            var indGO = CreateText("Indicator", go.transform, "Pronto", 8.5f, FontStyles.Normal, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
+            // Status indicator (Ready / Missing).
+            var indGO = CreateText("Indicator", go.transform, "Ready", 8.5f, FontStyles.Normal, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
             var indRect = indGO.GetComponent<RectTransform>();
             indRect.anchorMin = new Vector2(0, 0.5f);
             indRect.anchorMax = new Vector2(1, 0.5f);
@@ -1409,21 +1409,21 @@ namespace Duskborn.UI
                 AddRecipeHoverHighlight(go);
             }
 
-            // Badge de Tier
+            // Tier badge.
             string tierLabel = recipe.Tier switch
             {
-                CraftingTier.Primitivo => "T1",
-                CraftingTier.Ferro => "T2",
-                CraftingTier.Reforcado => "T3",
-                CraftingTier.Espinheiro => "T4",
+                CraftingTier.Primitive => "T1",
+                CraftingTier.Iron => "T2",
+                CraftingTier.Reinforced => "T3",
+                CraftingTier.Thornheart => "T4",
                 _ => ""
             };
             Color tierColor = recipe.Tier switch
             {
-                CraftingTier.Primitivo => new Color(0.6f, 0.6f, 0.6f, 1f),
-                CraftingTier.Ferro => new Color(0.7f, 0.8f, 0.9f, 1f),
-                CraftingTier.Reforcado => new Color(0.4f, 0.6f, 1f, 1f),
-                CraftingTier.Espinheiro => new Color(0.9f, 0.5f, 0.2f, 1f),
+                CraftingTier.Primitive => new Color(0.6f, 0.6f, 0.6f, 1f),
+                CraftingTier.Iron => new Color(0.7f, 0.8f, 0.9f, 1f),
+                CraftingTier.Reinforced => new Color(0.4f, 0.6f, 1f, 1f),
+                CraftingTier.Thornheart => new Color(0.9f, 0.5f, 0.2f, 1f),
                 _ => Color.gray
             };
             var tierGO = CreateText("TierBadge", go.transform, tierLabel, 7.5f, FontStyles.Bold, tierColor, TextAlignmentOptions.Right);
@@ -1449,7 +1449,7 @@ namespace Duskborn.UI
             var img = rowGO.GetComponent<Image>();
             img.color = new Color(0.12f, 0.14f, 0.18f, 0.6f);
 
-            // Ícone do Material
+            // Material icon.
             var iconGO = new GameObject("Icon", typeof(RectTransform), typeof(Image));
             iconGO.transform.SetParent(rowGO.transform, false);
             var iconRect = iconGO.GetComponent<RectTransform>();
@@ -1463,7 +1463,7 @@ namespace Duskborn.UI
             iconImg.sprite = GetMaterialSprite(mat);
             iconImg.preserveAspect = true;
 
-            // Nome do Material
+            // Material name.
             var nameGO = CreateText("Name", rowGO.transform, mat.DisplayName, 9.5f, FontStyles.Normal, Color.white, TextAlignmentOptions.Left);
             var nameRect = nameGO.GetComponent<RectTransform>();
             nameRect.anchorMin = new Vector2(0, 0.5f);
@@ -1472,7 +1472,7 @@ namespace Duskborn.UI
             nameRect.anchoredPosition = new Vector2(24, 0);
             nameRect.sizeDelta = new Vector2(0, 18);
 
-            // Quantidade (Verde se tem o suficiente, Vermelho se não)
+            // Quantity (green when sufficient, red otherwise).
             bool enough = current >= required;
             string countColor = enough ? "#4ade80" : "#f87171";
             string countText = $"<color={countColor}>{current}</color> / {required}";
@@ -1488,7 +1488,7 @@ namespace Duskborn.UI
             return rowGO;
         }
 
-        // ── Utilitários UI Básicos ─────────────────────────────────────────────
+        // Basic UI Utilities
 
         private void ConfigureScroll(ScrollRect scrollRect)
         {
@@ -1552,12 +1552,12 @@ namespace Duskborn.UI
         {
             return category switch
             {
-                "Armas" => new Color(0.92f, 0.48f, 0.28f),
-                "Ferramentas" => new Color(0.52f, 0.72f, 0.88f),
-                "Armadura" => new Color(0.62f, 0.72f, 0.82f),
-                "Acessórios" => new Color(0.94f, 0.72f, 0.28f),
-                "Consumíveis" => new Color(0.48f, 0.84f, 0.62f),
-                "Materiais" => new Color(0.62f, 0.78f, 0.50f),
+                "Weapons" => new Color(0.92f, 0.48f, 0.28f),
+                "Tools" => new Color(0.52f, 0.72f, 0.88f),
+                "Armor" => new Color(0.62f, 0.72f, 0.82f),
+                "Accessories" => new Color(0.94f, 0.72f, 0.28f),
+                "Consumables" => new Color(0.48f, 0.84f, 0.62f),
+                "Materials" => new Color(0.62f, 0.78f, 0.50f),
                 _ => new Color(0.60f, 0.66f, 0.78f)
             };
         }
@@ -1635,7 +1635,7 @@ namespace Duskborn.UI
             return go;
         }
 
-        // ── Recursos Padrão e Áudio ───────────────────────────────────────────
+        // Default Resources and Audio
 
         private void LoadDefaultRecipes()
         {

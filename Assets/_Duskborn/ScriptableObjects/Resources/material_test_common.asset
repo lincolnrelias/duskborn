@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InventorySystem.Data.MaterialDefinition
   id: test_common
   displayName: Pebble (Common)
-  description: Pedra de teste comum
+  description: "Common test stone"
   icon: {fileID: 0}
   dropPrefab: {fileID: 5752967656333843250, guid: e14a27b82f1640a4ba12891ec5418a01, type: 3}
   category: common

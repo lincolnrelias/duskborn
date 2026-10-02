@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_SwiftnessElixir
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_SwiftnessElixir
-  recipeName: Elixir da Rapina
-  description: Elixir da Rapina
-  category: "Consum\xEDveis"
+  recipeName: "Predator's Elixir"
+  description: "Predator's Elixir"
+  category: "Consumables"
   tier: 3
   requiredStation: 2
   isAlwaysDiscovered: 0

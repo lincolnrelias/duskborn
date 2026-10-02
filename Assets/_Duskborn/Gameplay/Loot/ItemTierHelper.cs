@@ -3,19 +3,19 @@ using UnityEngine;
 namespace Duskborn.Gameplay.Loot
 {
     /// <summary>
-    /// Utilitário central para o sistema de tiers/raridades (Comum -> Incomum -> Raro -> Épico -> Lendário).
-    /// Centraliza paleta de cores, intensidades de luz, dimensões de feixes de luz verticais (estilo Diablo)
+    /// Central utility for the tier / rarity system (Common -> Uncommon -> Rare -> Epic -> Legendary).
+    /// Centralizes the color palette, light intensities, and vertical beam dimensions (Diablo style).
     /// e nomenclatura localizada.
     /// </summary>
     public static class ItemTierHelper
     {
-        // Cores vibrantes ajustadas para o estilo low-poly/stylized do Duskborn com alto contraste visual
-        public static readonly Color ColorCommon    = new Color(0.88f, 0.90f, 0.94f, 1f); // Branco / Prata suave
-        public static readonly Color ColorUncommon  = new Color(0.18f, 0.88f, 0.35f, 1f); // Verde Esmeralda vibrante
-        public static readonly Color ColorRare      = new Color(0.22f, 0.58f, 1.00f, 1f); // Azul Safira cristalino
-        public static readonly Color ColorEpic      = new Color(0.72f, 0.28f, 1.00f, 1f); // Roxo Arcano profundo
-        public static readonly Color ColorLegendary = new Color(1.00f, 0.62f, 0.08f, 1f); // Laranja Solar / Ouro radiante
-        public static readonly Color ColorCursed    = new Color(0.95f, 0.22f, 0.22f, 1f); // Vermelho Carmesim
+        // Vibrant colors tuned for Duskborn's low-poly / stylized aesthetic with strong visual contrast.
+        public static readonly Color ColorCommon    = new Color(0.88f, 0.90f, 0.94f, 1f); // White / Soft Silver
+        public static readonly Color ColorUncommon  = new Color(0.18f, 0.88f, 0.35f, 1f); // Vibrant Emerald Green
+        public static readonly Color ColorRare      = new Color(0.22f, 0.58f, 1.00f, 1f); // Crystalline Sapphire Blue
+        public static readonly Color ColorEpic      = new Color(0.72f, 0.28f, 1.00f, 1f); // Deep Arcane Purple
+        public static readonly Color ColorLegendary = new Color(1.00f, 0.62f, 0.08f, 1f); // Solar orange / radiant gold.
+        public static readonly Color ColorCursed    = new Color(0.95f, 0.22f, 0.22f, 1f); // Crimson Red
 
         public static Color GetColor(ItemRarity rarity)
         {
@@ -33,7 +33,7 @@ namespace Duskborn.Gameplay.Loot
 
         public static float GetLightIntensity(ItemRarity rarity)
         {
-            // Luz suave ("dim light") para criar destaque sutil no chão sem ofuscar o ambiente
+            // Soft light ("dim light") creates a subtle ground highlight without overpowering the environment.
             return rarity switch
             {
                 ItemRarity.Common    => 0.20f,
@@ -62,7 +62,7 @@ namespace Duskborn.Gameplay.Loot
 
         public static float GetBeamHeight(ItemRarity rarity)
         {
-            // Altura do pilar vertical projetando-se aos céus (estilo Diablo / ARPG skyward beams)
+            // Vertical pillar height extending toward the sky (Diablo / ARPG skyward beams).
             return rarity switch
             {
                 ItemRarity.Common    => 14.0f,
@@ -77,7 +77,7 @@ namespace Duskborn.Gameplay.Loot
 
         public static float GetBeamWidth(ItemRarity rarity)
         {
-            // Largura esguia e estilizada para formar um pilar de luz nítido e elegante em direção ao céu
+            // Slender stylized width for a crisp, elegant skyward light pillar.
             return rarity switch
             {
                 ItemRarity.Common    => 0.10f,
@@ -106,7 +106,7 @@ namespace Duskborn.Gameplay.Loot
 
         public static float GetHaloScale(ItemRarity rarity)
         {
-            // Disco no solo compacto e discreto para ancorar a presença do item sem inundar o chão
+            // Compact, subtle ground disc anchors the item's presence without flooding the ground.
             return rarity switch
             {
                 ItemRarity.Common    => 0.28f,
@@ -123,12 +123,12 @@ namespace Duskborn.Gameplay.Loot
         {
             return rarity switch
             {
-                ItemRarity.Common    => "Comum",
-                ItemRarity.Uncommon  => "Incomum",
-                ItemRarity.Rare      => "Raro",
-                ItemRarity.Epic      => "Épico",
-                ItemRarity.Legendary => "Lendário",
-                ItemRarity.Cursed    => "Amaldiçoado",
+                ItemRarity.Common    => "Common",
+                ItemRarity.Uncommon  => "Uncommon",
+                ItemRarity.Rare      => "Rare",
+                ItemRarity.Epic      => "Epic",
+                ItemRarity.Legendary => "Legendary",
+                ItemRarity.Cursed    => "Cursed",
                 _                    => rarity.ToString()
             };
         }
@@ -139,9 +139,9 @@ namespace Duskborn.Gameplay.Loot
         }
 
         /// <summary>
-        /// Determina se o item deve levitar/flutuar no ar.
-        /// Apenas itens de raridade Épica ou superior (Épico, Lendário) permanecem suspensos no ar.
-        /// Os demais (Comum, Incomum e Raro) caem livremente no chão sob gravidade e física como de costume.
+        /// Determine whether the item should levitate / float in the air.
+        /// Only Epic or higher rarity items (Epic, Legendary) remain suspended in the air.
+        /// The others (Common, Uncommon, Rare) fall freely under gravity and physics as usual.
         /// </summary>
         public static bool ShouldFloatInAir(ItemRarity rarity)
         {
@@ -149,7 +149,7 @@ namespace Duskborn.Gameplay.Loot
         }
 
         /// <summary>
-        /// Retorna a altura de flutuação no ar acima da superfície do solo.
+        /// Return hover height above the ground surface.
         /// </summary>
         public static float GetHoverHeight(ItemRarity rarity)
         {

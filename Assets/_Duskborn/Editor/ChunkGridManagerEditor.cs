@@ -17,17 +17,17 @@ namespace Duskborn.Editor
             ChunkGridManager manager = (ChunkGridManager)target;
 
             EditorGUILayout.Space(10);
-            EditorGUILayout.LabelField("Mundos Pré-Configurados (Presets Prontos)", EditorStyles.boldLabel);
-            EditorGUILayout.HelpBox("Clique em qualquer preset abaixo para carregar a configuração e gerar o mundo completo automaticamente:", MessageType.None);
+            EditorGUILayout.LabelField("Preconfigured Worlds (Ready Presets)", EditorStyles.boldLabel);
+            EditorGUILayout.HelpBox("Click any preset below to load its configuration and automatically generate the complete world:", MessageType.None);
 
             EditorGUILayout.BeginHorizontal();
             GUI.backgroundColor = new Color(0.35f, 0.85f, 0.95f);
-            if (GUILayout.Button("🏝️ Ilha Náufragos", GUILayout.Height(28)))
+            if (GUILayout.Button("🏝️ Castaway Island", GUILayout.Height(28)))
             {
                 ApplyPreset(manager, "Assets/_Duskborn/ScriptableObjects/World/TerrainConfig_ArchipelagoIslands.asset");
             }
             GUI.backgroundColor = new Color(0.95f, 0.75f, 0.35f);
-            if (GUILayout.Button("⚔️ Platôs Combate", GUILayout.Height(28)))
+            if (GUILayout.Button("⚔️ Combat Plateaus", GUILayout.Height(28)))
             {
                 ApplyPreset(manager, "Assets/_Duskborn/ScriptableObjects/World/TerrainConfig_TerracedPlateaus.asset");
             }
@@ -35,12 +35,12 @@ namespace Duskborn.Editor
 
             EditorGUILayout.BeginHorizontal();
             GUI.backgroundColor = new Color(0.75f, 0.65f, 0.95f);
-            if (GUILayout.Button("⛰️ Vale dos Titãs", GUILayout.Height(28)))
+            if (GUILayout.Button("⛰️ Valley of Titans", GUILayout.Height(28)))
             {
                 ApplyPreset(manager, "Assets/_Duskborn/ScriptableObjects/World/TerrainConfig_SteepMountains.asset");
             }
             GUI.backgroundColor = new Color(0.55f, 0.88f, 0.45f);
-            if (GUILayout.Button("🌾 Planícies Ermas", GUILayout.Height(28)))
+            if (GUILayout.Button("🌾 Barren Plains", GUILayout.Height(28)))
             {
                 ApplyPreset(manager, "Assets/_Duskborn/ScriptableObjects/World/TerrainConfig_RollingPlains.asset");
             }
@@ -53,37 +53,37 @@ namespace Duskborn.Editor
             GUI.backgroundColor = Color.white;
 
             EditorGUILayout.Space(12);
-            EditorGUILayout.LabelField("Controles de Terreno & Semente", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Terrain & Seed Controls", EditorStyles.boldLabel);
 
             if (manager.config == null)
             {
-                EditorGUILayout.HelpBox("Atribua um asset de LowPolyTerrainConfig acima para gerar o terreno.", MessageType.Warning);
+                EditorGUILayout.HelpBox("Assign a LowPolyTerrainConfig asset above to generate terrain.", MessageType.Warning);
             }
             if (manager.vertexColorMaterial == null)
             {
-                EditorGUILayout.HelpBox("Atribua um Material de cores de vértice (M_TerrainLowPoly) acima.", MessageType.Info);
+                EditorGUILayout.HelpBox("Assign a vertex color material (M_TerrainLowPoly) above.", MessageType.Info);
             }
             if (manager.propsConfig == null)
             {
-                EditorGUILayout.HelpBox("Atribua um asset de WorldPropsConfig acima para posicionar recursos, baús e a bancada.", MessageType.Info);
+                EditorGUILayout.HelpBox("Assign a WorldPropsConfig asset above to place resources, chests, and the workbench.", MessageType.Info);
             }
 
             if (manager.useRandomSeed)
             {
-                EditorGUILayout.HelpBox("🎲 Modo Aleatório ATIVO: Uma nova semente será sorteada automaticamente a cada clique em 'Gerar Terreno'.", MessageType.None);
+                EditorGUILayout.HelpBox("🎲 Random Mode ACTIVE: A new seed is automatically selected each time you click 'Generate Terrain'.", MessageType.None);
             }
 
             GUI.enabled = manager.config != null;
 
             // Generate with current settings
             GUI.backgroundColor = new Color(0.35f, 0.85f, 0.35f);
-            string generateLabel = manager.useRandomSeed 
-                ? "🎲 Gerar Terreno & Props (com Nova Semente Aleatória)" 
-                : $"Gerar Terreno & Props (Seed: {manager.customSeed})";
+            string generateLabel = manager.useRandomSeed
+                ? "🎲 Generate Terrain & Props (New Random Seed)"
+                : $"Generate Terrain & Props (Seed: {manager.customSeed})";
 
             if (GUILayout.Button(generateLabel, GUILayout.Height(34)))
             {
-                Undo.RecordObject(manager, "Gerar Terreno Low-Poly");
+                Undo.RecordObject(manager, "Generate Low-Poly Terrain");
                 manager.GenerateGrid();
                 manager.EnsureNavMeshSurface();
                 if (manager.navMeshSurface != null && !Application.isPlaying)
@@ -100,9 +100,9 @@ namespace Duskborn.Editor
 
             // Quick button to force a new random seed regardless of toggle
             GUI.backgroundColor = new Color(0.35f, 0.75f, 0.95f);
-            if (GUILayout.Button("🎲 Sortear Nova Semente e Regerar Tudo", GUILayout.Height(28)))
+            if (GUILayout.Button("🎲 Randomize Seed and Regenerate All", GUILayout.Height(28)))
             {
-                Undo.RecordObject(manager, "Sortear Semente e Gerar Terreno");
+                Undo.RecordObject(manager, "Randomize Seed and Generate Terrain");
                 manager.customSeed = Random.Range(1, 9999999);
                 manager.GenerateGrid();
                 manager.EnsureNavMeshSurface();
@@ -122,14 +122,14 @@ namespace Duskborn.Editor
             if (manager.propsConfig != null)
             {
                 int currentPropsSeed = manager.propsSeed != 0 ? manager.propsSeed : manager.customSeed;
-                string regenPropsLabel = manager.useRandomSeed 
-                    ? "🎲 Regerar Apenas Props (Nova Semente Aleatória)" 
-                    : $"🌲 Regerar Apenas Props (Seed: {currentPropsSeed})";
+                string regenPropsLabel = manager.useRandomSeed
+                    ? "🎲 Regenerate Props Only (New Random Seed)"
+                    : $"🌲 Regenerate Props Only (Seed: {currentPropsSeed})";
 
                 GUI.backgroundColor = new Color(0.85f, 0.65f, 0.25f);
                 if (GUILayout.Button(regenPropsLabel, GUILayout.Height(28)))
                 {
-                    Undo.RecordObject(manager, "Regerar Apenas Props");
+                    Undo.RecordObject(manager, "Regenerate Props Only");
                     manager.RegeneratePropsOnly(manager.useRandomSeed);
                     EditorUtility.SetDirty(manager);
                     if (!Application.isPlaying)
@@ -139,9 +139,9 @@ namespace Duskborn.Editor
                 }
 
                 GUI.backgroundColor = new Color(0.95f, 0.75f, 0.35f);
-                if (GUILayout.Button("🎲 Sortear Nova Semente e Regerar Props", GUILayout.Height(26)))
+                if (GUILayout.Button("🎲 Randomize Seed and Regenerate Props", GUILayout.Height(26)))
                 {
-                    Undo.RecordObject(manager, "Sortear Semente e Regerar Props");
+                    Undo.RecordObject(manager, "Randomize Seed and Regenerate Props");
                     manager.propsSeed = Random.Range(1, 9999999);
                     manager.RegeneratePropsOnly(false);
                     EditorUtility.SetDirty(manager);
@@ -155,9 +155,9 @@ namespace Duskborn.Editor
             if (manager.generateFoliage)
             {
                 GUI.backgroundColor = new Color(0.45f, 0.85f, 0.35f);
-                if (GUILayout.Button("🌾 Regerar Apenas Folhagem (Grama & Arbustos)", GUILayout.Height(28)))
+                if (GUILayout.Button("🌾 Regenerate Foliage Only (Grass & Shrubs)", GUILayout.Height(28)))
                 {
-                    Undo.RecordObject(manager, "Regerar Folhagem");
+                    Undo.RecordObject(manager, "Regenerate Foliage");
                     manager.RegenerateFoliageOnly();
                     EditorUtility.SetDirty(manager);
                     if (!Application.isPlaying)
@@ -172,17 +172,17 @@ namespace Duskborn.Editor
                 var occ = manager.propsPlacer.OccupancyMap;
                 int occCount = occ != null ? occ.Count : 0;
                 EditorGUILayout.Space(4);
-                EditorGUILayout.HelpBox($"📍 Mapa de Ocupação Espacial: {occCount} registros ativos (Santuário, Clareiras, Recursos Sólidos e Copas). Folhagem configurada para zero sobreposição.", MessageType.Info);
+                EditorGUILayout.HelpBox($"📍 Spatial Occupancy Map: {occCount} active records (Sanctuary, Clearings, Solid Resources, and Canopies). Foliage configured for zero overlap.", MessageType.Info);
 
                 GUI.backgroundColor = new Color(0.35f, 0.75f, 0.95f);
-                if (GUILayout.Button("🧪 Executar Testes de Validação (Ocupação & Folhagem)", GUILayout.Height(24)))
+                if (GUILayout.Button("🧪 Run Validation Tests (Occupancy & Foliage)", GUILayout.Height(24)))
                 {
                     SpatialOccupancyMapTests.RunAllTests();
                 }
 
                 EditorGUILayout.Space(4);
                 GUI.backgroundColor = new Color(0.85f, 0.45f, 0.95f);
-                if (GUILayout.Button("🔨 Reimportar & Validar Modelos/Prefabs de Recursos", GUILayout.Height(28)))
+                if (GUILayout.Button("🔨 Reimport & Validate Resource Models / Prefabs", GUILayout.Height(28)))
                 {
                     ReimportAndValidateResourceNodes(manager);
                 }
@@ -191,16 +191,16 @@ namespace Duskborn.Editor
             if (manager.generateWaterPlane)
             {
                 EditorGUILayout.Space(6);
-                EditorGUILayout.LabelField("Controle de Altura da Água (Tempo Real)", EditorStyles.boldLabel);
+                EditorGUILayout.LabelField("Water Height Control (Real Time)", EditorStyles.boldLabel);
                 float currentEffective = manager.EffectiveWaterLevel;
                 string baseLevelStr = manager.config != null ? $"{manager.config.waterLevel:F1}m" : "N/A";
-                EditorGUILayout.HelpBox($"Nível Base (Config): {baseLevelStr}  |  Nível Efetivo Atual: {currentEffective:F1}m", MessageType.None);
+                EditorGUILayout.HelpBox($"Base Level (Config): {baseLevelStr}  |  Current Effective Level: {currentEffective:F1}m", MessageType.None);
 
                 EditorGUI.BeginChangeCheck();
-                float newOffset = EditorGUILayout.Slider("Ajuste de Altura (Offset)", manager.waterHeightOffset, -6f, 10f);
+                float newOffset = EditorGUILayout.Slider("Height Adjustment (Offset)", manager.waterHeightOffset, -6f, 10f);
                 if (EditorGUI.EndChangeCheck())
                 {
-                    Undo.RecordObject(manager, "Ajustar Altura da Água");
+                    Undo.RecordObject(manager, "Adjust Water Height");
                     manager.waterHeightOffset = newOffset;
                     manager.UpdateWaterPlanePosition();
                     EditorUtility.SetDirty(manager);
@@ -211,9 +211,9 @@ namespace Duskborn.Editor
                 }
 
                 GUI.backgroundColor = new Color(0.35f, 0.75f, 0.95f);
-                if (GUILayout.Button("🌊 Regerar Malha do Plano de Água", GUILayout.Height(26)))
+                if (GUILayout.Button("🌊 Regenerate Water Plane Mesh", GUILayout.Height(26)))
                 {
-                    Undo.RecordObject(manager, "Regerar Plano de Água");
+                    Undo.RecordObject(manager, "Regenerate Water Plane");
                     manager.GenerateWaterPlane();
                     EditorUtility.SetDirty(manager);
                     if (!Application.isPlaying)
@@ -225,7 +225,7 @@ namespace Duskborn.Editor
 
             GUI.backgroundColor = Color.white;
             EditorGUILayout.Space(8);
-            EditorGUILayout.LabelField("Navegação & AI (NavMesh)", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Navigation & AI (NavMesh)", EditorStyles.boldLabel);
 
             var surface = manager.navMeshSurface != null ? manager.navMeshSurface : manager.GetComponent<NavMeshSurface>();
             bool hasSurface = surface != null;
@@ -233,11 +233,11 @@ namespace Duskborn.Editor
 
             if (!hasSurface)
             {
-                EditorGUILayout.HelpBox("⚠️ Nenhum NavMeshSurface detectado neste GameObject.", MessageType.Warning);
+                EditorGUILayout.HelpBox("⚠️ No NavMeshSurface detected on this GameObject.", MessageType.Warning);
                 GUI.backgroundColor = new Color(1f, 0.8f, 0.3f);
-                if (GUILayout.Button("+ Adicionar & Configurar NavMeshSurface", GUILayout.Height(26)))
+                if (GUILayout.Button("+ Add and Configure NavMeshSurface", GUILayout.Height(26)))
                 {
-                    Undo.RecordObject(manager.gameObject, "Adicionar NavMeshSurface");
+                    Undo.RecordObject(manager.gameObject, "Add NavMeshSurface");
                     manager.EnsureNavMeshSurface();
                     EditorUtility.SetDirty(manager.gameObject);
                     if (!Application.isPlaying)
@@ -250,19 +250,19 @@ namespace Duskborn.Editor
             {
                 if (hasBakedData)
                 {
-                    EditorGUILayout.HelpBox($"✅ NavMesh Ativo e Válido! ({surface.navMeshData.name})", MessageType.Info);
+                    EditorGUILayout.HelpBox($"✅ NavMesh Active and Valid! ({surface.navMeshData.name})", MessageType.Info);
                 }
                 else
                 {
-                    EditorGUILayout.HelpBox("⚠️ NavMeshSurface presente, mas ainda sem malha assada. Clique no botão abaixo para gerar.", MessageType.Warning);
+                    EditorGUILayout.HelpBox("⚠️ NavMeshSurface exists but has no baked mesh yet. Click the button below to generate one.", MessageType.Warning);
                 }
             }
 
             // NavMesh Bake Button
             GUI.backgroundColor = new Color(0.25f, 0.7f, 1f);
-            if (GUILayout.Button("Assar / Recalcular NavMesh (Rebake)", GUILayout.Height(30)))
+            if (GUILayout.Button("Bake / Recalculate NavMesh", GUILayout.Height(30)))
             {
-                Undo.RecordObject(manager, "Assar NavMesh");
+                Undo.RecordObject(manager, "Bake NavMesh");
                 manager.EnsureNavMeshSurface();
                 manager.RebuildNavMesh();
 
@@ -278,11 +278,11 @@ namespace Duskborn.Editor
             if (hasBakedData)
             {
                 GUI.backgroundColor = new Color(0.85f, 0.4f, 0.4f);
-                if (GUILayout.Button("Limpar Dados do NavMesh", GUILayout.Height(22)))
+                if (GUILayout.Button("Clear NavMesh Data", GUILayout.Height(22)))
                 {
                     if (surface != null)
                     {
-                        Undo.RecordObject(surface, "Limpar NavMesh");
+                        Undo.RecordObject(surface, "Clear NavMesh");
                         NavMeshAssetManager.instance.ClearSurfaces(new UnityEngine.Object[] { surface });
                         EditorUtility.SetDirty(surface);
                         if (!Application.isPlaying)
@@ -297,9 +297,9 @@ namespace Duskborn.Editor
 
             // Clear button
             GUI.backgroundColor = new Color(0.95f, 0.4f, 0.4f);
-            if (GUILayout.Button("Limpar Terreno", GUILayout.Height(26)))
+            if (GUILayout.Button("Clear Terrain", GUILayout.Height(26)))
             {
-                Undo.RecordObject(manager, "Limpar Terreno Low-Poly");
+                Undo.RecordObject(manager, "Clear Low-Poly Terrain");
                 manager.ClearGrid();
                 EditorUtility.SetDirty(manager);
                 if (!Application.isPlaying)
@@ -317,7 +317,7 @@ namespace Duskborn.Editor
             var preset = AssetDatabase.LoadAssetAtPath<LowPolyTerrainConfig>(assetPath);
             if (preset != null)
             {
-                Undo.RecordObject(manager, "Aplicar Preset de Terreno");
+                Undo.RecordObject(manager, "Apply Terrain Preset");
                 manager.config = preset;
                 manager.GenerateGrid();
                 manager.EnsureNavMeshSurface();
@@ -331,11 +331,11 @@ namespace Duskborn.Editor
                 {
                     EditorSceneManager.MarkSceneDirty(manager.gameObject.scene);
                 }
-                Debug.Log($"[ChunkGridManager] Preset '{preset.name}' aplicado e mundo regerado com sucesso.");
+                Debug.Log($"[ChunkGridManager] Preset '{preset.name}' applied and world successfully regenerated.");
             }
             else
             {
-                Debug.LogError($"[ChunkGridManagerEditor] Não foi possível carregar o preset em: {assetPath}");
+                Debug.LogError($"[ChunkGridManagerEditor] Could not load preset at: {assetPath}");
             }
         }
 
@@ -410,7 +410,7 @@ namespace Duskborn.Editor
                 var go = AssetDatabase.LoadAssetAtPath<GameObject>(path);
                 if (go == null)
                 {
-                    sb.AppendLine($"❌ {path}: Falha ao carregar Prefab!");
+                    sb.AppendLine($"❌ {path}: Failed to load prefab!");
                     continue;
                 }
 
@@ -424,19 +424,19 @@ namespace Duskborn.Editor
                 bool hasCol = col != null;
                 bool hasNob = nob != null && nob.PrefabId != FishNet.Object.NetworkObject.UNSET_PREFABID_VALUE;
 
-                string status = (hasMesh && hasMat && hasCol && hasNob) ? "✅ OK" : "⚠️ AVISO";
+                string status = (hasMesh && hasMat && hasCol && hasNob) ? "✅ OK" : "⚠️ WARNING";
                 if (hasMesh && hasMat && hasCol && hasNob) totalOk++;
 
-                string meshInfo = hasMesh ? $"Mesh: '{mf.sharedMesh.name}' ({mf.sharedMesh.vertexCount} verts)" : "SEM MALHA!";
-                string matInfo = hasMat ? $"Mat: '{mr.sharedMaterial.name}'" : "SEM MATERIAL!";
-                string nobInfo = hasNob ? $"PrefabId: {nob.PrefabId}" : "NetworkObject PENDENTE";
+                string meshInfo = hasMesh ? $"Mesh: '{mf.sharedMesh.name}' ({mf.sharedMesh.vertexCount} verts)" : "NO MESH!";
+                string matInfo = hasMat ? $"Mat: '{mr.sharedMaterial.name}'" : "NO MATERIAL!";
+                string nobInfo = hasNob ? $"PrefabId: {nob.PrefabId}" : "NetworkObject PENDING";
 
                 sb.AppendLine($"{status} | {go.name,-24} | {meshInfo,-32} | {matInfo,-24} | {nobInfo}");
             }
 
-            sb.AppendLine($"Resultado: {totalOk}/{prefabPaths.Length} prefabs 100% validados e sincronizados.");
+            sb.AppendLine($"Result: {totalOk}/{prefabPaths.Length} prefabs fully validated and synchronized.");
             Debug.Log(sb.ToString());
-            EditorUtility.DisplayDialog("Validação de Modelos", $"Validação concluída: {totalOk}/{prefabPaths.Length} prefabs validados com sucesso!\nConsulte a Console para o relatório completo.", "OK");
+            EditorUtility.DisplayDialog("Model Validation", $"Validation complete: {totalOk}/{prefabPaths.Length} prefabs successfully validated!\nSee the Console for the full report.", "OK");
         }
     }
 }

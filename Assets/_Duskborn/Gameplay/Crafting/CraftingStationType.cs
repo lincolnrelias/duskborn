@@ -1,21 +1,21 @@
 namespace Duskborn.Gameplay.Crafting
 {
     /// <summary>
-    /// Tipos de estações de trabalho de fabricação no Duskborn.
-    /// Cada estação possui sua própria especialidade e receitas dedicadas.
+    /// Crafting workstation types in Duskborn.
+    /// Each station has its own specialty and dedicated recipes.
     /// </summary>
     public enum CraftingStationType
     {
-        /// <summary>Bancada inicial: ferramentas básicas, armaduras de fibra, madeira e curtição.</summary>
-        Bancada = 0,
+        /// <summary>Starting workbench: basic tools, fiber armor, wood, and tanning.</summary>
+        Workbench = 0,
 
-        /// <summary>Forja de fundição: barras de ferro, armas pesadas, armaduras de placas e ligas.</summary>
-        Forja = 1,
+        /// <summary>Smelting forge: iron bars, heavy weapons, plate armor, and alloys.</summary>
+        Forge = 1,
 
-        /// <summary>Caldeirão alquímico: tônicos, elixires, bombas, óleos elementares e armadilhas.</summary>
-        Caldeirao = 2,
+        /// <summary>Alchemical cauldron: tonics, elixirs, bombs, elemental oils, and traps.</summary>
+        Cauldron = 2,
 
-        /// <summary>Mesa arcana: lapidação de cristais arcanos, jóias, cajados e relíquias do Espinheiro.</summary>
-        MesaArcana = 3
+        /// <summary>Arcane table: cutting arcane crystals, jewelry, staves, and Thornheart relics.</summary>
+        ArcaneTable = 3
     }
 }

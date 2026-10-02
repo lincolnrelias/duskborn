@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_HeavyIronHelm
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_HeavyIronHelm
-  recipeName: Elmo de Ferro Batido
-  description: Elmo de Ferro Batido
-  category: Armadura
+  recipeName: "Hammered Iron Helm"
+  description: "Hammered Iron Helm"
+  category: "Armor"
   tier: 3
   requiredStation: 1
   isAlwaysDiscovered: 0

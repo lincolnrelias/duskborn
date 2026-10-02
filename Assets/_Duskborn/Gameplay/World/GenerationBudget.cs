@@ -4,9 +4,9 @@ using System.Diagnostics;
 namespace Duskborn.Gameplay.World
 {
     /// <summary>
-    /// Gerenciador de orçamento de tempo por quadro (Frame Budgeting).
-    /// Permite fatiar operações computacionais pesadas (como relevo fractal, raycasts e montagem de malhas)
-    /// ao longo de vários frames para eliminar engasgos (stuttering) e manter uma taxa de 60+ FPS constante.
+    /// Per-frame time budget manager (Frame Budgeting).
+    /// Allows heavy operations (such as fractal terrain, raycasts, and mesh assembly) to be sliced
+    /// across multiple frames to eliminate stuttering and maintain consistent 60+ FPS.
     /// </summary>
     public class GenerationBudget
     {
@@ -14,9 +14,9 @@ namespace Duskborn.Gameplay.World
         private readonly float _maxMillisecondsPerFrame;
 
         /// <summary>
-        /// Inicializa o controlador de orçamento com um limite em milissegundos por quadro (padrão: 8ms, metade de um frame a 60 FPS).
+        /// Initialize the budget controller with a per-frame millisecond limit (default: 8ms, half a frame at 60 FPS).
         /// </summary>
-        /// <param name="maxMillisecondsPerFrame">Tempo máximo em ms antes de ceder o frame ao Unity.</param>
+        /// <param name="maxMillisecondsPerFrame">Maximum time in ms before yielding the frame to Unity.</param>
         public GenerationBudget(float maxMillisecondsPerFrame = 8f)
         {
             _maxMillisecondsPerFrame = maxMillisecondsPerFrame;
@@ -24,7 +24,7 @@ namespace Duskborn.Gameplay.World
         }
 
         /// <summary>
-        /// Reinicia o cronômetro para o frame atual.
+        /// Restart the timer for the current frame.
         /// </summary>
         public void Reset()
         {
@@ -32,8 +32,8 @@ namespace Duskborn.Gameplay.World
         }
 
         /// <summary>
-        /// Verifica se o limite de tempo do frame atual foi atingido.
-        /// Caso tenha sido atingido, reinicia o cronômetro e retorna true, sinalizando que a rotina deve dar 'yield return null'.
+        /// Check whether the current frame's time limit has been reached.
+        /// If reached, restart the timer and return true, signaling the routine to use 'yield return null'.
         /// </summary>
         public bool ShouldYield()
         {
@@ -46,7 +46,7 @@ namespace Duskborn.Gameplay.World
         }
 
         /// <summary>
-        /// Helper que cede a execução ao Unity por um frame e reseta o cronômetro.
+        /// Helper yielding execution to Unity for one frame and resetting the timer.
         /// </summary>
         public IEnumerator YieldFrame()
         {

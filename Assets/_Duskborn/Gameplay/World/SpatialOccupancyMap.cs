@@ -5,18 +5,18 @@ using UnityEngine;
 namespace Duskborn.Gameplay.World
 {
     /// <summary>
-    /// Tipos de ocupação espacial no mapa do mundo.
+    /// Spatial occupancy types on the world map.
     /// </summary>
     public enum OccupancyType
     {
-        Resource_Solid,   // Obstáculo físico sólido (tronco de árvore, rocha, baú, bancada)
-        Resource_Canopy,  // Área sombreada/influência da copa da árvore (sem bloqueio físico, estimula folhagem)
-        Combat_Clearing,  // Clareira aberta preservada para combate e movimentação
-        Player_Sanctuary  // Santuário central inicial do jogador
+        Resource_Solid,   // Solid physical obstacle (tree trunk, rock, chest, workbench).
+        Resource_Canopy,  // Tree canopy shade / influence area (no physical blocking, encourages foliage).
+        Combat_Clearing,  // Open clearing preserved for combat and movement.
+        Player_Sanctuary  // Player's starting central sanctuary.
     }
 
     /// <summary>
-    /// Registro de ocupação de um nó ou área no plano XZ.
+    /// Node or area occupancy record on the XZ plane.
     /// </summary>
     [Serializable]
     public struct OccupancyEntry
@@ -36,9 +36,9 @@ namespace Duskborn.Gameplay.World
     }
 
     /// <summary>
-    /// Coordenador Espacial Compartilhado (Spatial Occupancy & Clustering Coordinator).
-    /// Indexa obstáculos físicos sólidos, copas de árvores e clareiras preservadas
-    /// usando uma grade espacial 2D rápida em memória para consultas O(1).
+    /// Spatial Coordinator (Spatial Occupancy & Clustering Coordinator).
+    /// Index solid physical obstacles, tree canopies, and preserved clearings
+    /// using a fast in-memory 2D spatial grid for O(1) queries.
     /// </summary>
     public class SpatialOccupancyMap
     {
@@ -69,7 +69,7 @@ namespace Duskborn.Gameplay.World
         }
 
         /// <summary>
-        /// Registra um objeto ou recurso no mapa de ocupação.
+        /// Register an object or resource in the occupancy map.
         /// </summary>
         public void Register(Vector3 worldPos, float solidRadius, float canopyRadius = 0f, OccupancyType type = OccupancyType.Resource_Solid)
         {
@@ -77,7 +77,7 @@ namespace Duskborn.Gameplay.World
         }
 
         /// <summary>
-        /// Registra um objeto ou recurso no mapa de ocupação 2D.
+        /// Register an object or resource in the 2D occupancy map.
         /// </summary>
         public void Register(Vector2 positionXZ, float solidRadius, float canopyRadius = 0f, OccupancyType type = OccupancyType.Resource_Solid)
         {
@@ -112,7 +112,7 @@ namespace Duskborn.Gameplay.World
         }
 
         /// <summary>
-        /// Registra uma clareira ou zona protegida.
+        /// Register a clearing or protected zone.
         /// </summary>
         public void RegisterClearing(Vector2 centerXZ, float radius, OccupancyType type = OccupancyType.Combat_Clearing)
         {
@@ -120,8 +120,8 @@ namespace Duskborn.Gameplay.World
         }
 
         /// <summary>
-        /// Retorna verdadeiro se o ponto fornecido estiver dentro do raio sólido de qualquer recurso/obstáculo
-        /// acrescido da margem de clearance especificada.
+        /// Return true if the supplied point is within the solid radius of any resource / obstacle.
+        /// plus the specified clearance margin.
         /// </summary>
         public bool IsSolidOccupied(Vector2 xz, float clearanceRadius = 0f)
         {
@@ -156,7 +156,7 @@ namespace Duskborn.Gameplay.World
         }
 
         /// <summary>
-        /// Retorna se o ponto fornecido está sob a copa de uma ou mais árvores e o peso de sombreamento (0 a 1).
+        /// Return whether the supplied point is under one or more tree canopies and its shade weight (0 to 1).
         /// </summary>
         public bool IsUnderCanopy(Vector2 xz, out float canopyWeight)
         {
@@ -199,7 +199,7 @@ namespace Duskborn.Gameplay.World
         }
 
         /// <summary>
-        /// Retorna verdadeiro se o ponto estiver contido em uma clareira protegida (Santuário ou Clareira de Combate).
+        /// Return true if the point is inside a protected clearing (Sanctuary or Combat Clearing).
         /// </summary>
         public bool IsInClearing(Vector2 xz, out OccupancyType clearingType)
         {
@@ -221,7 +221,7 @@ namespace Duskborn.Gameplay.World
         }
 
         /// <summary>
-        /// Retorna verdadeiro se o ponto estiver contido em qualquer clareira protegida.
+        /// Return true if the point is inside any protected clearing.
         /// </summary>
         public bool IsInClearing(Vector2 xz)
         {
@@ -229,7 +229,7 @@ namespace Duskborn.Gameplay.World
         }
 
         /// <summary>
-        /// Valida se um novo prop pode ser posicionado mantendo distância dos demais nós sólidos e das clareiras.
+        /// Validate whether a new prop can be placed while maintaining distance from other solid nodes and clearings.
         /// </summary>
         public bool CanPlaceProp(Vector2 xz, float solidRadius, float requiredSpacing)
         {

@@ -141,7 +141,7 @@ namespace Duskborn.Gameplay.Building
         }
 
         private int FuelBurnsPerLoadedFuel(CraftingRecipe recipe) =>
-            Definition.station == CraftingStationType.Forja && recipe.FuelIngredients.Count > 0 ? 2 : 1;
+            Definition.station == CraftingStationType.Forge && recipe.FuelIngredients.Count > 0 ? 2 : 1;
 
         private static int Amount(List<MaterialStack> stacks, string id)
         {

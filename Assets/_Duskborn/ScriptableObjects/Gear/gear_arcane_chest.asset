@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: gear_arcane_chest
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.GearDefinition
   id: gear_arcane_chest
-  displayName: Armadura Arcana
-  description: Armadura Arcana
+  displayName: "Arcane Armor"
+  description: "Arcane Armor"
   icon: {fileID: 2800000, guid: 9719a2ab276b4f53846cdb6a85badc8c, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 0

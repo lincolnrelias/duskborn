@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_WindBoots
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_WindBoots
-  recipeName: Botas do Vendaval
-  description: Botas do Vendaval
-  category: Armadura
+  recipeName: "Gale Boots"
+  description: "Gale Boots"
+  category: "Armor"
   tier: 4
   requiredStation: 3
   isAlwaysDiscovered: 0

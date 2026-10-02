@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_FiberLegs
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_FiberLegs
-  recipeName: "Cal\xE7as de Fibra"
-  description: "Cal\xE7as de Fibra"
-  category: Armadura
+  recipeName: "Fiber Trousers"
+  description: "Fiber Trousers"
+  category: "Armor"
   tier: 2
   requiredStation: 0
   isAlwaysDiscovered: 1

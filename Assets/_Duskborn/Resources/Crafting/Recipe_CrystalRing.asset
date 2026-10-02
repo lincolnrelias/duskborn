@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_CrystalRing
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_CrystalRing
-  recipeName: Anel de Cristal Puro
-  description: Anel de Cristal Puro
-  category: "Acess\xF3rios"
+  recipeName: "Pure Crystal Ring"
+  description: "Pure Crystal Ring"
+  category: "Accessories"
   tier: 4
   requiredStation: 3
   isAlwaysDiscovered: 0

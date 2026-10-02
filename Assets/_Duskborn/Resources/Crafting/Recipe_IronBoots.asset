@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_IronBoots
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_IronBoots
-  recipeName: Botas de Ferro
-  description: Botas de Ferro
-  category: Armadura
+  recipeName: "Iron Boots"
+  description: "Iron Boots"
+  category: "Armor"
   tier: 2
   isAlwaysDiscovered: 0
   outputItem: {fileID: 11400000, guid: 7479d4424d027434986a4f473387534a, type: 2}

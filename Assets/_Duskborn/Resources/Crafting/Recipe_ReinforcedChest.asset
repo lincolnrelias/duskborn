@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_ReinforcedChest
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_ReinforcedChest
-  recipeName: "Armadura Refor\xE7ada"
-  description: "Armadura Refor\xE7ada"
-  category: Armadura
+  recipeName: "Reinforced Armor"
+  description: "Reinforced Armor"
+  category: "Armor"
   tier: 3
   isAlwaysDiscovered: 0
   outputItem: {fileID: 11400000, guid: 41deac0d2bd99c642b03326a22f78ab2, type: 2}

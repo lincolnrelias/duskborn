@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_HeavyBoots
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_HeavyBoots
-  recipeName: "Botas de A\xE7o Pesado"
-  description: "Botas de A\xE7o Pesado"
-  category: Armadura
+  recipeName: "Heavy Steel Boots"
+  description: "Heavy Steel Boots"
+  category: "Armor"
   tier: 3
   requiredStation: 1
   isAlwaysDiscovered: 0

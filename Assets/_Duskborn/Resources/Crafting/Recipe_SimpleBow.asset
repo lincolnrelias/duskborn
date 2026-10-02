@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_SimpleBow
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_SimpleBow
-  recipeName: Arco Simples
-  description: Arco Simples
-  category: Armas
+  recipeName: Simple Bow
+  description: Simple Bow
+  category: "Weapons"
   tier: 1
   isAlwaysDiscovered: 1
   outputItem: {fileID: 11400000, guid: c4c56a0fcf2437566ec0298d24e48c13, type: 2}

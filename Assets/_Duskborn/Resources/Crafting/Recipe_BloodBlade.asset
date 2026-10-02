@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_BloodBlade
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_BloodBlade
-  recipeName: "L\xE2mina Sedenta de Sangue"
-  description: "L\xE2mina Sedenta de Sangue"
-  category: Armas
+  recipeName: "Bloodthirsty Blade"
+  description: "Bloodthirsty Blade"
+  category: "Weapons"
   tier: 4
   requiredStation: 3
   isAlwaysDiscovered: 0

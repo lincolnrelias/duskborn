@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_HeavyWaraxe
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_HeavyWaraxe
-  recipeName: Machado de Guerra Pesado
-  description: Machado de Guerra Pesado
-  category: Armas
+  recipeName: "Heavy War Axe"
+  description: "Heavy War Axe"
+  category: "Weapons"
   tier: 4
   requiredStation: 1
   isAlwaysDiscovered: 0

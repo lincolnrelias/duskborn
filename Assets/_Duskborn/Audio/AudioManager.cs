@@ -5,9 +5,9 @@ using UnityEngine;
 namespace Duskborn.Audio
 {
     /// <summary>
-    /// Gerenciador central de áudio do Duskborn.
-    /// Controla canais de volume (Master, Music, SFX, Ambience, UI), crossfade de trilhas musicais
-    /// e reprodução 2D e 3D com variação orgânica de pitch e volume.
+    /// Central Duskborn audio manager.
+    /// Controls volume channels (Master, Music, SFX, Ambience, UI), music track crossfades,
+    /// and 2D / 3D playback with organic pitch and volume variation.
     /// </summary>
     public class AudioManager : MonoBehaviour
     {
@@ -60,7 +60,7 @@ namespace Duskborn.Audio
         public float AmbienceVolume => ambienceVolume;
         public float UiVolume       => uiVolume;
 
-        // Fontes de áudio dedicadas
+        // Dedicated audio sources.
         private AudioSource _musicSourceA;
         private AudioSource _musicSourceB;
         private bool _activeSourceIsA = true;
@@ -70,7 +70,7 @@ namespace Duskborn.Audio
         private AudioSource _uiSource;
         private AudioSource _sfx2DSource;
 
-        // Pool de fontes 3D para evitar alocações constantes
+        // 3D source pool to avoid repeated allocations.
         private readonly List<AudioSource> _pool3D = new();
         private const int InitialPoolSize = 8;
 
@@ -204,7 +204,7 @@ namespace Duskborn.Audio
                 _ambienceSource.volume = masterVolume * ambienceVolume;
         }
 
-        // ── Trilha Sonora e Crossfade ──────────────────────────────────────────
+        // ── Soundtrack and Crossfade ──
 
         public void PlayMusic(AudioClip clip, float fadeDuration = 1.5f, bool loop = true)
         {
@@ -281,7 +281,7 @@ namespace Duskborn.Audio
             _musicCrossfadeRoutine = null;
         }
 
-        // ── Efeitos Sonoros 2D e UI ───────────────────────────────────────────
+        // ── 2D Sound Effects and UI ──
 
         public void PlaySfx(AudioClip clip, float volumeScale = 1.0f, float pitchJitter = 0.04f)
         {
@@ -298,7 +298,7 @@ namespace Duskborn.Audio
             _uiSource.PlayOneShot(clip, volumeScale * masterVolume * uiVolume);
         }
 
-        // ── Efeitos Sonoros 3D com Posicionamento ──────────────────────────────
+        // Positional 3D Sound Effects
 
         public AudioSource PlayAtPoint(AudioClip clip, Vector3 position, float volumeScale = 1.0f,
                                       float minDistance = 2f, float maxDistance = 40f, float pitchJitter = 0.05f,

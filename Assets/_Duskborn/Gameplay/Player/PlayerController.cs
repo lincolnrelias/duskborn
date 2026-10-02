@@ -257,7 +257,7 @@ namespace Duskborn.Gameplay.Player
         {
             float targetYaw = CameraYaw;
 
-            // O personagem acompanha o ângulo horizontal da câmera ao girar
+            // The character follows the camera's horizontal angle when turning.
             if (_rotationEnabled)
             {
                 Quaternion targetRot = Quaternion.Euler(0f, targetYaw, 0f);
@@ -271,13 +271,13 @@ namespace Duskborn.Gameplay.Player
                 Vector3 camForward = _camController != null ? _camController.CameraForward : transform.forward;
                 Vector3 camRight   = _camController != null ? _camController.CameraRight   : transform.right;
 
-                // Vetor de movimento relativo à orientação da câmera
+                // Movement vector relative to camera orientation.
                 Vector3 moveDir = camForward * _smoothedInput.y + camRight * _smoothedInput.x;
                 float waterMod = _waterInteraction != null ? _waterInteraction.SpeedModifier : 1f;
                 horizontalMove = moveDir * (_stats.MoveSpeed * waterMod);
             }
 
-            // Gravidade e velocidade vertical integradas em um único cálculo para manter _cc.velocity íntegro
+            // Integrate gravity and vertical speed in one calculation to preserve _cc.velocity.
             if (_cc.isGrounded && _velocity.y < 0f)
                 _velocity.y = -2f;
             else
@@ -289,15 +289,15 @@ namespace Duskborn.Gameplay.Player
 
         private void HandleGravity()
         {
-            // Integrado atomicamente em HandleMovement()
+            // Integrated atomically in HandleMovement().
         }
 
         private void UpdateAnimator()
         {
             if (_animator == null) return;
 
-            // O personagem alinha-se à câmera, então a entrada suavizada representa velocidade no espaço local:
-            // Y = frente/trás, X = strafe lateral.
+            // The character aligns with the camera, so smoothed input represents local-space velocity:
+            // Y = forward / backward, X = lateral strafe.
             _animator.SetFloat(HashVelocityX, _smoothedInput.x);
             _animator.SetFloat(HashVelocityY, _smoothedInput.y);
 
@@ -314,10 +314,10 @@ namespace Duskborn.Gameplay.Player
 
         public void SetInputEnabled(bool enabled) => _inputEnabled = enabled;
 
-        // Mantém o corpo voltado para a direção atual (usado pelo PlayerDodge para manter o rolamento alinhado).
+        // Keep the body facing the current direction (PlayerDodge uses this to keep the roll aligned).
         public void SetRotationEnabled(bool enabled) => _rotationEnabled = enabled;
 
-        // Direção de movimento no mundo relativa à câmera
+        // World movement direction relative to the camera.
         public Vector3 GetMoveDirectionWorld()
         {
             if (_moveInput.sqrMagnitude < 0.01f)

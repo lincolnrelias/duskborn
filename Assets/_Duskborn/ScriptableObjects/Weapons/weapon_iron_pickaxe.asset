@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: weapon_iron_pickaxe
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.WeaponDefinition
   id: weapon_iron_pickaxe
-  displayName: Picareta de Ferro
-  description: "Picareta de ferro temperado. Capaz de perfurar veios de ferro e estilha\xE7ar
-    cristais arcanos (+400%)."
+  displayName: "Iron Pickaxe"
+  description: "Tempered iron pickaxe. Pierces iron veins and shatters arcane crystals (+400%)."
   icon: {fileID: 2800000, guid: 2784489d28684f26a2a49741fb1378b2, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 0

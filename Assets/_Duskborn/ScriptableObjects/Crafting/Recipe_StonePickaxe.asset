@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_StonePickaxe
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: recipe_stone_pickaxe
-  recipeName: Picareta de Pedra
-  description: Picareta resistente de pedra. Causa dano massivo (+300%) a nos de pedra e minerios.
-  category: Ferramentas
+  recipeName: "Stone Pickaxe"
+  description: "Sturdy stone pickaxe. Deals massive damage (+300%) to stone and ore nodes."
+  category: "Tools"
   outputItem: {fileID: 11400000, guid: 0aa265baf59b4068bf539eadb27c59f5, type: 2}
   outputAmount: 1
   ingredients:

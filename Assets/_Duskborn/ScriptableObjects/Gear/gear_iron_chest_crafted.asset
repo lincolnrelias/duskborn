@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: gear_iron_chest_crafted
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.GearDefinition
   id: gear_iron_chest_crafted
-  displayName: Armadura de Ferro
-  description: Armadura de Ferro
+  displayName: "Iron Armor"
+  description: "Iron Armor"
   icon: {fileID: 2800000, guid: be4bac3ee54347a1be245e2d1c79a8c4, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 0

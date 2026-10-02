@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: material_crystal_powder
   m_EditorClassIdentifier: Assembly-CSharp::InventorySystem.Data.MaterialDefinition
   id: material_crystal_powder
-  displayName: Po de Cristal Purificado
-  description: Po cintilante moido a partir de cristais arcanos. Essencial para rituais e infusoes.
+  displayName: "Purified Crystal Powder"
+  description: "Shimmering powder ground from arcane crystals. Essential for rituals and infusions."
   icon: {fileID: 2800000, guid: e5762e097a2e49ca90d7f3c0547edfad, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 2

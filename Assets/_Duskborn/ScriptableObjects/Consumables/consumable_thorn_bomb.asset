@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: consumable_thorn_bomb
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.ConsumableDefinition
   id: consumable_thorn_bomb
-  displayName: Bomba de Espinhos
-  description: "Bomba alqu\xEDmica de estilha\xE7os. Aumenta a reflex\xE3o de espinhos
-    em +35% por 30 segundos."
+  displayName: "Thorn Bomb"
+  description: "Alchemical shrapnel bomb. Increases reflected thorns damage by +35% for 30 seconds."
   icon: {fileID: 2800000, guid: 33718cef75304df89b34888b6e354215, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 1
@@ -23,4 +22,4 @@ MonoBehaviour:
   effectValue: 0.35
   duration: 30
   maxStack: 3
-  effectDescription: +35% Dano de Espinhos refletido por 30s.
+  effectDescription: "+35% Reflected Thorns Damage for 30s."

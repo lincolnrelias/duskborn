@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: gear_arcane_robe
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.GearDefinition
   id: gear_arcane_robe
-  displayName: Veste de Seda Arcana
-  description: Veste de Seda Arcana
+  displayName: "Arcane Silk Robe"
+  description: "Arcane Silk Robe"
   icon: {fileID: 2800000, guid: ad660b21d1f340e1822e28fd69036dff, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 0

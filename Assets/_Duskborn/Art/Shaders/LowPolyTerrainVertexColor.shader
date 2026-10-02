@@ -75,22 +75,22 @@ Shader "Duskborn/LowPolyTerrainVertexColor"
                 float3 normalWS = normalize(input.normalWS);
                 Light mainLight = GetMainLight(TransformWorldToShadowCoord(input.positionWS));
                 
-                // Stylized Half-Lambert Cel Shading com Sombras Suaves
+                // Stylized Half-Lambert cel shading with soft shadows.
                 half NdotL = dot(normalWS, mainLight.direction);
                 half halfLambert = NdotL * 0.5 + 0.5;
                 half celDiffuse = smoothstep(_CelCutoff - _CelSmoothness, _CelCutoff + _CelSmoothness, halfLambert);
 
-                // Atenuação de sombras projetadas suave (preserva penumbra suave do URP)
+                // Smooth cast-shadow attenuation (preserves URP soft penumbra).
                 half shadowSoft = smoothstep(0.0, 1.0, mainLight.shadowAttenuation);
                 half lightFactor = celDiffuse * shadowSoft;
 
-                // Cor da sombra estilizada enriquecida com luz ambiente hemisférica suave
+                // Stylized shadow color enriched with soft hemispherical ambient light.
                 half3 ambientSH = SampleSH(normalWS);
                 half3 shadowColor = _ShadowTint.rgb * (ambientSH + half3(0.25, 0.25, 0.30));
                 half3 litLight = mainLight.color * _SunlightBoost;
                 half3 directLight = lerp(shadowColor, litLight, lightFactor);
 
-                // Subtle Sunlit Rim Light (apenas em superfícies expostas à luz)
+                // Subtle sunlit rim light (only on surfaces exposed to light).
                 float3 viewDirWS = normalize(GetCameraPositionWS() - input.positionWS);
                 half NdotV = 1.0 - saturate(dot(normalWS, viewDirWS));
                 half rim = pow(NdotV, _RimPower) * _RimIntensity * lightFactor;
@@ -98,7 +98,7 @@ Shader "Duskborn/LowPolyTerrainVertexColor"
                 half3 ambient = ambientSH * 0.40;
                 half3 finalColor = input.color.rgb * (directLight + ambient) + (rim * mainLight.color);
 
-                // Additional Lights (tochas, habilidades, lanternas)
+                // Additional Lights (torches, abilities, lanterns)
                 #if defined(_ADDITIONAL_LIGHTS)
                 uint addLightsCount = GetAdditionalLightsCount();
                 for (uint i = 0u; i < addLightsCount; ++i)
@@ -109,7 +109,7 @@ Shader "Duskborn/LowPolyTerrainVertexColor"
                 }
                 #endif
 
-                // Atmosfera / Neblina URP (Fog)
+                // URP Atmosphere / Fog
                 finalColor = MixFog(finalColor, input.fogFactor);
 
                 return half4(finalColor, input.color.a);

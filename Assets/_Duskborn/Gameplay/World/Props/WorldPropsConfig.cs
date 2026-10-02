@@ -6,64 +6,64 @@ namespace Duskborn.Gameplay.World
     [CreateAssetMenu(fileName = "WorldPropsConfig", menuName = "Duskborn/World/World Props Config")]
     public class WorldPropsConfig : ScriptableObject
     {
-        [Header("Clareira Central (Safe Spawn Zone)")]
-        [Tooltip("Raio em torno de (0,0) onde não serão geradas árvores ou rochas densas.")]
+        [Header("Central Clearing (Safe Spawn Zone)")]
+        [Tooltip("Radius around (0,0) where dense trees or rocks are not generated.")]
         public float centerClearingRadius = 10f;
 
-        [Tooltip("Prefab da bancada de trabalho inicial a ser posicionada na clareira central.")]
+        [Tooltip("Starting workbench prefab placed in the central clearing.")]
         public GameObject workbenchPrefab;
 
-        [Tooltip("Prefab da forja de fundição a ser posicionada na clareira central.")]
+        [Tooltip("Smelting forge prefab placed in the central clearing.")]
         public GameObject forgePrefab;
 
-        [Tooltip("Prefab do caldeirão alquímico a ser posicionado na clareira central.")]
+        [Tooltip("Alchemical cauldron prefab placed in the central clearing.")]
         public GameObject cauldronPrefab;
 
-        [Tooltip("Prefab da mesa arcana a ser posicionada na clareira central.")]
+        [Tooltip("Arcane table prefab placed in the central clearing.")]
         public GameObject arcaneTablePrefab;
 
-        [Tooltip("Prefab opcional para instanciar pontos de spawn de jogadores na clareira se não existirem na cena.")]
+        [Tooltip("Optional prefab for instantiating player spawn points in the clearing if absent from the scene.")]
         public GameObject playerSpawnPointPrefab;
 
-        [Tooltip("Quantidade de pontos de spawn de jogadores a serem gerados proceduralmente na clareira central.")]
+        [Tooltip("Number of player spawn points generated procedurally in the central clearing.")]
         [Range(1, 10)] public int playerSpawnPointsCount = 5;
 
-        [Tooltip("Raio em metros do círculo de spawn ao redor do centro da clareira.")]
+        [Tooltip("Spawn circle radius in meters around the clearing center.")]
         [Range(2f, 15f)] public float playerSpawnRadius = 6.5f;
 
-        [Header("Recursos Naturais (Resource Nodes)")]
-        [Tooltip("Definição ecológica de árvores (Madeira).")]
+        [Header("Natural Resources (Resource Nodes)")]
+        [Tooltip("Ecological tree definition (Wood).")]
         public PropDefinition treeProp;
 
-        [Tooltip("Definição ecológica de rochas comuns (Pedra).")]
+        [Tooltip("Ecological common rock definition (Stone).")]
         public PropDefinition stoneProp;
 
-        [Tooltip("Definição ecológica de minério de ferro (Iron Ore).")]
+        [Tooltip("Ecological iron ore definition.")]
         public PropDefinition ironProp;
 
-        [Tooltip("Definição ecológica de arbustos de fibra (Fiber).")]
+        [Tooltip("Ecological fiber shrub definition.")]
         public PropDefinition fiberProp;
 
-        [Tooltip("Props adicionais decorativos ou naturais (opcional).")]
+        [Tooltip("Additional decorative or natural props (optional).")]
         public PropDefinition[] extraProps;
 
-        [Header("Configuração de Baús (Chests)")]
-        [Tooltip("Prefab do baú interativo contendo Chest.cs.")]
+        [Header("Chest Configuration")]
+        [Tooltip("Interactive chest prefab containing Chest.cs.")]
         public GameObject chestPrefab;
 
-        [Tooltip("Quantidade total de baús a serem distribuídos pelo mapa.")]
+        [Tooltip("Total number of chests distributed across the map.")]
         [Range(1, 50)] public int totalChests = 8;
 
-        [Tooltip("Tabela de loot para baús básicos (próximos ao centro / raio <= 50%).")]
+        [Tooltip("Loot table for basic chests (near the center / radius <= 50%).")]
         public LootTable basicLootTable;
 
-        [Tooltip("Tabela de loot para baús raros (distantes do centro / raio > 50%).")]
+        [Tooltip("Loot table for rare chests (far from the center / radius > 50%).")]
         public LootTable rareLootTable;
 
-        [Tooltip("Custo mínimo em ouro para os baús mais próximos do centro.")]
+        [Tooltip("Minimum gold cost for chests closest to the center.")]
         public int minChestCost = 35;
 
-        [Tooltip("Custo máximo em ouro para os baús mais distantes ou nas bordas.")]
+        [Tooltip("Maximum gold cost for the farthest or boundary chests.")]
         public int maxChestCost = 150;
     }
 }

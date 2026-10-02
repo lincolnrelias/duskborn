@@ -5,60 +5,60 @@ namespace Duskborn.Effects
     [CreateAssetMenu(fileName = "HealthBarConfig", menuName = "Duskborn/Effects/Health Bar Config")]
     public class HealthBarConfig : ScriptableObject
     {
-        [Header("Cores (Medieval Fantasy / Crepúsculo)")]
-        [Tooltip("Vida plena: Esmeralda / Jade vibrante.")]
+        [Header("Colors (Medieval Fantasy / Dusk)")]
+        [Tooltip("Full health: vibrant Emerald / Jade.")]
         public Color fullColor  = new Color(0.18f, 0.80f, 0.44f, 1f);
-        [Tooltip("Vida moderada: Âmbar crepuscular / Ouro.")]
+        [Tooltip("Moderate health: twilight Amber / Gold.")]
         public Color midColor   = new Color(0.92f, 0.62f, 0.14f, 1f);
-        [Tooltip("Vida crítica: Rubi de sangue / Carmesim.")]
+        [Tooltip("Critical health: blood Ruby / Crimson.")]
         public Color lowColor   = new Color(0.85f, 0.20f, 0.18f, 1f);
-        [Tooltip("Fundo da calha: Tonalidade neutra para preservar o sprite da calha.")]
+        [Tooltip("Track background: neutral tint to preserve the track sprite.")]
         public Color bgColor    = Color.white;
-        [Tooltip("Rastro de dano fantasma: Brasa ardente do crepúsculo.")]
+        [Tooltip("Ghost damage trail: burning twilight ember.")]
         public Color ghostColor = new Color(1.0f,  0.58f, 0.16f, 0.85f);
-        [Tooltip("Tonalidade da moldura: Branca neutra para exibir arte estilizada de madeira e aço.")]
+        [Tooltip("Frame tint: neutral white to display stylized wood and steel artwork.")]
         public Color frameColor = Color.white;
-        [Tooltip("Base da moldura externa: Ferro forjado.")]
+        [Tooltip("Outer frame base: wrought iron.")]
         public Color ironColor  = new Color(0.14f, 0.16f, 0.20f, 1f);
 
-        [Header("Limiares de Transição")]
+        [Header("Transition Thresholds")]
         public float midThreshold = 0.5f;
         public float lowThreshold = 0.25f;
 
-        [Header("Dinâmica & Temporização")]
-        [Tooltip("Velocidade de decaimento suave da barra principal.")]
+        [Header("Dynamics & Timing")]
+        [Tooltip("Smooth decay speed of the main bar.")]
         public float drainSpeed      = 12f;
-        [Tooltip("Velocidade do rastro fantasma de brasa (efeito de impacto).")]
+        [Tooltip("Ember ghost trail speed (impact effect).")]
         public float ghostDrainSpeed = 2.0f;
-        [Tooltip("Tempo em segundos antes de iniciar o desvanecimento após dano.")]
+        [Tooltip("Time in seconds before fading begins after damage.")]
         public float fadeDelay       = 3.5f;
-        [Tooltip("Duração da animação de desvanecimento.")]
+        [Tooltip("Fade animation duration.")]
         public float fadeDuration    = 0.6f;
 
-        [Header("Posicionamento & Enquadramento")]
-        [Tooltip("Espaçamento vertical em unidades de mundo acima do topo do colisor/malha.")]
+        [Header("Positioning and Framing")]
+        [Tooltip("Vertical spacing in world units above the collider / mesh top.")]
         public float yOffset = 0.45f;
-        [Tooltip("Deslocamento horizontal em direção à câmera/jogador para exibir a barra à frente do objeto (objeto -> barra -> jogador).")]
+        [Tooltip("Horizontal offset toward the camera / player to display the bar in front of the object (object -> bar -> player).")]
         public float forwardOffset = 0.35f;
-        [Tooltip("Altura máxima permitida acima da base da entidade. Impede que nós altos (como pinheiros ou monólitos) joguem a barra fora do campo visual.")]
+        [Tooltip("Maximum height above the entity base. Prevents tall nodes (such as pines or monoliths) from pushing the bar out of view.")]
         public float maxHeightAboveBase = 3.2f;
-        [Tooltip("Prende a barra aos limites da tela visível caso o objeto seja alto ou a câmera aproxime.")]
+        [Tooltip("Clamp the bar to visible screen bounds when the object is tall or the camera approaches.")]
         public bool clampToScreen = true;
-        [Tooltip("Limite superior no viewport (0 a 1). 0.88 mantém a barra abaixo da barra superior de HUD.")]
+        [Tooltip("Upper viewport limit (0 to 1). 0.88 keeps the bar below the top HUD bar.")]
         public float maxViewportY = 0.88f;
-        [Tooltip("Limite inferior no viewport (0 a 1).")]
+        [Tooltip("Lower viewport limit (0 to 1).")]
         public float minViewportY = 0.08f;
-        [Tooltip("Margem lateral esquerda no viewport.")]
+        [Tooltip("Left viewport margin.")]
         public float minViewportX = 0.06f;
-        [Tooltip("Margem lateral direita no viewport.")]
+        [Tooltip("Right viewport margin.")]
         public float maxViewportX = 0.94f;
 
-        [Header("Identificação do Alvo (Tipografia)")]
-        [Tooltip("Exibir nome ou tipo do alvo acima da barra de vida.")]
+        [Header("Target Identification (Typography)")]
+        [Tooltip("Display the target name or type above the health bar.")]
         public bool showName = true;
-        [Tooltip("Cor do texto do nome do alvo (Ouro pergaminho).")]
+        [Tooltip("Target name text color (parchment gold).")]
         public Color nameTextColor = new Color(0.96f, 0.88f, 0.70f, 0.95f);
-        [Tooltip("Tamanho da fonte em unidades de mundo.")]
+        [Tooltip("Font size in world units.")]
         public float nameFontSize = 0.18f;
     }
 }

@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_ReinforcedIron
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_ReinforcedIron
-  recipeName: "Ferro Refor\xE7ado"
-  description: "Ferro Refor\xE7ado"
-  category: Materiais
+  recipeName: "Reinforced Iron"
+  description: "Reinforced Iron"
+  category: "Materials"
   tier: 2
   isAlwaysDiscovered: 0
   outputItem: {fileID: 11400000, guid: 3d52004a79fb1d44b9fe97bdd8ac97fd, type: 2}

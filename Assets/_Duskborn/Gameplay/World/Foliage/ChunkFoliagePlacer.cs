@@ -7,154 +7,154 @@ using Unity.AI.Navigation;
 namespace Duskborn.Gameplay.World.Foliage
 {
     /// <summary>
-    /// Níveis de pré-definição de densidade de vegetação procedural.
+    /// Procedural vegetation density preset levels.
     /// </summary>
     public enum FoliageDensityPreset
     {
         Custom,
-        Low,           // 400 tufos de grama, 12 arbustos
-        Medium,        // 950 tufos de grama, 20 arbustos
-        High,          // 1800 tufos de grama, 32 arbustos
-        Ultra_Genshin, // 3200 tufos de grama, 48 arbustos
-        Cinematic_Lush // 5000 tufos de grama, 64 arbustos
+        Low,           // 400 grass tufts, 12 shrubs.
+        Medium,        // 950 grass tufts, 20 shrubs.
+        High,          // 1800 grass tufts, 32 shrubs.
+        Ultra_Genshin, // 3200 grass tufts, 48 shrubs.
+        Cinematic_Lush // 5000 grass tufts, 64 shrubs.
     }
 
     /// <summary>
-    /// Gerenciador de folhagem procedural de alta densidade por chunk (estilo Genshin Impact / Zelda: BotW).
-    /// Gera tufos de grama, tufos viçosos densos, flores silvestres e arbustos/samambaias respeitando
-    /// a topografia do terreno, ondas de densidade macro (meadow fields), mapas de ocupação física (SpatialOccupancyMap)
-    /// e clareiras de combate, consolidando toda a geometria em malhas unificadas por chunk (1 draw call para toda a grama,
-    /// 1 draw call para os arbustos, executado 100% na GPU com suporte a sombras e animação de vento).
+    /// High-density procedural foliage manager per chunk (Genshin Impact / Zelda: BotW style).
+    /// Generate grass tufts, dense lush clumps, wildflowers, and shrubs / ferns while respecting
+    /// terrain topography, macro density waves (meadow fields), physical occupancy maps (SpatialOccupancyMap),
+    /// and combat clearings, consolidating all geometry into unified meshes per chunk (1 draw call for all grass,
+    /// 1 draw call for shrubs, executed entirely on the GPU with shadows and wind animation support).
     /// </summary>
     [RequireComponent(typeof(TerrainChunk))]
     public class ChunkFoliagePlacer : MonoBehaviour
     {
-        [Header("Materiais de Folhagem")]
-        [Tooltip("Material para os tufos de grama e flores (shader Duskborn/StylizedFoliage).")]
+        [Header("Foliage Materials")]
+        [Tooltip("Grass tuft and flower material (Duskborn/StylizedFoliage shader).")]
         [SerializeField] private Material grassMaterial;
 
-        [Tooltip("Material para os arbustos estilizados (shader Duskborn/StylizedFoliage).")]
+        [Tooltip("Stylized shrub material (Duskborn/StylizedFoliage shader).")]
         [SerializeField] private Material bushMaterial;
 
-        [Header("Configuração de Densidade (Escala Genshin / Zelda)")]
-        [Tooltip("Perfil pré-definido de densidade de vegetação.")]
+        [Header("Density Configuration (Genshin / Zelda Scale)")]
+        [Tooltip("Preset vegetation density profile.")]
         [SerializeField] private FoliageDensityPreset densityPreset = FoliageDensityPreset.High;
 
-        [Tooltip("Quantidade de tufos de grama gerados por chunk.")]
+        [Tooltip("Number of grass tufts generated per chunk.")]
         [Range(0, 6000)]
         [SerializeField] private int grassTuftsPerChunk = 1800;
 
-        [Tooltip("Quantidade de pequenas pedras e seixos gerados por chunk.")]
+        [Tooltip("Number of small rocks and pebbles generated per chunk.")]
         [Range(0, 500)]
         [SerializeField] private int littleRocksPerChunk = 85;
 
-        [Tooltip("Quantidade de arbustos gerados por chunk (desativado por padrão).")]
+        [Tooltip("Number of shrubs generated per chunk (disabled by default).")]
         [Range(0, 100)]
         [SerializeField] private int bushesPerChunk = 0;
 
-        [Header("Distribuição de Arquétipos de Grama")]
-        [Tooltip("Proporção de grama carpete densa para cobertura contínua de solo (Dense Carpet Grass).")]
+        [Header("Grass Archetype Distribution")]
+        [Tooltip("Proportion of dense carpet grass for continuous ground coverage.")]
         [Range(0f, 1f)]
         [SerializeField] private float carpetGrassRatio = 0.32f;
 
-        [Tooltip("Proporção de tufos de grama alta e viçosa anime (Lush Grass Clumps).")]
+        [Tooltip("Proportion of tall, lush anime grass clumps.")]
         [Range(0f, 1f)]
         [SerializeField] private float lushGrassRatio = 0.22f;
 
-        [Tooltip("Proporção de tufos de flores silvestres em colônias (Wildflowers).")]
+        [Tooltip("Proportion of wildflower tufts in colonies.")]
         [Range(0f, 1f)]
         [SerializeField] private float wildflowerRatio = 0.14f;
 
-        [Tooltip("Proporção de grama fina de pradaria nas orlas e transições (Prairie Grass).")]
+        [Tooltip("Proportion of fine prairie grass at edges and transitions.")]
         [Range(0f, 1f)]
         [SerializeField] private float prairieGrassRatio = 0.12f;
 
-        [Tooltip("Proporção de juncos de várzea em depressões úmidas e margens (Reed Grass).")]
+        [Tooltip("Proportion of reed grass in wet depressions and banks.")]
         [Range(0f, 1f)]
         [SerializeField] private float reedGrassRatio = 0.05f;
 
-        [Header("Distribuição de Ervas Daninhas Silvestres (Weeds & Undergrowth)")]
-        [Tooltip("Proporção de ervas daninhas com roseta basal e botões florais (Wild Weed Tufts).")]
+        [Header("Wild Weed Distribution (Weeds & Undergrowth)")]
+        [Tooltip("Proportion of wild weed tufts with basal rosettes and flower buds.")]
         [Range(0f, 1f)]
         [SerializeField] private float wildWeedRatio = 0.10f;
 
-        [Tooltip("Proporção de plantas rasteiras de folhas largas de sombra (Broadleaf Weeds).")]
+        [Tooltip("Proportion of shade-tolerant, creeping broadleaf weeds.")]
         [Range(0f, 1f)]
         [SerializeField] private float broadleafWeedRatio = 0.08f;
 
-        [Tooltip("Proporção de hastes altas selvagens com plumas que oscilam no vento (Tall Stalk Weeds).")]
+        [Tooltip("Proportion of tall wild stalk weeds with wind-swaying plumes.")]
         [Range(0f, 1f)]
         [SerializeField] private float tallStalkRatio = 0.07f;
 
-        [Tooltip("Proporção de canteiros de trevos miúdos (Clover Patches).")]
+        [Tooltip("Proportion of small clover patches.")]
         [Range(0f, 1f)]
         [SerializeField] private float cloverPatchRatio = 0.06f;
 
-        [Header("Ecologia de Margem e Água (Water Spots)")]
-        [Tooltip("Proporção de canteiros de taboa e juncos aquáticos na orla (Water Cattail Beds).")]
+        [Header("Shoreline and Water Ecology (Water Spots)")]
+        [Tooltip("Proportion of shoreline water cattail and aquatic reed beds.")]
         [Range(0f, 1f)]
         [SerializeField] private float cattailBedRatio = 0.08f;
 
-        [Tooltip("Faixa de altura acima do nível da água considerada margem aquática / orla.")]
+        [Tooltip("Height band above water level considered the aquatic margin / shoreline.")]
         [Range(0.1f, 2.5f)]
         [SerializeField] private float waterMarginBand = 0.85f;
 
-        [Header("Distribuição de Pequenas Pedras (Little Rocks)")]
-        [Tooltip("Proporção de aglomerados de seixos (Pebble Clusters).")]
+        [Header("Little Rock Distribution")]
+        [Tooltip("Proportion of pebble clusters.")]
         [Range(0f, 1f)]
         [SerializeField] private float pebbleClusterRatio = 0.42f;
 
-        [Tooltip("Proporção de pedras de rio achatadas em margens (Smooth River Stones).")]
+        [Tooltip("Proportion of flat, smooth river stones along banks.")]
         [Range(0f, 1f)]
         [SerializeField] private float riverStoneRatio = 0.28f;
 
-        [Tooltip("Proporção de seixos individuais facetados (Single Pebbles).")]
+        [Tooltip("Proportion of individual faceted pebbles.")]
         [Range(0f, 1f)]
         [SerializeField] private float singlePebbleRatio = 0.18f;
 
-        [Tooltip("Proporção de rochas lascadas de encosta (Scree / Talus Rocks).")]
+        [Tooltip("Proportion of chipped slope rocks (scree / talus).")]
         [Range(0f, 1f)]
         [SerializeField] private float screeRockRatio = 0.12f;
 
-        [Header("Distribuição de Arquétipos de Arbustos")]
-        [Tooltip("Proporção de samambaias/arbustos em leque (Fern Bushes).")]
+        [Header("Shrub Archetype Distribution")]
+        [Tooltip("Proportion of ferns / fan-shaped shrubs.")]
         [Range(0f, 1f)]
         [SerializeField] private float fernBushRatio = 0.30f;
 
-        [Tooltip("Proporção de arbustos floridos com bagas/botões coloridos (Flowering Bushes).")]
+        [Tooltip("Proportion of flowering shrubs with colorful berries / buds.")]
         [Range(0f, 1f)]
         [SerializeField] private float floweringBushRatio = 0.28f;
 
-        [Tooltip("Proporção de arbustos rasteiros de cobertura de solo para ancorar rochas (Ground Shrubs).")]
+        [Tooltip("Proportion of creeping ground-cover shrubs anchoring rocks.")]
         [Range(0f, 1f)]
         [SerializeField] private float groundShrubRatio = 0.22f;
 
-        [Header("Ondas de Campo & Relevo (Macro Ecology)")]
-        [Tooltip("Frequência espacial do ruído macro de densidade de campina.")]
+        [Header("Field Waves & Terrain (Macro Ecology)")]
+        [Tooltip("Spatial frequency of macro meadow density noise.")]
         [SerializeField] private float macroNoiseScale = 0.024f;
 
-        [Tooltip("Limiar de ruído abaixo do qual a campina se torna clareira aberta / trilha suave.")]
+        [Tooltip("Noise threshold below which the meadow becomes an open clearing / soft trail.")]
         [SerializeField] private float macroDensityThreshold = 0.30f;
 
-        [Tooltip("Deslocamento mínimo acima da água para permitir vegetação.")]
+        [Tooltip("Minimum offset above water to allow vegetation.")]
         [SerializeField] private float waterClearance = 0.65f;
 
         private TerrainChunk _terrainChunk;
 
-        // Paleta de flores silvestres estilizadas (Genshin / Zelda anime palette)
+        // Stylized wildflower palette (Genshin / Zelda anime palette).
         public static readonly Color[] WildflowerPalettes = new Color[]
         {
-            new Color(0.24f, 0.58f, 0.98f, 1f), // Azul campânula / Cornflower Azure
-            new Color(0.98f, 0.84f, 0.14f, 1f), // Amarelo dente-de-leão / Dandelion Gold
-            new Color(0.94f, 0.26f, 0.35f, 1f), // Vermelho papoula / Poppy Crimson
-            new Color(0.95f, 0.96f, 0.92f, 1f), // Branco margarida / Mountain Daisy
-            new Color(0.72f, 0.48f, 0.95f, 1f)  // Roxo lavanda / Wild Lavender
+            new Color(0.24f, 0.58f, 0.98f, 1f), // Bellflower blue / Cornflower Azure.
+            new Color(0.98f, 0.84f, 0.14f, 1f), // Dandelion yellow / Dandelion Gold.
+            new Color(0.94f, 0.26f, 0.35f, 1f), // Poppy Crimson
+            new Color(0.95f, 0.96f, 0.92f, 1f), // Mountain Daisy White
+            new Color(0.72f, 0.48f, 0.95f, 1f)  // Lavender Purple / Wild Lavender
         };
 
-        // Paleta de destaques botânicos (Taboas, Dente-de-Leão, Cardos)
-        public static readonly Color CattailAccentColor = new Color(0.32f, 0.18f, 0.10f, 1.0f); // Marrom espiga
-        public static readonly Color DandelionAccentColor = new Color(0.96f, 0.82f, 0.14f, 1.0f); // Amarelo ouro
-        public static readonly Color ThistleAccentColor = new Color(0.78f, 0.52f, 0.88f, 1.0f); // Lilás cardo
+        // Botanical highlight palette (Cattails, Dandelions, Thistles).
+        public static readonly Color CattailAccentColor = new Color(0.32f, 0.18f, 0.10f, 1.0f); // Brown stalk
+        public static readonly Color DandelionAccentColor = new Color(0.96f, 0.82f, 0.14f, 1.0f); // Golden yellow.
+        public static readonly Color ThistleAccentColor = new Color(0.78f, 0.52f, 0.88f, 1.0f); // Thistle lilac.
 
         public FoliageDensityPreset DensityPreset => densityPreset;
         public int GrassTuftsPerChunk => grassTuftsPerChunk;
@@ -305,7 +305,7 @@ namespace Duskborn.Gameplay.World.Foliage
             if (_terrainChunk == null) _terrainChunk = GetComponent<TerrainChunk>();
             Vector2Int coord = _terrainChunk != null ? _terrainChunk.ChunkCoord : Vector2Int.zero;
 
-            // Tenta resolver o mapa de ocupação automaticamente caso não tenha sido injetado
+            // Try resolving the occupancy map automatically if it was not injected.
             if (occupancyMap == null)
             {
                 var gridMgr = GetComponentInParent<ChunkGridManager>();
@@ -329,10 +329,10 @@ namespace Duskborn.Gameplay.World.Foliage
             float halfMapZ = (config.chunksZ * config.chunkSize * config.cellSize) * 0.5f;
             float centerRadiusSqr = (config.centralSanctuaryRadius * 0.9f) * (config.centralSanctuaryRadius * 0.9f);
 
-            // 1. Gera o lote consolidado de grama e flores (1 draw call por chunk)
+            // 1. Generate consolidated grass and flower batch (1 draw call per chunk).
             BuildGrassBatch(config, seed, rng, minX, maxX, minZ, maxZ, halfMapX, halfMapZ, centerRadiusSqr, occupancyMap);
 
-            // 2. Arbustos (desativados a pedido do usuário por artefatos visuais)
+            // 2. Shrubs (disabled at the user's request due to visual artifacts).
             if (bushesPerChunk > 0)
             {
                 BuildBushBatch(config, seed, rng, minX, maxX, minZ, maxZ, halfMapX, halfMapZ, centerRadiusSqr, occupancyMap);
@@ -340,7 +340,7 @@ namespace Duskborn.Gameplay.World.Foliage
         }
 
         /// <summary>
-        /// Geração assíncrona da folhagem do chunk fatiada em múltiplos frames para manter 60+ FPS constante.
+        /// Asynchronous chunk foliage generation spread across multiple frames for consistent 60+ FPS.
         /// </summary>
         public System.Collections.IEnumerator GenerateFoliageAsync(
             LowPolyTerrainConfig config,
@@ -385,10 +385,10 @@ namespace Duskborn.Gameplay.World.Foliage
 
             budget ??= new GenerationBudget(8f);
 
-            // 1. Gera o lote consolidado de grama e flores assincronamente
+            // 1. Generate consolidated grass and flower batch asynchronously.
             yield return BuildGrassBatchRoutine(config, seed, rng, minX, maxX, minZ, maxZ, halfMapX, halfMapZ, centerRadiusSqr, occupancyMap, budget);
 
-            // 2. Arbustos
+            // 2. Shrubs
             if (bushesPerChunk > 0)
             {
                 BuildBushBatch(config, seed, rng, minX, maxX, minZ, maxZ, halfMapX, halfMapZ, centerRadiusSqr, occupancyMap);
@@ -416,7 +416,7 @@ namespace Duskborn.Gameplay.World.Foliage
         {
             float stoneNoise = Mathf.PerlinNoise((worldX + 283.1f) * 0.022f, (worldZ + 419.7f) * 0.022f);
 
-            // 1. Margem de água / seixos de praia
+            // 1. Water margin / beach pebbles.
             if (groundY <= config.waterLevel + waterMarginBand + 0.35f)
             {
                 Color wetSlate = new Color(0.30f, 0.33f, 0.38f);
@@ -427,7 +427,7 @@ namespace Duskborn.Gameplay.World.Foliage
                 return Color.Lerp(wetSlate, smoothGray, stoneNoise / 0.55f);
             }
 
-            // 2. Encostas rochosas íngremes / cascalho de escarpa
+            // 2. Steep rocky slopes / cliff gravel.
             if (slope > 18f)
             {
                 Color cliffStone = config.cliffColor;
@@ -435,7 +435,7 @@ namespace Duskborn.Gameplay.World.Foliage
                 return Color.Lerp(cliffStone, darkGranite, stoneNoise * 0.5f);
             }
 
-            // 3. Campo aberto / planície
+            // 3. Open field / plain.
             Color granite = new Color(0.48f, 0.47f, 0.46f);
             Color mossyStone = new Color(0.38f, 0.45f, 0.35f);
             Color slate = new Color(0.40f, 0.42f, 0.46f);
@@ -472,23 +472,23 @@ namespace Duskborn.Gameplay.World.Foliage
         {
             if ((grassTuftsPerChunk <= 0 && littleRocksPerChunk <= 0) || grassMaterial == null) yield break;
 
-            // 1. Arquétipos de Grama e Flores Silvestres
+            // 1. Grass and Wildflower Archetypes.
             Mesh carpetMesh = FoliageMeshUtility.CreateDenseCarpetMesh(bladeCount: 18, radius: 0.85f, height: 0.90f, baseWidth: 0.28f);
             Mesh lushMesh = FoliageMeshUtility.CreateLushGrassClumpMesh(bladeCount: 15, radius: 0.75f, height: 1.30f, baseWidth: 0.22f);
             Mesh prairieMesh = FoliageMeshUtility.CreatePrairieGrassMesh(bladeCount: 10, radius: 0.55f, height: 0.70f, baseWidth: 0.14f);
             Mesh reedMesh = FoliageMeshUtility.CreateReedGrassMesh(bladeCount: 8, height: 1.45f, baseWidth: 0.12f);
             Mesh flowerMesh = FoliageMeshUtility.CreateWildflowerTuftMesh(bladeCount: 14, flowerCount: 4, radius: 0.75f, height: 0.90f, flowerHeight: 1.15f);
 
-            // 2. Arquétipos de Ervas Daninhas Silvestres (Weeds & Undergrowth)
+            // 2. Wild Weed Archetypes (Weeds & Undergrowth).
             Mesh wildWeedMesh = FoliageMeshUtility.CreateWildWeedTuftMesh(leafCount: 6, radius: 0.48f, height: 0.42f);
             Mesh broadleafMesh = FoliageMeshUtility.CreateBroadleafWeedMesh(leafCount: 5, radius: 0.42f, height: 0.22f);
             Mesh tallStalkMesh = FoliageMeshUtility.CreateTallStalkWeedMesh(stalkCount: 4, height: 1.35f, baseWidth: 0.10f);
             Mesh cloverMesh = FoliageMeshUtility.CreateCloverPatchMesh(cloverCount: 7, radius: 0.38f);
 
-            // 3. Arquétipos de Margem e Água (Water Spots)
+            // 3. Shoreline and Water Archetypes (Water Spots).
             Mesh cattailBedMesh = FoliageMeshUtility.CreateWaterCattailBedMesh(reedCount: 10, cattailCount: 3, radius: 0.65f, height: 1.55f);
 
-            // 4. Arquétipos de Pequenas Pedras (Little Rocks)
+            // 4. Little Rock Archetypes.
             Mesh singlePebbleMesh = FoliageMeshUtility.CreateLittlePebbleMesh(radius: 0.18f, height: 0.12f);
             Mesh pebbleClusterMesh = FoliageMeshUtility.CreatePebbleClusterMesh(pebbleCount: 4, radius: 0.42f);
             Mesh riverStoneMesh = FoliageMeshUtility.CreateRiverStoneMesh(radiusX: 0.30f, radiusZ: 0.20f, height: 0.08f);
@@ -504,7 +504,7 @@ namespace Duskborn.Gameplay.World.Foliage
 
             if (grassTuftsPerChunk > 0)
             {
-                // Distribuição em malha hexagonal (triangular packing) para eliminar padrões de grade e canais visuais
+                // Hexagonal distribution (triangular packing) to eliminate grid patterns and visual channels.
                 float hexAreaPerPoint = (chunkWorldLength * chunkWorldLength) / (float)grassTuftsPerChunk;
                 float stepX = Mathf.Sqrt(hexAreaPerPoint / 0.8660254f);
                 float stepZ = stepX * 0.8660254f;
@@ -515,20 +515,20 @@ namespace Duskborn.Gameplay.World.Foliage
                 float maxFoliageH = config.heightMultiplier * 0.72f;
                 float minGroundH = config.waterLevel + waterClearance;
 
-                // Percorre a malha hexagonal com amostragem orgânica estratificada
+                // Traverse the hexagonal grid with organic stratified sampling.
                 for (int gz = 0; gz <= gridResZ; gz++)
                 {
                     float rowOffset = (gz % 2 == 1) ? stepX * 0.5f : 0f;
 
                     for (int gx = -1; gx <= gridResX; gx++)
                     {
-                        // Amostragem com jitter orgânico de ±42% do espaçamento
+                        // Sample with organic jitter of ±42% of spacing.
                         float jitterX = rng.Range(-0.42f, 0.42f) * stepX;
                         float jitterZ = rng.Range(-0.42f, 0.42f) * stepZ;
                         float worldX = minX + gx * stepX + rowOffset + jitterX;
                         float worldZ = minZ + gz * stepZ + jitterZ;
 
-                        // Restringe estritamente aos limites do chunk
+                        // Strictly constrain to chunk bounds.
                         if (worldX < minX || worldX > maxX || worldZ < minZ || worldZ > maxZ) continue;
 
                         Vector2 worldXZ = new Vector2(worldX, worldZ);
@@ -536,7 +536,7 @@ namespace Duskborn.Gameplay.World.Foliage
                         float distSqr = worldX * worldX + worldZ * worldZ;
                         if (distSqr < centerRadiusSqr * 0.75f) continue;
 
-                        // 1. Verificação com SpatialOccupancyMap
+                        // 1. Check SpatialOccupancyMap.
                         float canopyWeight = 0f;
                         bool inSanctuaryClearing = false;
                         bool inCombatClearing = false;
@@ -565,7 +565,7 @@ namespace Duskborn.Gameplay.World.Foliage
                             occupancyMap.IsUnderCanopy(worldXZ, out canopyWeight);
                         }
 
-                        // 2. Amostra relevo, concavidade de vale e inclinação
+                        // 2. Sample relief, valley concavity, and slope.
                         float groundY = TerrainNoise.SampleHeight(worldX, worldZ, config, activeSeed, halfMapX, halfMapZ);
                         if (groundY < minGroundH || groundY > maxFoliageH) continue;
 
@@ -578,12 +578,12 @@ namespace Duskborn.Gameplay.World.Foliage
                         Vector3 normalWS = new Vector3(-(hX1 - hX0) / (2f * eps), 1f, -(hZ1 - hZ0) / (2f * eps)).normalized;
                         float slope = Vector3.Angle(normalWS, Vector3.up);
 
-                        // Rejeição estrita em encostas rochosas íngremes
+                        // Strict rejection on steep rocky slopes.
                         if (slope > config.steepSlopeThreshold * 0.85f) continue;
 
                         float slopeFactor = slope <= 14f ? 1.0f : Mathf.Clamp01((config.steepSlopeThreshold * 0.85f - slope) / (config.steepSlopeThreshold * 0.85f - 14f));
 
-                        // Fator de elevação (planícies e vales exuberantes, rarefeito nos cumes)
+                        // Elevation factor (lush plains and valleys, sparse peaks).
                         float elevFactor = 1.0f;
                         float midMountain = config.heightMultiplier * 0.55f;
                         if (groundY > midMountain)
@@ -597,10 +597,10 @@ namespace Duskborn.Gameplay.World.Foliage
 
                         if (slopeFactor * elevFactor < 0.12f) continue;
 
-                        // Concavidade (depressões que acumulam umidade e formam tapetes mais verdes)
+                        // Concavity (depressions collecting moisture and forming greener carpets).
                         float concavity = ((hX1 + hX0 + hZ1 + hZ0) * 0.25f) - groundY;
 
-                        // 3. Campo de Manchas de Campina & Colônias de Ervas Daninhas
+                        // 3. Meadow Patch & Weed Colony Field.
                         float patchDensity = EvaluateMeadowPatch(worldX, worldZ, activeSeed);
                         float patchThreshold = macroDensityThreshold;
                         float edgeWidth = 0.10f;
@@ -608,13 +608,13 @@ namespace Duskborn.Gameplay.World.Foliage
 
                         float weedColony = EvaluateWeedPatch(worldX, worldZ, activeSeed);
 
-                        // Fora das campinas: trilhas de terra com vegetação rasteira resistente
+                        // Outside meadows: dirt trails with resilient ground cover.
                         if (patchWeight < 0.05f)
                         {
                             if (rng.Range(0f, 1f) > 0.05f * elevFactor) continue;
                         }
 
-                        // 4. Seleção Ecológica de Arquétipo
+                        // 4. Ecological Archetype Selection.
                         Mesh chosenMesh;
                         bool hasAccent = false;
                         Color accentColor = Color.white;
@@ -624,7 +624,7 @@ namespace Duskborn.Gameplay.World.Foliage
 
                         if (isWaterMargin)
                         {
-                            // Faixa de orla aquática e várzea úmida (Water Spots)
+                            // Aquatic shoreline band and wet floodplain (Water Spots).
                             float waterRoll = rng.Range(0f, 1f);
                             if (waterRoll < cattailBedRatio * 3.5f)
                             {
@@ -638,7 +638,7 @@ namespace Duskborn.Gameplay.World.Foliage
                             }
                             else if (waterRoll < 0.70f)
                             {
-                                chosenMesh = broadleafMesh; // Planta ribeirinha de folhas largas
+                                chosenMesh = broadleafMesh; // Broadleaf riverside plant.
                             }
                             else
                             {
@@ -647,7 +647,7 @@ namespace Duskborn.Gameplay.World.Foliage
                         }
                         else if (!isInsideMeadow)
                         {
-                            // Fora das campinas: trilhas e bordas
+                            // Outside meadows: trails and edges.
                             float trailRoll = rng.Range(0f, 1f);
                             if (trailRoll < wildWeedRatio * 1.8f)
                             {
@@ -666,10 +666,10 @@ namespace Duskborn.Gameplay.World.Foliage
                         }
                         else
                         {
-                            // Dentro das campinas (Meadow)
+                            // Inside meadows.
                             if (canopyWeight > 0.15f)
                             {
-                                // Vegetação de sombra sob copa de árvores
+                                // Shade vegetation under tree canopies.
                                 float canopyRoll = rng.Range(0f, 1f);
                                 if (canopyRoll < 0.42f)
                                 {
@@ -686,7 +686,7 @@ namespace Duskborn.Gameplay.World.Foliage
                             }
                             else if (weedColony > 0.48f && !inCombatClearing && !inSanctuaryClearing)
                             {
-                                // Colônia de ervas daninhas silvestres e plumas
+                                // Wild weed and plume colony.
                                 float weedRoll = rng.Range(0f, 1f);
                                 if (weedRoll < 0.38f)
                                 {
@@ -709,7 +709,7 @@ namespace Duskborn.Gameplay.World.Foliage
                             }
                             else
                             {
-                                // Campina principal viçosa (Genshin / Zelda)
+                                // Main lush meadow (Genshin / Zelda).
                                 float roll = rng.Range(0f, 1f);
                                 if (roll < wildflowerRatio && !inCombatClearing && !inSanctuaryClearing)
                                 {
@@ -742,10 +742,10 @@ namespace Duskborn.Gameplay.World.Foliage
                             terrainColor = Color.Lerp(terrainColor, config.deepGrassColor, canopyWeight * 0.45f);
                         }
 
-                        // Cor da ponta contínua no espaço de mundo (sem jitter aleatório por tufo)
+                        // Continuous tip color in world space (no random per-tuft jitter).
                         Color tipColor = EvaluateFoliageTipColor(worldX, worldZ, canopyWeight, config);
 
-                        // Escala base com transição suave (smoothstep) na borda da campina para fusão orgânica
+                        // Base scale with smoothstep transition at the meadow edge for organic blending.
                         float edgeScale = isInsideMeadow ? Mathf.SmoothStep(0.65f, 1.15f, patchWeight) : 0.65f;
                         float scale = edgeScale * (1.0f + rng.Range(-0.06f, 0.06f));
 
@@ -786,7 +786,7 @@ namespace Duskborn.Gameplay.World.Foliage
                 }
             }
 
-            // 5. Aglomerados e Dispersão de Pequenas Pedras e Seixos (Little Rocks Pass)
+            // 5. Little Rock and Pebble Clustering / Scattering Pass.
             if (littleRocksPerChunk > 0)
             {
                 int rocksToPlace = littleRocksPerChunk;
@@ -808,7 +808,7 @@ namespace Duskborn.Gameplay.World.Foliage
                     }
 
                     float ry = TerrainNoise.SampleHeight(rx, rz, config, activeSeed, halfMapX, halfMapZ);
-                    // Pedras podem ficar na margem de água (até waterLevel + 0.05m)
+                    // Rocks can sit at the water margin (up to waterLevel + 0.05m).
                     if (ry < config.waterLevel + 0.05f || ry > (config.heightMultiplier * 0.75f) + 6f) continue;
 
                     const float eps = 0.35f;
@@ -820,26 +820,26 @@ namespace Duskborn.Gameplay.World.Foliage
                     Vector3 rNormal = new Vector3(-(hX1 - hX0) / (2f * eps), 1f, -(hZ1 - hZ0) / (2f * eps)).normalized;
                     float rSlope = Vector3.Angle(rNormal, Vector3.up);
 
-                    // Rejeição apenas em penhascos quase verticais (> 70°)
+                    // Reject only near-vertical cliffs (> 70°).
                     if (rSlope > 70f) continue;
 
-                    // Seleção do arquétipo de pedra conforme o contexto ecológico
+                    // Select rock archetype according to ecological context.
                     Mesh rockMesh;
                     bool isWaterEdge = (ry <= config.waterLevel + waterMarginBand + 0.20f);
 
                     if (isWaterEdge)
                     {
-                        // Pedras de rio lisas na orla aquática
+                        // Smooth river stones at the water's edge.
                         rockMesh = (rng.Range(0f, 1f) < 0.65f) ? riverStoneMesh : pebbleClusterMesh;
                     }
                     else if (rSlope > 18f)
                     {
-                        // Cascalho lascado em declives e base de escarpas
+                        // Chipped gravel on slopes and cliff bases.
                         rockMesh = (rng.Range(0f, 1f) < 0.68f) ? screeRockMesh : singlePebbleMesh;
                     }
                     else
                     {
-                        // Seixos e aglomerados de campo
+                        // Field pebbles and clusters.
                         rockMesh = (rng.Range(0f, 1f) < pebbleClusterRatio) ? pebbleClusterMesh : singlePebbleMesh;
                     }
 
@@ -911,7 +911,7 @@ namespace Duskborn.Gameplay.World.Foliage
             float maxFoliageH = config.heightMultiplier * 0.70f;
             float minGroundH = config.waterLevel + waterClearance + 0.35f;
 
-            // Agrupamento em moitas / bosques naturais (clusters de 2 a 4 arbustos)
+            // Cluster into natural thickets / groves (2 to 4 shrubs per cluster).
             int thicketCount = Mathf.Max(1, Mathf.RoundToInt(bushesPerChunk / 2.8f));
             int attemptsPerThicket = 15;
 
@@ -954,7 +954,7 @@ namespace Duskborn.Gameplay.World.Foliage
 
                 if (!foundCenter) continue;
 
-                // Spawna os arbustos do cluster/moita ao redor do centro
+                // Spawn cluster / thicket shrubs around the center.
                 int bushesInThisThicket = rng.Range(2, 5);
                 float thicketRadius = rng.Range(1.2f, 2.4f);
 
@@ -989,7 +989,7 @@ namespace Duskborn.Gameplay.World.Foliage
                     float slope = Vector3.Angle(normalWS, Vector3.up);
                     if (slope > config.steepSlopeThreshold * 0.75f) continue;
 
-                    // Escolha do arquétipo de arbusto
+                    // Select shrub archetype.
                     Mesh chosenMesh;
                     bool hasAccent = false;
                     Color accentColor = Color.white;
@@ -1101,7 +1101,7 @@ namespace Duskborn.Gameplay.World.Foliage
             int triCount = baseTris.Length;
             int startVertIndex = combinedVerts.Count;
 
-            // Converte a normal da superfície do relevo para o espaço local do chunk
+            // Convert terrain surface normal to chunk local space.
             Vector3 localSurfaceNormal = transform.InverseTransformDirection(surfaceNormal).normalized;
             Vector3 grassAlignedNormal = Vector3.Lerp(localSurfaceNormal, Vector3.up, 0.40f).normalized;
 
@@ -1112,12 +1112,12 @@ namespace Duskborn.Gameplay.World.Foliage
                 Vector3 ln;
                 if (isRock)
                 {
-                    // Pedras preservam estritamente suas normais geométricas facetadas para cel-shading low-poly
+                    // Rocks strictly preserve their faceted geometric normals for low-poly cel shading.
                     ln = rot * baseNormals[v];
                 }
                 else if (isGrass)
                 {
-                    // Alinha predominantemente com a normal do relevo / Vector3.up (estilo Genshin / Zelda)
+                    // Align predominantly with terrain normal / Vector3.up (Genshin / Zelda style).
                     Vector3 baseRotNormal = rot * baseNormals[v];
                     ln = (baseVerts[v].y > 0.45f)
                         ? Vector3.Lerp(grassAlignedNormal, baseRotNormal, 0.12f).normalized
@@ -1125,7 +1125,7 @@ namespace Duskborn.Gameplay.World.Foliage
                 }
                 else
                 {
-                    // Arbustos preservam normais esféricas anime de puff
+                    // Shrubs preserve spherical anime puff normals.
                     ln = rot * baseNormals[v];
                 }
 
@@ -1137,14 +1137,14 @@ namespace Duskborn.Gameplay.World.Foliage
 
                 if (isRock)
                 {
-                    // Pedras: cor de rocha com contact AO na base e alpha rigorosamente 0.0 (zero vento no shader)
+                    // Rocks: rock color with base contact AO and strictly 0.0 alpha (zero shader wind).
                     combinedUVs.Add(new Vector2(0.5f, 0.0f));
                     Color stoneCol = (rockColor != default) ? rockColor : new Color(0.48f, 0.47f, 0.46f);
                     float contactAO = Mathf.Lerp(0.70f, 1.0f, Mathf.Clamp01(baseVerts[v].y / 0.12f));
                     stoneCol.r *= contactAO;
                     stoneCol.g *= contactAO;
                     stoneCol.b *= contactAO;
-                    stoneCol.a = 0.0f; // Rigorosamente zero vento
+                    stoneCol.a = 0.0f; // Strictly zero wind
                     combinedColors.Add(stoneCol);
                 }
                 else if (hasAccent && rawU >= 2.0f)
@@ -1172,7 +1172,7 @@ namespace Duskborn.Gameplay.World.Foliage
 
         private Color EvaluateFoliageTipColor(float worldX, float worldZ, float canopyWeight, LowPolyTerrainConfig config)
         {
-            // Campo de matiz contínuo em coordenadas de mundo (escala macro de 50 metros)
+            // Continuous hue field in world coordinates (50-meter macro scale).
             float hueField = Mathf.PerlinNoise((worldX + 512.4f) * 0.018f, (worldZ + 841.7f) * 0.018f);
 
             Color sunnyGreen = new Color(0.48f, 0.82f, 0.24f);

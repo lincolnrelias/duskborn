@@ -7,98 +7,98 @@ using Duskborn.UI;
 namespace Duskborn.Gameplay.Player
 {
     /// <summary>
-    /// Sistema profissional de câmera em terceira pessoa para o Duskborn.
-    /// Suporta órbita esférica completa (Yaw/Pitch), prevenção ativa de oclusão via SphereCast,
-    /// enquadramento no ombro (shoulder framing), amortecimento de terreno, FOV dinâmico e integração com CameraShake.
-    /// Executado estritamente na instância do jogador local (IsOwner).
+    /// Professional third-person camera system for Duskborn.
+    /// Supports full spherical orbit (Yaw/Pitch), active SphereCast occlusion prevention,
+    /// shoulder framing, terrain damping, dynamic FOV, and CameraShake integration.
+    /// Runs strictly on the local player instance (IsOwner).
     /// </summary>
     [DisallowMultipleComponent]
     public class PlayerCameraController : MonoBehaviour
     {
         public static PlayerCameraController LocalInstance { get; set; }
 
-        [Header("Alvo e Posicionamento")]
-        [Tooltip("Ponto pivô relativo ao jogador (altura do peito/olhos).")]
+        [Header("Target and Positioning")]
+        [Tooltip("Pivot point relative to the player (chest / eye height).")]
         [SerializeField] private Vector3 pivotOffset = new Vector3(0f, 1.6f, 0f);
 
-        [Tooltip("Deslocamento horizontal para a direita (visão sobre o ombro).")]
+        [Tooltip("Horizontal offset to the right (over-the-shoulder view).")]
         [SerializeField] private float shoulderOffset = 0.35f;
 
-        [Tooltip("Tempo de amortecimento da posição do pivô para suavizar degraus e desníveis do terreno low-poly.")]
+        [Tooltip("Pivot position damping time to smooth steps and elevation changes on low-poly terrain.")]
         [SerializeField] private float pivotDampTime = 0.05f;
 
-        [Header("Órbita e Controle de Rotação")]
-        [Tooltip("Sensibilidade horizontal do mouse.")]
+        [Header("Orbit and Rotation Control")]
+        [Tooltip("Horizontal mouse sensitivity.")]
         [SerializeField] private float sensitivityX = 0.15f;
 
-        [Tooltip("Sensibilidade vertical do mouse.")]
+        [Tooltip("Vertical mouse sensitivity.")]
         [SerializeField] private float sensitivityY = 0.15f;
 
-        [Tooltip("Limite inferior do ângulo vertical (em graus).")]
+        [Tooltip("Lower vertical angle limit (degrees).")]
         [SerializeField] private float minPitch = -20f;
 
-        [Tooltip("Limite superior do ângulo vertical (em graus).")]
+        [Tooltip("Upper vertical angle limit (degrees).")]
         [SerializeField] private float maxPitch = 70f;
 
-        [Tooltip("Inverter eixo vertical da câmera.")]
+        [Tooltip("Invert the camera's vertical axis.")]
         [SerializeField] private bool invertPitch = false;
 
-        [Tooltip("Tempo de suavização da rotação da câmera (evita solavancos no mouse).")]
+        [Tooltip("Camera rotation smoothing time (prevents mouse jolts).")]
         [SerializeField] private float rotationDampTime = 0.02f;
 
-        [Header("Distância e Zoom")]
-        [Tooltip("Distância padrão de visualização da câmera.")]
+        [Header("Distance and Zoom")]
+        [Tooltip("Default camera viewing distance.")]
         [SerializeField] private float defaultDistance = 6.5f;
 
-        [Tooltip("Distância mínima permitida ao aproximar o zoom.")]
+        [Tooltip("Minimum permitted zoom-in distance.")]
         [SerializeField] private float minDistance = 2.0f;
 
-        [Tooltip("Distância máxima permitida ao afastar o zoom.")]
+        [Tooltip("Maximum permitted zoom-out distance.")]
         [SerializeField] private float maxDistance = 11.0f;
 
-        [Tooltip("Passo de alteração de distância por scroll de zoom.")]
+        [Tooltip("Distance change per zoom scroll step.")]
         [SerializeField] private float zoomStep = 1.0f;
 
-        [Tooltip("Velocidade de transição suave do zoom.")]
+        [Tooltip("Smooth zoom transition speed.")]
         [SerializeField] private float zoomDampTime = 0.1f;
 
-        [Header("Colisão com Cenário e Oclusão")]
-        [Tooltip("Camadas de física que devem bloquear a câmera (terreno, rochas, construções).")]
+        [Header("Environment Collision and Occlusion")]
+        [Tooltip("Physics layers that block the camera (terrain, rocks, buildings).")]
         [SerializeField] private LayerMask collisionLayers;
 
-        [Tooltip("Raio do SphereCast para evitar que o plano frontal da câmera atravesse geometrias.")]
+        [Tooltip("SphereCast radius to prevent the camera's front plane from penetrating geometry.")]
         [SerializeField] private float collisionRadius = 0.22f;
 
-        [Tooltip("Distância de amortecimento em relação à superfície colidida.")]
+        [Tooltip("Damping distance from the collided surface.")]
         [SerializeField] private float collisionPadding = 0.2f;
 
-        [Tooltip("Velocidade de retorno suave ao se afastar de um obstáculo.")]
+        [Tooltip("Smooth return speed when moving away from an obstacle.")]
         [SerializeField] private float collisionRecoverySpeed = 6.0f;
 
-        [Header("Sensação de Jogo (Game Feel)")]
-        [Tooltip("Campo de visão (FOV) base.")]
+        [Header("Game Feel")]
+        [Tooltip("Base field of view (FOV).")]
         [SerializeField] private float defaultFov = 60f;
 
-        [Tooltip("Acréscimo de FOV durante esquiva (dodge roll) ou corridas para sensação de velocidade.")]
+        [Tooltip("FOV increase during dodge rolls or running to convey speed.")]
         [SerializeField] private float dynamicFovKick = 4f;
 
-        [Tooltip("Velocidade de interpolação do campo de visão.")]
+        [Tooltip("Field of view interpolation speed.")]
         [SerializeField] private float fovTransitionSpeed = 8f;
 
-        [Header("Controle do Cursor")]
+        [Header("Cursor Control")]
         [SerializeField, Range(0.3f, 1f)] private float aimDistanceMultiplier = 0.7f;
         [SerializeField, Range(0.5f, 1f)] private float aimFovMultiplier = 0.85f;
 
-        [Tooltip("Travar o cursor automaticamente durante a gameplay de combate.")]
+        [Tooltip("Automatically lock the cursor during combat gameplay.")]
         [SerializeField] private bool autoLockCursor = true;
 
-        // Referências do jogador
+        // Player references.
         private Camera           _mainCam;
         private PlayerController _controller;
         private PlayerDodge      _dodge;
         private PlayerCombat     _combat;
 
-        // Estado de rotação e mira
+        // Rotation and aiming state.
         private float   _targetYaw;
         private float   _targetPitch = 20f;
         private float   _currentYaw;
@@ -107,21 +107,21 @@ namespace Duskborn.Gameplay.Player
         private float   _pitchVelocity;
         private Vector2 _lookInput;
 
-        // Estado de posicionamento e distância
+        // Position and distance state.
         private Vector3 _smoothedPivotPos;
         private Vector3 _pivotVelocity;
         private float   _targetDistance;
         private float   _currentDistance;
         private float   _distanceVelocity;
 
-        // Travas de controle e estado
+        // Control locks and state.
         private bool _isInitialized;
         private bool _isRotationLocked;
         private bool _isCursorLocked;
 
         private readonly RaycastHit[] _sphereCastHits = new RaycastHit[16];
 
-        // Propriedades públicas para orientação e movimentação
+        // Public orientation and movement properties.
         public bool    IsRotationLocked => _isRotationLocked;
         public float   CurrentYaw    => _currentYaw;
         public float   CurrentPitch  => _currentPitch;
@@ -142,7 +142,7 @@ namespace Duskborn.Gameplay.Player
             _currentDistance  = defaultDistance;
             _smoothedPivotPos = transform.position + pivotOffset;
 
-            // Se nenhuma camada de colisão foi atribuída no inspetor, usa Default e ResourceNode
+            // If no collision layers are assigned in the Inspector, use Default and ResourceNode.
             if (collisionLayers.value == 0)
             {
                 collisionLayers = LayerMask.GetMask("Default", "ResourceNode");
@@ -153,16 +153,16 @@ namespace Duskborn.Gameplay.Player
 
         private void Start()
         {
-            // Se o controller já tiver posse confirmada no Start, inicializa
+            // Initialize if the controller already has confirmed ownership at Start.
             if (_controller != null && _controller.IsOwner)
             {
                 InitializeForOwner();
             }
-            // Não desativa com enabled = false para permitir que LateUpdate detecte o IsOwner quando chegar a mensagem de rede
+            // Do not set enabled = false; allow LateUpdate to detect IsOwner when the network message arrives.
         }
 
         /// <summary>
-        /// Inicializa a câmera para a instância do jogador proprietário local.
+        /// Initialize the camera for the locally owned player instance.
         /// </summary>
         public void InitializeForOwner()
         {
@@ -200,7 +200,7 @@ namespace Duskborn.Gameplay.Player
 
             SnapCameraToTarget();
 
-            // Aplica sensibilidade e inversão carregadas do GameSettings
+            // Apply sensitivity and inversion loaded from GameSettings.
             sensitivityX = Duskborn.Core.GameSettings.MouseSensitivity;
             sensitivityY = Duskborn.Core.GameSettings.MouseSensitivity;
             invertPitch  = Duskborn.Core.GameSettings.InvertPitch;
@@ -210,7 +210,7 @@ namespace Duskborn.Gameplay.Player
         }
 
         /// <summary>
-        /// Posiciona instantaneamente a câmera atrás do jogador (evita interpolações longas ao spawnar).
+        /// Instantly position the camera behind the player (avoids long interpolation on spawn).
         /// </summary>
         public void SnapCameraToTarget()
         {
@@ -241,7 +241,7 @@ namespace Duskborn.Gameplay.Player
         }
 
         /// <summary>
-        /// Captura a entrada de rotação (Look) disparada pelo PlayerInput da Unity.
+        /// Capture Look rotation input dispatched by Unity PlayerInput.
         /// </summary>
         public void OnLook(InputValue value)
         {
@@ -283,7 +283,7 @@ namespace Duskborn.Gameplay.Player
                 if (_mainCam == null) return;
             }
 
-            // Se o jogador foi teletransportado ou spawnou longe do pivô anterior, reposiciona instantaneamente
+            // Instantly reposition if the player teleported or spawned far from the previous pivot.
             Vector3 targetPivot = transform.position + pivotOffset;
             if (Vector3.Distance(_smoothedPivotPos, targetPivot) > 10f)
             {
@@ -296,7 +296,7 @@ namespace Duskborn.Gameplay.Player
             UpdateDynamicFov();
         }
 
-        // ── Entrada e Controles ───────────────────────────────────────────────
+        // ── Input and Controls ──
 
         private void HandleInput()
         {
@@ -306,7 +306,7 @@ namespace Duskborn.Gameplay.Player
                 return;
             }
 
-            // Se o cursor estiver destravado (ex: mouse livre para UI), não rotaciona a câmera
+            // Do not rotate the camera when the cursor is unlocked (e.g. free mouse for UI).
             if (!_isCursorLocked)
             {
                 _lookInput = Vector2.zero;
@@ -325,7 +325,7 @@ namespace Duskborn.Gameplay.Player
         {
             if (_isRotationLocked || IsAnyMenuOpen()) return;
 
-            // Suporte a zoom segurando a tecla Alt ou via teclas específicas ([ e ])
+            // Support zoom while holding Alt or using dedicated keys ([ and ]).
             var kb = Keyboard.current;
             var mouse = Mouse.current;
             float scroll = 0f;
@@ -353,7 +353,7 @@ namespace Duskborn.Gameplay.Player
         public bool JustLockedCursorThisFrame => _justLockedCursorFrame == Time.frameCount;
 
         /// <summary>
-        /// Verifica se qualquer menu de interface está atualmente aberto no jogo.
+        /// Check whether any interface menu is currently open in the game.
         /// </summary>
         public static bool IsAnyMenuOpen()
         {
@@ -387,7 +387,7 @@ namespace Duskborn.Gameplay.Player
             if (!hasFocus) return;
             if (_controller != null && !_controller.IsOwner) return;
 
-            // Ao recuperar o foco da janela do jogo, se nenhum menu estiver aberto, esconde e trava o cursor
+            // When the game window regains focus, hide and lock the cursor if no menu is open.
             if (!IsAnyMenuOpen())
             {
                 _isAltUnlocked = false;
@@ -404,7 +404,7 @@ namespace Duskborn.Gameplay.Player
             // Record the state before automatic cursor recovery below. An ordinary
             // gameplay click must not be tagged as a click used to restore focus.
             bool cursorWasLocked = _isCursorLocked && Cursor.lockState == CursorLockMode.Locked && !Cursor.visible;
-            // Atalho de conveniência: pressionar Alt Esquerdo alterna temporariamente o cursor durante testes
+            // Convenience shortcut: Left Alt temporarily toggles the cursor during testing.
             var kb = Keyboard.current;
             // Alt is also the default dodge key. Never unlock the cursor during a
             // ranged dodge, otherwise holding RMB cannot resume aim afterwards.
@@ -418,7 +418,7 @@ namespace Duskborn.Gameplay.Player
 
             bool anyMenuOpen = IsAnyMenuOpen();
 
-            // Quando algo que estava aberto/visível é fechado/escondido, garante que o cursor desapareça imediatamente
+            // When an open / visible element closes / hides, ensure the cursor disappears immediately.
             if (_wasAnyMenuOpen && !anyMenuOpen)
             {
                 _isAltUnlocked = false;
@@ -430,8 +430,8 @@ namespace Duskborn.Gameplay.Player
             }
             _wasAnyMenuOpen = anyMenuOpen;
 
-            // Se nenhum menu está aberto e o jogador não está usando Alt intencionalmente,
-            // garante que o cursor NUNCA fique visível durante a gameplay
+            // If no menu is open and the player is not intentionally using Alt,
+            // ensure the cursor is NEVER visible during gameplay.
             if (!anyMenuOpen && !_isAltUnlocked && (!_isCursorLocked || Cursor.visible || Cursor.lockState != CursorLockMode.Locked))
             {
                 SetRotationLocked(false);
@@ -440,7 +440,7 @@ namespace Duskborn.Gameplay.Player
                 Cursor.visible = false;
             }
 
-            // Detecta clique de mouse neste frame
+            // Detect a mouse click in this frame.
             bool mouseClicked = false;
 #if ENABLE_INPUT_SYSTEM
             if (Mouse.current != null)
@@ -457,13 +457,13 @@ namespace Duskborn.Gameplay.Player
             if (!mouseClicked) return;
             if (Duskborn.Gameplay.Building.BuildingController.MenuOpen) return;
 
-            // Se o menu de pausa estiver aberto, o cursor é gerenciado pelo próprio menu OnGUI
+            // If the pause menu is open, its OnGUI manages the cursor.
             if (InGameMenuController.Instance != null && InGameMenuController.Instance.IsOpen)
             {
                 return;
             }
 
-            // Se o jogador estiver arrastando um item de inventário, não fecha nem interfere
+            // Do not close or interfere when the player is dragging an inventory item.
             if (InventoryUIManager.Instance != null && InventoryUIManager.Instance.Installer != null &&
                 InventoryUIManager.Instance.Installer.IsDraggingItem)
             {
@@ -472,8 +472,8 @@ namespace Duskborn.Gameplay.Player
 
             bool isOverUI = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
 
-            // Caso 1: NENHUM menu está aberto e o cursor estava visível/destravado.
-            // Clicar em qualquer área foca no jogo, esconde o cursor e trava a mira.
+            // Case 1: NO menu is open and the cursor was visible / unlocked.
+            // Clicking anywhere focuses the game, hides the cursor, and locks aim.
             if (!anyMenuOpen)
             {
                 if (cursorWasLocked) return;
@@ -486,8 +486,8 @@ namespace Duskborn.Gameplay.Player
                 return;
             }
 
-            // Caso 2: Um menu está aberto (Inventário, Crafting ou Stats).
-            // Se o jogador clicou em uma área vazia (fora de qualquer moldura ou botão de UI), fecha o menu e foca no jogo.
+            // Case 2: a menu is open (Inventory, Crafting, or Stats).
+            // If the player clicks an empty area (outside any UI frame or button), close the menu and focus the game.
             if (!isOverUI)
             {
                 if (CraftingUIManager.Instance != null && CraftingUIManager.Instance.IsOpen)
@@ -520,13 +520,13 @@ namespace Duskborn.Gameplay.Player
             }
         }
 
-        // ── Atualizações de Câmera ───────────────────────────────────────────
+        // Camera Updates
 
         private void UpdatePivotPosition()
         {
             Vector3 targetPivot = transform.position + pivotOffset;
 
-            // Interpolação amortecida para suavizar trepidações verticais do relevo procedural
+            // Damped interpolation to smooth vertical jitter on procedural terrain.
             _smoothedPivotPos = Vector3.SmoothDamp(
                 _smoothedPivotPos,
                 targetPivot,
@@ -553,21 +553,21 @@ namespace Duskborn.Gameplay.Player
         {
             Quaternion orbitRot = Quaternion.Euler(_currentPitch, _currentYaw, 0f);
 
-            // Deslocamento de ombro calculado a partir da rotação atual da câmera
+            // Shoulder offset calculated from current camera rotation.
             Vector3 shoulderVector = orbitRot * (Vector3.right * shoulderOffset);
             Vector3 rayOrigin      = _smoothedPivotPos + shoulderVector;
 
-            // Vetor para a posição desejada sem colisões
+            // Vector to the desired collision-free position.
             Vector3 backDir = -(orbitRot * Vector3.forward);
 
-            // Distância desejada com suavização de zoom
+            // Desired distance with zoom smoothing.
             float desiredDistance = Mathf.SmoothDamp(
                 _currentDistance,
                 _combat != null && _combat.IsAiming ? Mathf.Max(minDistance, _targetDistance * aimDistanceMultiplier) : _targetDistance,
                 ref _distanceVelocity,
                 zoomDampTime);
 
-            // Detecção esférica de obstrução (SphereCastNonAlloc) ignorando o próprio jogador
+            // Spherical obstruction detection (SphereCastNonAlloc) ignoring the player.
             int hitCount = Physics.SphereCastNonAlloc(
                 rayOrigin,
                 collisionRadius,
@@ -584,7 +584,7 @@ namespace Duskborn.Gameplay.Player
             {
                 var h = _sphereCastHits[i];
                 if (h.collider == null || h.collider.isTrigger) continue;
-                // Ignora o próprio jogador e qualquer objeto sob sua hierarquia
+                // Ignore the player and all objects in its hierarchy.
                 if (h.collider.transform.root == transform.root) continue;
 
                 if (h.distance < closestHitDist)
@@ -597,14 +597,14 @@ namespace Duskborn.Gameplay.Player
             float resolvedDistance = desiredDistance;
             if (hasObstacle)
             {
-                // Empurrão imediato para evitar que a câmera entre na geometria
+                // Immediate push to prevent the camera from entering geometry.
                 float safeHitDist = Mathf.Max(closestHitDist - collisionPadding, minDistance);
                 resolvedDistance  = Mathf.Min(safeHitDist, desiredDistance);
                 _currentDistance  = resolvedDistance;
             }
             else
             {
-                // Retorno suave ao afastar-se de obstáculos
+                // Smooth return when moving away from obstacles.
                 _currentDistance = Mathf.Lerp(
                     _currentDistance,
                     desiredDistance,
@@ -612,7 +612,7 @@ namespace Duskborn.Gameplay.Player
                 resolvedDistance = _currentDistance;
             }
 
-            // Posição final da câmera + tremor desvinculado (CameraShake)
+            // Final camera position + independent shake (CameraShake).
             Vector3 finalPosition = rayOrigin + backDir * resolvedDistance;
             _mainCam.transform.position = finalPosition + CameraShake.Offset;
             _mainCam.transform.rotation = orbitRot;
@@ -639,10 +639,10 @@ namespace Duskborn.Gameplay.Player
                 fovTransitionSpeed * Time.deltaTime);
         }
 
-        // ── Gerenciamento Público de Estado ───────────────────────────────────
+        // Public State Management
 
         /// <summary>
-        /// Bloqueia ou libera o cursor do mouse e define sua visibilidade.
+        /// Lock or unlock the mouse cursor and set its visibility.
         /// </summary>
         public void SetCursorLocked(bool locked)
         {
@@ -652,7 +652,7 @@ namespace Duskborn.Gameplay.Player
         }
 
         /// <summary>
-        /// Impede que a rotação da câmera receba comandos do mouse (usado ao abrir inventários/menus).
+        /// Prevent camera rotation from receiving mouse input (used when opening inventories / menus).
         /// </summary>
         public void SetRotationLocked(bool locked)
         {

@@ -45,11 +45,11 @@ namespace Duskborn.Gameplay.Building
         // a deterministic scene hierarchy id, so snapshots update the existing model.
         private void RegisterSceneFurnaces()
         {
-            var definition = Array.Find(Definitions, d => d.station == CraftingStationType.Forja && !d.storage);
+            var definition = Array.Find(Definitions, d => d.station == CraftingStationType.Forge && !d.storage);
             if (definition == null || !BuildableBounds.TryGet(definition, out var bounds)) return;
             foreach (var station in FindObjectsByType<Workbench>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
-                if (station.StationType != CraftingStationType.Forja || station.GetComponent<PlacedBuilding>() != null ||
+                if (station.StationType != CraftingStationType.Forge || station.GetComponent<PlacedBuilding>() != null ||
                     !station.gameObject.scene.IsValid() || station.gameObject.scene != gameObject.scene) continue;
                 string path = "";
                 for (var node = station.transform; node != null; node = node.parent)
@@ -126,8 +126,8 @@ namespace Duskborn.Gameplay.Building
         public PlacedBuilding Create(BuildingState state)
         {
             var d = Definition(state.definitionId);
-            if (d == null) throw new InvalidDataException("Definição ausente: " + state.definitionId);
-            if (!BuildableBounds.TryGet(d, out var bounds)) throw new InvalidDataException("Modelo da construção sem malha: " + d.displayName);
+            if (d == null) throw new InvalidDataException("Missing definition: " + state.definitionId);
+            if (!BuildableBounds.TryGet(d, out var bounds)) throw new InvalidDataException("Building model has no mesh: " + d.displayName);
             var root = CreateVisual(d);
             root.name = d.displayName;
             var box = root.AddComponent<BoxCollider>(); box.size = bounds.size; box.center = bounds.center;
@@ -211,65 +211,65 @@ namespace Duskborn.Gameplay.Building
         public string Validate(BuildingCommand command, PlayerInteractor player, out Dictionary<string, int> costs)
         {
             costs = new();
-            if (player == null || player.GetComponent<PlayerStats>()?.IsAlive != true) return "Jogador indisponível.";
-            if (command == null || !float.IsFinite(command.yaw)) return "Pedido inválido.";
+            if (player == null || player.GetComponent<PlayerStats>()?.IsAlive != true) return "Player unavailable.";
+            if (command == null || !float.IsFinite(command.yaw)) return "Invalid request.";
             if (command.action == "place")
             {
                 var d = Definition(command.definition);
-                if (d == null) return "Construção não encontrada no catálogo do servidor: " + command.definition;
-                if (d.prefab == null) return "Modelo da construção ausente: " + d.displayName;
-                if (!d.allowMultiple && Buildings.Values.Any(b => b.Definition == d)) return "Esta construção já existe.";
+                if (d == null) return "Building not found in the server catalog: " + command.definition;
+                if (d.prefab == null) return "Building model missing: " + d.displayName;
+                if (!d.allowMultiple && Buildings.Values.Any(b => b.Definition == d)) return "This building already exists.";
                 // Discovery is client-authoritative, like the existing crafting inventory, checked at payment.
                 var reason = PlacementValidator.Validate(d, command.position, Quaternion.Euler(0, command.yaw, 0), player.transform.position);
                 if (reason != null) return reason;
-                if (!MaterialCosts.Aggregate(d.costs, out costs)) return "Custo inválido.";
+                if (!MaterialCosts.Aggregate(d.costs, out costs)) return "Invalid cost.";
                 return null;
             }
-            if (string.IsNullOrEmpty(command.instance) || !Buildings.TryGetValue(command.instance, out var station)) return "Estação não encontrada.";
-            if (Vector3.Distance(player.transform.position, station.transform.position) > 4) return "Aproxime-se da estação.";
+            if (string.IsNullOrEmpty(command.instance) || !Buildings.TryGetValue(command.instance, out var station)) return "Station not found.";
+            if (Vector3.Distance(player.transform.position, station.transform.position) > 4) return "Move closer to the station.";
             switch (command.action)
             {
                 case "move":
-                    if (!station.Definition.movable) return "Esta estação não pode ser movida.";
+                    if (!station.Definition.movable) return "This station cannot be moved.";
                     return PlacementValidator.Validate(station.Definition, command.position, Quaternion.Euler(0, command.yaw, 0), player.transform.position, station.transform);
                 case "dismantle":
-                    return !station.Definition.dismantlable ? "Desmontagem indisponível." : !station.Empty ? "Retire os materiais e conclua a fila antes de desmontar." : null;
+                    return !station.Definition.dismantlable ? "Dismantling unavailable." : !station.Empty ? "Withdraw materials and finish the queue before dismantling." : null;
                 case "queue":
                     var recipe = Recipe(command.recipe);
-                    if (recipe == null || recipe.ProcessingSeconds <= 0 || recipe.RequiredStation != station.Definition.station || !(recipe.OutputItem is InventorySystem.Data.MaterialDefinition)) return "Processo incompatível.";
-                    if (station.State.jobs.Count >= station.Definition.queueCapacity) return "Fila cheia.";
-                    if (!MaterialCosts.Aggregate(recipe.Ingredients, recipe.FuelIngredients, out costs)) return "Receita inválida.";
+                    if (recipe == null || recipe.ProcessingSeconds <= 0 || recipe.RequiredStation != station.Definition.station || !(recipe.OutputItem is InventorySystem.Data.MaterialDefinition)) return "Incompatible process.";
+                    if (station.State.jobs.Count >= station.Definition.queueCapacity) return "Queue full.";
+                    if (!MaterialCosts.Aggregate(recipe.Ingredients, recipe.FuelIngredients, out costs)) return "Invalid recipe.";
                     return null;
                 case "load":
                     var loadRecipe = Recipe(command.recipe);
                     if (loadRecipe == null || loadRecipe.ProcessingSeconds <= 0 || loadRecipe.RequiredStation != station.Definition.station ||
-                        !(loadRecipe.OutputItem is InventorySystem.Data.MaterialDefinition)) return "Processo incompatível.";
-                    if (command.amount <= 0 || string.IsNullOrEmpty(command.material)) return "Material inválido.";
+                        !(loadRecipe.OutputItem is InventorySystem.Data.MaterialDefinition)) return "Incompatible process.";
+                    if (command.amount <= 0 || string.IsNullOrEmpty(command.material)) return "Invalid material.";
                     bool incompatibleLoadedFuel = station.State.fuel.Any(stack =>
                         IngredientAmount(loadRecipe.FuelIngredients, stack.id) <= 0);
                     if (!string.IsNullOrEmpty(station.State.selectedRecipe) && station.State.selectedRecipe != loadRecipe.RecipeId &&
                         (station.State.inputs.Count > 0 || incompatibleLoadedFuel || station.State.jobs.Count > 0))
-                        return "Esvazie a forja antes de trocar a receita.";
+                        return "Empty the forge before changing the recipe.";
                     bool isFuel = IngredientAmount(loadRecipe.FuelIngredients, command.material) > 0;
                     bool isInput = IngredientAmount(loadRecipe.Ingredients, command.material) > 0;
-                    if (!isFuel && !isInput) return "Este material não pertence à receita selecionada.";
+                    if (!isFuel && !isInput) return "This material does not belong to the selected recipe.";
                     int loaded = isFuel ? station.FuelAmount(command.material) : station.InputAmount(command.material);
-                    if (command.amount > PlacedBuilding.SlotStackCapacity - loaded) return "O slot aceita no máximo 64 unidades.";
+                    if (command.amount > PlacedBuilding.SlotStackCapacity - loaded) return "The slot accepts at most 64 units.";
                     costs[command.material] = command.amount;
                     return null;
                 case "unload":
-                    if (command.amount <= 0 || string.IsNullOrEmpty(command.material) || (command.slot != "input" && command.slot != "fuel")) return "Retirada inválida.";
+                    if (command.amount <= 0 || string.IsNullOrEmpty(command.material) || (command.slot != "input" && command.slot != "fuel")) return "Invalid withdrawal.";
                     int available = command.slot == "fuel" ? station.FuelAmount(command.material) : station.InputAmount(command.material);
-                    return available < command.amount ? "Quantidade indisponível no slot." : null;
-                case "collect": return station.State.contents.Count == 0 ? "Nenhum material disponível." : null;
+                    return available < command.amount ? "Quantity unavailable in the slot." : null;
+                case "collect": return station.State.contents.Count == 0 ? "No materials available." : null;
                 case "deposit":
-                    if (!station.Definition.storage || command.amount <= 0 || command.amount > station.Definition.capacity - station.StoredCount || string.IsNullOrEmpty(command.material)) return "Depósito inválido ou armazenamento cheio.";
+                    if (!station.Definition.storage || command.amount <= 0 || command.amount > station.Definition.capacity - station.StoredCount || string.IsNullOrEmpty(command.material)) return "Invalid deposit or storage full.";
                     costs[command.material] = command.amount; return null;
                 case "withdraw":
-                    if (!station.Definition.storage || command.amount <= 0 || string.IsNullOrEmpty(command.material)) return "Retirada inválida.";
+                    if (!station.Definition.storage || command.amount <= 0 || string.IsNullOrEmpty(command.material)) return "Invalid withdrawal.";
                     var stored = station.State.contents.Find(stack => stack.id == command.material);
-                    return stored == null || stored.amount < command.amount ? "Quantidade indisponível no baú." : null;
-                default: return "Ação desconhecida.";
+                    return stored == null || stored.amount < command.amount ? "Quantity unavailable in the chest." : null;
+                default: return "Unknown action.";
             }
         }
         public Dictionary<string, int> Commit(BuildingCommand command)
@@ -322,37 +322,37 @@ namespace Duskborn.Gameplay.Building
         }
         public void Load(ResourceInventory inventory)
         {
-            if (loadedCheckpoint || HasChangedBuildings() || inventory.Revision != 0) throw new InvalidOperationException("Carregue no início de uma sessão, antes de coletar ou gastar materiais.");
+            if (loadedCheckpoint || HasChangedBuildings() || inventory.Revision != 0) throw new InvalidOperationException("Load at the start of a session, before gathering or spending materials.");
             var snapshot = JsonUtility.FromJson<BuildingSnapshot>(File.ReadAllText(SavePath));
             var current = Capture();
-            if (snapshot == null || snapshot.version != 1 || snapshot.seed != current.seed || snapshot.scene != current.scene || snapshot.buildings == null || snapshot.hostResources == null) throw new InvalidDataException("Save incompatível com este mundo.");
+            if (snapshot == null || snapshot.version != 1 || snapshot.seed != current.seed || snapshot.scene != current.scene || snapshot.buildings == null || snapshot.hostResources == null) throw new InvalidDataException("Save is incompatible with this world.");
             var ids = new HashSet<string>();
             foreach (var b in snapshot.buildings)
             {
-                if (b == null || string.IsNullOrEmpty(b.instanceId) || !ids.Add(b.instanceId) || Definition(b.definitionId) == null || !PlacementValidator.Finite(b.position) || !float.IsFinite(b.yaw) || b.jobs == null || b.contents == null) throw new InvalidDataException("Construção inválida no save.");
+                if (b == null || string.IsNullOrEmpty(b.instanceId) || !ids.Add(b.instanceId) || Definition(b.definitionId) == null || !PlacementValidator.Finite(b.position) || !float.IsFinite(b.yaw) || b.jobs == null || b.contents == null) throw new InvalidDataException("Invalid building in save.");
                 b.inputs ??= new List<MaterialStack>();
                 b.fuel ??= new List<MaterialStack>();
-                foreach (var job in b.jobs) if (job == null || Recipe(job.recipe) == null || !float.IsFinite(job.remaining) || job.remaining < 0) throw new InvalidDataException("Processo inválido no save.");
+                foreach (var job in b.jobs) if (job == null || Recipe(job.recipe) == null || !float.IsFinite(job.remaining) || job.remaining < 0) throw new InvalidDataException("Invalid process in save.");
                 ValidateStacks(b.contents);
                 ValidateStacks(b.inputs);
                 ValidateStacks(b.fuel);
                 var definition = Definition(b.definitionId);
                 if (b.fuelCharges < 0 || b.fuelCharges > PlacedBuilding.SlotStackCapacity * 2 ||
                     b.contents.Sum(s => (long)s.amount) > definition.capacity || b.jobs.Count > definition.queueCapacity ||
-                    b.inputs.Any(s => s.amount > PlacedBuilding.SlotStackCapacity) || b.fuel.Any(s => s.amount > PlacedBuilding.SlotStackCapacity)) throw new InvalidDataException("Capacidade inválida no save.");
+                    b.inputs.Any(s => s.amount > PlacedBuilding.SlotStackCapacity) || b.fuel.Any(s => s.amount > PlacedBuilding.SlotStackCapacity)) throw new InvalidDataException("Invalid capacity in save.");
                 if (!string.IsNullOrEmpty(b.selectedRecipe))
                 {
                     var selected = Recipe(b.selectedRecipe);
                     if (selected == null || selected.RequiredStation != definition.station || selected.ProcessingSeconds <= 0 ||
                         b.inputs.Any(s => IngredientAmount(selected.Ingredients, s.id) == 0) ||
-                        b.fuel.Any(s => IngredientAmount(selected.FuelIngredients, s.id) == 0)) throw new InvalidDataException("Slots de processamento incompatíveis no save.");
+                        b.fuel.Any(s => IngredientAmount(selected.FuelIngredients, s.id) == 0)) throw new InvalidDataException("Incompatible processing slots in save.");
                 }
                 else if (b.inputs.Count > 0 || b.fuel.Count > 0)
-                    throw new InvalidDataException("Slots de processamento sem receita no save.");
+                    throw new InvalidDataException("Processing slots have no recipe in save.");
                 foreach (var job in b.jobs)
                 {
                     var recipe = Recipe(job.recipe);
-                    if (recipe.RequiredStation != definition.station || recipe.ProcessingSeconds <= 0 || !(recipe.OutputItem is InventorySystem.Data.MaterialDefinition) || job.remaining > recipe.ProcessingSeconds) throw new InvalidDataException("Receita incompatível no save.");
+                    if (recipe.RequiredStation != definition.station || recipe.ProcessingSeconds <= 0 || !(recipe.OutputItem is InventorySystem.Data.MaterialDefinition) || job.remaining > recipe.ProcessingSeconds) throw new InvalidDataException("Incompatible recipe in save.");
                 }
             }
             ValidateStacks(snapshot.hostResources);
@@ -366,7 +366,7 @@ namespace Duskborn.Gameplay.Building
         private static void ValidateStacks(List<MaterialStack> stacks)
         {
             var ids = new HashSet<string>();
-            foreach (var s in stacks) if (s == null || string.IsNullOrEmpty(s.id) || s.amount < 0 || !ids.Add(s.id)) throw new InvalidDataException("Materiais inválidos no save.");
+            foreach (var s in stacks) if (s == null || string.IsNullOrEmpty(s.id) || s.amount < 0 || !ids.Add(s.id)) throw new InvalidDataException("Invalid materials in save.");
         }
 
         private static int IngredientAmount(IReadOnlyList<CraftingIngredient> ingredients, string material)

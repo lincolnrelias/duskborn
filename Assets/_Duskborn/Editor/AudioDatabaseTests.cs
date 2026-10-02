@@ -8,7 +8,7 @@ using Duskborn.Gameplay;
 namespace Duskborn.Editor
 {
     /// <summary>
-    /// Testes automatizados para o banco central de áudio (AudioDatabase) e utilitários de som.
+    /// Automated tests for the central audio database (AudioDatabase) and sound utilities.
     /// </summary>
     public static class AudioDatabaseTests
     {
@@ -25,7 +25,7 @@ namespace Duskborn.Editor
             RunTest(Test_AudioDatabase_LootPickupAndDropClips, ref passed, ref total);
             RunTest(Test_AudioPreviewUtility_SafeExecution, ref passed, ref total);
 
-            Debug.Log($"<color=#55FF55><b>[AudioDatabaseTests] {passed}/{total} testes passaram com sucesso!</b></color>");
+            Debug.Log($"<color=#55FF55><b>[AudioDatabaseTests] {passed}/{total} tests passed!</b></color>");
         }
 
         private static void RunTest(Action testMethod, ref int passed, ref int total)
@@ -48,73 +48,73 @@ namespace Duskborn.Editor
             var db = AudioDatabase.Instance;
             if (db == null)
             {
-                throw new Exception("AudioDatabase.Instance retornou nulo.");
+                throw new Exception("AudioDatabase.Instance returned null.");
             }
         }
 
         private static void Test_AudioDatabase_AutoPopulateAndCategories()
         {
             var db = AudioDatabase.Instance;
-            if (db == null) throw new Exception("AudioDatabase.Instance nulo.");
+            if (db == null) throw new Exception("AudioDatabase.Instance is null.");
 
             db.AutoPopulateDefaults();
 
-            if (db.ResourcesSettings == null) throw new Exception("ResourcesSettings é nulo.");
-            if (db.Player == null) throw new Exception("PlayerSettings é nulo.");
-            if (db.Enemies == null) throw new Exception("EnemySettings é nulo.");
-            if (db.Combat == null) throw new Exception("CombatSettings é nulo.");
-            if (db.Loot == null) throw new Exception("LootSettings é nulo.");
-            if (db.UI == null) throw new Exception("UiSettings é nulo.");
-            if (db.Music == null) throw new Exception("MusicSettings é nulo.");
+            if (db.ResourcesSettings == null) throw new Exception("ResourcesSettings is null.");
+            if (db.Player == null) throw new Exception("PlayerSettings is null.");
+            if (db.Enemies == null) throw new Exception("EnemySettings is null.");
+            if (db.Combat == null) throw new Exception("CombatSettings is null.");
+            if (db.Loot == null) throw new Exception("LootSettings is null.");
+            if (db.UI == null) throw new Exception("UiSettings is null.");
+            if (db.Music == null) throw new Exception("MusicSettings is null.");
         }
 
         private static void Test_AudioDatabase_GetDepletedClip_OreAndStone()
         {
             var db = AudioDatabase.Instance;
-            if (db == null) throw new Exception("AudioDatabase.Instance nulo.");
+            if (db == null) throw new Exception("AudioDatabase.Instance is null.");
 
             db.AutoPopulateDefaults();
 
             var stoneClip = db.GetDepletedClip(TargetType.Stone, "Stone");
-            if (stoneClip == null) throw new Exception("GetDepletedClip para Stone retornou nulo.");
+            if (stoneClip == null) throw new Exception("GetDepletedClip for Stone returned null.");
 
             var oreClip = db.GetDepletedClip(TargetType.Ore, "Metal");
-            if (oreClip == null) throw new Exception("GetDepletedClip para Ore retornou nulo.");
+            if (oreClip == null) throw new Exception("GetDepletedClip for Ore returned null.");
 
             var treeClip = db.GetDepletedClip(TargetType.Tree, "Tree");
-            if (treeClip == null) throw new Exception("GetDepletedClip para Tree retornou nulo.");
+            if (treeClip == null) throw new Exception("GetDepletedClip for Tree returned null.");
         }
 
         private static void Test_AudioDatabase_GetFootstepClip_Surfaces()
         {
             var db = AudioDatabase.Instance;
-            if (db == null) throw new Exception("AudioDatabase.Instance nulo.");
+            if (db == null) throw new Exception("AudioDatabase.Instance is null.");
 
             db.AutoPopulateDefaults();
 
             var grassStep = db.GetFootstepClip("Grass");
-            if (grassStep == null) throw new Exception("GetFootstepClip para Grass retornou nulo.");
+            if (grassStep == null) throw new Exception("GetFootstepClip for Grass returned null.");
 
             var stoneStep = db.GetFootstepClip("Stone");
-            if (stoneStep == null) throw new Exception("GetFootstepClip para Stone retornou nulo.");
+            if (stoneStep == null) throw new Exception("GetFootstepClip for Stone returned null.");
 
             var dirtStep = db.GetFootstepClip("Dirt");
-            if (dirtStep == null) throw new Exception("GetFootstepClip para Dirt retornou nulo.");
+            if (dirtStep == null) throw new Exception("GetFootstepClip for Dirt returned null.");
 
             var waterStep = db.GetFootstepClip("Water");
-            if (waterStep == null) throw new Exception("GetFootstepClip para Water retornou nulo.");
+            if (waterStep == null) throw new Exception("GetFootstepClip for Water returned null.");
 
-            // Testes com SurfaceType tipado
-            if (db.GetFootstepClip(SurfaceType.Grass) == null) throw new Exception("GetFootstepClip(SurfaceType.Grass) nulo.");
-            if (db.GetFootstepClip(SurfaceType.Dirt) == null)  throw new Exception("GetFootstepClip(SurfaceType.Dirt) nulo.");
-            if (db.GetFootstepClip(SurfaceType.Rock) == null)  throw new Exception("GetFootstepClip(SurfaceType.Rock) nulo.");
-            if (db.GetFootstepClip(SurfaceType.Water) == null) throw new Exception("GetFootstepClip(SurfaceType.Water) nulo.");
+            // Tests with typed SurfaceType.
+            if (db.GetFootstepClip(SurfaceType.Grass) == null) throw new Exception("GetFootstepClip(SurfaceType.Grass) is null.");
+            if (db.GetFootstepClip(SurfaceType.Dirt) == null)  throw new Exception("GetFootstepClip(SurfaceType.Dirt) is null.");
+            if (db.GetFootstepClip(SurfaceType.Rock) == null)  throw new Exception("GetFootstepClip(SurfaceType.Rock) is null.");
+            if (db.GetFootstepClip(SurfaceType.Water) == null) throw new Exception("GetFootstepClip(SurfaceType.Water) is null.");
         }
 
         private static void Test_AudioDatabase_LootPickupAndDropClips()
         {
             var db = AudioDatabase.Instance;
-            if (db == null) throw new Exception("AudioDatabase.Instance nulo.");
+            if (db == null) throw new Exception("AudioDatabase.Instance is null.");
 
             db.AutoPopulateDefaults();
 
@@ -131,19 +131,19 @@ namespace Duskborn.Editor
             {
                 var pickupClip = db.GetPickupClip(rarity);
                 if (pickupClip == null)
-                    throw new Exception($"GetPickupClip para {rarity} retornou nulo.");
+                    throw new Exception($"GetPickupClip for {rarity} returned null.");
 
                 float pickupVol = db.GetPickupVolume(rarity);
                 if (pickupVol <= 0f || pickupVol > 1f)
-                    throw new Exception($"GetPickupVolume para {rarity} fora dos limites válidos: {pickupVol}");
+                    throw new Exception($"GetPickupVolume for {rarity} is outside valid bounds: {pickupVol}");
 
                 var dropClip = db.GetDropClip(rarity);
                 if (dropClip == null)
-                    throw new Exception($"GetDropClip para {rarity} retornou nulo.");
+                    throw new Exception($"GetDropClip for {rarity} returned null.");
 
                 float dropVol = db.GetDropVolume(rarity);
                 if (dropVol <= 0f || dropVol > 1f)
-                    throw new Exception($"GetDropVolume para {rarity} fora dos limites válidos: {dropVol}");
+                    throw new Exception($"GetDropVolume for {rarity} is outside valid bounds: {dropVol}");
             }
         }
 

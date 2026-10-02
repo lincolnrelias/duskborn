@@ -4,21 +4,21 @@ using Duskborn.Core;
 namespace Duskborn.Audio
 {
     /// <summary>
-    /// Gerencia a trilha sonora adaptativa e os efeitos sonoros de transição do Ciclo Dia/Noite.
-    /// Executa o berrante do alvorecer e a música serena de exploração durante o dia,
-    /// e o berrante de guerra e a percussão frenética de combate durante a noite.
+    /// Manages the adaptive soundtrack and transition sound effects for the day/night cycle.
+    /// Plays the dawn horn and serene exploration music during the day,
+    /// and the war horn and frantic combat percussion at night.
     /// </summary>
     public class DayNightAudio : MonoBehaviour
     {
-        [Header("Trilhas Musicais")]
+        [Header("Music Tracks")]
         [SerializeField] private AudioClip dayMusic;
         [SerializeField] private AudioClip nightMusic;
 
-        [Header("Stingers de Transição")]
+        [Header("Transition Stingers")]
         [SerializeField] private AudioClip dawnHorn;
         [SerializeField] private AudioClip nightHorn;
 
-        [Header("Configurações")]
+        [Header("Settings")]
         [SerializeField] private float musicFadeTime = 2.5f;
         [SerializeField] [Range(0f, 1f)] private float hornVolume = 0.9f;
 
@@ -31,7 +31,7 @@ namespace Duskborn.Audio
                 DayNightCycle.Instance.OnDayStart += HandleDayStart;
                 DayNightCycle.Instance.OnNightStart += HandleNightStart;
 
-                // Inicia a trilha apropriada para a fase atual
+                // Start the appropriate track for the current phase.
                 if (DayNightCycle.Instance.IsDay)
                     HandleDayStart();
                 else
@@ -39,7 +39,7 @@ namespace Duskborn.Audio
             }
             else
             {
-                // Fallback caso não haja DayNightCycle na cena (ex: teste rápido)
+                // Fallback when no DayNightCycle exists in the scene (e.g. a quick test).
                 if (dayMusic != null && AudioManager.Instance != null)
                     AudioManager.Instance.PlayMusic(dayMusic, musicFadeTime);
             }

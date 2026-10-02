@@ -4,19 +4,19 @@ using Duskborn.Gameplay.Player;
 namespace Duskborn.Audio
 {
     /// <summary>
-    /// Feedback sonoro de vitalidade e combate para o jogador.
-    /// Gerencia gemidos de dano (hurt grunts), som de morte e a batida cardíaca imersiva (heartbeat)
-    /// quando a vida cai abaixo de 30%.
+    /// Player vitality and combat audio feedback.
+    /// Manages hurt grunts, death sounds, and the immersive heartbeat
+    /// when health drops below 30%.
     /// </summary>
     [RequireComponent(typeof(PlayerStats))]
     public class PlayerAudioFeedback : MonoBehaviour
     {
-        [Header("Clipes de Dano e Morte")]
+        [Header("Hurt and Death Clips")]
         [SerializeField] private AudioClip[] hurtClips;
         [SerializeField] private AudioClip deathClip;
         [SerializeField] private AudioClip heartbeatLoopClip;
 
-        [Header("Configurações")]
+        [Header("Settings")]
         [SerializeField] [Range(0f, 1f)] private float hurtVolume = 0.85f;
         [SerializeField] [Range(0f, 1f)] private float deathVolume = 1.0f;
         [SerializeField] private float lowHpThreshold = 0.30f;
@@ -32,7 +32,7 @@ namespace Duskborn.Audio
 
             _voiceSource = gameObject.AddComponent<AudioSource>();
             _voiceSource.playOnAwake = false;
-            _voiceSource.spatialBlend = 0f; // 2D para feedback do jogador local
+            _voiceSource.spatialBlend = 0f; // 2D feedback for the local player.
 
             _heartbeatSource = gameObject.AddComponent<AudioSource>();
             _heartbeatSource.playOnAwake = false;
@@ -94,7 +94,7 @@ namespace Duskborn.Audio
 
         private void HandleHealthChanged(float current, float max)
         {
-            // Dano recebido
+            // Damage received.
             if (current < _lastHP && current > 0f)
             {
                 PlayHurt();
@@ -102,7 +102,7 @@ namespace Duskborn.Audio
 
             _lastHP = current;
 
-            // Heartbeat em perigo crítico
+            // Heartbeat during critical danger.
             float hpRatio = max > 0f ? (current / max) : 1f;
             if (hpRatio < lowHpThreshold && current > 0f)
             {
@@ -111,7 +111,7 @@ namespace Duskborn.Audio
                     _heartbeatSource.Play();
                 }
 
-                // Volume aumenta quanto mais perto da morte
+                // Volume increases as death approaches.
                 float danger = 1f - (hpRatio / lowHpThreshold);
                 _heartbeatSource.volume = Mathf.Lerp(0.3f, 0.9f, danger) *
                     (AudioManager.Instance != null ? AudioManager.Instance.MasterVolume * AudioManager.Instance.SfxVolume : 1f);

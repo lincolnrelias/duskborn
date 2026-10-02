@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_IronChest
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_IronChest
-  recipeName: Armadura de Ferro
-  description: Armadura de Ferro
-  category: Armadura
+  recipeName: "Iron Armor"
+  description: "Iron Armor"
+  category: "Armor"
   tier: 2
   isAlwaysDiscovered: 0
   outputItem: {fileID: 11400000, guid: 20ca6e6a87424114988cb40603421b41, type: 2}

@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_StoneAxe
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: recipe_stone_axe
-  recipeName: Machado de Pedra
-  description: Machado de pedra rustico. Causa dano massivo (+300%) a arvores e bonus contra humanoides.
-  category: Ferramentas
+  recipeName: "Stone Axe"
+  description: "Rough stone axe. Deals massive damage (+300%) to trees and bonus damage against humanoids."
+  category: "Tools"
   outputItem: {fileID: 11400000, guid: 601f53b2da268ec439655f119087feb4, type: 2}
   outputAmount: 1
   ingredients:

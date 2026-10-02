@@ -1,50 +1,50 @@
-# Otimização de GPU, Shaders URP e Renderização
+# GPU, URP Shader, and Rendering Optimization
 
-O Duskborn adota um estilo visual estilizado *low-poly 3D* com interface em *pixel art*, renderizado através do **Universal Render Pipeline (URP 17)** e aprimorado com o pacote **Linework Lite** para contornos.
+Duskborn uses a stylized *low-poly 3D* visual style with a *pixel art* interface, rendered through **Universal Render Pipeline (URP 17)** and enhanced with **Linework Lite** outlines.
 
-Abaixo estão os princípios para garantir 60+ FPS estáveis em GPUs integradas e dedicadas.
-
----
-
-## 1. Preservação do SRP Batcher
-
-O SRP Batcher agrupa draw calls de materiais compatíveis sem custo de CPU para reconstrução de buffers de desenho.
-
-- **Compatibilidade do Shader**: Certifique-se de que todos os shaders personalizados declarem todas as propriedades de material dentro de uma constante de buffer uniforme (`CBUFFER_START(UnityPerMaterial)` ... `CBUFFER_END`).
-- **Não altere materiais diretamente**: Usar `material.color` ou `material.SetFloat()` clona o material e desqualifica o objeto do SRP Batcher.
-- Mantenha paletas e texturas atlasadas para os modelos *low-poly*, minimizando a variação de materiais na cena.
+The following principles target stable 60+ FPS on integrated and dedicated GPUs.
 
 ---
 
-## 2. Ajustes de Sombras para Hordas
+## 1. Preserve the SRP Batcher
 
-Renderizar mapas de sombras dinâmicas para centenas de inimigos sobrecarrega a GPU:
+The SRP Batcher groups compatible material draw calls without CPU overhead for rebuilding draw buffers.
 
-- Em `Swarmer` e `Runner` (inimigos básicos e rápidos):
-  - Configure `Cast Shadows = Off` no componente `MeshRenderer`.
-  - Ative sombras apenas para inimigos de grande porte (`Brute`, `Elite`, Chefes de Bioma).
-- Mantenha as cascatas de sombra URP configuradas com alcance restrito no `UniversalRenderPipelineAsset`.
-
----
-
-## 3. Linework Lite e Contornos (Rendering Layer Mask)
-
-O sistema de contorno do Duskborn identifica alvos via camadas de renderização (`RenderingLayerMask`):
-
-- O contorno não deve adicionar passes adicionais de geometria.
-- Ao ativar ou desativar o contorno de um inimigo sob a mira do jogador:
-  - Modifique apenas `renderer.renderingLayerMask = baseMask | outlineMask;`.
-  - Jamais instancie materiais de contorno individuais por inimigo.
+- **Shader Compatibility**: Ensure every custom shader declares all material properties inside a uniform constant buffer (`CBUFFER_START(UnityPerMaterial)` ... `CBUFFER_END`).
+- **Do not modify materials directly**: Using `material.color` or `material.SetFloat()` clones the material and disqualifies the object from the SRP Batcher.
+- Keep palettes and atlased textures for *low-poly* models, minimizing material variation in the scene.
 
 ---
 
-## 4. Otimização de UI e Canvas em Pixel Art
+## 2. Horde Shadow Settings
 
-A interface do Duskborn combina barras de vida dinâmicas, popups de dano (`DamageNumberPool`) e menus:
+Rendering dynamic shadow maps for hundreds of enemies overloads the GPU:
 
-1. **Separação de Canvas**:
-   - **Canvas Estático**: Menus, minimapa estático, molduras de inventário.
-   - **Canvas Dinâmico**: Barras de vida de inimigos, popups de dano flutuante, contadores de tempo.
-   - *Motivo*: Quando um único elemento de texto ou número de dano muda de posição ou valor, a Unity re-submete a malha inteira daquele Canvas para a GPU. Separar os Canvas isola as reconstruções.
+- For `Swarmer` and `Runner` (basic, fast enemies):
+  - Set `Cast Shadows = Off` on the `MeshRenderer` component.
+  - Enable shadows only for large enemies (`Brute`, `Elite`, Biome Bosses).
+- Keep URP shadow cascades configured with restricted range in `UniversalRenderPipelineAsset`.
+
+---
+
+## 3. Linework Lite and Outlines (Rendering Layer Mask)
+
+Duskborn's outline system identifies targets through rendering layers (`RenderingLayerMask`):
+
+- Outlines must not add additional geometry passes.
+- When enabling or disabling an outline on an enemy under the player's aim:
+  - Modify only `renderer.renderingLayerMask = baseMask | outlineMask;`.
+  - Never instantiate individual outline materials per enemy.
+
+---
+
+## 4. Pixel Art UI and Canvas Optimization
+
+Duskborn's interface combines dynamic health bars, damage popups (`DamageNumberPool`), and menus:
+
+1. **Canvas Separation**:
+   - **Static Canvas**: Menus, static minimap, inventory frames.
+   - **Dynamic Canvas**: Enemy health bars, floating damage popups, timers.
+   - *Reason*: When one text element or damage number changes position or value, Unity resubmits that Canvas's entire mesh to the GPU. Separating Canvases isolates rebuilds.
 2. **Raycast Target**:
-   - Desmarque a opção `Raycast Target` em todas as imagens estáticas, textos do TextMeshPro e ícones que não recebem clique direto do mouse.
+   - Disable `Raycast Target` on all static images, TextMeshPro texts, and icons that do not receive direct mouse clicks.

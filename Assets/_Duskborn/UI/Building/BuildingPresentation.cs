@@ -46,14 +46,14 @@ namespace Duskborn.Gameplay.Building
             string disabledReason = null;
             if (!unlocked)
                 disabledReason = definition != null && definition.unlockRecipe != null
-                    ? "Descubra " + definition.unlockRecipe.RecipeName + " para desbloquear."
-                    : "Construção ainda bloqueada.";
+                    ? "Discover " + definition.unlockRecipe.RecipeName + " to unlock."
+                    : "Building is still locked.";
             else if (definition == null || definition.prefab == null)
-                disabledReason = "Modelo da construção indisponível.";
+                disabledReason = "Building model unavailable.";
             else if (!definition.allowMultiple && alreadyPlaced)
-                disabledReason = "Esta construção já existe neste mundo.";
+                disabledReason = "This building already exists in this world.";
             else if (!affordable)
-                disabledReason = "Faltam " + string.Join(", ", costs.Where(cost => cost.Missing > 0)
+                disabledReason = "Missing " + string.Join(", ", costs.Where(cost => cost.Missing > 0)
                     .Select(cost => cost.Missing + " " + cost.DisplayName)) + ".";
 
             return new BuildablePresentation
@@ -96,13 +96,13 @@ namespace Duskborn.Gameplay.Building
         private static string Capability(BuildableDefinition definition)
         {
             if (definition == null) return string.Empty;
-            if (definition.storage) return "Armazena pilhas de materiais com segurança.";
+            if (definition.storage) return "Safely stores stacks of materials.";
             return definition.station switch
             {
-                CraftingStationType.Forja => "Processa metais e permite fabricar equipamento pesado.",
-                CraftingStationType.Caldeirao => "Prepara alquimia, óleos e materiais orgânicos.",
-                CraftingStationType.MesaArcana => "Processa cristais e habilita fabricação arcana.",
-                _ => "Fabricação geral e preparação básica de materiais."
+                CraftingStationType.Forge => "Processes metals and enables heavy equipment crafting.",
+                CraftingStationType.Cauldron => "Prepares alchemy, oils, and organic materials.",
+                CraftingStationType.ArcaneTable => "Processes crystals and enables arcane crafting.",
+                _ => "General crafting and basic material preparation."
             };
         }
     }

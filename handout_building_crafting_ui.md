@@ -183,7 +183,7 @@ Remaining UI weaknesses:
 - Queue entries are read-only and cannot be canceled or reordered, matching backend rules.
 - Storage does not yet provide a typed arbitrary quantity or search because the current material set is small; one and full-stack transfers are supported.
 - The views are reusable but still built at runtime; an authored prefab may be preferable once the layout settles.
-- Runtime UI text is partly Portuguese while this handout is in English. Match the language already used by the surrounding game UI; do not mix languages within one screen.
+- Runtime UI, comments, code names, and project documentation use English. Keep every screen consistently in English.
 
 ---
 

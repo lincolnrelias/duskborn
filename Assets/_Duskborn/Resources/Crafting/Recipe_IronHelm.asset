@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_IronHelm
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_IronHelm
-  recipeName: Elmo de Ferro
-  description: Elmo de Ferro
-  category: Armadura
+  recipeName: "Iron Helm"
+  description: "Iron Helm"
+  category: "Armor"
   tier: 2
   isAlwaysDiscovered: 0
   outputItem: {fileID: 11400000, guid: ef60cb4c3b3bee0428c263de7e7f0b1f, type: 2}

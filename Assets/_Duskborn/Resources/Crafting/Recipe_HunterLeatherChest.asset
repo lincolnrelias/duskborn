@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_HunterLeatherChest
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_HunterLeatherChest
-  recipeName: "Gib\xE3o do Ca\xE7ador"
-  description: "Gib\xE3o do Ca\xE7ador"
-  category: Armadura
+  recipeName: "Hunter's Jerkin"
+  description: "Hunter's Jerkin"
+  category: "Armor"
   tier: 3
   requiredStation: 0
   isAlwaysDiscovered: 0

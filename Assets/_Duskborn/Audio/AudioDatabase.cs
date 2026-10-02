@@ -5,9 +5,9 @@ using UnityEngine;
 namespace Duskborn.Audio
 {
     /// <summary>
-    /// Banco de dados central de áudio do Duskborn.
-    /// Funciona como a única fonte da verdade (Single Source of Truth) para configurações,
-    /// volumes, distâncias e clipes de áudio do jogo, eliminando caminhos mágicos e hardcoded strings.
+    /// Central Duskborn audio database.
+    /// Acts as the single source of truth for settings,
+    /// volumes, distances, and game audio clips, eliminating magic paths and hardcoded strings.
     /// </summary>
     [CreateAssetMenu(fileName = "AudioDatabase", menuName = "Duskborn/Audio/Audio Database")]
     public class AudioDatabase : ScriptableObject
@@ -41,7 +41,7 @@ namespace Duskborn.Audio
             }
         }
 
-        [Header("Categorias de Áudio")]
+        [Header("Audio Categories")]
         [SerializeField] private ResourceAudioSettings resources = new();
         [SerializeField] private PlayerAudioSettings   player    = new();
         [SerializeField] private EnemyAudioSettings    enemies   = new();
@@ -58,7 +58,7 @@ namespace Duskborn.Audio
         public UiAudioSettings       UI                => ui;
         public MusicAudioSettings    Music             => music;
 
-        // ── Helpers de Resolução Rápida ───────────────────────────────────────
+        // Quick Resolution Helpers
 
         public AudioClip GetDepletedClip(Gameplay.TargetType type, string surfaceTag)
         {
@@ -138,17 +138,17 @@ namespace Duskborn.Audio
         }
     }
 
-    // ── 1. Recursos e Coleta (Nós de Minério, Pedra e Árvores) ────────────────
+    // 1. Resources and Gathering (Ore, Stone, and Tree Nodes)
 
     [Serializable]
     public class ResourceAudioSettings
     {
-        [Header("Clipes de Destruição / Depleção")]
+        [Header("Destruction / Depletion Clips")]
         public AudioClip[] rockShatterClips = Array.Empty<AudioClip>();
         public AudioClip[] oreShatterClips  = Array.Empty<AudioClip>();
         public AudioClip[] treeFallClips    = Array.Empty<AudioClip>();
 
-        [Header("Parâmetros 3D")]
+        [Header("3D Parameters")]
         [Range(0f, 1f)] public float depletedVolume = 1.0f;
         public float minDistance = 2f;
         public float maxDistance = 45f;
@@ -204,27 +204,27 @@ namespace Duskborn.Audio
         }
     }
 
-    // ── 2. Jogador (Passos, Movimentação e Vitalidade) ─────────────────────────
+    // 2. Player (Footsteps, Movement, and Vitality)
 
     [Serializable]
     public class PlayerAudioSettings
     {
-        [Header("Passos por Superfície")]
+        [Header("Footsteps by Surface")]
         public AudioClip[] grassSteps = Array.Empty<AudioClip>();
         public AudioClip[] stoneSteps = Array.Empty<AudioClip>();
         public AudioClip[] dirtSteps  = Array.Empty<AudioClip>();
         public AudioClip[] waterSteps = Array.Empty<AudioClip>();
 
-        [Header("Locomoção e Salto")]
+        [Header("Locomotion and Jumping")]
         public AudioClip jumpClip;
         public AudioClip landClip;
 
-        [Header("Vitalidade e Combate")]
+        [Header("Vitality and Combat")]
         public AudioClip[] hurtClips = Array.Empty<AudioClip>();
         public AudioClip deathClip;
         public AudioClip heartbeatLoopClip;
 
-        [Header("Volumes e Parâmetros")]
+        [Header("Volumes and Parameters")]
         [Range(0f, 1f)] public float footstepVolume    = 0.65f;
         [Range(0f, 1f)] public float jumpVolume        = 0.60f;
         [Range(0f, 1f)] public float landVolume        = 0.75f;
@@ -235,7 +235,7 @@ namespace Duskborn.Audio
         public float lowHpThreshold = 0.30f;
         public float pitchVariation = 0.08f;
 
-        [Header("Interação Contínua com Água")]
+        [Header("Continuous Water Interaction")]
         public AudioClip waterWadeLoop;
         public AudioClip waterEnterSplashClip;
 
@@ -349,17 +349,17 @@ namespace Duskborn.Audio
         }
     }
 
-    // ── 3. Inimigos (Vocalizações e Archetypes) ─────────────────────────────────
+    // 3. Enemies (Vocalizations and Archetypes)
 
     [Serializable]
     public class EnemyAudioSettings
     {
-        [Header("Inimigo: Swarmer")]
+        [Header("Enemy: Swarmer")]
         public AudioClip[] swarmerAttackClips = Array.Empty<AudioClip>();
         public AudioClip[] swarmerHurtClips   = Array.Empty<AudioClip>();
         public AudioClip[] swarmerDeathClips  = Array.Empty<AudioClip>();
 
-        [Header("Volumes e Parâmetros")]
+        [Header("Volumes and Parameters")]
         [Range(0f, 1f)] public float attackVolume = 0.8f;
         [Range(0f, 1f)] public float hurtVolume   = 0.75f;
         [Range(0f, 1f)] public float deathVolume  = 0.9f;
@@ -401,23 +401,23 @@ namespace Duskborn.Audio
         }
     }
 
-    // ── 4. Combate e Superfícies (Fallbacks de Impacto e Perfis de Armas) ─────
+    // 4. Combat and Surfaces (Impact Fallbacks and Weapon Profiles)
 
     [Serializable]
     public class CombatAudioSettings
     {
-        [Header("Impactos de Superfície Padrão")]
+        [Header("Default Surface Impacts")]
         public AudioClip[] woodHitClips    = Array.Empty<AudioClip>();
         public AudioClip[] stoneHitClips   = Array.Empty<AudioClip>();
         public AudioClip[] metalHitClips   = Array.Empty<AudioClip>();
         public AudioClip[] fleshHitClips   = Array.Empty<AudioClip>();
         public AudioClip[] defaultHitClips = Array.Empty<AudioClip>();
 
-        [Header("Golpes no Ar (Swings)")]
+        [Header("Air Swings")]
         public AudioClip[] lightSwingClips = Array.Empty<AudioClip>();
         public AudioClip[] heavySwingClips = Array.Empty<AudioClip>();
 
-        [Header("Perfis de Armas Registrados")]
+        [Header("Registered Weapon Profiles")]
         public List<WeaponAudioProfile> registeredProfiles = new();
 
         public AudioClip PickHitClip(string surfaceTag)
@@ -525,24 +525,24 @@ namespace Duskborn.Audio
         }
     }
 
-    // ── 5. Loot e Interações (Ouro, Itens e Baús) ──────────────────────────────
+    // 5. Loot and Interactions (Gold, Items, and Chests)
 
     [Serializable]
     public class LootAudioSettings
     {
-        [Header("Coleta e Baús")]
+        [Header("Pickups and Chests")]
         public AudioClip goldPickupClip;
         public AudioClip itemPickupClip;
         public AudioClip chestOpenClip;
 
-        [Header("Clipes de Coleta por Tier / Raridade")]
+        [Header("Pickup Clips by Tier / Rarity")]
         public AudioClip commonPickupClip;
         public AudioClip uncommonPickupClip;
         public AudioClip rarePickupClip;
         public AudioClip epicPickupClip;
         public AudioClip legendaryPickupClip;
 
-        [Header("Clipes de Drop por Tier / Raridade")]
+        [Header("Drop Clips by Tier / Rarity")]
         public AudioClip commonDropClip;
         public AudioClip uncommonDropClip;
         public AudioClip rareDropClip;
@@ -698,12 +698,12 @@ namespace Duskborn.Audio
         }
     }
 
-    // ── 6. Interface de Usuário (UI) ──────────────────────────────────────────
+    // 6. User Interface (UI)
 
     [Serializable]
     public class UiAudioSettings
     {
-        [Header("Efeitos Sonoros de Interface")]
+        [Header("Interface Sound Effects")]
         public AudioClip buttonClickClip;
         public AudioClip modalOpenClip;
         public AudioClip craftSuccessClip;
@@ -724,21 +724,21 @@ namespace Duskborn.Audio
         }
     }
 
-    // ── 7. Música e Atmosfera (Ciclo Dia/Noite e Stingers) ────────────────────
+    // 7. Music and Atmosphere (Day/Night Cycle and Stingers)
 
     [Serializable]
     public class MusicAudioSettings
     {
-        [Header("Trilhas de Música")]
+        [Header("Music Tracks")]
         public AudioClip menuMusic;
         public AudioClip dayMusic;
         public AudioClip nightMusic;
 
-        [Header("Stingers e Berrantes")]
+        [Header("Stingers and Horns")]
         public AudioClip dawnHorn;
         public AudioClip nightHorn;
 
-        [Header("Parâmetros")]
+        [Header("Parameters")]
         public float musicFadeDuration = 2.5f;
         [Range(0f, 1f)] public float hornVolume = 0.9f;
 

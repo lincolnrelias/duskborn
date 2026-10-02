@@ -3,8 +3,8 @@ using UnityEngine;
 namespace Duskborn.Gameplay.World
 {
     /// <summary>
-    /// Componente mantido apenas para evitar referências ausentes em assets legados.
-    /// As partículas foram completamente descartadas.
+    /// Component retained only to avoid missing references in legacy assets.
+    /// Particles have been completely removed.
     /// </summary>
     public class WorldAtmosphereController : MonoBehaviour
     {

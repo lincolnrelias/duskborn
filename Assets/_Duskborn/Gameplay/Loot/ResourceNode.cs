@@ -19,13 +19,13 @@ namespace Duskborn.Gameplay.Loot
         private TargetType materialTypes;
         public TargetType Types => materialTypes;
 
-        [SerializeField] private CraftingTier requiredHarvestTier = CraftingTier.Primitivo;
+        [SerializeField] private CraftingTier requiredHarvestTier = CraftingTier.Primitive;
         public CraftingTier RequiredHarvestTier => requiredHarvestTier;
 
         [Header("Damage Numbers")]
         [SerializeField] private DamageNumberConfig _damageNumberConfig;
 
-        [Header("Áudio")]
+        [Header("Audio")]
         [SerializeField] private AudioClip depletedClip;
 
         [Header("Outline")]

@@ -4,16 +4,16 @@ using UnityEngine;
 namespace Duskborn.Gameplay.World.Foliage
 {
     /// <summary>
-    /// Utilitário procedural para geração de malhas low-poly de folhagem estilizada
-    /// (tufo de grama com lâminas curvadas, arbustos em esferas agrupadas com normais esféricas anime,
-    /// e copas de árvores estilizadas com vertex colors e pesos de vento).
+    /// Procedural utility for generating stylized low-poly foliage meshes
+    /// (grass tufts with curved blades, clustered spherical shrubs with anime spherical normals,
+    /// and stylized tree canopies with vertex colors and wind weights).
     /// </summary>
     public static class FoliageMeshUtility
     {
         /// <summary>
-        /// Gera uma malha de tufo de grama estilizado com múltiplas lâminas curvadas.
-        /// Base (UV.y=0, Alpha=0) não sofre vento.
-        /// Ponta (UV.y=1, Alpha=1) oscila suavemente com o vento.
+        /// Generate a stylized grass tuft mesh with multiple curved blades.
+        /// Base (UV.y=0, Alpha=0) is unaffected by wind.
+        /// Tip (UV.y=1, Alpha=1) sways gently in the wind.
         /// </summary>
         public static Mesh CreateGrassTuftMesh(int bladeCount = 5, float height = 0.95f, float baseWidth = 0.18f, float tipWidth = 0.02f)
         {
@@ -41,24 +41,24 @@ namespace Duskborn.Gameplay.World.Foliage
 
                 int baseIndex = verts.Count;
 
-                // Segmento 0: Base no solo (sem vento)
+                // Segment 0: ground base (no wind).
                 Vector3 v0_left = -bladeSide * (baseWidth * 0.5f);
                 Vector3 v0_right = bladeSide * (baseWidth * 0.5f);
 
-                // Segmento 1: Meio da lâmina com curvatura
+                // Segment 1: curved blade midpoint.
                 float midY = bladeHeight * 0.52f;
                 Vector3 v1_left = -bladeSide * (baseWidth * 0.38f) + Vector3.up * midY + curveOffset * 0.45f;
                 Vector3 v1_right = bladeSide * (baseWidth * 0.38f) + Vector3.up * midY + curveOffset * 0.45f;
 
-                // Segmento 2: Ponta da lâmina
+                // Segment 2: blade tip.
                 Vector3 v2_tip = Vector3.up * bladeHeight + curveOffset;
 
-                // Normais apontando predominantemente para cima para iluminação uniforme contínua (estilo Genshin / Zelda)
+                // Normals point predominantly upward for continuous uniform lighting (Genshin / Zelda style).
                 Vector3 nBase = (Vector3.up * 0.94f + bladeDir * 0.06f).normalized;
                 Vector3 nMid = (Vector3.up * 0.97f + bladeDir * 0.03f).normalized;
                 Vector3 nTip = Vector3.up;
 
-                // Adiciona vértices
+                // Add vertices.
                 verts.Add(v0_left);  // 0
                 verts.Add(v0_right); // 1
                 verts.Add(v1_left);  // 2
@@ -71,22 +71,22 @@ namespace Duskborn.Gameplay.World.Foliage
                 normals.Add(nMid);
                 normals.Add(nTip);
 
-                // UVs: x = horizontal (0 a 1), y = altura vertical (0 no solo a 1 no topo)
+                // UVs: x = horizontal (0 to 1), y = vertical height (0 at ground to 1 at top).
                 uvs.Add(new Vector2(0.0f, 0.0f));
                 uvs.Add(new Vector2(1.0f, 0.0f));
                 uvs.Add(new Vector2(0.15f, 0.52f));
                 uvs.Add(new Vector2(0.85f, 0.52f));
                 uvs.Add(new Vector2(0.5f, 1.0f));
 
-                // Cores de vértice: RGB = branco (multiplicado pelo shader), Alpha = peso de deslocamento do vento
-                colors.Add(new Color(1f, 1f, 1f, 0.0f)); // Solo estático
+                // Vertex colors: RGB = white (multiplied by shader), Alpha = wind displacement weight.
+                colors.Add(new Color(1f, 1f, 1f, 0.0f)); // Static ground.
                 colors.Add(new Color(1f, 1f, 1f, 0.0f));
-                colors.Add(new Color(1f, 1f, 1f, 0.45f)); // Meio
+                colors.Add(new Color(1f, 1f, 1f, 0.45f)); // Middle
                 colors.Add(new Color(1f, 1f, 1f, 0.45f));
-                colors.Add(new Color(1f, 1f, 1f, 1.0f));  // Ponta com balanço total
+                colors.Add(new Color(1f, 1f, 1f, 1.0f));  // Tip with full sway.
 
-                // Triângulos (Front e Back para garantir renderização perfeita)
-                // Quad inferior (0, 2, 1) e (1, 2, 3)
+                // Triangles (front and back for complete rendering).
+                // Lower quad (0, 2, 1) and (1, 2, 3)
                 tris.Add(baseIndex + 0);
                 tris.Add(baseIndex + 2);
                 tris.Add(baseIndex + 1);
@@ -95,7 +95,7 @@ namespace Duskborn.Gameplay.World.Foliage
                 tris.Add(baseIndex + 2);
                 tris.Add(baseIndex + 3);
 
-                // Triângulo superior até a ponta (2, 4, 3)
+                // Upper triangle toward the tip (2, 4, 3).
                 tris.Add(baseIndex + 2);
                 tris.Add(baseIndex + 4);
                 tris.Add(baseIndex + 3);
@@ -112,10 +112,10 @@ namespace Duskborn.Gameplay.World.Foliage
         }
 
         /// <summary>
-        /// Gera uma malha de carpete denso contínuo (Dense Carpet Grass), projetada especificamente
-        /// para criar o efeito de grama pintada (Unity Terrain Detail Painter / Genshin Impact).
-        /// As lâminas são distribuídas organicamente sobre um disco de raio amplo em espiral áurea,
-        /// eliminando o centro único (efeito abacaxi/tufo isolado) e fundindo-se em um tapete contínuo.
+        /// Generate a continuous dense carpet mesh (Dense Carpet Grass), specifically designed
+        /// to create a painted grass effect (Unity Terrain Detail Painter / Genshin Impact).
+        /// Blades are organically distributed over a wide-radius disc in a golden spiral,
+        /// eliminating the single center (isolated pineapple / tuft effect) and blending into a continuous carpet.
         /// </summary>
         public static Mesh CreateDenseCarpetMesh(int bladeCount = 18, float radius = 0.85f, float height = 0.90f, float baseWidth = 0.28f)
         {
@@ -128,11 +128,11 @@ namespace Duskborn.Gameplay.World.Foliage
             List<Color> colors = new List<Color>();
             List<int> tris = new List<int>();
 
-            const float goldenAngle = 2.39996323f; // ~137.51 graus em radianos
+            const float goldenAngle = 2.39996323f; // ~137.51 degrees in radians.
 
             for (int i = 0; i < bladeCount; i++)
             {
-                // Distribuição áurea de raízes: cobre uniformemente o disco sem agrupar no centro
+                // Golden root distribution: cover the disc uniformly without clustering at the center.
                 float rNorm = Mathf.Sqrt((i + 0.5f) / (float)bladeCount);
                 float r = rNorm * radius;
                 float theta = i * goldenAngle;
@@ -214,8 +214,8 @@ namespace Duskborn.Gameplay.World.Foliage
         }
 
         /// <summary>
-        /// Gera uma malha de grama alta e viçosa (Lush Grass Clump), com lâminas espaçadas
-        /// em espiral áurea cobrindo uma área de 1.5m de diâmetro para conferir volume e maciez natural.
+        /// Generate a tall, lush grass mesh (Lush Grass Clump) with spaced blades
+        /// in a golden spiral covering a 1.5m diameter area for volume and natural softness.
         /// </summary>
         public static Mesh CreateLushGrassClumpMesh(int bladeCount = 15, float radius = 0.75f, float height = 1.30f, float baseWidth = 0.22f)
         {
@@ -313,8 +313,8 @@ namespace Duskborn.Gameplay.World.Foliage
         }
 
         /// <summary>
-        /// Gera uma malha de grama fina de pradaria (Prairie Grass), distribuída em um disco de 1.1m
-        /// ideal para orlas de campos, transições de trilhas e bordas de clareiras.
+        /// Generate a fine prairie grass mesh distributed over a 1.1m disc,
+        /// ideal for field edges, trail transitions, and clearing boundaries.
         /// </summary>
         public static Mesh CreatePrairieGrassMesh(int bladeCount = 10, float radius = 0.55f, float height = 0.70f, float baseWidth = 0.16f)
         {
@@ -407,8 +407,8 @@ namespace Duskborn.Gameplay.World.Foliage
         }
 
         /// <summary>
-        /// Gera uma malha de juncos / capim alto de várzea (Reed Grass),
-        /// com lâminas esguias e verticais ideais para margens de corpos d'água e depressões úmidas de vales.
+        /// Generate a reed / tall floodplain grass mesh (Reed Grass),
+        /// with slender vertical blades ideal for water banks and damp valley depressions.
         /// </summary>
         public static Mesh CreateReedGrassMesh(int bladeCount = 6, float height = 1.45f, float baseWidth = 0.12f)
         {
@@ -497,10 +497,10 @@ namespace Duskborn.Gameplay.World.Foliage
         }
 
         /// <summary>
-        /// Gera uma malha de tufo de grama com flores silvestres elevadas (Wildflowers).
-        /// As hastes e lâminas usam UV.x em [0,1], enquanto as pétalas/cabeça da flor
-        /// são codificadas com UV.x >= 2.0f para permitir colorização vibrante de pétalas.
-        /// As lâminas e flores são distribuídas em um disco para se fundir naturalmente com o carpete ao redor.
+        /// Generate a grass tuft mesh with raised wildflowers.
+        /// Stems and blades use UV.x in [0,1], while petals / flower heads
+        /// are encoded with UV.x >= 2.0f to allow vibrant petal colors.
+        /// Blades and flowers are distributed over a disc to blend naturally with the surrounding carpet.
         /// </summary>
         public static Mesh CreateWildflowerTuftMesh(int bladeCount = 14, int flowerCount = 4, float radius = 0.75f, float height = 0.90f, float flowerHeight = 1.15f)
         {
@@ -673,8 +673,8 @@ namespace Duskborn.Gameplay.World.Foliage
         }
 
         /// <summary>
-        /// Gera uma malha de arbusto low-poly composta por agrupamentos esféricos (Puffs)
-        /// com normais esféricas anime voltadas para fora do centro do tufo, produzindo sombreamento suave e volumoso.
+        /// Generate a low-poly shrub mesh composed of spherical clusters (puffs)
+        /// with anime spherical normals pointing outward from the tuft center for soft, voluminous shading.
         /// </summary>
         public static Mesh CreateBushMesh(int lobes = 4, float baseRadius = 0.65f, float height = 1.0f)
         {
@@ -687,7 +687,7 @@ namespace Duskborn.Gameplay.World.Foliage
             List<Color> colors = new List<Color>();
             List<int> tris = new List<int>();
 
-            // Centros dos agrupamentos/lobos
+            // Cluster / lobe centers.
             Vector3[] lobeCenters = new Vector3[lobes];
             float[] lobeRadii = new float[lobes];
 
@@ -703,14 +703,14 @@ namespace Duskborn.Gameplay.World.Foliage
                 lobeRadii[l] = baseRadius * Random.Range(0.68f, 0.85f);
             }
 
-            // Gera geometria icosaédrica subdividida leve para cada lobo
+            // Generate lightweight subdivided icosahedral geometry for each lobe.
             for (int l = 0; l < lobes; l++)
             {
                 Vector3 center = lobeCenters[l];
                 float radius = lobeRadii[l];
                 int startV = verts.Count;
 
-                // Esfera low-poly simplificada (lat/long com 6 segmentos e 5 anéis)
+                // Simplified low-poly sphere (lat / long with 6 segments and 5 rings).
                 int rings = 4;
                 int segments = 6;
 
@@ -731,10 +731,10 @@ namespace Duskborn.Gameplay.World.Foliage
                         );
 
                         Vector3 vertPos = center + spherePos * radius;
-                        // Achata a base do arbusto em contato com o solo
+                        // Flatten the shrub base in contact with the ground.
                         if (vertPos.y < 0.05f) vertPos.y = 0.02f;
 
-                        // Técnica Anime Ghibli: Normal radial a partir do centro do lobo ou centro do arbusto
+                        // Ghibli anime technique: radial normal from the lobe or shrub center.
                         Vector3 animeNormal = (vertPos - new Vector3(0f, height * 0.35f, 0f)).normalized;
 
                         verts.Add(vertPos);
@@ -743,7 +743,7 @@ namespace Duskborn.Gameplay.World.Foliage
                         float vertH = Mathf.Clamp01(vertPos.y / height);
                         uvs.Add(new Vector2(u, vertH));
 
-                        // Base estática, topo e laterais oscilando
+                        // Static base, swaying top and sides.
                         float windStrength = Mathf.Clamp01((vertPos.y - 0.12f) / height) * 0.65f;
                         colors.Add(new Color(1f, 1f, 1f, windStrength));
                     }
@@ -779,9 +779,9 @@ namespace Duskborn.Gameplay.World.Foliage
         }
 
         /// <summary>
-        /// Gera uma malha de arbusto florido / frutífero (Flowering Bush),
-        /// combinando a copa volumosa anime com botões coloridos de flores/bagas distribuídos na superfície.
-        /// Os botões de flor são marcados com UV.x >= 2.0f para receber a coloração vibrante de pétalas.
+        /// Generate a flowering / fruiting shrub mesh (Flowering Bush),
+        /// combining a voluminous anime canopy with colorful flower / berry buds across the surface.
+        /// Flower buds are marked with UV.x >= 2.0f to receive vibrant petal coloring.
         /// </summary>
         public static Mesh CreateFloweringBushMesh(int lobes = 4, int flowerCount = 10, float baseRadius = 0.65f, float height = 1.0f)
         {
@@ -837,7 +837,7 @@ namespace Duskborn.Gameplay.World.Foliage
                 normals.Add(outward);
                 normals.Add(outward);
 
-                // UV.x >= 2.0f indica vértice de pétala/flor
+                // UV.x >= 2.0f marks a petal / flower vertex.
                 uvs.Add(new Vector2(2.5f, 1.0f));
                 uvs.Add(new Vector2(2.5f, 1.0f));
                 uvs.Add(new Vector2(2.5f, 1.0f));
@@ -869,8 +869,8 @@ namespace Duskborn.Gameplay.World.Foliage
         }
 
         /// <summary>
-        /// Gera uma malha de arbusto rasteiro de cobertura de solo (Ground Shrub),
-        /// mais baixo e achatado horizontalmente, ideal para ancorar rochas e transições.
+        /// Generate a creeping ground-cover shrub mesh (Ground Shrub),
+        /// lower and horizontally flattened, ideal for anchoring rocks and transitions.
         /// </summary>
         public static Mesh CreateGroundShrubMesh(int lobes = 5, float radius = 0.95f, float height = 0.45f)
         {
@@ -918,7 +918,7 @@ namespace Duskborn.Gameplay.World.Foliage
                         float theta = u * Mathf.PI * 2.0f;
 
                         Vector3 spherePos = new Vector3(
-                            Mathf.Sin(phi) * Mathf.Cos(theta) * 1.2f, // Mais achatado horizontalmente
+                            Mathf.Sin(phi) * Mathf.Cos(theta) * 1.2f, // More horizontally flattened.
                             Mathf.Cos(phi) * 0.70f,
                             Mathf.Sin(phi) * Mathf.Sin(theta) * 1.2f
                         );
@@ -969,9 +969,9 @@ namespace Duskborn.Gameplay.World.Foliage
         }
 
         /// <summary>
-        /// Gera uma malha de samambaia / arbusto rasteiro estilizado (Fern Bush),
-        /// com folhas arqueadas em leque radial voltadas para fora.
-        /// Ideal para margens de florestas, sob copas de árvores e ao redor de rochas.
+        /// Generate a stylized fern / creeping shrub mesh (Fern Bush),
+        /// with arched leaves fanning radially outward.
+        /// Ideal for forest edges, beneath tree canopies, and around rocks.
         /// </summary>
         public static Mesh CreateFernBushMesh(int frondCount = 7, float radius = 0.85f, float height = 0.65f)
         {
@@ -1061,8 +1061,8 @@ namespace Duskborn.Gameplay.World.Foliage
         }
 
         /// <summary>
-        /// Gera uma malha de copa de árvore estilizada com lóbulos volumosos
-        /// e gradiente vertical de vento e cores.
+        /// Generate a stylized tree canopy mesh with voluminous lobes.
+        /// and vertical wind and color gradients.
         /// </summary>
         public static Mesh CreateTreeCanopyMesh(float radius = 2.2f, float height = 3.5f)
         {
@@ -1114,7 +1114,7 @@ namespace Duskborn.Gameplay.World.Foliage
 
                         Vector3 spherePos = new Vector3(
                             Mathf.Sin(phi) * Mathf.Cos(theta),
-                            Mathf.Cos(phi) * 0.88f, // Ligeiramente achatado no topo
+                            Mathf.Cos(phi) * 0.88f, // Slightly flattened at the top.
                             Mathf.Sin(phi) * Mathf.Sin(theta)
                         );
 
@@ -1164,7 +1164,7 @@ namespace Duskborn.Gameplay.World.Foliage
         #region Little Rocks & Pebbles (Low-Poly Static Props)
 
         /// <summary>
-        /// Utilitário para adicionar uma face triangular plana com normais calculadas por produto vetorial.
+        /// Utility to add a flat triangular face with normals calculated by cross product.
         /// </summary>
         private static void AddFlatFace(
             Vector3 a, Vector3 b, Vector3 c,
@@ -1186,7 +1186,7 @@ namespace Duskborn.Gameplay.World.Foliage
         }
 
         /// <summary>
-        /// Constrói a geometria de um seixo/rocha facetada low-poly com normais planas e peso de vento zero.
+        /// Build low-poly faceted pebble / rock geometry with flat normals and zero wind weight.
         /// </summary>
         private static void BuildFacetedPebble(
             Vector3 center, float radius, float height, float irregularity,
@@ -1215,22 +1215,22 @@ namespace Duskborn.Gameplay.World.Foliage
             for (int i = 0; i < sides; i++)
             {
                 int next = (i + 1) % sides;
-                // Faceta inferior
+                // Lower facet
                 AddFlatFace(basePoints[i], basePoints[next], midPoints[next], verts, normals, uvs, colors, tris, 0f);
                 AddFlatFace(basePoints[i], midPoints[next], midPoints[i], verts, normals, uvs, colors, tris, 0f);
 
-                // Faceta superior até a crista do topo
+                // Upper facet toward the top ridge.
                 Vector3 topTarget = (i < 3) ? topPoint1 : topPoint2;
                 AddFlatFace(midPoints[i], midPoints[next], topTarget, verts, normals, uvs, colors, tris, 0f);
             }
-            // Facetas de fechamento do topo
+            // Top closure facets.
             AddFlatFace(midPoints[0], topPoint1, topPoint2, verts, normals, uvs, colors, tris, 0f);
             AddFlatFace(midPoints[3], topPoint2, topPoint1, verts, normals, uvs, colors, tris, 0f);
         }
 
         /// <summary>
-        /// Gera uma malha de seixo/pedra pequena individual facetada low-poly (Little Pebble).
-        /// Totalmente estática (Alpha=0, zero vento) e com normais facetadas próprias.
+        /// Generate an individual small faceted low-poly pebble / rock mesh (Little Pebble).
+        /// Fully static (Alpha=0, zero wind) with its own faceted normals.
         /// </summary>
         public static Mesh CreateLittlePebbleMesh(float radius = 0.20f, float height = 0.14f)
         {
@@ -1256,8 +1256,8 @@ namespace Duskborn.Gameplay.World.Foliage
         }
 
         /// <summary>
-        /// Gera um aglomerado orgânico de 3 a 5 pequenas pedras/seixos (Pebble Cluster).
-        /// Ideal para quebrar a uniformidade da grama, adornar bases de escarpas e margens.
+        /// Generate an organic cluster of 3 to 5 small rocks / pebbles (Pebble Cluster).
+        /// Ideal for breaking grass uniformity and decorating cliff bases and banks.
         /// </summary>
         public static Mesh CreatePebbleClusterMesh(int pebbleCount = 4, float radius = 0.45f)
         {
@@ -1270,10 +1270,10 @@ namespace Duskborn.Gameplay.World.Foliage
             List<Color> colors = new List<Color>();
             List<int> tris = new List<int>();
 
-            // Pedra principal central
+            // Main central stone.
             BuildFacetedPebble(Vector3.zero, radius * 0.42f, radius * 0.30f, 0.20f, verts, normals, uvs, colors, tris);
 
-            // Seixos menores distribuídos ao redor
+            // Smaller pebbles distributed around it.
             int satelliteCount = Mathf.Clamp(pebbleCount - 1, 2, 5);
             float angleStep = Mathf.PI * 2.0f / satelliteCount;
 
@@ -1299,8 +1299,8 @@ namespace Duskborn.Gameplay.World.Foliage
         }
 
         /// <summary>
-        /// Gera uma pedra de rio achatada e arredondada (Smooth River Stone).
-        /// Perfeita para a zona de orla/margem de água (Water Spots) e leitos de lagos.
+        /// Generate a flat, rounded river stone (Smooth River Stone).
+        /// Perfect for shorelines / water margins (Water Spots) and lakebeds.
         /// </summary>
         public static Mesh CreateRiverStoneMesh(float radiusX = 0.32f, float radiusZ = 0.22f, float height = 0.09f)
         {
@@ -1348,8 +1348,8 @@ namespace Duskborn.Gameplay.World.Foliage
         }
 
         /// <summary>
-        /// Gera uma rocha lascada/angular de cascalho e encostas (Scree / Talus Rock).
-        /// Excelente para o sopé de montanhas rochosas e transições de escarpas.
+        /// Generate a chipped / angular gravel and slope rock (Scree / Talus Rock).
+        /// Ideal for rocky mountain foothills and cliff transitions.
         /// </summary>
         public static Mesh CreateScreeRockMesh(float size = 0.28f)
         {
@@ -1362,14 +1362,14 @@ namespace Duskborn.Gameplay.World.Foliage
             List<Color> colors = new List<Color>();
             List<int> tris = new List<int>();
 
-            // Vértices de uma cunha triangular angular
+            // Vertices of an angular triangular wedge.
             Vector3 b0 = new Vector3(-size * 0.5f, 0f, -size * 0.4f);
             Vector3 b1 = new Vector3(size * 0.6f, 0f, -size * 0.3f);
             Vector3 b2 = new Vector3(0f, 0f, size * 0.6f);
             Vector3 peak = new Vector3(-size * 0.1f, size * 0.65f, -size * 0.1f);
             Vector3 fractureEdge = new Vector3(size * 0.25f, size * 0.38f, size * 0.15f);
 
-            // Facetas triangulares angulares
+            // Angular triangular facets
             AddFlatFace(b0, b1, peak, verts, normals, uvs, colors, tris, 0f);
             AddFlatFace(b1, fractureEdge, peak, verts, normals, uvs, colors, tris, 0f);
             AddFlatFace(b1, b2, fractureEdge, verts, normals, uvs, colors, tris, 0f);
@@ -1391,8 +1391,8 @@ namespace Duskborn.Gameplay.World.Foliage
         #region Botanical Weeds & Wild Undergrowth (Plantas Silvestres)
 
         /// <summary>
-        /// Gera uma malha de tufo de ervas daninhas / dente-de-leão / cardo silvestre (Wild Weed Tuft).
-        /// Apresenta roseta basal de folhas serrilhadas rentes ao solo e 1 a 2 hastes delgadas com botões.
+        /// Generate a wild weed / dandelion / thistle tuft mesh (Wild Weed Tuft).
+        /// Features a basal rosette of serrated ground-level leaves and 1 to 2 thin stems with buds.
         /// </summary>
         public static Mesh CreateWildWeedTuftMesh(int leafCount = 6, float radius = 0.48f, float height = 0.42f)
         {
@@ -1407,7 +1407,7 @@ namespace Duskborn.Gameplay.World.Foliage
 
             float angleStep = 360f / leafCount;
 
-            // 1. Roseta de folhas basais serrilhadas rentes ao solo
+            // 1. Rosette of serrated basal leaves at ground level.
             for (int i = 0; i < leafCount; i++)
             {
                 float baseAngle = i * angleStep + Random.Range(-10f, 10f);
@@ -1443,19 +1443,19 @@ namespace Duskborn.Gameplay.World.Foliage
                 uvs.Add(new Vector2(0.9f, 0.45f));
                 uvs.Add(new Vector2(0.5f, 0.90f));
 
-                colors.Add(new Color(1f, 1f, 1f, 0.0f));  // Base imóvel
+                colors.Add(new Color(1f, 1f, 1f, 0.0f));  // Stationary base.
                 colors.Add(new Color(1f, 1f, 1f, 0.28f));
                 colors.Add(new Color(1f, 1f, 1f, 0.28f));
-                colors.Add(new Color(1f, 1f, 1f, 0.40f)); // Ponta oscila sutilmente
+                colors.Add(new Color(1f, 1f, 1f, 0.40f)); // Tip sways subtly.
 
-                // Triângulos (dois lados)
+                // Triangles (two sides).
                 tris.Add(baseIdx + 0); tris.Add(baseIdx + 1); tris.Add(baseIdx + 2);
                 tris.Add(baseIdx + 1); tris.Add(baseIdx + 3); tris.Add(baseIdx + 2);
                 tris.Add(baseIdx + 0); tris.Add(baseIdx + 2); tris.Add(baseIdx + 1);
                 tris.Add(baseIdx + 1); tris.Add(baseIdx + 2); tris.Add(baseIdx + 3);
             }
 
-            // 2. Hastes delgadas com botão/flor silvestre
+            // 2. Thin stems with a wildflower / bud.
             int stalks = Random.Range(1, 3);
             for (int s = 0; s < stalks; s++)
             {
@@ -1483,7 +1483,7 @@ namespace Duskborn.Gameplay.World.Foliage
                 tris.Add(sIdx + 0); tris.Add(sIdx + 1); tris.Add(sIdx + 2);
                 tris.Add(sIdx + 1); tris.Add(sIdx + 3); tris.Add(sIdx + 2);
 
-                // Botão floral / tufo de sementes (accent color UV.x >= 2.0f)
+                // Flower bud / seed tuft (accent color UV.x >= 2.0f).
                 int budIdx = verts.Count;
                 float budRadius = 0.055f;
                 Vector3 budCenter = sOffset + Vector3.up * (sHeight + 0.03f);
@@ -1495,7 +1495,7 @@ namespace Duskborn.Gameplay.World.Foliage
 
                 verts.Add(bL); verts.Add(bR); verts.Add(bT); verts.Add(bB);
                 normals.Add(Vector3.up); normals.Add(Vector3.up); normals.Add(Vector3.up); normals.Add(Vector3.up);
-                // UV.x = 2.5f marca para cor de destaque (accent)
+                // UV.x = 2.5f marks an accent color.
                 uvs.Add(new Vector2(2.1f, 0.5f)); uvs.Add(new Vector2(2.9f, 0.5f));
                 uvs.Add(new Vector2(2.5f, 1.0f)); uvs.Add(new Vector2(2.5f, 0.0f));
                 colors.Add(new Color(1f, 1f, 1f, 0.90f));
@@ -1520,8 +1520,8 @@ namespace Duskborn.Gameplay.World.Foliage
         }
 
         /// <summary>
-        /// Gera uma malha de erva de folhas largas / tanchagem / folhagem rasteira de sombra (Broadleaf Weed).
-        /// Folhas largas ovais que abraçam o relevo, excelentes sob copas de árvores e bordas úmidas.
+        /// Generate a broadleaf weed / plantain / creeping shade foliage mesh (Broadleaf Weed).
+        /// Broad oval leaves hugging the terrain, ideal beneath tree canopies and along damp edges.
         /// </summary>
         public static Mesh CreateBroadleafWeedMesh(int leafCount = 5, float radius = 0.42f, float height = 0.22f)
         {
@@ -1553,11 +1553,11 @@ namespace Duskborn.Gameplay.World.Foliage
                 Vector3 v0_L = -leafSide * (lWidth * 0.22f);
                 Vector3 v0_R = leafSide * (lWidth * 0.22f);
 
-                // Meio amplo (formato de remo/paddle)
+                // Wide middle (paddle shape).
                 Vector3 v1_L = leafDir * (lLen * 0.50f) - leafSide * (lWidth * 0.52f) + Vector3.up * midY;
                 Vector3 v1_R = leafDir * (lLen * 0.50f) + leafSide * (lWidth * 0.52f) + Vector3.up * midY;
 
-                // Ponta arredondada caindo suavemente para o solo
+                // Rounded tip falling gently toward the ground.
                 Vector3 v2_tip = leafDir * lLen + Vector3.up * 0.04f;
 
                 Vector3 norm = (Vector3.up * 0.92f + leafDir * 0.08f).normalized;
@@ -1575,7 +1575,7 @@ namespace Duskborn.Gameplay.World.Foliage
                 colors.Add(new Color(1f, 1f, 1f, 0.25f));
                 colors.Add(new Color(1f, 1f, 1f, 0.40f));
 
-                // Triângulos frente e verso
+                // Front and back triangles.
                 tris.Add(startIdx + 0); tris.Add(startIdx + 2); tris.Add(startIdx + 1);
                 tris.Add(startIdx + 1); tris.Add(startIdx + 2); tris.Add(startIdx + 3);
                 tris.Add(startIdx + 2); tris.Add(startIdx + 4); tris.Add(startIdx + 3);
@@ -1596,8 +1596,8 @@ namespace Duskborn.Gameplay.World.Foliage
         }
 
         /// <summary>
-        /// Gera uma malha de hastes altas selvagens com plumas de sementes / trigo bravo (Tall Stalk Weed / Foxtail).
-        /// Altura destacada (1.2m - 1.5m) que oscila vigorosamente com rajadas de vento.
+        /// Generate tall wild stalks with seed plumes / wild wheat (Tall Stalk Weed / Foxtail).
+        /// Prominent height (1.2m - 1.5m) swaying vigorously in wind gusts.
         /// </summary>
         public static Mesh CreateTallStalkWeedMesh(int stalkCount = 4, float height = 1.35f, float baseWidth = 0.10f)
         {
@@ -1626,17 +1626,17 @@ namespace Duskborn.Gameplay.World.Foliage
                 Vector3 v0_L = -stalkSide * (baseWidth * 0.5f);
                 Vector3 v0_R = stalkSide * (baseWidth * 0.5f);
 
-                // Meio da haste
+                // Stem midpoint.
                 float midY = sHeight * 0.60f;
                 Vector3 v1_L = -stalkSide * (baseWidth * 0.35f) + Vector3.up * midY + curveOffset * 0.40f;
                 Vector3 v1_R = stalkSide * (baseWidth * 0.35f) + Vector3.up * midY + curveOffset * 0.40f;
 
-                // Base da pluma / espiga de sementes
+                // Plume / seed spike base.
                 float plumeBaseY = sHeight * 0.72f;
                 Vector3 v2_L = -stalkSide * (baseWidth * 0.85f) + Vector3.up * plumeBaseY + curveOffset * 0.65f;
                 Vector3 v2_R = stalkSide * (baseWidth * 0.85f) + Vector3.up * plumeBaseY + curveOffset * 0.65f;
 
-                // Ponta da espiga
+                // Spike tip.
                 Vector3 v3_tip = Vector3.up * sHeight + curveOffset;
 
                 Vector3 norm = Vector3.up;
@@ -1662,9 +1662,9 @@ namespace Duskborn.Gameplay.World.Foliage
                 colors.Add(new Color(1f, 1f, 1f, 0.45f));
                 colors.Add(new Color(1f, 1f, 1f, 0.85f));
                 colors.Add(new Color(1f, 1f, 1f, 0.85f));
-                colors.Add(new Color(1f, 1f, 1f, 1.0f)); // Pluma de topo com oscilação máxima
+                colors.Add(new Color(1f, 1f, 1f, 1.0f)); // Top plume with maximum sway.
 
-                // Triângulos (frente e verso)
+                // Triangles (front and back).
                 tris.Add(startIdx + 0); tris.Add(startIdx + 2); tris.Add(startIdx + 1);
                 tris.Add(startIdx + 1); tris.Add(startIdx + 2); tris.Add(startIdx + 3);
                 tris.Add(startIdx + 2); tris.Add(startIdx + 4); tris.Add(startIdx + 3);
@@ -1689,8 +1689,8 @@ namespace Duskborn.Gameplay.World.Foliage
         }
 
         /// <summary>
-        /// Gera uma malha de canteiro de trevos de 3 folhas (Clover Patch).
-        /// Adiciona micro-detalhes charmosos que enriquecem o chão como em Zelda / Genshin.
+        /// Generate a three-leaf clover patch mesh.
+        /// Add charming microdetails to enrich the ground in the Zelda / Genshin style.
         /// </summary>
         public static Mesh CreateCloverPatchMesh(int cloverCount = 7, float radius = 0.38f)
         {
@@ -1710,7 +1710,7 @@ namespace Duskborn.Gameplay.World.Foliage
                 Vector3 clovCenter = new Vector3(Mathf.Cos(ang) * dist, 0.05f, Mathf.Sin(ang) * dist);
                 float clovSize = 0.055f * Random.Range(0.85f, 1.15f);
 
-                // 3 folíolos em ângulos de 120 graus
+                // 3 leaflets at 120-degree angles.
                 for (int f = 0; f < 3; f++)
                 {
                     float leafAng = (f * 120f + Random.Range(-10f, 10f)) * Mathf.Deg2Rad;
@@ -1751,11 +1751,11 @@ namespace Duskborn.Gameplay.World.Foliage
 
         #endregion
 
-        #region Shoreline & Water Flora (Vegetação e Detalhes de Água)
+        #region Shoreline & Water Flora (Vegetation and Water Details)
 
         /// <summary>
-        /// Gera uma malha densa de canteiro de taboas/juncos aquáticos (Water Cattail Bed).
-        /// Combina lâminas aquáticas espessas com hastes portando a espiga cilíndrica marrom característica.
+        /// Generate a dense aquatic cattail / reed bed mesh (Water Cattail Bed).
+        /// Combine thick aquatic blades with stems bearing characteristic brown cylindrical spikes.
         /// </summary>
         public static Mesh CreateWaterCattailBedMesh(int reedCount = 10, int cattailCount = 3, float radius = 0.65f, float height = 1.55f)
         {
@@ -1768,7 +1768,7 @@ namespace Duskborn.Gameplay.World.Foliage
             List<Color> colors = new List<Color>();
             List<int> tris = new List<int>();
 
-            // 1. Lâminas aquáticas de fundo
+            // 1. Background aquatic blades.
             float angleStep = 360f / reedCount;
             for (int i = 0; i < reedCount; i++)
             {
@@ -1816,14 +1816,14 @@ namespace Duskborn.Gameplay.World.Foliage
                 tris.Add(baseIdx + 2); tris.Add(baseIdx + 3); tris.Add(baseIdx + 4);
             }
 
-            // 2. Hastes de Taboa com espiga cilíndrica marrom característica
+            // 2. Cattail stems with characteristic brown cylindrical spikes.
             for (int c = 0; c < cattailCount; c++)
             {
                 float cAngle = (c * (360f / cattailCount) + Random.Range(-20f, 20f)) * Mathf.Deg2Rad;
                 Vector3 cRoot = new Vector3(Mathf.Cos(cAngle), 0f, Mathf.Sin(cAngle)) * (radius * Random.Range(0.15f, 0.50f));
                 float cHeight = height * Random.Range(0.90f, 1.15f);
 
-                // Haste inferior
+                // Lower stem
                 int hIdx = verts.Count;
                 float hw = 0.035f;
                 float headBottom = cHeight * 0.70f;
@@ -1846,7 +1846,7 @@ namespace Duskborn.Gameplay.World.Foliage
                 tris.Add(hIdx + 0); tris.Add(hIdx + 1); tris.Add(hIdx + 2);
                 tris.Add(hIdx + 1); tris.Add(hIdx + 3); tris.Add(hIdx + 2);
 
-                // Espiga cilíndrica de taboa (6 lados, UV.x = 2.5f para cor de destaque marrom aveludada)
+                // Cylindrical cattail spike (6 sides, UV.x = 2.5f for a velvety brown accent color).
                 int cylIdx = verts.Count;
                 const int cylSides = 6;
                 float cylRad = 0.045f;
@@ -1868,7 +1868,7 @@ namespace Duskborn.Gameplay.World.Foliage
                         new Vector2(2.1f, 0.75f), new Vector2(2.9f, 0.90f), new Vector2(2.9f, 0.75f));
                 }
 
-                // Espícula fina no topo da taboa
+                // Thin spikelet at the cattail top.
                 int spikeIdx = verts.Count;
                 Vector3 spk0 = cRoot + Vector3.up * headTop;
                 Vector3 spk1 = cRoot + Vector3.up * (cHeight + 0.12f);

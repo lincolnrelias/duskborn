@@ -95,23 +95,23 @@ namespace Duskborn.Editor
         private void DrawPlaybackControls()
         {
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            EditorGUILayout.LabelField("Controles de Preview (Estilo Particle System)", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Preview Controls (Particle System Style)", EditorStyles.boldLabel);
 
             if (PrefabUtility.IsPartOfPrefabAsset(effect.gameObject))
             {
-                EditorGUILayout.HelpBox("Visualização 3D interativa ativa abaixo no Preview do Inspector. Para simular diretamente no Scene View, abra o Prefab no Prefab Stage ou posicione-o na cena.", MessageType.Info);
+                EditorGUILayout.HelpBox("Interactive 3D visualization is active in the Inspector Preview below. To simulate directly in Scene View, open the prefab in Prefab Stage or place it in the scene.", MessageType.Info);
             }
 
             EditorGUILayout.BeginHorizontal();
             GUI.backgroundColor = isPlaying ? new Color(0.9f, 0.4f, 0.4f) : new Color(0.4f, 0.9f, 0.4f);
-            if (GUILayout.Button(isPlaying ? "⏸ Pausar" : "▶ Reproduzir", GUILayout.Height(26)))
+            if (GUILayout.Button(isPlaying ? "⏸ Pause" : "▶ Reproduzir", GUILayout.Height(26)))
             {
                 isPlaying = !isPlaying;
                 lastEditorTime = EditorApplication.timeSinceStartup;
             }
             GUI.backgroundColor = Color.white;
 
-            if (GUILayout.Button("⏹ Parar", GUILayout.Height(26)))
+            if (GUILayout.Button("⏹ Stop", GUILayout.Height(26)))
             {
                 isPlaying = false;
                 effect.ResetSimulation();
@@ -130,7 +130,7 @@ namespace Duskborn.Editor
             EditorGUILayout.Space(4);
 
             EditorGUILayout.BeginHorizontal();
-            bool newOperating = GUILayout.Toggle(isOperating, " Simular Fornalha Ativa (Queima)", "Button");
+            bool newOperating = GUILayout.Toggle(isOperating, " Simulate Active Furnace (Burning)", "Button");
             if (newOperating != isOperating)
             {
                 isOperating = newOperating;
@@ -139,7 +139,7 @@ namespace Duskborn.Editor
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Velocidade:", GUILayout.Width(70));
+            EditorGUILayout.LabelField("Speed:", GUILayout.Width(70));
             if (GUILayout.Toggle(Mathf.Approximately(playbackSpeed, 0.5f), "0.5x", "Button")) playbackSpeed = 0.5f;
             if (GUILayout.Toggle(Mathf.Approximately(playbackSpeed, 1.0f), "1.0x", "Button")) playbackSpeed = 1.0f;
             if (GUILayout.Toggle(Mathf.Approximately(playbackSpeed, 2.0f), "2.0x", "Button")) playbackSpeed = 2.0f;
@@ -151,7 +151,7 @@ namespace Duskborn.Editor
             float heatPercent = effect.CurrentHeat * 100f;
             int particleCount = effect.LiveParticleCount;
             int maxParticles = effect.maxSmokeParticles;
-            EditorGUILayout.LabelField($"Calor: {heatPercent:F0}%  |  Partículas de Fumaça: {particleCount} / {maxParticles}");
+            EditorGUILayout.LabelField($"Heat: {heatPercent:F0}%  |  Smoke Particles: {particleCount} / {maxParticles}");
 
             EditorGUILayout.EndVertical();
         }
@@ -180,18 +180,18 @@ namespace Duskborn.Editor
                 float height = 145;
                 var rect = new Rect(sceneView.position.width - width - 12, sceneView.position.height - height - 24, width, height);
 
-                GUILayout.BeginArea(rect, "Fornalha • Efeitos VFX", GUI.skin.window);
+                GUILayout.BeginArea(rect, "Furnace • VFX Effects", GUI.skin.window);
 
                 EditorGUILayout.BeginHorizontal();
                 GUI.backgroundColor = isPlaying ? new Color(0.9f, 0.4f, 0.4f) : new Color(0.4f, 0.9f, 0.4f);
-                if (GUILayout.Button(isPlaying ? "⏸ Pausar" : "▶ Play"))
+                if (GUILayout.Button(isPlaying ? "⏸ Pause" : "▶ Play"))
                 {
                     isPlaying = !isPlaying;
                     lastEditorTime = EditorApplication.timeSinceStartup;
                 }
                 GUI.backgroundColor = Color.white;
 
-                if (GUILayout.Button("⏹ Parar"))
+                if (GUILayout.Button("⏹ Stop"))
                 {
                     isPlaying = false;
                     effect.ResetSimulation();
@@ -205,16 +205,16 @@ namespace Duskborn.Editor
                 }
                 EditorGUILayout.EndHorizontal();
 
-                isOperating = GUILayout.Toggle(isOperating, isOperating ? "🔥 Fogo & Fumaça: Ativo" : "❄ Resfriamento / Idle");
+                isOperating = GUILayout.Toggle(isOperating, isOperating ? "🔥 Fire & Smoke: Active" : "❄ Resfriamento / Idle");
 
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("Vel:", GUILayout.Width(30));
                 playbackSpeed = EditorGUILayout.Slider(playbackSpeed, 0.25f, 3.0f);
                 EditorGUILayout.EndHorizontal();
 
-                showFurnaceReference = GUILayout.Toggle(showFurnaceReference, "Exibir Modelo da Fornalha");
+                showFurnaceReference = GUILayout.Toggle(showFurnaceReference, "Show Furnace Model");
 
-                EditorGUILayout.LabelField($"Calor: {effect.CurrentHeat * 100f:F0}% | Partículas: {effect.LiveParticleCount}");
+                EditorGUILayout.LabelField($"Heat: {effect.CurrentHeat * 100f:F0}% | Particles: {effect.LiveParticleCount}");
 
                 GUILayout.EndArea();
             }
@@ -270,7 +270,7 @@ namespace Duskborn.Editor
 
         public override bool HasPreviewGUI() => true;
 
-        public override GUIContent GetPreviewTitle() => new GUIContent("Fornalha VFX Preview");
+        public override GUIContent GetPreviewTitle() => new GUIContent("Furnace VFX Preview");
 
         public override void OnPreviewSettings()
         {
@@ -289,7 +289,7 @@ namespace Duskborn.Editor
                 previewDistance = 4.2f;
             }
 
-            darkLighting = GUILayout.Toggle(darkLighting, "Noite/Escuro", EditorStyles.toolbarButton);
+            darkLighting = GUILayout.Toggle(darkLighting, "Night / Dark", EditorStyles.toolbarButton);
         }
 
         public override void OnPreviewGUI(Rect r, GUIStyle background)
@@ -301,7 +301,7 @@ namespace Duskborn.Editor
 
             if (previewUtility == null)
             {
-                EditorGUI.LabelField(r, "Carregando preview da fornalha...", EditorStyles.centeredGreyMiniLabel);
+                EditorGUI.LabelField(r, "Loading furnace preview...", EditorStyles.centeredGreyMiniLabel);
                 return;
             }
 

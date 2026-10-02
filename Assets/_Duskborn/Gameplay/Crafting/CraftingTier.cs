@@ -1,13 +1,13 @@
 namespace Duskborn.Gameplay.Crafting
 {
     /// <summary>
-    /// Tier de progressão da receita de fabricação.
+    /// Crafting recipe progression tier.
     /// </summary>
     public enum CraftingTier
     {
-        Primitivo = 1,
-        Ferro     = 2,
-        Reforcado = 3,
-        Espinheiro = 4,
+        Primitive = 1,
+        Iron     = 2,
+        Reinforced = 3,
+        Thornheart = 4,
     }
 }

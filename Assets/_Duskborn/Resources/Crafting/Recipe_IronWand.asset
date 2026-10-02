@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_IronWand
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_IronWand
-  recipeName: "Bast\xE3o de Ferro"
-  description: "Bast\xE3o de Ferro"
-  category: Armas
+  recipeName: "Iron Staff"
+  description: "Iron Staff"
+  category: "Weapons"
   tier: 2
   isAlwaysDiscovered: 0
   outputItem: {fileID: 0}

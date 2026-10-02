@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_IronPickaxe
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_IronPickaxe
-  recipeName: Picareta de Ferro
-  description: Picareta de Ferro
-  category: Ferramentas
+  recipeName: "Iron Pickaxe"
+  description: "Iron Pickaxe"
+  category: "Tools"
   tier: 3
   requiredStation: 1
   isAlwaysDiscovered: 0

@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_ArcaneChest
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_ArcaneChest
-  recipeName: Armadura Arcana
-  description: Armadura Arcana
-  category: Armadura
+  recipeName: "Arcane Armor"
+  description: "Arcane Armor"
+  category: "Armor"
   tier: 3
   isAlwaysDiscovered: 0
   outputItem: {fileID: 11400000, guid: feb73e94fddcfbe448c3982da621b50f, type: 2}

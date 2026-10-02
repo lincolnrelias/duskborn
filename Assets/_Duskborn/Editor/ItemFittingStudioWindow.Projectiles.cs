@@ -52,9 +52,9 @@ namespace Duskborn.Editor
         {
             if (!(selectedWeapon?.Behaviour is RangedWeaponBehaviour ranged)) return;
 
-            EditorGUILayout.LabelField("Projétil da Arma", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Weapon Projectile", EditorStyles.boldLabel);
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            EditorGUILayout.HelpBox("Edita os assets usados no disparo real. Alterações afetam todas as armas que compartilham este comportamento ou projétil. Use Ctrl+Z para desfazer.", MessageType.Info);
+            EditorGUILayout.HelpBox("Edit assets used for actual firing. Changes affect all weapons sharing this behavior or projectile. Use Ctrl+Z to undo.", MessageType.Info);
 
             bool shouldRebuild = false;
             bool shouldRepose = false;
@@ -64,27 +64,27 @@ namespace Duskborn.Editor
                 behaviour.Update();
                 var projProp = behaviour.FindProperty("projectile");
                 EditorGUI.BeginChangeCheck();
-                EditorGUILayout.PropertyField(projProp, new GUIContent("Projétil"));
+                EditorGUILayout.PropertyField(projProp, new GUIContent("Projectile"));
                 if (EditorGUI.EndChangeCheck())
                 {
                     shouldRebuild = true;
                 }
 
                 EditorGUILayout.Space(6);
-                EditorGUILayout.LabelField("Origem do Disparo (Spawn Offset)", EditorStyles.boldLabel);
+                EditorGUILayout.LabelField("Firing Origin (Spawn Offset)", EditorStyles.boldLabel);
                 var customOffsetProp = behaviour.FindProperty("useCustomSpawnOffset");
                 var posOffsetProp = behaviour.FindProperty("spawnPositionOffset");
                 var rotOffsetProp = behaviour.FindProperty("spawnRotationOffset");
 
-                EditorGUILayout.PropertyField(customOffsetProp, new GUIContent("Override nesta Arma", "Se marcado, esta arma usa seus próprios offsets em vez do padrão global do jogador."));
+                EditorGUILayout.PropertyField(customOffsetProp, new GUIContent("Override on This Weapon", "When enabled, this weapon uses its own offsets instead of the player's global default."));
 
                 if (customOffsetProp.boolValue)
                 {
-                    EditorGUILayout.PropertyField(posOffsetProp, new GUIContent("Posição Relativa", "Posição (X = Direita, Y = Cima, Z = Frente) relativa ao jogador."));
-                    EditorGUILayout.PropertyField(rotOffsetProp, new GUIContent("Rotação Relativa", "Ângulos de Euler (Pitch, Yaw, Roll) relativos à direção do jogador/mira."));
+                    EditorGUILayout.PropertyField(posOffsetProp, new GUIContent("Relative Position", "Position (X = Right, Y = Up, Z = Forward) relative to the player."));
+                    EditorGUILayout.PropertyField(rotOffsetProp, new GUIContent("Relative Rotation", "Euler angles (Pitch, Yaw, Roll) relative to player / aim direction."));
 
                     EditorGUILayout.BeginHorizontal();
-                    if (GUILayout.Button("Alinhar com a Arma", EditorStyles.miniButton))
+                    if (GUILayout.Button("Align with Weapon", EditorStyles.miniButton))
                     {
                         if (_weaponInstance != null)
                         {
@@ -97,7 +97,7 @@ namespace Duskborn.Editor
                             shouldRepose = true;
                         }
                     }
-                    if (GUILayout.Button("Resetar (0, 1.3, 0)", EditorStyles.miniButton))
+                    if (GUILayout.Button("Reset (0, 1.3, 0)", EditorStyles.miniButton))
                     {
                         posOffsetProp.vector3Value = new Vector3(0f, 1.3f, 0f);
                         rotOffsetProp.vector3Value = Vector3.zero;
@@ -107,7 +107,7 @@ namespace Duskborn.Editor
                 }
                 else
                 {
-                    EditorGUILayout.HelpBox("Usando offset padrão global do jogador. Você pode editá-lo abaixo ou marcar 'Override nesta Arma'.", MessageType.None);
+                    EditorGUILayout.HelpBox("Using the player's global default offset. Edit it below or enable 'Override on This Weapon'.", MessageType.None);
 
                     var playerPrefab = SpawnSettingsPrefab;
                     var defaultCombat = playerPrefab != null ? playerPrefab.GetComponentInChildren<PlayerCombat>(true) : null;
@@ -123,10 +123,10 @@ namespace Duskborn.Editor
                             if (defPos != null && defRot != null)
                             {
                                 using (new EditorGUI.DisabledScope(defaultCombat.RangedSpawnPoint != null))
-                                    EditorGUILayout.PropertyField(defPos, new GUIContent("Posição Padrão (Player)", "Offset padrão de spawn no PlayerCombat."));
+                                    EditorGUILayout.PropertyField(defPos, new GUIContent("Default Position (Player)", "Default spawn offset in PlayerCombat."));
                                 if (defaultCombat.RangedSpawnPoint != null)
-                                    EditorGUILayout.HelpBox("O jogador usa Ranged Spawn Point. Para substituir essa origem, marque Override nesta Arma.", MessageType.Info);
-                                EditorGUILayout.PropertyField(defRot, new GUIContent("Rotação Padrão (Player)", "Offset padrão de rotação no PlayerCombat."));
+                                    EditorGUILayout.HelpBox("The player uses Ranged Spawn Point. To replace this origin, enable Override on This Weapon.", MessageType.Info);
+                                EditorGUILayout.PropertyField(defRot, new GUIContent("Default Rotation (Player)", "Default rotation offset in PlayerCombat."));
                                 if (playerSo.ApplyModifiedProperties())
                                 {
                                     EditorUtility.SetDirty(targetObj);
@@ -148,15 +148,15 @@ namespace Duskborn.Editor
             var projectile = ranged.projectile;
             if (projectile == null)
             {
-                EditorGUILayout.HelpBox("Atribua ou crie um projétil para esta arma.", MessageType.Warning);
-                if (GUILayout.Button("Criar Projétil..."))
+                EditorGUILayout.HelpBox("Assign or create a projectile for this weapon.", MessageType.Warning);
+                if (GUILayout.Button("Create Projectile..."))
                 {
-                    string path = EditorUtility.SaveFilePanelInProject("Criar Projétil", "NovoProjetil", "asset", "Escolha onde salvar o projétil.");
+                    string path = EditorUtility.SaveFilePanelInProject("Create Projectile", "NovoProjetil", "asset", "Choose where to save the projectile.");
                     if (!string.IsNullOrEmpty(path))
                     {
                         projectile = CreateInstance<ProjectileDefinition>();
                         AssetDatabase.CreateAsset(projectile, path);
-                        Undo.RecordObject(ranged, "Atribuir Projétil");
+                        Undo.RecordObject(ranged, "Assign Projectile");
                         ranged.projectile = projectile;
                         EditorUtility.SetDirty(ranged);
                         shouldRebuild = true;
@@ -177,9 +177,9 @@ namespace Duskborn.Editor
 
                         if (property.name == "visualScale")
                         {
-                            EditorGUILayout.PropertyField(property, new GUIContent("Escala Visual", "Multiplicador de escala relativo à escala original do prefab."), true);
+                            EditorGUILayout.PropertyField(property, new GUIContent("Visual Scale", "Scale multiplier relative to the prefab's original scale."), true);
                             EditorGUILayout.BeginHorizontal();
-                            _projectileUniformScale = EditorGUILayout.ToggleLeft("Uniforme", _projectileUniformScale, GUILayout.Width(75));
+                            _projectileUniformScale = EditorGUILayout.ToggleLeft("Uniform", _projectileUniformScale, GUILayout.Width(75));
                             if (_projectileUniformScale)
                             {
                                 float cur = property.vector3Value.x;
@@ -189,7 +189,7 @@ namespace Duskborn.Editor
                                     property.vector3Value = Vector3.one * Mathf.Max(0.001f, uScale);
                                 }
                             }
-                            if (GUILayout.Button("Resetar (1, 1, 1)", EditorStyles.miniButton, GUILayout.Width(110)))
+                            if (GUILayout.Button("Reset (1, 1, 1)", EditorStyles.miniButton, GUILayout.Width(110)))
                             {
                                 property.vector3Value = Vector3.one;
                             }
@@ -215,22 +215,22 @@ namespace Duskborn.Editor
                 }
 
                 if (projectile.visualPrefab == null)
-                    EditorGUILayout.HelpBox("Defina Visual Prefab para visualizar e disparar o projétil.", MessageType.Warning);
+                    EditorGUILayout.HelpBox("Set Visual Prefab to preview and fire the projectile.", MessageType.Warning);
 
-                EditorGUILayout.HelpBox("Preview de voo livre: usa a origem e rotação de spawn configuradas acima, velocidade, gravidade e duração do projétil.", MessageType.None);
-                _showProjectile = EditorGUILayout.Toggle("Mostrar Projétil", _showProjectile);
-                _followProjectile = EditorGUILayout.Toggle("Seguir Projétil", _followProjectile);
+                EditorGUILayout.HelpBox("Free-flight preview: uses the spawn origin and rotation configured above, projectile speed, gravity, and lifetime.", MessageType.None);
+                _showProjectile = EditorGUILayout.Toggle("Show Projectile", _showProjectile);
+                _followProjectile = EditorGUILayout.Toggle("Follow Projectile", _followProjectile);
                 using (new EditorGUI.DisabledScope(projectile.visualPrefab == null))
                 {
                     EditorGUI.BeginChangeCheck();
-                    _projectileTime = EditorGUILayout.Slider("Tempo de Voo (s)", _projectileTime, 0f, Mathf.Max(0.1f, projectile.lifetime));
+                    _projectileTime = EditorGUILayout.Slider("Flight Time (s)", _projectileTime, 0f, Mathf.Max(0.1f, projectile.lifetime));
                     if (EditorGUI.EndChangeCheck())
                     {
                         _playProjectile = false;
                         shouldRepose = true;
                     }
                     EditorGUILayout.BeginHorizontal();
-                    if (GUILayout.Button(_playProjectile ? "Pausar Voo" : "Reproduzir Voo"))
+                    if (GUILayout.Button(_playProjectile ? "Pause Flight" : "Reproduzir Voo"))
                     {
                         if (_projectileTime >= projectile.lifetime) _projectileTime = 0f;
                         _playProjectile = !_playProjectile;
@@ -243,7 +243,7 @@ namespace Duskborn.Editor
                         _playProjectile = false;
                         shouldRepose = true;
                     }
-                    if (GUILayout.Button("Focar Projétil"))
+                    if (GUILayout.Button("Focus Projectile"))
                     {
                         _showProjectile = true;
                         EnsureProjectilePreview();
@@ -254,7 +254,7 @@ namespace Duskborn.Editor
                 }
             }
 
-            if (GUILayout.Button("Salvar Configuração do Projétil"))
+            if (GUILayout.Button("Save Projectile Configuration"))
             {
                 AssetDatabase.SaveAssetIfDirty(ranged);
                 if (ranged.projectile != null) AssetDatabase.SaveAssetIfDirty(ranged.projectile);

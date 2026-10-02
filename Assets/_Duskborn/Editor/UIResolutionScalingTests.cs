@@ -11,8 +11,8 @@ using UnityEngine.EventSystems;
 namespace Duskborn.Editor
 {
     /// <summary>
-    /// Testes automatizados de validação de escalonamento de resolução e consistência dimensional
-    /// para ActionBar, Menus IMGUI, HUD e CraftingUI.
+    /// Automated tests to validate resolution scaling and dimensional consistency
+    /// for ActionBar, IMGUI menus, HUD, and CraftingUI.
     /// </summary>
     public static class UIResolutionScalingTests
     {
@@ -32,7 +32,7 @@ namespace Duskborn.Editor
             RunTest(Test_InventorySlotView_ImplementsDragHandlers, ref passed, ref total);
             RunTest(Test_InventoryDragController_DragIconCanvasConfiguration, ref passed, ref total);
 
-            Debug.Log($"<color=#55FF55><b>[UIResolutionScalingTests] {passed}/{total} testes passaram com sucesso!</b></color>");
+            Debug.Log($"<color=#55FF55><b>[UIResolutionScalingTests] {passed}/{total} tests passed!</b></color>");
         }
 
         private static void RunTest(Action testMethod, ref int passed, ref int total)
@@ -58,7 +58,7 @@ namespace Duskborn.Editor
         private static void AssertApproximately(float a, float b, float maxDelta, string message)
         {
             if (Mathf.Abs(a - b) > maxDelta)
-                throw new Exception($"{message} (Esperado: {b}, Obtido: {a}, Delta: {Mathf.Abs(a - b)})");
+                throw new Exception($"{message} (Expected: {b}, Actual: {a}, Delta: {Mathf.Abs(a - b)})");
         }
 
         private static void Test_ActionBarInstaller_CanvasScalerConfiguration()
@@ -80,11 +80,11 @@ namespace Duskborn.Editor
                 installer.ConfigureCanvasAndLayout();
 
                 var scaler = canvasGO.GetComponent<CanvasScaler>();
-                AssertTrue(scaler != null, "CanvasScaler deve ser criado automaticamente no Canvas da ActionBar.");
-                AssertTrue(scaler.uiScaleMode == CanvasScaler.ScaleMode.ScaleWithScreenSize, "CanvasScaler da ActionBar deve operar em ScaleWithScreenSize.");
-                AssertApproximately(scaler.referenceResolution.x, 800f, 0.01f, "Resolução de referência X da ActionBar deve ser 800 (idêntica ao inventário).");
-                AssertApproximately(scaler.referenceResolution.y, 600f, 0.01f, "Resolução de referência Y da ActionBar deve ser 600 (idêntica ao inventário).");
-                AssertApproximately(scaler.matchWidthOrHeight, 0f, 0.01f, "MatchWidthOrHeight deve ser 0 para manter consistência direta com o inventário.");
+                AssertTrue(scaler != null, "CanvasScaler must be created automatically on the ActionBar Canvas.");
+                AssertTrue(scaler.uiScaleMode == CanvasScaler.ScaleMode.ScaleWithScreenSize, "ActionBar CanvasScaler must use ScaleWithScreenSize.");
+                AssertApproximately(scaler.referenceResolution.x, 800f, 0.01f, "ActionBar reference resolution X must be 800 (identical to inventory).");
+                AssertApproximately(scaler.referenceResolution.y, 600f, 0.01f, "ActionBar reference resolution Y must be 600 (identical to inventory).");
+                AssertApproximately(scaler.matchWidthOrHeight, 0f, 0.01f, "MatchWidthOrHeight must be 0 for direct consistency with inventory.");
             }
             finally
             {
@@ -128,18 +128,18 @@ namespace Duskborn.Editor
                 var rect = rootGO.GetComponent<RectTransform>();
                 var glg = gridGO.GetComponent<GridLayoutGroup>();
 
-                AssertApproximately(rect.anchorMin.x, 0.5f, 0.001f, "anchorMin.x deve ser 0.5 (centro)");
-                AssertApproximately(rect.anchorMin.y, 0f, 0.001f, "anchorMin.y deve ser 0 (base)");
-                AssertApproximately(rect.anchorMax.x, 0.5f, 0.001f, "anchorMax.x deve ser 0.5 (centro)");
-                AssertApproximately(rect.anchorMax.y, 0f, 0.001f, "anchorMax.y deve ser 0 (base)");
-                AssertApproximately(rect.pivot.x, 0.5f, 0.001f, "pivot.x deve ser 0.5");
-                AssertApproximately(rect.pivot.y, 0f, 0.001f, "pivot.y deve ser 0");
+                AssertApproximately(rect.anchorMin.x, 0.5f, 0.001f, "anchorMin.x must be 0.5 (center)");
+                AssertApproximately(rect.anchorMin.y, 0f, 0.001f, "anchorMin.y must be 0 (bottom)");
+                AssertApproximately(rect.anchorMax.x, 0.5f, 0.001f, "anchorMax.x must be 0.5 (center)");
+                AssertApproximately(rect.anchorMax.y, 0f, 0.001f, "anchorMax.y must be 0 (bottom)");
+                AssertApproximately(rect.pivot.x, 0.5f, 0.001f, "pivot.x must be 0.5");
+                AssertApproximately(rect.pivot.y, 0f, 0.001f, "pivot.y must be 0");
 
-                // 8 slots de 55px com 4px de espaçamento = 8 * 55 + 7 * 4 = 440 + 28 = 468px
-                AssertApproximately(rect.sizeDelta.x, 468f, 0.01f, "Largura total deve ser 468px para 8 slots de 55px com 4px de espaçamento.");
-                AssertApproximately(rect.sizeDelta.y, 55f, 0.01f, "Altura total deve ser 55px.");
-                AssertApproximately(rect.anchoredPosition.y, 15f, 0.01f, "anchoredPosition.y deve ter margem inferior de 15px.");
-                AssertTrue(glg.childAlignment == TextAnchor.MiddleCenter, "childAlignment do GridLayoutGroup deve ser MiddleCenter.");
+                // 8 slots of 55px with 4px spacing = 8 * 55 + 7 * 4 = 440 + 28 = 468px.
+                AssertApproximately(rect.sizeDelta.x, 468f, 0.01f, "Total width must be 468px for 8 slots of 55px with 4px spacing.");
+                AssertApproximately(rect.sizeDelta.y, 55f, 0.01f, "Total height must be 55px.");
+                AssertApproximately(rect.anchoredPosition.y, 15f, 0.01f, "anchoredPosition.y must have a 15px bottom margin.");
+                AssertTrue(glg.childAlignment == TextAnchor.MiddleCenter, "GridLayoutGroup childAlignment must be MiddleCenter.");
             }
             finally
             {
@@ -164,7 +164,7 @@ namespace Duskborn.Editor
 
             const float invRefW = 800f;
             const float actionRefW = 800f;
-            float expectedRatio = invRefW / actionRefW; // 1.0f (escala idêntica em qualquer resolução)
+            float expectedRatio = invRefW / actionRefW; // 1.0f (identical scale at every resolution).
 
             foreach (var res in testResolutions)
             {
@@ -173,14 +173,14 @@ namespace Duskborn.Editor
                 float ratio = actionScale / invScale;
 
                 AssertApproximately(ratio, expectedRatio, 0.0001f,
-                    $"Proporção de escala entre ActionBar e Inventário falhou na resolução {res.x}x{res.y}.");
+                    $"Scale ratio between ActionBar and Inventory failed at resolution {res.x}x{res.y}.");
 
-                // Valida que o tamanho do slot da ActionBar na tela acompanha consistentemente o inventário
+                // Validate that on-screen ActionBar slot size consistently tracks inventory.
                 float invSlotPixels = 50f * invScale;
                 float actionSlotPixels = 55f * actionScale;
                 float slotRatio = actionSlotPixels / invSlotPixels;
                 AssertApproximately(slotRatio, 55f / 50f, 0.0001f,
-                    $"Proporção de tamanho de slot entre ActionBar e Inventário divergente na resolução {res.x}x{res.y}.");
+                    $"Slot size ratio between ActionBar and Inventory diverges at resolution {res.x}x{res.y}.");
             }
         }
 
@@ -198,7 +198,7 @@ namespace Duskborn.Editor
             Vector2 screenClick = new Vector2((buttonRect.x + buttonRect.width * 0.5f) * scale, (buttonRect.y + buttonRect.height * 0.5f) * scale);
             Vector2 virtualClick = invMatrix.MultiplyPoint(screenClick);
 
-            AssertTrue(buttonRect.Contains(virtualClick), "Clique em 4K transformado pela matriz inversa deve estar dentro do botão virtual.");
+            AssertTrue(buttonRect.Contains(virtualClick), "A 4K click transformed by the inverse matrix must be inside the virtual button.");
 
             // 720p (1280x720)
             screenH = 720f;
@@ -209,7 +209,7 @@ namespace Duskborn.Editor
             screenClick = new Vector2((buttonRect.x + buttonRect.width * 0.5f) * scale, (buttonRect.y + buttonRect.height * 0.5f) * scale);
             virtualClick = invMatrix.MultiplyPoint(screenClick);
 
-            AssertTrue(buttonRect.Contains(virtualClick), "Clique em 720p transformado pela matriz inversa deve estar dentro do botão virtual.");
+            AssertTrue(buttonRect.Contains(virtualClick), "A 720p click transformed by the inverse matrix must be inside the virtual button.");
         }
 
         private static void Test_CraftingUIManager_CanvasScalerScreenSpaceCheck()
@@ -235,15 +235,15 @@ namespace Duskborn.Editor
                 var canvasField = typeof(CraftingUIManager).GetField("_canvas", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                 var assignedCanvas = canvasField?.GetValue(manager) as Canvas;
 
-                AssertTrue(assignedCanvas != null, "CraftingUIManager deve encontrar um Canvas.");
-                AssertTrue(assignedCanvas.renderMode != RenderMode.WorldSpace, "CraftingUIManager não pode se conectar a um Canvas WorldSpace.");
+                AssertTrue(assignedCanvas != null, "CraftingUIManager must find a Canvas.");
+                AssertTrue(assignedCanvas.renderMode != RenderMode.WorldSpace, "CraftingUIManager cannot connect to a WorldSpace Canvas.");
 
                 var scaler = assignedCanvas.GetComponent<CanvasScaler>();
-                AssertTrue(scaler != null, "O Canvas selecionado deve possuir CanvasScaler.");
-                AssertTrue(scaler.uiScaleMode == CanvasScaler.ScaleMode.ScaleWithScreenSize, "O CanvasScaler selecionado deve operar em ScaleWithScreenSize.");
-                AssertApproximately(scaler.referenceResolution.x, 800f, 0.01f, "Resolução de referência X do Crafting deve ser 800.");
-                AssertApproximately(scaler.referenceResolution.y, 600f, 0.01f, "Resolução de referência Y do Crafting deve ser 600.");
-                AssertApproximately(scaler.matchWidthOrHeight, 0f, 0.01f, "MatchWidthOrHeight deve ser 0 (Match Width).");
+                AssertTrue(scaler != null, "The selected Canvas must have a CanvasScaler.");
+                AssertTrue(scaler.uiScaleMode == CanvasScaler.ScaleMode.ScaleWithScreenSize, "The selected CanvasScaler must use ScaleWithScreenSize.");
+                AssertApproximately(scaler.referenceResolution.x, 800f, 0.01f, "Crafting reference resolution X must be 800.");
+                AssertApproximately(scaler.referenceResolution.y, 600f, 0.01f, "Crafting reference resolution Y must be 600.");
+                AssertApproximately(scaler.matchWidthOrHeight, 0f, 0.01f, "MatchWidthOrHeight must be 0 (Match Width).");
             }
             finally
             {
@@ -277,27 +277,27 @@ namespace Duskborn.Editor
                 manager.EnsureUIHierarchy();
 
                 var craftingRoot = manager.CraftingRoot;
-                AssertTrue(craftingRoot != null, "A raiz da interface de Crafting (CraftingFrame) deve ser instanciada.");
+                AssertTrue(craftingRoot != null, "The Crafting interface root (CraftingFrame) must be instantiated.");
 
                 // The detailed two-column layout is scaled down as a whole.
-                AssertApproximately(craftingRoot.sizeDelta.x, 460f, 1f, "Largura interna deve ser 460.");
-                AssertApproximately(craftingRoot.sizeDelta.y, 420f, 1f, "Altura interna deve ser 420.");
-                AssertApproximately(craftingRoot.localScale.x, 0.67f, 0.001f, "Escala do painel deve ser 0.67.");
-                AssertApproximately(craftingRoot.localScale.y, 0.67f, 0.001f, "Escala vertical deve ser 0.67.");
+                AssertApproximately(craftingRoot.sizeDelta.x, 460f, 1f, "Internal width must be 460.");
+                AssertApproximately(craftingRoot.sizeDelta.y, 420f, 1f, "Internal height must be 420.");
+                AssertApproximately(craftingRoot.localScale.x, 0.67f, 0.001f, "Panel scale must be 0.67.");
+                AssertApproximately(craftingRoot.localScale.y, 0.67f, 0.001f, "Vertical scale must be 0.67.");
                 float displayedHeight = craftingRoot.sizeDelta.y * craftingRoot.localScale.y;
                 float displayedWidth = craftingRoot.sizeDelta.x * craftingRoot.localScale.x;
 
-                // Valida que em qualquer resolução padrão (16:9, 16:10, 4:3) o painel não transborda a tela verticalmente
+                // Validate that the panel does not overflow vertically at standard resolutions (16:9, 16:10, 4:3).
                 Vector2[] testResolutions = new Vector2[]
                 {
-                    new(1920, 1080), // 16:9 -> altura de canvas = 450
-                    new(1280, 720),  // 16:9 -> altura de canvas = 450
-                    new(2560, 1440), // 16:9 -> altura de canvas = 450
-                    new(3840, 2160), // 16:9 -> altura de canvas = 450
-                    new(1920, 1200), // 16:10 -> altura de canvas = 500
-                    new(1280, 800),  // 16:10 -> altura de canvas = 500
-                    new(800, 600),   // 4:3 -> altura de canvas = 600
-                    new(1024, 768)   // 4:3 -> altura de canvas = 600
+                    new(1920, 1080), // 16:9 -> canvas height = 450.
+                    new(1280, 720),  // 16:9 -> canvas height = 450.
+                    new(2560, 1440), // 16:9 -> canvas height = 450.
+                    new(3840, 2160), // 16:9 -> canvas height = 450.
+                    new(1920, 1200), // 16:10 -> canvas height = 500.
+                    new(1280, 800),  // 16:10 -> canvas height = 500.
+                    new(800, 600),   // 4:3 -> canvas height = 600.
+                    new(1024, 768)   // 4:3 -> canvas height = 600.
                 };
 
                 foreach (var res in testResolutions)
@@ -305,22 +305,22 @@ namespace Duskborn.Editor
                     float scale = res.x / 800f;
                     float canvasH = res.y / scale;
 
-                    // A altura do painel não pode exceder 85% da altura visível da tela
+                    // Panel height cannot exceed 85% of the visible screen height.
                     float heightRatio = displayedHeight / canvasH;
                     AssertTrue(heightRatio <= 0.85f,
-                        $"A janela de crafting ocupa {heightRatio * 100f:F1}% da altura da tela na resolução {res.x}x{res.y}, o que é excessivo (limite: 85%).");
+                        $"The crafting window occupies {heightRatio * 100f:F1}% of screen height at resolution {res.x}x{res.y}, which is excessive (limit: 85%).");
 
-                    // Valida margem livre no topo e na base (mínimo de 60 unidades totais de canvas)
+                    // Validate free margin at top and bottom (at least 60 total canvas units).
                     float remainingMarginY = canvasH - displayedHeight;
                     AssertTrue(remainingMarginY >= 60f,
-                        $"Margem vertical insuficiente ({remainingMarginY} units) na resolução {res.x}x{res.y}.");
+                        $"Insufficient vertical margin ({remainingMarginY} units) at resolution {res.x}x{res.y}.");
                 }
 
-                // Valida posicionamento horizontal lado a lado (modo duplo com inventário)
+                // Validate side-by-side horizontal placement (dual mode with inventory).
                 float craftingLeft = craftingRoot.anchoredPosition.x - displayedWidth * 0.5f;
                 float craftingRight = craftingRoot.anchoredPosition.x + displayedWidth * 0.5f;
-                AssertTrue(craftingLeft >= -400f, "A borda esquerda da janela de crafting não pode sair da tela (-400).");
-                AssertTrue(craftingRight <= 0f, "A borda direita da janela de crafting não pode cruzar o centro da tela (0).");
+                AssertTrue(craftingLeft >= -400f, "The crafting window's left edge cannot leave the screen (-400).");
+                AssertTrue(craftingRight <= 0f, "The crafting window's right edge cannot cross the screen center (0).");
             }
             finally
             {
@@ -337,12 +337,12 @@ namespace Duskborn.Editor
             {
                 ItemIconRegistry.Register("item_test_unique", testTex);
                 bool found = ItemIconRegistry.TryGetIcon("item_test_unique", out var resolved);
-                AssertTrue(found, "ItemIconRegistry deve encontrar o ícone registrado por id.");
-                AssertTrue(resolved == testTex, "O ícone retornado deve ser o mesmo registrado.");
+                AssertTrue(found, "ItemIconRegistry must find the icon registered by ID.");
+                AssertTrue(resolved == testTex, "The returned icon must be the registered icon.");
 
                 var materialItem = new MaterialItem("item_test_unique", "Test Item", "", "tex_test_icon", "resource", 1);
                 var resolvedItem = ItemIconRegistry.Resolve(materialItem);
-                AssertTrue(resolvedItem == testTex, "ItemIconRegistry.Resolve deve resolver o ícone para IInventoryItem.");
+                AssertTrue(resolvedItem == testTex, "ItemIconRegistry.Resolve must resolve the icon for IInventoryItem.");
             }
             finally
             {
@@ -356,9 +356,9 @@ namespace Duskborn.Editor
             try
             {
                 var slot = slotGO.GetComponent<InventorySlotView>();
-                AssertTrue(slot is IBeginDragHandler, "InventorySlotView deve implementar IBeginDragHandler para não bolhar eventos ao DraggablePanel da janela.");
-                AssertTrue(slot is IDragHandler, "InventorySlotView deve implementar IDragHandler.");
-                AssertTrue(slot is IEndDragHandler, "InventorySlotView deve implementar IEndDragHandler.");
+                AssertTrue(slot is IBeginDragHandler, "InventorySlotView must implement IBeginDragHandler to prevent bubbling to the window's DraggablePanel.");
+                AssertTrue(slot is IDragHandler, "InventorySlotView must implement IDragHandler.");
+                AssertTrue(slot is IEndDragHandler, "InventorySlotView must implement IEndDragHandler.");
             }
             finally
             {
@@ -392,9 +392,9 @@ namespace Duskborn.Editor
                     // Nested canvas sorting is resolved when the drag icon becomes active.
                     image.gameObject.SetActive(true);
                     var canvasComp = image.GetComponent<Canvas>();
-                    AssertTrue(canvasComp != null, "DragIcon deve possuir um componente Canvas dedicado.");
-                    AssertTrue(canvasComp.overrideSorting, "Canvas do DragIcon deve ter overrideSorting ativado.");
-                    AssertTrue(canvasComp.sortingOrder >= 999, "SortingOrder do DragIcon deve ser alto (>= 999) para sobrepor todas as janelas.");
+                    AssertTrue(canvasComp != null, "DragIcon must have a dedicated Canvas component.");
+                    AssertTrue(canvasComp.overrideSorting, "DragIcon Canvas must have overrideSorting enabled.");
+                    AssertTrue(canvasComp.sortingOrder >= 999, "DragIcon SortingOrder must be high (>= 999) to overlay all windows.");
                 }
                 finally
                 {

@@ -23,7 +23,7 @@ namespace Duskborn.Editor
             RunTest(Test_DynamicAtmosphericFogAndDensitySanity, ref passed, ref total);
             RunTest(Test_EnvironmentVisualBootstrapperPipeline, ref passed, ref total);
 
-            Debug.Log($"<color=#55FF55><b>[DayNightCycleTests] {passed}/{total} testes passaram com sucesso!</b></color>");
+            Debug.Log($"<color=#55FF55><b>[DayNightCycleTests] {passed}/{total} tests passed!</b></color>");
         }
 
         private static void RunTest(Action testMethod, ref int passed, ref int total)
@@ -49,7 +49,7 @@ namespace Duskborn.Editor
         private static void AssertApproximately(float a, float b, float maxDelta, string message)
         {
             if (Mathf.Abs(a - b) > maxDelta)
-                throw new Exception($"{message} (Esperado: {b}, Obtido: {a}, Delta: {Mathf.Abs(a - b)})");
+                throw new Exception($"{message} (Expected: {b}, Actual: {a}, Delta: {Mathf.Abs(a - b)})");
         }
 
         private static void AssertColorApproximately(Color a, Color b, float maxDelta, string message)
@@ -58,144 +58,144 @@ namespace Duskborn.Editor
             float deltaG = Mathf.Abs(a.g - b.g);
             float deltaB = Mathf.Abs(a.b - b.b);
             if (deltaR > maxDelta || deltaG > maxDelta || deltaB > maxDelta)
-                throw new Exception($"{message} (Esperado: {b}, Obtido: {a})");
+                throw new Exception($"{message} (Expected: {b}, Actual: {a})");
         }
 
         private static void Test_PeriodProgressionAndTiming()
         {
-            // Valida as janelas dos períodos progressivos
-            AssertTrue(GetPeriodForProgress(true, 0.05f) == CyclePeriod.Dawn, "0.05 de dia deve ser Alvorecer");
-            AssertTrue(GetPeriodForProgress(true, 0.30f) == CyclePeriod.Morning, "0.30 de dia deve ser Manhã");
-            AssertTrue(GetPeriodForProgress(true, 0.60f) == CyclePeriod.Midday, "0.60 de dia deve ser Meio-dia");
-            AssertTrue(GetPeriodForProgress(true, 0.78f) == CyclePeriod.Afternoon, "0.78 de dia deve ser Entardecer");
-            AssertTrue(GetPeriodForProgress(true, 0.92f) == CyclePeriod.Dusk, "0.92 de dia deve ser Crepúsculo");
+            // Validate progressive period windows.
+            AssertTrue(GetPeriodForProgress(true, 0.05f) == CyclePeriod.Dawn, "0.05 of day must be Dawn");
+            AssertTrue(GetPeriodForProgress(true, 0.30f) == CyclePeriod.Morning, "0.30 of day must be Morning");
+            AssertTrue(GetPeriodForProgress(true, 0.60f) == CyclePeriod.Midday, "0.60 of day must be Noon");
+            AssertTrue(GetPeriodForProgress(true, 0.78f) == CyclePeriod.Afternoon, "0.78 of day must be Afternoon");
+            AssertTrue(GetPeriodForProgress(true, 0.92f) == CyclePeriod.Dusk, "0.92 of day must be Dusk");
 
-            AssertTrue(GetPeriodForProgress(false, 0.10f) == CyclePeriod.Nightfall, "0.10 de noite deve ser Anoitecer");
-            AssertTrue(GetPeriodForProgress(false, 0.50f) == CyclePeriod.Midnight, "0.50 de noite deve ser Meia-noite");
-            AssertTrue(GetPeriodForProgress(false, 0.85f) == CyclePeriod.PreDawn, "0.85 de noite deve ser Madrugada");
+            AssertTrue(GetPeriodForProgress(false, 0.10f) == CyclePeriod.Nightfall, "0.10 of night must be Nightfall");
+            AssertTrue(GetPeriodForProgress(false, 0.50f) == CyclePeriod.Midnight, "0.50 of night must be Midnight");
+            AssertTrue(GetPeriodForProgress(false, 0.85f) == CyclePeriod.PreDawn, "0.85 of night must be Predawn");
         }
 
         private static void Test_NightlyMechanicsGatedToNight()
         {
-            // O Crepúsculo faz parte do Dia — jogadores preparam-se, mecânicas noturnas ainda não ativaram
+            // Dusk is part of the day: players prepare, and nighttime mechanics have not activated yet.
             CyclePeriod duskPeriod = GetPeriodForProgress(true, 0.95f);
-            AssertTrue(duskPeriod == CyclePeriod.Dusk, "Fim da tarde deve ser Crepúsculo");
+            AssertTrue(duskPeriod == CyclePeriod.Dusk, "Late afternoon must be Dusk");
 
-            // Valida que em qualquer momento do dia (inclusive Crepúsculo), IsDay é verdadeiro
+            // Validate that IsDay is true at any time during the day (including dusk).
             for (float p = 0f; p <= 1f; p += 0.1f)
             {
                 bool isDay = true;
                 bool isNight = !isDay;
-                AssertTrue(isDay && !isNight, $"Em progresso {p} do dia, mecânicas noturnas não devem rodar");
+                AssertTrue(isDay && !isNight, $"At day progress {p}, nighttime mechanics must not run");
             }
         }
 
         private static void Test_VisualBlendBoundaryContinuity()
         {
-            // Transição Dia -> Noite: o valor em t=1.0 de dia deve ser idêntico ao valor em t=0.0 de noite
+            // Day -> night transition: the value at day t=1.0 must equal the value at night t=0.0.
             float dayEndBlend = CalculateNightBlend(true, 1.0f);
             float nightStartBlend = CalculateNightBlend(false, 0.0f);
-            AssertApproximately(dayEndBlend, nightStartBlend, 0.001f, "Blend de Dia->Noite deve ser perfeitamente contínuo (sem saltos)");
+            AssertApproximately(dayEndBlend, nightStartBlend, 0.001f, "Day->Night blend must be perfectly continuous (no jumps)");
 
-            // Transição Noite -> Dia: o valor em t=1.0 de noite deve ser idêntico ao valor em t=0.0 de dia
+            // Night -> day transition: the value at night t=1.0 must equal the value at day t=0.0.
             float nightEndBlend = CalculateNightBlend(false, 1.0f);
             float dayStartBlend = CalculateNightBlend(true, 0.0f);
-            AssertApproximately(nightEndBlend, dayStartBlend, 0.001f, "Blend de Noite->Dia deve ser perfeitamente contínuo (sem saltos)");
+            AssertApproximately(nightEndBlend, dayStartBlend, 0.001f, "Night->Day blend must be perfectly continuous (no jumps)");
         }
 
         private static void Test_ProceduralLightingContinuity()
         {
-            // Continuidade de Intensidade luminosa
+            // Light intensity continuity.
             float dayEndIntensity = CalculateIntensity(true, 1.0f);
             float nightStartIntensity = CalculateIntensity(false, 0.0f);
-            AssertApproximately(dayEndIntensity, nightStartIntensity, 0.001f, "Intensidade em Dia->Noite deve ser contínua");
+            AssertApproximately(dayEndIntensity, nightStartIntensity, 0.001f, "Intensity at Day->Night must be continuous");
 
             float nightEndIntensity = CalculateIntensity(false, 1.0f);
             float dayStartIntensity = CalculateIntensity(true, 0.0f);
-            AssertApproximately(nightEndIntensity, dayStartIntensity, 0.001f, "Intensidade em Noite->Dia deve ser contínua");
+            AssertApproximately(nightEndIntensity, dayStartIntensity, 0.001f, "Intensity at Night->Day must be continuous");
 
-            // Continuidade de Cor da luz
+            // Light color continuity.
             Color dayEndColor = CalculateLightColor(true, 1.0f);
             Color nightStartColor = CalculateLightColor(false, 0.0f);
-            AssertColorApproximately(dayEndColor, nightStartColor, 0.01f, "Cor da luz em Dia->Noite deve ser contínua");
+            AssertColorApproximately(dayEndColor, nightStartColor, 0.01f, "Light color at Day->Night must be continuous");
 
             Color nightEndColor = CalculateLightColor(false, 1.0f);
             Color dayStartColor = CalculateLightColor(true, 0.0f);
-            AssertColorApproximately(nightEndColor, dayStartColor, 0.01f, "Cor da luz em Noite->Dia deve ser contínua");
+            AssertColorApproximately(nightEndColor, dayStartColor, 0.01f, "Light color at Night->Day must be continuous");
         }
 
         private static void Test_ClockTimeContinuity()
         {
-            // Dia: 06:00 a 20:00
+            // Day: 06:00 to 20:00.
             float startHour = 6f + 0f * 14f;
             float endHour = 6f + 1f * 14f;
-            AssertApproximately(startHour, 6f, 0.01f, "Dia deve começar às 06:00");
-            AssertApproximately(endHour, 20f, 0.01f, "Dia deve encerrar às 20:00");
+            AssertApproximately(startHour, 6f, 0.01f, "Day must start at 06:00");
+            AssertApproximately(endHour, 20f, 0.01f, "Day must end at 20:00");
 
-            // Noite: 20:00 a 06:00
+            // Night: 20:00 to 06:00.
             float nightStartHour = (20f + 0f * 10f) % 24f;
             float nightEndHour = (20f + 1f * 10f) % 24f;
-            AssertApproximately(nightStartHour, 20f, 0.01f, "Noite deve começar às 20:00");
-            AssertApproximately(nightEndHour, 6f, 0.01f, "Noite deve encerrar às 06:00 (amanhecer)");
+            AssertApproximately(nightStartHour, 20f, 0.01f, "Night must start at 20:00");
+            AssertApproximately(nightEndHour, 6f, 0.01f, "Night must end at 06:00 (dawn)");
         }
 
         private static void Test_CelestialSunMoonDayNightSanity()
         {
-            // Valida que durante todo o dia útil o Sol está no céu e a Lua sob o horizonte
+            // Validate that the sun is in the sky and the moon below the horizon throughout the day.
             for (float p = 0.05f; p <= 0.95f; p += 0.15f)
             {
                 DayNightCycle.CalculateCelestialVectors(true, p, 32f, 68f, 28f, 62f, out Vector3 sunDir, out Vector3 moonDir, out _);
-                AssertTrue(sunDir.y > 0f, $"Em progresso {p:F2} do dia, Sol DEVE estar no céu (sunDir.y={sunDir.y:F3} > 0)");
-                AssertTrue(moonDir.y < 0f, $"Em progresso {p:F2} do dia, Lua DEVE estar sob o horizonte (moonDir.y={moonDir.y:F3} < 0)");
+                AssertTrue(sunDir.y > 0f, $"At day progress {p:F2}, the sun MUST be in the sky (sunDir.y={sunDir.y:F3} > 0)");
+                AssertTrue(moonDir.y < 0f, $"At day progress {p:F2}, the moon MUST be below the horizon (moonDir.y={moonDir.y:F3} < 0)");
             }
 
-            // Valida que durante toda a noite a Lua está no céu e o Sol sob o horizonte
+            // Validate that the moon is in the sky and the sun below the horizon throughout the night.
             for (float p = 0.05f; p <= 0.95f; p += 0.15f)
             {
                 DayNightCycle.CalculateCelestialVectors(false, p, 32f, 68f, 28f, 62f, out Vector3 sunDir, out Vector3 moonDir, out _);
-                AssertTrue(moonDir.y > 0f, $"Em progresso {p:F2} da noite, Lua DEVE estar no céu (moonDir.y={moonDir.y:F3} > 0)");
-                AssertTrue(sunDir.y < 0f, $"Em progresso {p:F2} da noite, Sol DEVE estar sob o horizonte (sunDir.y={sunDir.y:F3} < 0)");
+                AssertTrue(moonDir.y > 0f, $"At night progress {p:F2}, the moon MUST be in the sky (moonDir.y={moonDir.y:F3} > 0)");
+                AssertTrue(sunDir.y < 0f, $"At night progress {p:F2}, the sun MUST be below the horizon (sunDir.y={sunDir.y:F3} < 0)");
             }
 
-            // Valida elevações máximas ao Meio-dia e Meia-noite
+            // Validate maximum elevations at noon and midnight.
             DayNightCycle.CalculateCelestialVectors(true, 0.5f, 32f, 68f, 28f, 62f, out Vector3 middaySun, out _, out _);
-            AssertTrue(middaySun.y > 0.85f, $"Sol ao meio-dia deve atingir elevação máxima (y={middaySun.y:F3})");
+            AssertTrue(middaySun.y > 0.85f, $"The sun at noon must reach maximum elevation (y={middaySun.y:F3})");
 
             DayNightCycle.CalculateCelestialVectors(false, 0.5f, 32f, 68f, 28f, 62f, out _, out Vector3 midnightMoon, out _);
-            AssertTrue(midnightMoon.y > 0.80f, $"Lua à meia-noite deve atingir elevação máxima (y={midnightMoon.y:F3})");
+            AssertTrue(midnightMoon.y > 0.80f, $"The moon at midnight must reach maximum elevation (y={midnightMoon.y:F3})");
         }
 
         private static void Test_DirectionalLightAndShadowSanity()
         {
-            // Valida que a luz direcional SEMPRE aponta para baixo (Y < 0), iluminando o terreno e projetando sombras
+            // Validate that directional light ALWAYS points downward (Y < 0), lighting terrain and casting shadows.
             for (float p = 0f; p <= 1f; p += 0.1f)
             {
                 DayNightCycle.CalculateCelestialVectors(true, p, 32f, 68f, 28f, 62f, out _, out _, out Vector3 dayLightFwd);
-                AssertTrue(dayLightFwd.y < 0f, $"Em progresso {p:F1} do dia, luz deve incidir para o chão (light.y={dayLightFwd.y:F3} < 0)");
+                AssertTrue(dayLightFwd.y < 0f, $"At day progress {p:F1}, light must point toward the ground (light.y={dayLightFwd.y:F3} < 0)");
 
                 DayNightCycle.CalculateCelestialVectors(false, p, 32f, 68f, 28f, 62f, out _, out _, out Vector3 nightLightFwd);
-                AssertTrue(nightLightFwd.y < 0f, $"Em progresso {p:F1} da noite, luar deve incidir para o chão (light.y={nightLightFwd.y:F3} < 0)");
+                AssertTrue(nightLightFwd.y < 0f, $"At night progress {p:F1}, moonlight must point toward the ground (light.y={nightLightFwd.y:F3} < 0)");
             }
 
-            // Valida continuidade perfeita na transição Pôr do Sol -> Noite (sem saltos de sombra)
+            // Validate seamless continuity at the sunset -> night transition (no shadow jumps).
             DayNightCycle.CalculateCelestialVectors(true, 1.0f, 32f, 68f, 28f, 62f, out _, out _, out Vector3 dayEndLightFwd);
             DayNightCycle.CalculateCelestialVectors(false, 0.0f, 32f, 68f, 28f, 62f, out _, out _, out Vector3 nightStartLightFwd);
             float duskDelta = Vector3.Distance(dayEndLightFwd, nightStartLightFwd);
-            AssertApproximately(duskDelta, 0f, 0.005f, "Vetor de luz na passagem Crepúsculo->Anoitecer deve ser contínuo (sem saltos de sombra)");
+            AssertApproximately(duskDelta, 0f, 0.005f, "Light vector at Dusk->Nightfall must be continuous (no shadow jumps)");
 
-            // Valida continuidade perfeita na transição Madrugada -> Aurora (sem saltos de sombra)
+            // Validate seamless continuity at the predawn -> dawn transition (no shadow jumps).
             DayNightCycle.CalculateCelestialVectors(false, 1.0f, 32f, 68f, 28f, 62f, out _, out _, out Vector3 nightEndLightFwd);
             DayNightCycle.CalculateCelestialVectors(true, 0.0f, 32f, 68f, 28f, 62f, out _, out _, out Vector3 dayStartLightFwd);
             float dawnDelta = Vector3.Distance(nightEndLightFwd, dayStartLightFwd);
-            AssertApproximately(dawnDelta, 0f, 0.005f, "Vetor de luz na passagem Madrugada->Alvorecer deve ser contínuo (sem saltos de sombra)");
+            AssertApproximately(dawnDelta, 0f, 0.005f, "Light vector at Predawn->Dawn must be continuous (no shadow jumps)");
 
-            // Valida alinhamento físico: ao Meio-dia o Sol fica ao Sul (z < 0) e sombras projetam-se ao Norte (z > 0)
+            // Validate physical alignment: at noon the sun is south (z < 0), and shadows extend north (z > 0).
             DayNightCycle.CalculateCelestialVectors(true, 0.5f, 32f, 68f, 28f, 62f, out Vector3 middaySun, out _, out Vector3 middayLightFwd);
-            AssertTrue(middaySun.z < 0f, "Sol ao meio-dia deve estar a Sul no hemisfério norte estilizado");
-            AssertTrue(middayLightFwd.z > 0f, "Luz deve apontar para o Norte ao meio-dia, projetando sombras a Norte");
+            AssertTrue(middaySun.z < 0f, "The sun at noon must be south in the stylized northern hemisphere");
+            AssertTrue(middayLightFwd.z > 0f, "Light must point north at noon, casting shadows northward");
         }
 
-        // Funções de réplica idênticas ao DayNightCycle para verificação determinística
+        // Functions mirroring DayNightCycle for deterministic verification.
         private static CyclePeriod GetPeriodForProgress(bool isDay, float p)
         {
             if (isDay)
@@ -300,7 +300,7 @@ namespace Duskborn.Editor
 
         private static void Test_DynamicAtmosphericFogAndDensitySanity()
         {
-            // Cria um GameObject temporário com DayNightCycle para testar modulação de neblina e atmosfera
+            // Create a temporary GameObject with DayNightCycle to test fog and atmosphere modulation.
             GameObject go = new GameObject("Test_DayNightCycle_Atmosphere");
             var lightGO = new GameObject("Test_Sun");
             try
@@ -315,31 +315,31 @@ namespace Duskborn.Editor
                 typeof(DayNightCycle).GetField("directionalLight", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
                     .SetValue(cycle, dirLight);
 
-                // Teste 1: Meio-dia (visibilidade aberta e névoa mínima límpida)
+                // Test 1: noon (open visibility and minimal clear fog).
                 cycle.SetPhaseAndProgressForEditor(true, 0.5f, 1);
                 float dayFog = cycle.CurrentFogDensity;
-                AssertTrue(dayFog > 0.002f && dayFog < 0.005f, $"Névoa ao meio-dia deve ser límpida (obtido: {dayFog})");
+                AssertTrue(dayFog > 0.002f && dayFog < 0.005f, $"Noon fog must be clear (got: {dayFog})");
 
-                // Teste 2: Crepúsculo (bruma âmbar/dourada atmosférica deve ser mais densa que o meio-dia)
+                // Test 2: dusk (atmospheric amber / golden mist must be denser than at noon).
                 cycle.SetPhaseAndProgressForEditor(true, 0.90f, 1);
                 float duskFog = cycle.CurrentFogDensity;
-                AssertTrue(duskFog > dayFog, $"Névoa no crepúsculo ({duskFog}) DEVE ser mais densa que no meio-dia ({dayFog})");
+                AssertTrue(duskFog > dayFog, $"Dusk fog ({duskFog}) MUST be denser than noon fog ({dayFog})");
 
-                // Teste 3: Meia-noite (névoa enluarada densa)
+                // Test 3: midnight (dense moonlit fog).
                 cycle.SetPhaseAndProgressForEditor(false, 0.5f, 1);
                 float nightFog = cycle.CurrentFogDensity;
-                AssertTrue(nightFog > duskFog, $"Névoa da noite ({nightFog}) DEVE ser mais densa que o crepúsculo ({duskFog})");
+                AssertTrue(nightFog > duskFog, $"Night fog ({nightFog}) MUST be denser than dusk fog ({duskFog})");
 
-                // Teste 4: Noite 7 do Chefe (bruma carmesim mais opressiva de todas)
+                // Test 4: boss night 7 (the most oppressive crimson mist).
                 cycle.SetPhaseAndProgressForEditor(false, 0.5f, 7);
                 float bossFog = cycle.CurrentFogDensity;
-                AssertTrue(bossFog > nightFog, $"Névoa da Noite 7 ({bossFog}) DEVE ser a mais densa de todas (maior que {nightFog})");
+                AssertTrue(bossFog > nightFog, $"Night 7 fog ({bossFog}) MUST be the densest (greater than {nightFog})");
 
-                // Teste 5: Remoção de partículas da atmosfera
+                // Test 5: remove atmospheric particles.
                 var atmoGO = new GameObject("WorldAtmosphere");
                 atmoGO.AddComponent<Duskborn.Gameplay.World.WorldAtmosphereController>();
                 EnvironmentVisualBootstrapper.RemoveWorldAtmosphere();
-                AssertTrue(GameObject.Find("WorldAtmosphere") == null, "WorldAtmosphere deve ser removido com sucesso");
+                AssertTrue(GameObject.Find("WorldAtmosphere") == null, "WorldAtmosphere must be removed successfully");
             }
             finally
             {
@@ -356,19 +356,19 @@ namespace Duskborn.Editor
             {
                 EnvironmentVisualBootstrapper.EnsureCameraPostProcessing(cam);
                 var camData = cam.GetComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>();
-                AssertTrue(camData != null && camData.renderPostProcessing, "Câmera deve ter renderPostProcessing ativado.");
+                AssertTrue(camData != null && camData.renderPostProcessing, "The camera must have renderPostProcessing enabled.");
 
                 EnvironmentVisualBootstrapper.EnsureGlobalVolume();
                 var volume = UnityEngine.Object.FindAnyObjectByType<UnityEngine.Rendering.Volume>();
-                AssertTrue(volume != null, "Volume global deve ser criado/assegurado.");
-                AssertTrue(volume.isGlobal, "Volume deve ser global.");
-                AssertTrue(volume.sharedProfile != null || volume.profile != null, "Volume deve ter perfil atribuído.");
+                AssertTrue(volume != null, "The global Volume must be created / ensured.");
+                AssertTrue(volume.isGlobal, "The Volume must be global.");
+                AssertTrue(volume.sharedProfile != null || volume.profile != null, "The Volume must have a profile assigned.");
 
                 EnvironmentVisualBootstrapper.EnsureDayNightFog();
-                AssertTrue(RenderSettings.fog, "RenderSettings.fog deve estar ativado.");
+                AssertTrue(RenderSettings.fog, "RenderSettings.fog must be enabled.");
 
                 EnvironmentVisualBootstrapper.EnsureVisualPipeline();
-                AssertTrue(GameObject.Find("WorldAtmosphere") == null, "WorldAtmosphere não deve existir após o pipeline ser assegurado.");
+                AssertTrue(GameObject.Find("WorldAtmosphere") == null, "WorldAtmosphere must not exist after the pipeline is ensured.");
             }
             finally
             {

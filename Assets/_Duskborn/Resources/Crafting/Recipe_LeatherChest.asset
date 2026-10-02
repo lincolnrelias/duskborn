@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_LeatherChest
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_LeatherChest
-  recipeName: Armadura de Couro
-  description: Armadura de Couro
-  category: Armadura
+  recipeName: "Leather Armor"
+  description: "Leather Armor"
+  category: "Armor"
   tier: 2
   isAlwaysDiscovered: 0
   outputItem: {fileID: 11400000, guid: 7ddc8f9d85ab67447b1079f833aac18f, type: 2}

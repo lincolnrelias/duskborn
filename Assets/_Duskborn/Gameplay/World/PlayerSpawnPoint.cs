@@ -3,14 +3,14 @@ using UnityEngine;
 namespace Duskborn.Gameplay.World
 {
     /// <summary>
-    /// Representa um ponto de spawn de jogador gerado proceduralmente com o terreno.
-    /// Inclui gizmos no Scene View para facilitar visualização e depuração.
+    /// Represents a player spawn point procedurally generated with terrain.
+    /// Includes Scene View gizmos for easier visualization and debugging.
     /// </summary>
     [SelectionBase]
     [DisallowMultipleComponent]
     public class PlayerSpawnPoint : MonoBehaviour
     {
-        [Tooltip("Índice de identificação do ponto de spawn.")]
+        [Tooltip("Spawn point identification index.")]
         public int spawnIndex;
 
         private void OnDrawGizmos()

@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_VitalityTonic
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_VitalityTonic
-  recipeName: "T\xF4nico de Vitalidade"
-  description: "T\xF4nico de Vitalidade"
-  category: "Consum\xEDveis"
+  recipeName: "Vitality Tonic"
+  description: "Vitality Tonic"
+  category: "Consumables"
   tier: 3
   requiredStation: 2
   isAlwaysDiscovered: 0

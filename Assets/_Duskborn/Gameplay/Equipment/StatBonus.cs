@@ -47,9 +47,9 @@ namespace Duskborn.Gameplay.Equipment
             StatType.DamageReduction          => "Damage Reduction",
             StatType.MiningResourceBonus      => "Mining Resource Bonus",
             StatType.WoodcuttingResourceBonus => "Woodcutting Resource Bonus",
-            StatType.Lifesteal                => "Roubo de Vida",
-            StatType.ThornsDamage             => "Dano de Espinhos",
-            StatType.GatheringSpeed           => "Velocidade de Coleta",
+            StatType.Lifesteal                => "Life Steal",
+            StatType.ThornsDamage             => "Thorns Damage",
+            StatType.GatheringSpeed           => "Gathering Speed",
             _                                 => type.ToString()
         };
     }

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: gear_leather_gloves
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.GearDefinition
   id: gear_leather_gloves
-  displayName: Luvas de Couro
+  displayName: "Leather Gloves"
   description: 'AttackSpeed: +6%  Mining: +10%'
   icon: {fileID: 2800000, guid: 1d398e6f3bc54e3186ea9c2244e6a80b, type: 3}
   dropPrefab: {fileID: 0}

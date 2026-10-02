@@ -84,7 +84,7 @@ namespace Duskborn.UI
                     }
                 }
 
-                // Registra ícones das receitas conhecidas
+                // Register known recipe icons.
                 var recipes = Resources.LoadAll<Duskborn.Gameplay.Crafting.CraftingRecipe>("Crafting");
                 foreach (var r in recipes)
                 {
@@ -147,14 +147,14 @@ namespace Duskborn.UI
             var rootRect = inventoryRoot.GetComponent<RectTransform>();
             if (rootRect == null) return;
 
-            // Remove DraggablePanel do root se existir, para que o arraste de itens nos slots não arraste a janela inteira
+            // Remove DraggablePanel from the root if present so dragging slot items does not drag the entire window.
             var rootDrag = inventoryRoot.GetComponent<DraggablePanel>();
             if (rootDrag != null)
             {
                 Destroy(rootDrag);
             }
 
-            // Adiciona área dedicada para arraste no topo da moldura do inventário
+            // Add a dedicated drag area at the top of the inventory frame.
             var handleTransform = inventoryRoot.transform.Find("HeaderDragHandle");
             if (handleTransform == null)
             {
@@ -375,7 +375,7 @@ namespace Duskborn.UI
                 return;
             }
 
-            // Se soltou fora da grade mas ainda dentro da moldura do inventário, restaura o item no slot original
+            // If dropped outside the grid but inside the inventory frame, restore the item to its original slot.
             if (inventoryRoot != null)
             {
                 var invRect = inventoryRoot.GetComponent<RectTransform>();
@@ -414,7 +414,7 @@ namespace Duskborn.UI
                 return;
             }
 
-            // Se soltou fora do inventário mas ainda na área da ActionBar, restaura o item no slot original
+            // If dropped outside inventory but inside the ActionBar area, restore the item to its original slot.
             if (actionBarInstaller != null)
             {
                 var abRect = actionBarInstaller.transform as RectTransform;
@@ -664,7 +664,7 @@ namespace Duskborn.UI
 
             if (existingSlot >= 0)
             {
-                // Substitui no mesmo slot atual do inventário, respeitando movimentações do jogador
+                // Replace in the same current inventory slot, respecting the player's moves.
                 installer.Inventory.RemoveItem(existingSlot);
                 installer.Service.TryPlaceItemAt(existingSlot, newItem);
                 _resourceSlot[resourceId] = existingSlot;
@@ -692,7 +692,7 @@ namespace Duskborn.UI
                 CraftingUIManager.Instance.Close();
             }
 
-            // Se o painel de personagem estiver aberto, ajusta posicionamento lado a lado
+            // If the character panel is open, adjust side-by-side positioning.
             if (CharacterUIManager.Instance != null && CharacterUIManager.Instance.IsOpen)
             {
                 var charRoot = CharacterUIManager.Instance.CharacterRoot;
@@ -711,7 +711,7 @@ namespace Duskborn.UI
                 }
             }
 
-            // Libera o cursor e pausa a rotação da câmera quando o inventário estiver aberto
+            // Release the cursor and pause camera rotation while inventory is open.
             bool otherMenuOpen = (CraftingUIManager.Instance != null && CraftingUIManager.Instance.IsOpen) ||
                                  (CharacterUIManager.Instance != null && CharacterUIManager.Instance.IsOpen);
             bool shouldUnlock = willShow || otherMenuOpen;
@@ -850,9 +850,9 @@ namespace Duskborn.UI
         }
 
         /// <summary>
-        /// Popula o inventário com itens de equipamento de teste placeholder cobrindo todos os slots
-        /// e com atributos variados (Vida, Dano, Vel. Ataque, Velocidade, Crítico, Redução de Dano, Mineração, Madeira),
-        /// permitindo testes imediatos com clique direito.
+        /// Populate inventory with placeholder test equipment covering all slots
+        /// and varied attributes (Health, Damage, Attack Speed, Speed, Critical, Damage Reduction, Mining, Woodcutting),
+        /// allowing immediate right-click testing.
         /// </summary>
         public void PopulatePlaceholderTestGear()
         {
@@ -862,7 +862,7 @@ namespace Duskborn.UI
 
             var addedIds = new HashSet<string>();
 
-            // 1. Tenta carregar as definições de Resources/Gear
+            // 1. Try loading definitions from Resources/Gear.
             var gearDefs = Resources.LoadAll<Duskborn.Gameplay.Equipment.GearDefinition>("Gear");
             if (gearDefs != null && gearDefs.Length > 0)
             {
@@ -900,7 +900,7 @@ namespace Duskborn.UI
                 }
             }
 
-            // 2. Garante loadout completo de 12 slots caso algum não esteja em Resources
+            // 2. Ensure a complete 12-slot loadout if any are absent from Resources.
             EnsureProgrammaticTestLoadout(inv, addedIds);
         }
 
@@ -908,67 +908,67 @@ namespace Duskborn.UI
         {
             var testItems = new (string id, string name, string desc, string icon, Duskborn.Gameplay.Equipment.EquipmentSlot slot, Duskborn.Gameplay.Equipment.StatBonus[] bonuses)[]
             {
-                ("gear_iron_helm", "Elmo de Ferro", "HP: +5%", "Iron Helmet", Duskborn.Gameplay.Equipment.EquipmentSlot.Head,
+                ("gear_iron_helm", "Iron Helm", "HP: +5%", "Iron Helmet", Duskborn.Gameplay.Equipment.EquipmentSlot.Head,
                     new[] { new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.HP, Value = 0.05f } }),
 
-                ("gear_bone_necklace", "Colar de Ossos", "Dano: +7%  Crítico: +3%", "Bone Necklace", Duskborn.Gameplay.Equipment.EquipmentSlot.Neck,
+                ("gear_bone_necklace", "Bone Necklace", "Damage: +7%  Critical: +3%", "Bone Necklace", Duskborn.Gameplay.Equipment.EquipmentSlot.Neck,
                     new[] {
                         new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.Damage, Value = 0.07f },
                         new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.CritChance, Value = 0.03f }
                     }),
 
-                ("gear_iron_shoulders", "Ombreiras de Ferro", "Dano: +8%  Redução Dano: +4%", "Iron Shoulders", Duskborn.Gameplay.Equipment.EquipmentSlot.Shoulder,
+                ("gear_iron_shoulders", "Iron Pauldrons", "Damage: +8%  Damage Reduction: +4%", "Iron Shoulders", Duskborn.Gameplay.Equipment.EquipmentSlot.Shoulder,
                     new[] {
                         new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.Damage, Value = 0.08f },
                         new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.DamageReduction, Value = 0.04f }
                     }),
 
-                ("gear_shadow_cloak", "Manto das Sombras", "Velocidade: +10%  Crítico: +5%", "Shadow Cloak", Duskborn.Gameplay.Equipment.EquipmentSlot.Back,
+                ("gear_shadow_cloak", "Shadow Cloak", "Speed: +10%  Critical: +5%", "Shadow Cloak", Duskborn.Gameplay.Equipment.EquipmentSlot.Back,
                     new[] {
                         new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.MoveSpeed, Value = 0.10f },
                         new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.CritChance, Value = 0.05f }
                     }),
 
-                ("gear_leather_chest", "Peitoral de Couro", "HP: +12%  Redução Dano: +6%", "Iron Armor", Duskborn.Gameplay.Equipment.EquipmentSlot.Chest,
+                ("gear_leather_chest", "Leather Chestpiece", "HP: +12%  Damage Reduction: +6%", "Iron Armor", Duskborn.Gameplay.Equipment.EquipmentSlot.Chest,
                     new[] {
                         new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.HP, Value = 0.12f },
                         new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.DamageReduction, Value = 0.06f }
                     }),
 
-                ("gear_iron_bracers", "Braçadeiras de Ferro", "Vel. Ataque: +6%  Redução Dano: +3%", "Iron Bracers", Duskborn.Gameplay.Equipment.EquipmentSlot.Wrist,
+                ("gear_iron_bracers", "Iron Bracers", "Attack Speed: +6%  Damage Reduction: +3%", "Iron Bracers", Duskborn.Gameplay.Equipment.EquipmentSlot.Wrist,
                     new[] {
                         new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.AttackSpeed, Value = 0.06f },
                         new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.DamageReduction, Value = 0.03f }
                     }),
 
-                ("gear_leather_gloves", "Luvas de Couro", "Vel. Ataque: +8%  Mineração: +15%", "Leather Gloves", Duskborn.Gameplay.Equipment.EquipmentSlot.Hands,
+                ("gear_leather_gloves", "Leather Gloves", "Attack Speed: +8%  Mining: +15%", "Leather Gloves", Duskborn.Gameplay.Equipment.EquipmentSlot.Hands,
                     new[] {
                         new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.AttackSpeed, Value = 0.08f },
                         new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.MiningResourceBonus, Value = 0.15f }
                     }),
 
-                ("gear_leather_belt", "Cinto de Couro", "HP: +8%  Madeira: +15%", "Belt", Duskborn.Gameplay.Equipment.EquipmentSlot.Waist,
+                ("gear_leather_belt", "Leather Belt", "HP: +8%  Woodcutting: +15%", "Belt", Duskborn.Gameplay.Equipment.EquipmentSlot.Waist,
                     new[] {
                         new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.HP, Value = 0.08f },
                         new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.WoodcuttingResourceBonus, Value = 0.15f }
                     }),
 
-                ("gear_iron_greaves", "Grevas de Ferro", "Redução Dano: +8%  HP: +5%", "Iron Greaves", Duskborn.Gameplay.Equipment.EquipmentSlot.Legs,
+                ("gear_iron_greaves", "Iron Greaves", "Damage Reduction: +8%  HP: +5%", "Iron Greaves", Duskborn.Gameplay.Equipment.EquipmentSlot.Legs,
                     new[] {
                         new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.DamageReduction, Value = 0.08f },
                         new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.HP, Value = 0.05f }
                     }),
 
-                ("gear_worn_boots", "Botas Desgastadas", "Velocidade: +12%", "Iron Boot", Duskborn.Gameplay.Equipment.EquipmentSlot.Feet,
+                ("gear_worn_boots", "Worn Boots", "Speed: +12%", "Iron Boot", Duskborn.Gameplay.Equipment.EquipmentSlot.Feet,
                     new[] { new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.MoveSpeed, Value = 0.12f } }),
 
-                ("gear_copper_ring", "Anel de Cobre", "Crítico: +5%  Vel. Ataque: +4%", "Copper Ring", Duskborn.Gameplay.Equipment.EquipmentSlot.Ring1,
+                ("gear_copper_ring", "Copper Ring", "Critical: +5%  Attack Speed: +4%", "Copper Ring", Duskborn.Gameplay.Equipment.EquipmentSlot.Ring1,
                     new[] {
                         new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.CritChance, Value = 0.05f },
                         new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.AttackSpeed, Value = 0.04f }
                     }),
 
-                ("gear_ruby_ring", "Anel de Rubi", "Dano: +10%  Crítico: +6%", "Ruby Ring", Duskborn.Gameplay.Equipment.EquipmentSlot.Ring2,
+                ("gear_ruby_ring", "Ruby Ring", "Damage: +10%  Critical: +6%", "Ruby Ring", Duskborn.Gameplay.Equipment.EquipmentSlot.Ring2,
                     new[] {
                         new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.Damage, Value = 0.10f },
                         new Duskborn.Gameplay.Equipment.StatBonus { Type = Duskborn.Gameplay.Equipment.StatType.CritChance, Value = 0.06f }

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: gear_iron_greaves
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.GearDefinition
   id: gear_iron_greaves
-  displayName: Perneiras de Ferro
+  displayName: "Iron Leggings"
   description: 'HP: +6%  DamageReduction: +4%'
   icon: {fileID: 2800000, guid: 59b70b1495c9462b80b0750679f30b76, type: 3}
   dropPrefab: {fileID: 0}

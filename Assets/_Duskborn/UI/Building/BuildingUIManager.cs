@@ -85,9 +85,9 @@ namespace Duskborn.UI.Building
             BuildingUIElements.Anchors(confirmationTitle.rectTransform, new Vector2(.07f, .71f), new Vector2(.93f, .94f), Vector2.zero, Vector2.zero);
             confirmationBody = BuildingUIElements.Label("Body", dialog.transform, 17, TextAnchor.MiddleCenter);
             BuildingUIElements.Anchors(confirmationBody.rectTransform, new Vector2(.08f, .34f), new Vector2(.92f, .7f), Vector2.zero, Vector2.zero);
-            var cancel = BuildingUIElements.Button("Cancel", dialog.transform, "CANCELAR", HideConfirmation);
+            var cancel = BuildingUIElements.Button("Cancel", dialog.transform, "CANCEL", HideConfirmation);
             BuildingUIElements.Anchors((RectTransform)cancel.transform, new Vector2(.08f, .09f), new Vector2(.47f, .29f), Vector2.zero, Vector2.zero);
-            confirmationAccept = BuildingUIElements.Button("Accept", dialog.transform, "CONFIRMAR", Confirm, true);
+            confirmationAccept = BuildingUIElements.Button("Accept", dialog.transform, "CONFIRM", Confirm, true);
             BuildingUIElements.Anchors((RectTransform)confirmationAccept.transform, new Vector2(.53f, .09f), new Vector2(.92f, .29f), Vector2.zero, Vector2.zero);
             confirmation.SetActive(false);
 
@@ -137,7 +137,7 @@ namespace Duskborn.UI.Building
             ClearChildren(forgeContent);
             stationCloseAction = close;
             stationTitle.text = title;
-            stationSubtitle.text = "ESTAÇÃO";
+            stationSubtitle.text = "STATION";
             BuildingUIElements.Anchors((RectTransform)station.transform, new Vector2(.08f, .12f), new Vector2(.48f, .9f), Vector2.zero, Vector2.zero);
             stationScroll.SetActive(true);
             forgeContent.gameObject.SetActive(false);
@@ -153,7 +153,7 @@ namespace Duskborn.UI.Building
             ClearChildren(forgeContent);
             stationCloseAction = close;
             stationTitle.text = title;
-            stationSubtitle.text = "FUNDIÇÃO";
+            stationSubtitle.text = "SMELTING";
             BuildingUIElements.Anchors((RectTransform)station.transform, new Vector2(.09f, .18f), new Vector2(.47f, .82f), Vector2.zero, Vector2.zero);
             stationScroll.SetActive(false);
             forgeContent.gameObject.SetActive(true);
@@ -222,7 +222,7 @@ namespace Duskborn.UI.Building
             BuildingUIElements.Stretch(root.rectTransform);
 
             var hint = BuildingUIElements.Label("Hint", root.transform, 13, TextAnchor.MiddleCenter);
-            hint.text = "BOTÃO DIREITO NO INVENTÁRIO PARA CARREGAR";
+            hint.text = "RIGHT-CLICK IN INVENTORY TO LOAD";
             hint.fontStyle = FontStyle.Bold;
             hint.color = new Color(.73f, .68f, .58f, 1f);
             BuildingUIElements.Anchors(hint.rectTransform, new Vector2(.03f, .89f), new Vector2(.97f, .98f), Vector2.zero, Vector2.zero);
@@ -230,7 +230,7 @@ namespace Duskborn.UI.Building
             var input = ForgeSlot("InputSlot", root.transform, "MATERIAL", inputIcon?.Invoke(), null, returnInput, out var inputValue);
             BuildingUIElements.Anchors((RectTransform)input.transform, new Vector2(.055f, .53f), new Vector2(.30f, .86f), Vector2.zero, Vector2.zero);
             var inputImage = input.GetComponentInChildren<RawImage>();
-            var fuel = ForgeSlot("FuelSlot", root.transform, "COMBUSTÍVEL", fuelIcon?.Invoke(), null, returnFuel, out var fuelValue);
+            var fuel = ForgeSlot("FuelSlot", root.transform, "FUEL", fuelIcon?.Invoke(), null, returnFuel, out var fuelValue);
             BuildingUIElements.Anchors((RectTransform)fuel.transform, new Vector2(.055f, .13f), new Vector2(.30f, .46f), Vector2.zero, Vector2.zero);
             var fuelImage = fuel.GetComponentInChildren<RawImage>();
 
@@ -275,7 +275,7 @@ namespace Duskborn.UI.Building
             arrowHead.color = BuildingUIElements.Accent;
             BuildingUIElements.Anchors(arrowHead.rectTransform, new Vector2(.69f, .63f), new Vector2(.735f, .76f), Vector2.zero, Vector2.zero);
 
-            var output = ForgeSlot("OutputSlot", root.transform, "RESULTADO · RMB", outputIcon?.Invoke(), collectOutput, collectOutput, out var outputValue, true);
+            var output = ForgeSlot("OutputSlot", root.transform, "OUTPUT · RMB", outputIcon?.Invoke(), collectOutput, collectOutput, out var outputValue, true);
             // Keep the output cell square-ish at the panel's aspect ratio instead
             // of stretching it into a tall card. Its centre aligns to the arrow.
             BuildingUIElements.Anchors((RectTransform)output.transform, new Vector2(.745f, .56f), new Vector2(.96f, .82f), Vector2.zero, Vector2.zero);
@@ -360,13 +360,13 @@ namespace Duskborn.UI.Building
             var counts = BuildingUIElements.Label("Counts", row.transform, 14);
             BuildingUIElements.Anchors(counts.rectTransform, new Vector2(.15f, .15f), new Vector2(.43f, .57f), Vector2.zero, Vector2.zero);
             var deposit1 = MiniButton(row.transform, "+1", depositOne, .45f, .57f);
-            var depositAll = MiniButton(row.transform, "+ PILHA", depositStack, .58f, .73f);
+            var depositAll = MiniButton(row.transform, "+ STACK", depositStack, .58f, .73f);
             var withdraw1Button = MiniButton(row.transform, "−1", withdrawOne, .75f, .87f);
-            var withdrawAllButton = MiniButton(row.transform, "− PILHA", withdrawStack, .88f, .99f);
+            var withdrawAllButton = MiniButton(row.transform, "− STACK", withdrawStack, .88f, .99f);
             stationRefreshers.Add(() =>
             {
                 if (counts == null) return;
-                counts.text = "JOGADOR  " + playerAmount() + "\nBAÚ  " + storedAmount();
+                counts.text = "PLAYER  " + playerAmount() + "\nCHEST  " + storedAmount();
                 deposit1.interactable = depositAll.interactable = canDeposit();
                 withdraw1Button.interactable = withdrawAllButton.interactable = canWithdraw();
             });

@@ -99,9 +99,9 @@ namespace Duskborn.Gameplay.Building
             invalid = hasGround
                 ? PlacementValidator.Validate(selected, position, Quaternion.Euler(0, yaw, 0), transform.position,
                     moving != null ? moving.transform : null)
-                : "Aponte para o chão.";
+                : "Aim at the ground.";
             if (moving == null && !MaterialCosts.CanPay(resources, selected.costs))
-                invalid = "Materiais insuficientes.";
+                invalid = "Insufficient materials.";
 
             preview.SetActive(hasGround);
             preview.transform.SetPositionAndRotation(position + previewGroundOffset, Quaternion.Euler(0, yaw, 0));
@@ -188,7 +188,7 @@ namespace Duskborn.Gameplay.Building
             bool closesFlow = preview != null || lastAction == "dismantle";
             if (closesFlow) Cancel();
             else if (station != null) RenderStation(station);
-            ui.ShowToast(lastAction == "place" ? "Construção concluída." : "Ação concluída.");
+            ui.ShowToast(lastAction == "place" ? "Construction complete." : "Action complete.");
             ui.RefreshCatalog();
         }
 
@@ -210,7 +210,7 @@ namespace Duskborn.Gameplay.Building
             if (busy) return;
             if (definition == null || definition.prefab == null)
             {
-                ui.ShowToast("Modelo da construção ausente. Verifique o catálogo.", true);
+                ui.ShowToast("Building model missing. Check the catalog.", true);
                 return;
             }
             if (relocation == null && !Presentation(definition).CanPlace)
@@ -249,7 +249,7 @@ namespace Duskborn.Gameplay.Building
             }
             selectedRecipe = preferredRecipe;
             RenderStation(building);
-            InventoryUIManager.Instance?.SetStationContext(building != null && building.Definition.station == CraftingStationType.Forja);
+            InventoryUIManager.Instance?.SetStationContext(building != null && building.Definition.station == CraftingStationType.Forge);
         }
 
         private void RenderStation(PlacedBuilding building)
@@ -261,7 +261,7 @@ namespace Duskborn.Gameplay.Building
                 station = building;
             }
             station = building;
-            bool isForge = !building.Definition.storage && building.Definition.station == CraftingStationType.Forja;
+            bool isForge = !building.Definition.storage && building.Definition.station == CraftingStationType.Forge;
             if (isForge) ui.BeginForgeStation(building.Definition.displayName, Cancel);
             else ui.BeginStation(building.Definition.displayName, Cancel);
             UnlockCursor();
@@ -282,31 +282,31 @@ namespace Duskborn.Gameplay.Building
                                      recipes.FirstOrDefault(recipe => recipe.RecipeId == "Recipe_SmeltIronBar") ??
                                      recipes.FirstOrDefault();
 
-                if (building.Definition.station == CraftingStationType.Forja)
+                if (building.Definition.station == CraftingStationType.Forge)
                 {
                     RenderForge(building);
                 }
                 else
                 {
-                    ui.AddStationSection("Processamento atual");
+                    ui.AddStationSection("Current processing");
                     ui.AddStationProgress(
                         () => CurrentProcessLabel(building),
                         () => CurrentProgress(building),
                         () => OutputBlocked(building));
                     ui.AddStationLabel(() => QueueLabel(building), 62);
-                    ui.AddStationSection("Saída");
+                    ui.AddStationSection("Output");
                     ui.AddStationProgress(
                         () => OutputLabel(building),
                         () => building.Definition.capacity > 0 ? (float)building.StoredCount / building.Definition.capacity : 0f,
                         () => building.StoredCount >= building.Definition.capacity);
-                    ui.AddStationButton("COLETAR SAÍDA",
+                    ui.AddStationButton("COLLECT OUTPUT",
                         () => Send(new BuildingCommand { action = "collect", instance = building.State.instanceId }),
                         () => !busy && building.State.contents.Count > 0);
-                    ui.AddStationSection("Receitas");
+                    ui.AddStationSection("Recipes");
                     if (selectedRecipe != null)
                         ui.AddStationLabel(() => RecipeDetails(selectedRecipe, building), 106);
                     ui.AddStationButton(
-                        () => selectedRecipe == null ? "FILA INDISPONÍVEL" : "ADICIONAR À FILA  •  " + selectedRecipe.RecipeName,
+                        () => selectedRecipe == null ? "QUEUE UNAVAILABLE" : "ADD TO QUEUE  •  " + selectedRecipe.RecipeName,
                         () => Queue(selectedRecipe, building),
                         () => selectedRecipe != null && CanQueue(selectedRecipe, building));
 
@@ -315,7 +315,7 @@ namespace Duskborn.Gameplay.Building
                         var captured = recipe;
                         ui.AddStationButton(
                             () => (selectedRecipe == captured ? "▶  " : string.Empty) + captured.RecipeName +
-                                (discovery != null && discovery.IsDiscovered(captured) ? string.Empty : "  •  receita não descoberta") +
+                                (discovery != null && discovery.IsDiscovered(captured) ? string.Empty : "  •  recipe undiscovered") +
                                 $"  •  {captured.ProcessingSeconds / building.Definition.processingSpeed:0}s",
                             () => { selectedRecipe = captured; RenderStation(building); },
                             () => !busy && discovery != null && discovery.IsDiscovered(captured));
@@ -323,8 +323,8 @@ namespace Duskborn.Gameplay.Building
                 }
                 if (!isForge)
                 {
-                    ui.AddStationSection("Fabricação");
-                    ui.AddStationButton("FABRICAR EQUIPAMENTO", () =>
+                    ui.AddStationSection("Crafting");
+                    ui.AddStationButton("CRAFT EQUIPMENT", () =>
                     {
                         ui.HidePanels();
                         CraftingUIManager.EnsureInstance().Open(building.GetComponent<Workbench>());
@@ -333,12 +333,12 @@ namespace Duskborn.Gameplay.Building
             }
             else
             {
-                ui.AddStationSection("Armazenamento");
+                ui.AddStationSection("Storage");
                 ui.AddStationProgress(
-                    () => $"CAPACIDADE  {building.StoredCount}/{building.Definition.capacity}",
+                    () => $"CAPACITY  {building.StoredCount}/{building.Definition.capacity}",
                     () => building.Definition.capacity > 0 ? (float)building.StoredCount / building.Definition.capacity : 0f,
                     () => building.StoredCount >= building.Definition.capacity);
-                ui.AddStationLabel(() => "JOGADOR                                      BAÚ\nUse + para guardar e − para retirar.", 54);
+                ui.AddStationLabel(() => "PLAYER                                      CHEST\nUse + to store and − to withdraw.", 54);
                 var materialIds = resources.Counts.Keys
                     .Concat(building.State.contents.Select(stack => stack.id))
                     .Where(id => !string.IsNullOrEmpty(id))
@@ -366,14 +366,14 @@ namespace Duskborn.Gameplay.Building
             // so it does not need the generic station action rows below.
             if (isForge) return;
 
-            ui.AddStationSection("Estação");
-            ui.AddStationButton("MOVER  •  grátis, mantém conteúdos",
+            ui.AddStationSection("Station");
+            ui.AddStationButton("MOVE  •  free, preserves contents",
                 () => Begin(building.Definition, building),
                 () => !busy && building.Definition.movable);
             ui.AddStationButton(
                 () => building.Empty
-                    ? "DESMONTAR  •  devolve 100% dos materiais"
-                    : "DESMONTAR  •  retire materiais e conclua a fila",
+                    ? "DISMANTLE  •  returns 100% of materials"
+                    : "DISMANTLE  •  withdraw materials and finish the queue",
                 () => ConfirmDismantle(building),
                 () => !busy && building.Definition.dismantlable && building.Empty,
                 true);
@@ -392,9 +392,9 @@ namespace Duskborn.Gameplay.Building
                 () => building.State.fuel.Count == 0
                     ? string.Empty
                     : ForgeSlotSummary(recipe?.FuelIngredients, building.State.fuel,
-                        recipe != null && recipe.FuelIngredients.Count == 0 ? "não necessário" : string.Empty),
+                        recipe != null && recipe.FuelIngredients.Count == 0 ? "not required" : string.Empty),
                 () => building.State.contents.Count == 0
-                    ? "vazio"
+                    ? "empty"
                     : string.Join("\n", building.State.contents.Select(stack => MaterialName(stack.id) + "  ×" + stack.amount)),
                 () => ForgeStatus(building, recipe),
                 () => CurrentProgress(building),
@@ -414,10 +414,10 @@ namespace Duskborn.Gameplay.Building
 
         public bool TryAssignInventoryItem(string materialId)
         {
-            if (busy || station == null || !MenuOpen || station.Definition.station != CraftingStationType.Forja ||
+            if (busy || station == null || !MenuOpen || station.Definition.station != CraftingStationType.Forge ||
                 string.IsNullOrEmpty(materialId) || resources == null) return false;
             var recipes = Resources.LoadAll<CraftingRecipe>("Crafting")
-                .Where(recipe => recipe.RequiredStation == CraftingStationType.Forja && recipe.ProcessingSeconds > 0)
+                .Where(recipe => recipe.RequiredStation == CraftingStationType.Forge && recipe.ProcessingSeconds > 0)
                 .ToArray();
             var discoveredRecipes = recipes
                 .Where(recipe => discovery == null || discovery.IsDiscovered(recipe))
@@ -436,7 +436,7 @@ namespace Duskborn.Gameplay.Building
             }
             if (recipe == null)
             {
-                ui.ShowToast("Este item não pode ser usado na forja.", true);
+                ui.ShowToast("This item cannot be used in the forge.", true);
                 return true;
             }
             bool incompatibleLoadedFuel = station.State.fuel.Any(stack =>
@@ -444,7 +444,7 @@ namespace Duskborn.Gameplay.Building
             if (!string.IsNullOrEmpty(station.State.selectedRecipe) && station.State.selectedRecipe != recipe.RecipeId &&
                 (station.State.inputs.Count > 0 || incompatibleLoadedFuel || station.State.jobs.Count > 0))
             {
-                ui.ShowToast("Esvazie a forja antes de trocar a receita.", true);
+                ui.ShowToast("Empty the forge before changing the recipe.", true);
                 return true;
             }
             bool fuel = IngredientAmount(recipe.FuelIngredients, materialId) > 0;
@@ -452,7 +452,7 @@ namespace Duskborn.Gameplay.Building
             int amount = Mathf.Min(resources.GetCount(materialId), PlacedBuilding.SlotStackCapacity - loaded);
             if (amount <= 0)
             {
-                ui.ShowToast(loaded >= PlacedBuilding.SlotStackCapacity ? "O slot já está cheio." : "Você não possui esse material.", true);
+                ui.ShowToast(loaded >= PlacedBuilding.SlotStackCapacity ? "The slot is already full." : "You do not own this material.", true);
                 return true;
             }
             selectedRecipe = recipe;
@@ -497,16 +497,16 @@ namespace Duskborn.Gameplay.Building
 
         private static string ForgeStatus(PlacedBuilding building, CraftingRecipe recipe)
         {
-            if (recipe == null) return "Selecione uma receita.";
-            if (OutputBlocked(building)) return "SAÍDA CHEIA  •  fundição pausada";
+            if (recipe == null) return "Select a recipe.";
+            if (OutputBlocked(building)) return "OUTPUT FULL  •  smelting paused";
             if (building.State.jobs.Count > 0)
                 return recipe.RecipeName + $"  •  {building.State.jobs[0].remaining / building.Definition.processingSpeed:0.0}s";
             bool inputs = HasIngredients(building.State.inputs, recipe.Ingredients);
             bool fuel = building.FuelCharges > 0 || HasIngredients(building.State.fuel, recipe.FuelIngredients);
-            if (!inputs && !fuel) return "Aguardando recursos.";
-            if (!inputs) return "Aguardando material.";
-            if (!fuel) return "Aguardando combustível.";
-            return "Pronto para acender.";
+            if (!inputs && !fuel) return "Waiting for resources.";
+            if (!inputs) return "Waiting for material.";
+            if (!fuel) return "Waiting for fuel.";
+            return "Ready to ignite.";
         }
 
         private static bool HasIngredients(IReadOnlyList<MaterialStack> stacks, IReadOnlyList<CraftingIngredient> requirements)
@@ -533,11 +533,11 @@ namespace Duskborn.Gameplay.Building
 
         private string RecipeDetails(CraftingRecipe recipe, PlacedBuilding building)
         {
-            if (recipe == null) return "Selecione uma receita.";
-            string output = recipe.OutputItem != null ? recipe.OutputAmount + " × " + recipe.OutputItem.DisplayName : "Saída inválida";
-            string missing = MaterialCosts.CanPay(resources, recipe.Ingredients, recipe.FuelIngredients) ? "Materiais disponíveis." : "Faltam materiais.";
-            string fuel = recipe.FuelIngredients.Count > 0 ? $"\nCOMBUSTÍVEL  {Costs(recipe.FuelIngredients)}" : string.Empty;
-            return $"{recipe.RecipeName}\nENTRADA  {Costs(recipe.Ingredients)}{fuel}\nSAÍDA  {output}  •  {recipe.ProcessingSeconds / building.Definition.processingSpeed:0}s\n{missing}";
+            if (recipe == null) return "Select a recipe.";
+            string output = recipe.OutputItem != null ? recipe.OutputAmount + " × " + recipe.OutputItem.DisplayName : "Invalid output";
+            string missing = MaterialCosts.CanPay(resources, recipe.Ingredients, recipe.FuelIngredients) ? "Materials available." : "Missing materials.";
+            string fuel = recipe.FuelIngredients.Count > 0 ? $"\nFUEL  {Costs(recipe.FuelIngredients)}" : string.Empty;
+            return $"{recipe.RecipeName}\nINPUT  {Costs(recipe.Ingredients)}{fuel}\nOUTPUT  {output}  •  {recipe.ProcessingSeconds / building.Definition.processingSpeed:0}s\n{missing}";
         }
 
         private static float CurrentProgress(PlacedBuilding building)
@@ -558,27 +558,27 @@ namespace Duskborn.Gameplay.Building
 
         private static string CurrentProcessLabel(PlacedBuilding building)
         {
-            if (building.State.jobs.Count == 0) return "Nenhum processo ativo.";
+            if (building.State.jobs.Count == 0) return "No active process.";
             var job = building.State.jobs[0];
             var recipe = BuildingWorld.Recipe(job.recipe);
-            if (recipe == null) return "Processo inválido.";
-            if (OutputBlocked(building)) return "SAÍDA CHEIA  •  processamento pausado";
+            if (recipe == null) return "Invalid process.";
+            if (OutputBlocked(building)) return "OUTPUT FULL  •  processing paused";
             return recipe.RecipeName + $"  •  {job.remaining / building.Definition.processingSpeed:0}s restantes";
         }
 
         private static string QueueLabel(PlacedBuilding building)
         {
-            if (building.State.jobs.Count <= 1) return $"FILA  {building.State.jobs.Count}/{building.Definition.queueCapacity}  •  nenhuma receita aguardando";
-            return $"FILA  {building.State.jobs.Count}/{building.Definition.queueCapacity}\n" + string.Join("  •  ", building.State.jobs.Skip(1)
+            if (building.State.jobs.Count <= 1) return $"QUEUE  {building.State.jobs.Count}/{building.Definition.queueCapacity}  •  no recipes waiting";
+            return $"QUEUE  {building.State.jobs.Count}/{building.Definition.queueCapacity}\n" + string.Join("  •  ", building.State.jobs.Skip(1)
                 .Select((job, index) => (index + 1) + ". " + (BuildingWorld.Recipe(job.recipe)?.RecipeName ?? job.recipe)));
         }
 
         private static string OutputLabel(PlacedBuilding building)
         {
             string contents = building.State.contents.Count == 0
-                ? "vazio"
+                ? "empty"
                 : string.Join("  •  ", building.State.contents.Select(stack => MaterialName(stack.id) + " " + stack.amount));
-            return $"SAÍDA  {building.StoredCount}/{building.Definition.capacity}  •  {contents}";
+            return $"OUTPUT  {building.StoredCount}/{building.Definition.capacity}  •  {contents}";
         }
 
         private void Transfer(PlacedBuilding building, string material, int amount, bool withdraw)
@@ -599,15 +599,15 @@ namespace Duskborn.Gameplay.Building
         private void ConfirmDismantle(PlacedBuilding building)
         {
             ui.ShowConfirmation(
-                "DESMONTAR " + building.Definition.displayName.ToUpperInvariant() + "?",
-                "A estação será removida e devolverá 100% do custo:\n" + Costs(building.Definition.costs),
-                "DESMONTAR",
+                "DISMANTLE " + building.Definition.displayName.ToUpperInvariant() + "?",
+                "The station will be removed and return 100% of its cost:\n" + Costs(building.Definition.costs),
+                "DISMANTLE",
                 () => Send(new BuildingCommand { action = "dismantle", instance = building.State.instanceId }));
         }
 
         private string Status(PlacedBuilding building)
         {
-            string value = $"ARMAZENAMENTO  {building.StoredCount}/{building.Definition.capacity}    •    FILA  {building.State.jobs.Count}/{building.Definition.queueCapacity}\n";
+            string value = $"STORAGE  {building.StoredCount}/{building.Definition.capacity}    •    QUEUE  {building.State.jobs.Count}/{building.Definition.queueCapacity}\n";
             foreach (var stack in building.State.contents)
                 value += MaterialName(stack.id) + ": " + stack.amount + "   ";
             if (building.State.jobs.Count > 0)
@@ -618,19 +618,19 @@ namespace Duskborn.Gameplay.Building
                 {
                     value += "\n" + recipe.RecipeName + $"  •  {Mathf.Clamp01(1f - job.remaining / recipe.ProcessingSeconds):P0}";
                     if (building.StoredCount + recipe.OutputAmount > building.Definition.capacity)
-                        value += "  •  SAÍDA CHEIA, PROCESSO PAUSADO";
+                        value += "  •  OUTPUT FULL, PROCESS PAUSED";
                 }
             }
-            else if (building.State.contents.Count == 0) value += "\nNenhum processo ou material armazenado.";
+            else if (building.State.contents.Count == 0) value += "\nNo process or stored materials.";
             return value;
         }
 
         private string Costs(IReadOnlyList<CraftingIngredient> costs) => string.Join("  •  ", costs.Select(cost =>
             cost.material == null
-                ? "Material inválido"
+                ? "Invalid material"
                 : $"{cost.material.DisplayName}: {resources.GetCount(cost.material.Id)}/{cost.amount}" +
                   (resources.GetCount(cost.material.Id) < cost.amount
-                      ? $" (faltam {cost.amount - resources.GetCount(cost.material.Id)})"
+                      ? $" (missing {cost.amount - resources.GetCount(cost.material.Id)})"
                       : string.Empty)));
 
         private static string MaterialName(string id)
@@ -673,7 +673,7 @@ namespace Duskborn.Gameplay.Building
             var world = BuildingWorld.Instance;
             if (world == null)
             {
-                ui.ShowToast("O catálogo de construção ainda não está disponível.", true);
+                ui.ShowToast("The building catalog is not available yet.", true);
                 return;
             }
             if (resources == null) resources = GetComponent<ResourceInventory>();
@@ -708,17 +708,17 @@ namespace Duskborn.Gameplay.Building
             if (!player.IsServerStarted || PlayerInteractor.BuildingPeers.Count != 1 || busy ||
                 PlayerInteractor.BuildingPeers.Any(peer => peer.BuildingTransactionPending))
             {
-                ui.ShowToast("Salvar/carregar requer host solo e nenhuma transação pendente.", true);
+                ui.ShowToast("Saving / loading requires a solo host and no pending transactions.", true);
                 return;
             }
             try
             {
                 if (load) BuildingWorld.Instance.Load(resources); else BuildingWorld.Instance.Save(resources);
-                ui.ShowToast(load ? "Infraestrutura carregada." : "Infraestrutura salva.");
+                ui.ShowToast(load ? "Infrastructure loaded." : "Infrastructure saved.");
             }
             catch (Exception exception)
             {
-                ui.ShowToast("Falha no checkpoint: " + exception.Message, true);
+                ui.ShowToast("Checkpoint failed: " + exception.Message, true);
                 Debug.LogException(exception);
             }
         }

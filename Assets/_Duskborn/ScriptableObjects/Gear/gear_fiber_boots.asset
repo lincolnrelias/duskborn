@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: gear_fiber_boots
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.GearDefinition
   id: gear_fiber_boots
-  displayName: Botas de Fibra
-  description: Botas de Fibra
+  displayName: "Fiber Boots"
+  description: "Fiber Boots"
   icon: {fileID: 2800000, guid: a8480f2a9c2746c0a8f97381ad1e3b1c, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 0

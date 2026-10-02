@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_FiberChest
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_FiberChest
-  recipeName: Armadura de Fibra
-  description: Armadura de Fibra
-  category: Armadura
+  recipeName: "Fiber Armor"
+  description: "Fiber Armor"
+  category: "Armor"
   tier: 2
   requiredStation: 0
   isAlwaysDiscovered: 1

@@ -9,24 +9,24 @@ using UnityEngine.UI;
 namespace Duskborn.Effects
 {
     /// <summary>
-    /// Barra de vida no espaço de mundo em estética Medieval Fantasy Low-Poly ("Duskborn").
-    /// Apresenta moldura de ferro forjado e ouro envelhecido, rastro de dano em brasa crepuscular,
-    /// calha de ardósia escura profunda e preenchimento de vitalidade esmeralda/âmbar/rubi.
-    /// Inclui ancoragem inteligente de altura (evitando que nós altos joguem a barra no céu)
-    /// e travamento dinâmico no viewport da câmera para jamais sair da tela visível.
+    /// World-space health bar with a Medieval Fantasy Low-Poly aesthetic ("Duskborn").
+    /// Features a wrought iron and aged gold frame, twilight ember damage trail,
+    /// deep dark slate track, and emerald / amber / ruby vitality fill.
+    /// Includes intelligent height anchoring (prevents tall nodes from pushing the bar into the sky)
+    /// and dynamic camera viewport clamping to keep it on the visible screen.
     /// </summary>
     [RequireComponent(typeof(Canvas))]
     [RequireComponent(typeof(CanvasGroup))]
     public class WorldHealthBar : MonoBehaviour
     {
-        [Header("Elementos Visuais")]
+        [Header("Visual Elements")]
         [SerializeField] private Image           fill;
         [SerializeField] private Image           ghostFill;
         [SerializeField] private Image           background;
         [SerializeField] private Image           frame;
         [SerializeField] private TextMeshProUGUI nameLabel;
 
-        [Header("Configuração")]
+        [Header("Configuration")]
         [SerializeField] private HealthBarConfig config;
 
         private IHealthProvider _provider;
@@ -92,9 +92,9 @@ namespace Duskborn.Effects
         }
 
         /// <summary>
-        /// Determina a ancoragem vertical e horizontal correta com base nos colisores e na malha visual da entidade.
-        /// Respeita a altura máxima para não projetar a barra no céu em árvores altas (15m),
-        /// e expande o raio horizontal para englobar galhos e folhagens volumosas (evitando clipping em árvores grandes).
+        /// Determine correct vertical and horizontal anchoring from the entity's colliders and visual mesh.
+        /// Respect maximum height to avoid projecting the bar into the sky on tall trees (15m),
+        /// and expand the horizontal radius to include bulky branches and foliage (avoiding clipping on large trees).
         /// </summary>
         private void ComputeAnchorOffset()
         {
@@ -104,7 +104,7 @@ namespace Duskborn.Effects
             float baseWorldY = parent.position.y;
             float topWorldY  = float.NegativeInfinity;
 
-            // 1. Prioridade para Colisores sólidos na altura: o colisor delimita o topo acessível do tronco.
+            // 1. Prioritize solid colliders for height: the collider defines the accessible trunk top.
             var colliders = parent.GetComponentsInChildren<Collider>();
             foreach (var col in colliders)
             {
@@ -112,7 +112,7 @@ namespace Duskborn.Effects
                 topWorldY = Mathf.Max(topWorldY, col.bounds.max.y);
             }
 
-            // 2. Se não houver colisores sólidos válidos, avalia Renderers visíveis para a altura
+            // 2. If no valid solid colliders exist, evaluate visible Renderers for height.
             var renderers = parent.GetComponentsInChildren<Renderer>();
             if (float.IsNegativeInfinity(topWorldY))
             {
@@ -124,12 +124,12 @@ namespace Duskborn.Effects
                 }
             }
 
-            // 3. Fallback: altura humana média (1.8m)
+            // 3. Fallback: average human height (1.8m).
             if (float.IsNegativeInfinity(topWorldY))
                 topWorldY = baseWorldY + 1.8f;
 
-            // 4. Limitação de altura máxima relativa à base:
-            // Impede que folhagens de pinheiros de 15m projetem a barra fora da tela.
+            // 4. Maximum height limit relative to the base:
+            // Prevent foliage on 15m pines from projecting the bar offscreen.
             float heightAboveBase = topWorldY - baseWorldY;
             float maxHeight = config != null ? config.maxHeightAboveBase : 3.2f;
             if (maxHeight > 0f && heightAboveBase > maxHeight)
@@ -141,12 +141,12 @@ namespace Duskborn.Effects
             float barHalfHeight = rt != null ? rt.sizeDelta.y * 0.5f : 0.08f;
             float yGap = config != null ? config.yOffset : 0.35f;
 
-            // Converte offset do mundo para espaço local do pai respeitando a escala da entidade
+            // Convert the world offset to parent local space, respecting entity scale.
             float parentScaleY = parent.lossyScale.y != 0f ? Mathf.Abs(parent.lossyScale.y) : 1f;
             float localY = (heightAboveBase + yGap + barHalfHeight) / parentScaleY;
 
-            // 5. Determina raio horizontal e centro para projetar a barra à frente da superfície.
-            // Avalia tanto colisores quanto renderers para cobrir copas largas de árvores que ultrapassam o colisor.
+            // 5. Determine horizontal radius and center to project the bar in front of the surface.
+            // Evaluate both colliders and renderers to cover wide tree canopies extending beyond the collider.
             _horizontalRadius = 0f;
             _localCenter = Vector3.zero;
 
@@ -182,7 +182,7 @@ namespace Duskborn.Effects
                 }
             }
 
-            // Expande o raio horizontal com base na malha visual (Renderers) para cobrir galhos e folhagens
+            // Expand horizontal radius based on visual meshes (Renderers) to cover branches and foliage.
             foreach (var r in renderers)
             {
                 if (r is ParticleSystemRenderer || r.transform.IsChildOf(transform)) continue;
@@ -206,7 +206,7 @@ namespace Duskborn.Effects
         }
 
         /// <summary>
-        /// Resolve e estiliza o nome do alvo em português para conferir identidade de RPG medieval.
+        /// Resolve and style the target's English name for a medieval RPG identity.
         /// </summary>
         private void SetupTargetName()
         {
@@ -236,53 +236,53 @@ namespace Duskborn.Effects
 
         private string ResolveDisplayName()
         {
-            if (transform.parent == null) return "Alvo";
+            if (transform.parent == null) return "Target";
 
             string rawName = transform.parent.name;
 
-            // Remoção de sufixos de clone do Unity
+            // Remove Unity clone suffixes.
             if (rawName.EndsWith("(Clone)", StringComparison.OrdinalIgnoreCase))
                 rawName = rawName.Substring(0, rawName.Length - 7).Trim();
 
-            // Recursos do Mundo (árvores, minérios, plantas)
+            // World resources (trees, ores, plants).
             if (rawName.IndexOf("pine", StringComparison.OrdinalIgnoreCase) >= 0)
-                return "Pinheiro";
+                return "Pine";
             if (rawName.IndexOf("birch", StringComparison.OrdinalIgnoreCase) >= 0)
-                return "Bétula";
+                return "Birch";
             if (rawName.IndexOf("iron_vein", StringComparison.OrdinalIgnoreCase) >= 0)
-                return "Veio de Ferro";
+                return "Iron Vein";
             if (rawName.IndexOf("iron_ridge", StringComparison.OrdinalIgnoreCase) >= 0)
-                return "Crista de Ferro";
+                return "Iron Ridge";
             if (rawName.IndexOf("iron", StringComparison.OrdinalIgnoreCase) >= 0)
-                return "Minério de Ferro";
+                return "Iron Ore";
             if (rawName.IndexOf("monolith", StringComparison.OrdinalIgnoreCase) >= 0)
-                return "Monólito de Pedra";
+                return "Stone Monolith";
             if (rawName.IndexOf("outcrop", StringComparison.OrdinalIgnoreCase) >= 0)
-                return "Afloramento de Pedra";
+                return "Stone Outcrop";
             if (rawName.IndexOf("stone", StringComparison.OrdinalIgnoreCase) >= 0)
-                return "Pedra Ancestral";
+                return "Ancestral Stone";
             if (rawName.IndexOf("fern", StringComparison.OrdinalIgnoreCase) >= 0)
-                return "Samambaia";
+                return "Fern";
             if (rawName.IndexOf("herbs", StringComparison.OrdinalIgnoreCase) >= 0)
-                return "Ervas Silvestres";
+                return "Wild Herbs";
             if (rawName.IndexOf("fiber", StringComparison.OrdinalIgnoreCase) >= 0)
-                return "Fibras Vegetais";
+                return "Plant Fiber";
 
-            // Inimigos e Criaturas das Sombras
+            // Enemies and Shadow Creatures.
             if (rawName.IndexOf("swarmer", StringComparison.OrdinalIgnoreCase) >= 0)
                 return "Enxameante";
             if (rawName.IndexOf("wolf", StringComparison.OrdinalIgnoreCase) >= 0)
-                return "Lobo Sombrio";
+                return "Shadow Wolf";
             if (rawName.IndexOf("boss", StringComparison.OrdinalIgnoreCase) >= 0)
-                return "Terror do Crepúsculo";
+                return "Twilight Terror";
 
-            // Jogador
+            // Player.
             if (rawName.IndexOf("player", StringComparison.OrdinalIgnoreCase) >= 0)
                 return "Explorador";
 
-            // Limpeza geral para nós customizados
+            // General cleanup for custom nodes.
             string cleaned = rawName.Replace("ResourceNode_", "").Replace("Node_", "").Replace("_", " ");
-            return cleaned.Length > 0 ? cleaned : "Entidade";
+            return cleaned.Length > 0 ? cleaned : "Entity";
         }
 
         private void OnDestroy()
@@ -297,14 +297,14 @@ namespace Duskborn.Effects
 
             if (newFill < _targetFill)
             {
-                // Dano sofrido: rastro fantasma de brasa permanece e recua cadenciado
+                // Damage taken: the ember ghost trail remains and recedes steadily.
                 _ghostFill         = _displayFill;
                 _canvasGroup.alpha = 1f;
                 _fadeTimer         = newFill <= 0f ? 0.2f : (config != null ? config.fadeDelay : 3.5f);
             }
             else if (newFill > _targetFill)
             {
-                // Cura: ajusta fantasma para não criar atraso inverso
+                // Healing: adjust the ghost trail to avoid inverse lag.
                 _ghostFill = newFill;
             }
 
@@ -327,17 +327,17 @@ namespace Duskborn.Effects
         }
 
         /// <summary>
-        /// Mantém o outdoor alinhado à câmera e aplica clamp no viewport se a entidade estiver próxima
-        /// ou muito alta, garantindo que a barra de vida permaneça sempre dentro da área visível da tela.
+        /// Keep the billboard aligned with the camera and clamp to the viewport when the entity is nearby
+        /// or very tall, ensuring the health bar remains within the visible screen area.
         /// </summary>
         private void UpdatePositionAndScreenClamping()
         {
             if (transform.parent == null) return;
 
-            // Orientação de billboard sempre voltada para a lente da câmera principal
+            // Billboard orientation always faces the main camera lens.
             transform.rotation = _mainCamera.transform.rotation;
 
-            // Garante escala uniforme de mundo independente de escalas aplicadas no pai
+            // Ensure uniform world scale regardless of parent scaling.
             Vector3 pScale = transform.parent.lossyScale;
             transform.localScale = new Vector3(
                 pScale.x != 0f ? 1f / Mathf.Abs(pScale.x) : 1f,
@@ -351,19 +351,19 @@ namespace Duskborn.Effects
                 ComputeAnchorOffset();
             }
 
-            // Ponto central do objeto na altura ideal da barra
+            // Object center point at the ideal bar height.
             Vector3 anchorCenterWorld = transform.parent.TransformPoint(new Vector3(_localCenter.x, _localAnchorOffsetY, _localCenter.z));
 
-            // Vetor tridimensional na direção da câmera / jogador (perspectiva: objeto -> barra -> jogador)
+            // Three-dimensional vector toward the camera / player (perspective: object -> bar -> player).
             Vector3 toCam3D = _mainCamera.transform.position - anchorCenterWorld;
             float distToCam = toCam3D.magnitude;
             Vector3 dirToCam = distToCam > 0.0001f ? toCam3D / distToCam : -_mainCamera.transform.forward;
 
-            // Deslocamento para frente (em direção ao jogador) respeitando o raio do tronco/copa
+            // Forward offset (toward the player) respecting trunk / canopy radius.
             float extraForward = config != null ? config.forwardOffset : 0.35f;
             float totalForward = _horizontalRadius + extraForward;
 
-            // Prevenção de aproximação excessiva da câmera
+            // Prevent excessive camera proximity.
             if (distToCam > 0.6f)
             {
                 totalForward = Mathf.Min(totalForward, distToCam - 0.5f);
@@ -376,10 +376,10 @@ namespace Duskborn.Effects
                 Vector3 barVp    = _mainCamera.WorldToViewportPoint(idealWorldPos);
                 Vector3 parentVp = _mainCamera.WorldToViewportPoint(transform.parent.position);
 
-                // Se a entidade estiver na frente da câmera (z > 0)
+                // If the entity is in front of the camera (z > 0).
                 if (barVp.z > 0.1f && parentVp.z > 0.1f)
                 {
-                    // Apenas trava na tela se o corpo da entidade estiver horizontalmente no campo de visão
+                    // Only clamp to the screen when the entity body is horizontally within view.
                     if (parentVp.x >= -0.25f && parentVp.x <= 1.25f)
                     {
                         float clampedX = Mathf.Clamp(barVp.x, config.minViewportX, config.maxViewportX);
@@ -387,8 +387,8 @@ namespace Duskborn.Effects
 
                         if (Mathf.Abs(clampedX - barVp.x) > 0.001f || Mathf.Abs(clampedY - barVp.y) > 0.001f)
                         {
-                            // Profundidade segura ao prender no viewport:
-                            // Garante que a barra fique à frente da face frontal da árvore mais próxima da câmera
+                            // Safe depth when clamping to the viewport:
+                            // Ensure the bar stays in front of the tree face nearest the camera.
                             float safeZ = Mathf.Min(barVp.z, parentVp.z - _horizontalRadius - extraForward);
                             safeZ = Mathf.Max(0.5f, safeZ);
                             Vector3 clampedWorld = _mainCamera.ViewportToWorldPoint(new Vector3(clampedX, clampedY, safeZ));
@@ -399,13 +399,13 @@ namespace Duskborn.Effects
                 }
                 else if (barVp.z <= 0.1f)
                 {
-                    // Se estiver atrás do jogador, oculta para não projetar aberrações
+                    // If behind the player, hide it to avoid projection artifacts.
                     _canvasGroup.alpha = 0f;
                     return;
                 }
             }
 
-            // Posição natural de mundo caso não seja necessário prender ao viewport
+            // Natural world position when viewport clamping is unnecessary.
             transform.position = idealWorldPos;
         }
 
@@ -413,7 +413,7 @@ namespace Duskborn.Effects
         {
             if (config == null) return;
 
-            // Barra principal de vitalidade drena com rapidez responsiva
+            // The main vitality bar drains responsively.
             _displayFill = Mathf.Lerp(_displayFill, _targetFill, Time.deltaTime * config.drainSpeed);
             if (fill != null)
             {
@@ -421,7 +421,7 @@ namespace Duskborn.Effects
                 fill.color      = GetBarColor(_displayFill);
             }
 
-            // Rastro fantasma de brasas decai em ritmo cadenciado mostrando o dano sofrido
+            // The ember ghost trail decays steadily to show damage taken.
             if (ghostFill != null)
             {
                 if (_ghostFill > _displayFill + 0.001f)
@@ -436,7 +436,7 @@ namespace Duskborn.Effects
                 }
             }
 
-            // Temporizador de desvanecimento suave pós-combate
+            // Smooth post-combat fade timer.
             if (_fadeTimer > 0f)
             {
                 _fadeTimer -= Time.deltaTime;

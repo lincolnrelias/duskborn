@@ -38,7 +38,7 @@ namespace Duskborn.Network
 
         private System.Collections.IEnumerator SpawnPlayerRoutine(NetworkConnection conn)
         {
-            // Aguarda a geração assíncrona do terreno estar concluída para evitar que o jogador caia no vácuo
+            // Wait for asynchronous terrain generation to finish so the player does not fall into the void.
             while (ChunkGridManager.Instance != null && !ChunkGridManager.Instance.IsWorldReady)
             {
                 yield return null;

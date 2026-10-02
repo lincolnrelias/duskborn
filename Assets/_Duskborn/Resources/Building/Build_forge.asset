@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Build_forge
   m_EditorClassIdentifier: 
   id: forge
-  displayName: Forja
-  description: "Fundi\xE7\xE3o com combust\xEDvel, ligas e equipamento pesado."
-  category: "Esta\xE7\xF5es"
+  displayName: "Forge"
+  description: "Fueled smelting, alloys, and heavy equipment."
+  category: "Stations"
   prefab: {fileID: 606149192729443004, guid: e4c15758e1a7455b9c5d6eed6f2e1171, type: 3}
   operatingEffect: {fileID: 11400000, guid: f77e39a1e1521ed02a9eeba6d9259c74, type: 3}
   icon: {fileID: 2800000, guid: 1e3a33a5b24c4a5bbc9685394be3c8fa, type: 3}

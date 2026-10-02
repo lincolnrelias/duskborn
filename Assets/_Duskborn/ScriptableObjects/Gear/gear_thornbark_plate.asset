@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: gear_thornbark_plate
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.GearDefinition
   id: gear_thornbark_plate
-  displayName: "Coura\xE7a do Espinheiro"
-  description: "Coura\xE7a do Espinheiro"
+  displayName: "Thornheart Cuirass"
+  description: "Thornheart Cuirass"
   icon: {fileID: 2800000, guid: 7c1d9722d2ca47bfa32df1751d804166, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 0

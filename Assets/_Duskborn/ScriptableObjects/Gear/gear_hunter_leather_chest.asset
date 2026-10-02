@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: gear_hunter_leather_chest
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.GearDefinition
   id: gear_hunter_leather_chest
-  displayName: "Gib\xE3o do Ca\xE7ador"
-  description: "Gib\xE3o do Ca\xE7ador"
+  displayName: "Hunter's Jerkin"
+  description: "Hunter's Jerkin"
   icon: {fileID: 2800000, guid: faa38d23ac984ea9b23efe455a2883fc, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 0

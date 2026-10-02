@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: gear_reinforced_chest
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.GearDefinition
   id: gear_reinforced_chest
-  displayName: "Armadura de A\xE7o Refor\xE7ado"
-  description: "Armadura de A\xE7o Refor\xE7ado"
+  displayName: "Reinforced Steel Armor"
+  description: "Reinforced Steel Armor"
   icon: {fileID: 2800000, guid: b1748fd302a245c3bf80371deae572a9, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 0

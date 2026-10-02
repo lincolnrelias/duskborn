@@ -62,7 +62,7 @@ public static class TerrainNoise
         float normalizedHeight = totalHeight / Mathf.Max(0.0001f, maxPossibleHeight);
         float finalHeight = normalizedHeight * config.heightMultiplier;
 
-        // 1. Patamares de Combate / Terracing com rampas suaves
+        // 1. Combat Terraces with smooth ramps.
         if (config.terraceStep > 0f)
         {
             float step = config.terraceStep;
@@ -74,7 +74,7 @@ public static class TerrainNoise
             finalHeight = (baseFloor + ramp) * step;
         }
 
-        // 2. Clareira Central / Bacia do Santuário (Área plana para spawn e bancada)
+        // 2. Central Clearing / Sanctuary Basin (flat spawn and workbench area).
         if (config.centralSanctuaryRadius > 0f)
         {
             float distCenter = Mathf.Sqrt(worldX * worldX + worldZ * worldZ);
@@ -87,7 +87,7 @@ public static class TerrainNoise
             }
         }
 
-        // 3. Limite do Mapa (Island Falloff ou Paredões de Vale)
+        // 3. Map Boundary (Island Falloff or Valley Walls).
         if (config.boundaryType != LowPolyTerrainConfig.MapBoundaryType.None && halfMapX > 0.1f && halfMapZ > 0.1f)
         {
             float nx = worldX / halfMapX;

@@ -9,7 +9,7 @@ using UnityEngine;
 namespace Duskborn.Inventory
 {
     /// <summary>
-    /// Entrada serializável para um item do inventário inicial com quantidade configurável.
+    /// Serializable starting inventory item entry with configurable quantity.
     /// </summary>
     [Serializable]
     public class InitialItemEntry
@@ -38,7 +38,7 @@ namespace Duskborn.Inventory
         }
 
         /// <summary>
-        /// Instancia o item em tempo de execução respeitando a quantidade configurada.
+        /// Instantiate the runtime item respecting the configured quantity.
         /// </summary>
         public IInventoryItem CreateRuntimeItem()
         {
@@ -63,7 +63,7 @@ namespace Duskborn.Inventory
     }
 
     /// <summary>
-    /// Entrada para slot específico de equipamento inicial do jogador.
+    /// Entry for a specific starting player equipment slot.
     /// </summary>
     [Serializable]
     public class InitialGearSlotEntry
@@ -93,9 +93,9 @@ namespace Duskborn.Inventory
     }
 
     /// <summary>
-    /// Banco de dados central de itens e configurações de inventário inicial do Duskborn.
-    /// Funciona como a única fonte da verdade (Single Source of Truth) para o carregamento inicial
-    /// de mochila (backpack), barra de ação rápida (action bar), equipamentos vestidos e relíquias.
+    /// Central database of Duskborn starting items and inventory settings.
+    /// Acts as the single source of truth for the initial loadout
+    /// of backpack, action bar, worn equipment, and relics.
     /// </summary>
     [CreateAssetMenu(fileName = "InitialInventoryDatabase", menuName = "Duskborn/Inventory/Initial Inventory Database")]
     public class InitialInventoryDatabase : ScriptableObject
@@ -130,16 +130,16 @@ namespace Duskborn.Inventory
             }
         }
 
-        [Header("Mochila (Backpack / Grid Principal)")]
+        [Header("Backpack / Main Grid")]
         [SerializeField] private List<InitialItemEntry> backpackItems = new();
 
-        [Header("Barra de Ação Rápida (Action Bar / Hotbar)")]
+        [Header("Quick Action Bar (Hotbar)")]
         [SerializeField] private List<InitialItemEntry> actionBarItems = new();
 
-        [Header("Equipamento Vestido (Equipped Gear)")]
+        [Header("Equipped Gear")]
         [SerializeField] private List<InitialGearSlotEntry> startingGear = new();
 
-        [Header("Relíquias e Buffs Passivos Iniciais")]
+        [Header("Starting Relics and Passive Buffs")]
         [SerializeField] private List<ItemDefinition> startingRelics = new();
 
         public List<InitialItemEntry> BackpackItems => backpackItems;
@@ -147,7 +147,7 @@ namespace Duskborn.Inventory
         public List<InitialGearSlotEntry> StartingGear => startingGear;
         public List<ItemDefinition> StartingRelics => startingRelics;
 
-        // ── Helpers de Resolução e Criação ───────────────────────────────────
+        // Resolution and Creation Helpers
 
         public ItemDefinitionBase[] GetBackpackDefinitions()
         {
@@ -282,7 +282,7 @@ namespace Duskborn.Inventory
             startingGear.Clear();
             startingRelics.Clear();
 
-            // 1. Barra de Ação Inicial (Ferramentas e Consumíveis)
+            // 1. Starting Action Bar (Tools and Consumables).
             var stoneAxe = UnityEditor.AssetDatabase.LoadAssetAtPath<ItemDefinitionBase>(
                 "Assets/_Duskborn/ScriptableObjects/Weapons/Stone Axe/stone_axe.asset");
             if (stoneAxe != null)
@@ -303,7 +303,7 @@ namespace Duskborn.Inventory
                 "Assets/_Duskborn/Resources/Weapons/weapon_wooden_bow.asset");
             if (testBow != null) actionBarItems.Add(new InitialItemEntry(testBow, 1));
 
-            // 2. Mochila Inicial (Recursos Iniciais)
+            // 2. Starting Backpack (Starting Resources).
             var wood = UnityEditor.AssetDatabase.LoadAssetAtPath<ItemDefinitionBase>(
                 "Assets/_Duskborn/ScriptableObjects/Resources/material_wood.asset");
             if (wood != null)
@@ -314,7 +314,7 @@ namespace Duskborn.Inventory
             if (stone != null)
                 backpackItems.Add(new InitialItemEntry(stone, 15));
 
-            // 3. Equipamento Inicial (Matching Player.prefab starting gear)
+            // 3. Starting Equipment (matching Player.prefab starting gear).
             AddGearIfFound(EquipmentSlot.Head, "Assets/_Duskborn/ScriptableObjects/Gear/gear_iron_helm.asset");
             AddGearIfFound(EquipmentSlot.Chest, "Assets/_Duskborn/ScriptableObjects/Gear/gear_leather_chest.asset");
             AddGearIfFound(EquipmentSlot.Feet, "Assets/_Duskborn/ScriptableObjects/Gear/gear_worn_boots.asset");

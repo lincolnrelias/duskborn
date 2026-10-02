@@ -130,17 +130,17 @@ namespace InventorySystem.UI
 
         public void OnBeginDrag(PointerEventData eventData)
         {
-            // Consome o evento de início de arraste na célula para impedir que bolheie para painéis móveis (DraggablePanel)
+            // Consume the cell's drag-start event to prevent bubbling to movable panels (DraggablePanel).
         }
 
         public void OnDrag(PointerEventData eventData)
         {
-            // Consome o evento de arraste contínuo
+            // Consume the ongoing drag event.
         }
 
         public void OnEndDrag(PointerEventData eventData)
         {
-            // Consome o término de arraste
+            // Consume the drag-end event.
         }
 
         private void OnDestroy()

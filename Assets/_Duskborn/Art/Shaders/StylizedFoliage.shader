@@ -82,7 +82,7 @@ Shader "Duskborn/StylizedFoliage"
         TEXTURE2D(_BaseMap);
         SAMPLER(sampler_BaseMap);
 
-        // Deslocamento de vértice por vento com ancoragem no solo
+        // Wind vertex displacement anchored to the ground.
         float3 ApplyFoliageWind(float3 positionWS, float anchorWeight)
         {
             float anchor = saturate(anchorWeight);
@@ -91,17 +91,17 @@ Shader "Duskborn/StylizedFoliage"
             float2 windDir = normalize(_WindDirection.xy);
             float t = _Time.y * _WindSpeed;
 
-            // 1. Rajada de Vento Harmônica Contínua (Macro Gust Waves estilo BotW / Genshin)
+            // 1. Continuous harmonic wind gusts (macro gust waves in the BotW / Genshin style).
             float gustCoord = dot(positionWS.xz, windDir) * _WindFrequency - t;
             float gust = sin(gustCoord) * 0.70 + sin(gustCoord * 1.85 + 1.2) * 0.30;
             float gustEnvelope = pow(sin(gustCoord * 0.45) * 0.5 + 0.5, 2.0);
             float totalGust = (gust * 0.75 + gustEnvelope * 1.1) * _WindStrength;
 
-            // 2. Tremor / Fluttering de Alta Frequência nas Folhas e Pontas
+            // 2. High-frequency tremor / flutter at leaves and tips.
             float flutterPhase = (positionWS.x * 1.6 + positionWS.y * 2.4 + positionWS.z * 1.6) + _Time.y * _WindFlutterSpeed;
             float flutter = sin(flutterPhase) * _WindFlutterStrength;
 
-            // 3. Deslocamento com curvatura orgânica e conservação de volume
+            // 3. Displacement with organic curvature and volume preservation.
             float displacement = (totalGust + flutter) * anchor;
             positionWS.xz += windDir * displacement;
             positionWS.y -= abs(displacement) * 0.14;
@@ -159,7 +159,7 @@ Shader "Duskborn/StylizedFoliage"
                 float3 posWS = TransformObjectToWorld(input.positionOS.xyz);
                 float3 normWS = TransformObjectToWorldNormal(input.normalOS);
 
-                // Ancoragem do vento: canal alpha da cor do vértice é o peso autoritativo (0 = estático/pedras, >0 = balanço de folhagem)
+                // Wind anchoring: vertex color alpha is the authoritative weight (0 = static / rocks, >0 = foliage sway).
                 float windWeight = input.color.a;
                 posWS = ApplyFoliageWind(posWS, windWeight);
 
@@ -177,44 +177,44 @@ Shader "Duskborn/StylizedFoliage"
             {
                 UNITY_SETUP_INSTANCE_ID(input);
 
-                // Textura albedo opcional com recorte alfa
+                // Optional albedo texture with alpha clipping.
                 half4 texColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv);
                 if (_Cutoff > 0.001)
                 {
                     clip(texColor.a - _Cutoff);
                 }
 
-                // Inverte a normal caso a face seja traseira (Two-Sided foliage)
+                // Invert the normal for back faces (two-sided foliage).
                 float3 rawNormalWS = normalize(input.normalWS) * (facing > 0 ? 1.0 : -1.0);
 
-                // Identifica se este elemento é um objeto rígido estático (ex: pequenas pedras, seixos)
-                // Pedras têm alpha <= 0.001, mantendo 100% das normais facetadas para sombreamento low-poly perfeito
+                // Identify whether this element is a static rigid object (e.g. small rocks, pebbles).
+                // Rocks have alpha <= 0.001, retaining fully faceted normals for low-poly shading.
                 float isRigid = step(input.color.a, 0.001);
                 float effectiveUpBlend = lerp(_NormalUpBlend, 0.0, isRigid);
 
-                // Alinhamento de Normal para o Topo (Homogenous Anime Lighting estilo Genshin / Zelda)
+                // Upward normal alignment (homogeneous anime lighting in the Genshin / Zelda style).
                 float3 upNormal = float3(0.0, 1.0, 0.0);
                 float3 normalWS = normalize(lerp(rawNormalWS, upNormal, effectiveUpBlend));
 
-                // 1. Gradiente Base -> Ponta do Material
+                // 1. Material base -> tip gradient.
                 half3 matGradient = lerp(_RootColor.rgb, _TipColor.rgb, saturate(input.uv.y));
 
-                // 2. Mescla com as Cores de Vértice Procedurais (Bakeadas por tufo, pétalas de flor e terreno)
+                // 2. Blend with procedural vertex colors (baked per tuft, flower petal, and terrain).
                 half3 foliageBase = lerp(matGradient, input.color.rgb, _VertexColorBlend) * texColor.rgb;
 
-                // 3. Mescla de Contato com o Terreno e Oclusão de Raiz (Root AO)
-                // Garante que o pé da planta/pedra se funda organicamente com o relevo sem criar costuras visuais secas
+                // 3. Terrain contact blending and root occlusion (root AO).
+                // Ensure the plant / rock base blends organically with the terrain without harsh visual seams.
                 float rootBlend = saturate(1.0 - input.uv.y / max(0.01, _TerrainBlendHeight));
                 float rootAO = lerp(1.0, 1.0 - _RootAOIntensity, rootBlend);
                 foliageBase *= rootAO;
 
-                // 3. Iluminação Cel-Shaded com Sombras Suaves
+                // 3. Cel-shaded lighting with soft shadows.
                 Light mainLight = GetMainLight(TransformWorldToShadowCoord(input.positionWS));
                 half NdotL = dot(normalWS, mainLight.direction);
                 half halfLambert = NdotL * 0.5 + 0.5;
                 half celDiffuse = smoothstep(_CelCutoff - _CelSmoothness, _CelCutoff + _CelSmoothness, halfLambert);
 
-                // Atenuação de sombras projetadas suave (preserva penumbra suave do URP)
+                // Smooth cast-shadow attenuation (preserves URP soft penumbra).
                 half shadowSoft = smoothstep(0.0, 1.0, mainLight.shadowAttenuation);
                 half lightFactor = celDiffuse * shadowSoft;
 
@@ -223,20 +223,20 @@ Shader "Duskborn/StylizedFoliage"
                 half3 litLight = mainLight.color * _SunlightBoost;
                 half3 directLight = lerp(shadowColor, litLight, lightFactor);
 
-                // 4. Subsurface Scattering (Translucidez da Luz Atravessando a Folhagem - desativado em pedras)
+                // 4. Subsurface scattering (light translucency through foliage; disabled on rocks).
                 float3 viewDirWS = normalize(GetCameraPositionWS() - input.positionWS);
                 half backlight = saturate(dot(viewDirWS, -mainLight.direction));
                 half sssVal = pow(backlight, _SSSPower) * _SSSIntensity * saturate(input.uv.y * 1.4) * (1.0 - isRigid);
                 half3 sssHighlight = _SSSColor.rgb * (sssVal * mainLight.color * shadowSoft);
 
-                // 5. Rim Light Estilizado na Borda (apenas em áreas expostas à luz)
+                // 5. Stylized edge rim light (only in areas exposed to light).
                 half NdotV = 1.0 - saturate(dot(normalWS, viewDirWS));
                 half rim = pow(NdotV, _RimPower) * _RimIntensity * lightFactor;
 
                 half3 ambient = ambientSH * 0.40;
                 half3 finalColor = foliageBase * (directLight + ambient) + sssHighlight + (rim * mainLight.color);
 
-                // Luzes Adicionais
+                // Additional Lights
                 #if defined(_ADDITIONAL_LIGHTS)
                 uint addLightsCount = GetAdditionalLightsCount();
                 for (uint i = 0u; i < addLightsCount; ++i)
@@ -247,7 +247,7 @@ Shader "Duskborn/StylizedFoliage"
                 }
                 #endif
 
-                // Atmosfera / Neblina URP (Fog) sincronizada com o horizonte
+                // URP atmosphere / fog synchronized with the horizon.
                 finalColor = MixFog(finalColor, input.fogFactor);
 
                 return half4(finalColor, 1.0);

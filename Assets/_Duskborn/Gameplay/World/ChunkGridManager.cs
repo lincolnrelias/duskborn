@@ -9,25 +9,25 @@ using Unity.AI.Navigation;
 [RequireComponent(typeof(NavMeshSurface))]
 public class ChunkGridManager : MonoBehaviour
 {
-    [Header("Configuração Ativa")]
-    [Tooltip("Asset ScriptableObject contendo todos os parâmetros da grade e geração do relevo.")]
+    [Header("Active Configuration")]
+    [Tooltip("ScriptableObject asset containing all grid and terrain generation parameters.")]
     public LowPolyTerrainConfig config;
 
-    [Header("Props & Recursos (World Props)")]
-    [Tooltip("Configuração procedural de árvores, pedras, ferro, baús e clareira central.")]
+    [Header("Props & Resources (World Props)")]
+    [Tooltip("Procedural configuration for trees, rocks, iron, chests, and the central clearing.")]
     public WorldPropsConfig propsConfig;
 
-    [Tooltip("Referência opcional ao WorldPropsPlacer. Se vazio, buscará automaticamente neste GameObject.")]
+    [Tooltip("Optional WorldPropsPlacer reference. Automatically searches this GameObject when empty.")]
     public WorldPropsPlacer propsPlacer;
 
-    [Header("Controle de Semente (Seed)")]
-    [Tooltip("Se ativado, gera uma nova semente numérica aleatória a cada clique de geração.")]
+    [Header("Seed Control")]
+    [Tooltip("When enabled, generate a new random numeric seed on every generation click.")]
     public bool useRandomSeed = false;
 
-    [Tooltip("Semente específica utilizada para gerar o relevo quando 'useRandomSeed' estiver desativado.")]
+    [Tooltip("Specific seed used for terrain generation when 'useRandomSeed' is disabled.")]
     public int customSeed = 4242;
 
-    [Tooltip("Semente específica utilizada para os props. Se 0, utiliza a mesma semente do relevo.")]
+    [Tooltip("Specific props seed. Uses the terrain seed when 0.")]
     public int propsSeed = 0;
 
     public static ChunkGridManager Instance { get; private set; }
@@ -49,7 +49,7 @@ public class ChunkGridManager : MonoBehaviour
             }
         }
 
-        // Se o terreno já foi gerado na cena pelo Editor e não viemos do Menu Principal, pula o carregamento
+        // If terrain was already generated in the Editor scene and we did not arrive from the Main Menu, skip loading.
         CheckAndApplyExistingTerrain();
     }
 
@@ -92,57 +92,57 @@ public class ChunkGridManager : MonoBehaviour
         EnsureFoliageMaterials();
     }
 
-    [Header("Renderização & Material")]
-    [Tooltip("Material que suporte cores de vértice (ex: M_TerrainLowPoly com shader Duskborn/LowPolyTerrainVertexColor).")]
+    [Header("Rendering & Material")]
+    [Tooltip("Material supporting vertex colors (e.g. M_TerrainLowPoly using Duskborn/LowPolyTerrainVertexColor).")]
     public Material vertexColorMaterial;
 
-    [Header("Água Estilizada (Low-Poly Water)")]
-    [Tooltip("Se ativado, cria e posiciona automaticamente um plano de água estilizado no nível 'waterLevel'.")]
+    [Header("Stylized Water (Low-Poly Water)")]
+    [Tooltip("When enabled, automatically create and position a stylized water plane at 'waterLevel'.")]
     public bool generateWaterPlane = true;
 
-    [Tooltip("Ajuste fino de altura do plano de água (soma ao waterLevel do config). Permite calibrar a altura visual em tempo real.")]
+    [Tooltip("Fine water plane height adjustment (added to config waterLevel). Allows real-time visual height calibration.")]
     public float waterHeightOffset = 0f;
 
-    [Tooltip("Material de água estilizada (ex: M_WaterLowPoly com shader Duskborn/LowPolyWater).")]
+    [Tooltip("Stylized water material (e.g. M_WaterLowPoly using Duskborn/LowPolyWater).")]
     public Material waterMaterial;
 
-    [Tooltip("Subdivisões do plano de água (número de quads por lado para permitir animação e relevo das facetas low-poly).")]
+    [Tooltip("Water plane subdivisions (quads per side for low-poly facet animation and relief).")]
     [Range(16, 128)] public int waterSubdivisions = 64;
 
     public float EffectiveWaterLevel => config != null ? (config.waterLevel + waterHeightOffset) : waterHeightOffset;
 
-    [Header("Atmosfera & FX do Mundo")]
-    [Tooltip("Se ativado, cria ou atualiza um objeto com WorldAtmosphereController para partículas atmosféricas orgânicas.")]
+    [Header("World Atmosphere & FX")]
+    [Tooltip("When enabled, create or update a WorldAtmosphereController object for organic atmospheric particles.")]
     public bool generateAtmosphereFX = false;
 
-    [Header("Vegetação Estilizada (Stylized Foliage)")]
-    [Tooltip("Se ativado, gera automaticamente tufos de grama e arbustos com cores mescladas ao relevo por chunk.")]
+    [Header("Stylized Vegetation (Stylized Foliage)")]
+    [Tooltip("When enabled, automatically generate grass tufts and shrubs with terrain-blended colors per chunk.")]
     public bool generateFoliage = true;
 
-    [Tooltip("Material para os tufos de grama (shader Duskborn/StylizedFoliage).")]
+    [Tooltip("Grass tuft material (Duskborn/StylizedFoliage shader).")]
     public Material foliageGrassMaterial;
 
-    [Tooltip("Material para os arbustos estilizados (shader Duskborn/StylizedFoliage).")]
+    [Tooltip("Stylized shrub material (Duskborn/StylizedFoliage shader).")]
     public Material foliageBushMaterial;
 
-    [Tooltip("Nível de densidade da vegetação procedural (estilo Genshin / Zelda).")]
+    [Tooltip("Procedural vegetation density level (Genshin / Zelda style).")]
     public Duskborn.Gameplay.World.Foliage.FoliageDensityPreset foliageDensityPreset = Duskborn.Gameplay.World.Foliage.FoliageDensityPreset.High;
 
-    [Header("Navegação & AI (NavMesh)")]
-    [Tooltip("Referência opcional ao NavMeshSurface. Se vazio, buscará automaticamente neste GameObject ou na cena.")]
+    [Header("Navigation & AI (NavMesh)")]
+    [Tooltip("Optional NavMeshSurface reference. Automatically searches this GameObject or the scene when empty.")]
     public NavMeshSurface navMeshSurface;
 
-    [Header("Carregamento Assíncrono & Pipeline")]
-    [Tooltip("Se ativado, exibe a tela de carregamento procedural estilizada inspirada no Minecraft durante a geração.")]
+    [Header("Asynchronous Loading & Pipeline")]
+    [Tooltip("When enabled, display the Minecraft-inspired stylized procedural loading screen during generation.")]
     public bool showLoadingScreen = true;
 
-    [Tooltip("Se ativado, sempre limpa chunks antigos da cena e força uma nova geração procedural com tela de carregamento ao dar Play.")]
+    [Tooltip("When enabled, always clear old scene chunks and force new procedural generation with a loading screen when starting play.")]
     public bool forceRegenerateOnPlay = false;
 
-    [Tooltip("Se ativado, quando o jogo for iniciado diretamente nesta cena no Editor e o terreno já tiver sido gerado, pula completamente o carregamento para testes instantâneos.")]
+    [Tooltip("When enabled, skip loading entirely for instant tests if the game starts directly in this Editor scene with terrain already generated.")]
     public bool skipLoadingIfTerrainExists = true;
 
-    [Tooltip("Orçamento máximo de processamento por quadro em milissegundos (ex: 8ms para 60+ FPS constante).")]
+    [Tooltip("Maximum processing budget per frame in milliseconds (e.g. 8ms for consistent 60+ FPS).")]
     [Range(2f, 20f)] public float frameBudgetMs = 8f;
 
     public bool IsWorldReady { get; private set; } = false;
@@ -157,16 +157,16 @@ public class ChunkGridManager : MonoBehaviour
     {
         if (config == null) return;
 
-        // Se já foi inicializado instantaneamente no Awake através do terreno existente, não faz nada
+        // Do nothing if Awake already initialized instantly using existing terrain.
         if (IsWorldReady) return;
 
-        // Tenta novamente caso algum chunk tenha sido registrado ou criado entre Awake e Start
+        // Retry if a chunk was registered or created between Awake and Start.
         if (CheckAndApplyExistingTerrain())
         {
             return;
         }
 
-        // Consome a flag do menu principal caso tenha vindo por lá
+        // Consume the main menu flag if arriving from there.
         if (Duskborn.UI.MainMenuController.LoadedFromMainMenu)
         {
             Duskborn.UI.MainMenuController.LoadedFromMainMenu = false;
@@ -176,13 +176,13 @@ public class ChunkGridManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Busca chunks de terreno pré-existentes na cena com múltiplas estratégias defensivas.
+    /// Find existing scene terrain chunks using multiple defensive strategies.
     /// </summary>
     public bool TryFindExistingChunks(out List<TerrainChunk> foundChunks)
     {
         foundChunks = new List<TerrainChunk>();
 
-        // 1. Filhos diretos ou indiretos deste GameObject
+        // 1. Direct or indirect children of this GameObject.
         var childChunks = GetComponentsInChildren<TerrainChunk>(true);
         if (childChunks != null && childChunks.Length > 0)
         {
@@ -195,7 +195,7 @@ public class ChunkGridManager : MonoBehaviour
             }
         }
 
-        // 2. Chunks em qualquer lugar da cena ativa (caso estejam na raiz ou sob outro parent)
+        // 2. Chunks anywhere in the active scene (at root or under another parent).
         var allChunks = FindObjectsByType<TerrainChunk>(FindObjectsInactive.Include);
         if (allChunks != null && allChunks.Length > 0)
         {
@@ -208,7 +208,7 @@ public class ChunkGridManager : MonoBehaviour
             }
         }
 
-        // 3. Fallback: procurar GameObjects com prefixo "Chunk_" que sejam filhos deste transform
+        // 3. Fallback: find GameObjects with the "Chunk_" prefix that are children of this transform.
         for (int i = 0; i < transform.childCount; i++)
         {
             Transform child = transform.GetChild(i);
@@ -230,7 +230,7 @@ public class ChunkGridManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Verifica se o terreno existente na cena deve ser aproveitado, ignorando tela de carregamento e geração procedural.
+    /// Check whether existing scene terrain should be reused, skipping the loading screen and procedural generation.
     /// </summary>
     private bool CheckAndApplyExistingTerrain()
     {
@@ -259,7 +259,7 @@ public class ChunkGridManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Utiliza o terreno pré-gerado existente na cena do Editor, pulando a tela de carregamento e ativando o mundo instantaneamente.
+    /// Use pregenerated terrain from the Editor scene, skipping the loading screen and activating the world instantly.
     /// </summary>
     private void UseExistingSceneTerrain(IEnumerable<TerrainChunk> existingChunks)
     {
@@ -291,7 +291,7 @@ public class ChunkGridManager : MonoBehaviour
             propsPlacer.EnsureSpawnPointsReady(propsConfig);
         }
 
-        // Garante que nenhuma tela de carregamento permaneça ativa ou visível
+        // Ensure no loading screen remains active or visible.
         var loadingUIs = FindObjectsByType<WorldLoadingScreenUI>(FindObjectsInactive.Include);
         foreach (var ui in loadingUIs)
         {
@@ -305,7 +305,7 @@ public class ChunkGridManager : MonoBehaviour
         IsWorldReady = true;
         OnWorldGenerationComplete?.Invoke();
 
-        Debug.Log($"[ChunkGridManager] Terreno pré-gerado detectado na cena ({loadedChunks.Count} chunks). Carregamento e geração ignorados para teste instantâneo no Editor.");
+        Debug.Log($"[ChunkGridManager] Pregenerated terrain detected in scene ({loadedChunks.Count} chunks). Loading and generation skipped for instant Editor testing.");
     }
 
     private System.Collections.IEnumerator InitExistingSceneTerrainAsync(TerrainChunk[] existingChunks)
@@ -317,17 +317,17 @@ public class ChunkGridManager : MonoBehaviour
         if (showLoadingScreen && Application.isPlaying)
         {
             loadingUI = WorldLoadingScreenUI.EnsureInstance();
-            loadingUI.Show("Despertando o Crepúsculo...", "Sincronizando santuário e terras ancestrais...");
+            loadingUI.Show("Awakening the Twilight...", "Synchronizing the sanctuary and ancestral lands...");
         }
 
         GenerationBudget budget = new GenerationBudget(frameBudgetMs);
 
-        // Se os chunks existem mas os props ainda não foram gerados, gera-os de forma assíncrona
+        // If chunks exist but props have not been generated, generate them asynchronously.
         if (propsPlacer != null && propsConfig != null && propsPlacer.PropsCount == 0)
         {
             yield return propsPlacer.PlaceWorldPropsAsync(config, propsConfig, ActivePropsSeed, budget, (p, detail) =>
             {
-                if (loadingUI != null) loadingUI.UpdateProgress(Mathf.Lerp(0.1f, 0.45f, p), "Semeando Florestas e Jazidas", detail);
+                if (loadingUI != null) loadingUI.UpdateProgress(Mathf.Lerp(0.1f, 0.45f, p), "Seeding Forests and Deposits", detail);
             });
         }
         else if (propsPlacer != null)
@@ -354,7 +354,7 @@ public class ChunkGridManager : MonoBehaviour
                 yield return placer.GenerateFoliageAsync(config, ActiveSeed, occupancyMap, budget);
 
                 float p = Mathf.Lerp(0.45f, 0.95f, (float)(i + 1) / existingChunks.Length);
-                if (loadingUI != null) loadingUI.UpdateProgress(p, "Tecendo a Relva e Flores Silvestres", $"Cultivando folhagem sagrada (Chunk {i + 1}/{existingChunks.Length})...");
+                if (loadingUI != null) loadingUI.UpdateProgress(p, "Weaving Grass and Wildflowers", $"Growing sacred foliage (Chunk {i + 1}/{existingChunks.Length})...");
             }
         }
 
@@ -369,13 +369,13 @@ public class ChunkGridManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Pipeline assíncrono de geração de mundo completo em 6 fases com frame-budgeting e tela de carregamento inspirada em Minecraft.
+    /// Complete asynchronous world generation pipeline in 6 phases with frame budgeting and a Minecraft-inspired loading screen.
     /// </summary>
     public System.Collections.IEnumerator GenerateGridAsync(System.Action<float, string, string> onProgress = null, System.Action onComplete = null)
     {
         if (config == null)
         {
-            Debug.LogError("[ChunkGridManager] Nenhuma configuração atribuída!");
+            Debug.LogError("[ChunkGridManager] No configuration assigned!");
             yield break;
         }
 
@@ -386,7 +386,7 @@ public class ChunkGridManager : MonoBehaviour
         if (showLoadingScreen && Application.isPlaying)
         {
             loadingUI = WorldLoadingScreenUI.EnsureInstance();
-            loadingUI.Show("Construindo Mundo...", "Inicializando sementes do terreno...");
+            loadingUI.Show("Building World...", "Initializing terrain seeds...");
         }
 
         void Report(float progress, string stage, string detail)
@@ -401,7 +401,7 @@ public class ChunkGridManager : MonoBehaviour
 
         GenerationBudget budget = new GenerationBudget(frameBudgetMs);
 
-        Report(0.02f, "Evocando o Crepúsculo", "Consagrando o ermo e limpando vestígios...");
+        Report(0.02f, "Summoning the Twilight", "Consecrating the wilderness and clearing remnants...");
         ClearGrid();
         if (budget.ShouldYield()) yield return null;
 
@@ -420,7 +420,7 @@ public class ChunkGridManager : MonoBehaviour
         int totalChunks = config.chunksX * config.chunksZ;
         int chunkCounter = 0;
 
-        // FASE 1: Geração de Chunks de Relevo e Colisões (0.05 a 0.38)
+        // PHASE 1: Terrain Chunk and Collision Generation (0.05 to 0.38).
         for (int cz = startZ; cz < startZ + config.chunksZ; cz++)
         {
             for (int cx = startX; cx < startX + config.chunksX; cx++)
@@ -439,7 +439,7 @@ public class ChunkGridManager : MonoBehaviour
                 chunk.Initialize(coord, config, activeSeed, autoGenerateMesh: false);
 
                 Mesh mesh = chunk.BuildMesh();
-                // Pré-cozinha a malha no PhysX para que o colisor não congele o frame
+                // Precook the mesh in PhysX so the collider does not freeze the frame.
                 Physics.BakeMesh(mesh.GetInstanceID(), false);
                 chunk.ApplyMesh(mesh);
 
@@ -447,7 +447,7 @@ public class ChunkGridManager : MonoBehaviour
                 chunkCounter++;
 
                 float p = Mathf.Lerp(0.05f, 0.38f, (float)chunkCounter / totalChunks);
-                Report(p, "Talhando o Relevo dos Titãs", $"Forjando relevo fractal e abismos (Chunk {chunkCounter}/{totalChunks})...");
+                Report(p, "Carving the Titans' Terrain", $"Forging fractal terrain and ravines (Chunk {chunkCounter}/{totalChunks})...");
 
                 if (budget.ShouldYield())
                 {
@@ -456,8 +456,8 @@ public class ChunkGridManager : MonoBehaviour
             }
         }
 
-        // FASE 2: Superfície de Água Estilizada & Atmosfera (0.38 a 0.44)
-        Report(0.40f, "Canalizando Águas e Névoas", "Evocando plano de água ancestral e partículas do crepúsculo...");
+        // PHASE 2: Stylized Water Surface & Atmosphere (0.38 to 0.44).
+        Report(0.40f, "Channeling Waters and Mists", "Summoning the ancestral water plane and twilight particles...");
         if (generateWaterPlane)
         {
             GenerateWaterPlane();
@@ -477,7 +477,7 @@ public class ChunkGridManager : MonoBehaviour
         }
         if (budget.ShouldYield()) yield return null;
 
-        // FASE 3: Recursos e Estruturas Procedurais (0.44 a 0.68)
+        // PHASE 3: Procedural Resources and Structures (0.44 to 0.68).
         if (propsPlacer == null)
         {
             propsPlacer = GetComponent<WorldPropsPlacer>() ?? gameObject.AddComponent<WorldPropsPlacer>();
@@ -488,11 +488,11 @@ public class ChunkGridManager : MonoBehaviour
             yield return propsPlacer.PlaceWorldPropsAsync(config, propsConfig, activePropsSeed, budget, (propP, detail) =>
             {
                 float p = Mathf.Lerp(0.44f, 0.68f, propP);
-                Report(p, "Semeando Florestas e Jazidas", detail);
+                Report(p, "Seeding Forests and Deposits", detail);
             });
         }
 
-        // FASE 4: Vegetação e Folhagem Estilizada (0.68 a 0.86)
+        // PHASE 4: Stylized Vegetation and Foliage (0.68 to 0.86).
         if (generateFoliage)
         {
             EnsureFoliageMaterials();
@@ -513,7 +513,7 @@ public class ChunkGridManager : MonoBehaviour
                 yield return placer.GenerateFoliageAsync(config, activeSeed, occupancyMap, budget);
 
                 float p = Mathf.Lerp(0.68f, 0.86f, (float)(i + 1) / chunksForFoliage.Length);
-                Report(p, "Tecendo a Relva e Flores Silvestres", $"Cultivando folhagem sagrada (Chunk {i + 1}/{chunksForFoliage.Length})...");
+                Report(p, "Weaving Grass and Wildflowers", $"Growing sacred foliage (Chunk {i + 1}/{chunksForFoliage.Length})...");
             }
         }
         else
@@ -521,15 +521,15 @@ public class ChunkGridManager : MonoBehaviour
             ClearFoliage();
         }
 
-        // FASE 5: Malha de Navegação (NavMesh Assíncrono) (0.86 a 0.96)
+        // PHASE 5: Navigation Mesh (Asynchronous NavMesh) (0.86 to 0.96).
         yield return RebuildNavMeshAsync((navP, detail) =>
         {
             float p = Mathf.Lerp(0.86f, 0.96f, navP);
-            Report(p, "Consagrando Linhas de Navegação", detail);
+            Report(p, "Consecrating Navigation Paths", detail);
         });
 
-        // FASE 6: Finalização & Pronto para Lançamento (0.96 a 1.0)
-        Report(1.0f, "O Crepúsculo se Revela!", "Santuário ativo. Liberando entrada dos guerreiros...");
+        // PHASE 6: Finalization & Ready for Launch (0.96 to 1.0).
+        Report(1.0f, "The Twilight Reveals Itself!", "Sanctuary active. Opening the way for warriors...");
         if (propsPlacer != null)
         {
             propsPlacer.EnsureSpawnPointsReady(propsConfig);
@@ -541,7 +541,7 @@ public class ChunkGridManager : MonoBehaviour
         OnWorldGenerationComplete?.Invoke();
         onComplete?.Invoke();
 
-        Debug.Log($"[ChunkGridManager] Geração assíncrona da grid {config.chunksX}x{config.chunksZ} concluída com sucesso! (Seed={activeSeed}, PropsSeed={activePropsSeed})");
+        Debug.Log($"[ChunkGridManager] Asynchronous generation of {config.chunksX}x{config.chunksZ} grid completed successfully! (Seed={activeSeed}, PropsSeed={activePropsSeed})");
 
         if (loadingUI != null)
         {
@@ -549,7 +549,7 @@ public class ChunkGridManager : MonoBehaviour
         }
     }
 
-    [ContextMenu("Regerar Grid de Terreno")]
+    [ContextMenu("Regenerate Terrain Grid")]
     public void GenerateGrid()
     {
         if (Application.isPlaying)
@@ -561,12 +561,12 @@ public class ChunkGridManager : MonoBehaviour
 #if UNITY_EDITOR
         try
         {
-            UnityEditor.EditorUtility.DisplayProgressBar("Gerando Terreno Duskborn", "Limpando geometria prévia...", 0.05f);
+            UnityEditor.EditorUtility.DisplayProgressBar("Generating Duskborn Terrain", "Clearing previous geometry...", 0.05f);
             ClearGrid();
 
             if (config == null)
             {
-                Debug.LogError("[ChunkGridManager] Nenhuma configuração atribuída!");
+                Debug.LogError("[ChunkGridManager] No configuration assigned!");
                 return;
             }
 
@@ -594,7 +594,7 @@ public class ChunkGridManager : MonoBehaviour
                 {
                     chunkCounter++;
                     float p = Mathf.Lerp(0.1f, 0.5f, (float)chunkCounter / Mathf.Max(1, totalChunks));
-                    UnityEditor.EditorUtility.DisplayProgressBar("Gerando Terreno Duskborn", $"Gerando Relevo Low-Poly ({chunkCounter}/{totalChunks})...", p);
+                    UnityEditor.EditorUtility.DisplayProgressBar("Generating Duskborn Terrain", $"Generating Low-Poly Terrain ({chunkCounter}/{totalChunks})...", p);
 
                     Vector2Int coord = new Vector2Int(cx, cz);
                     Vector3 worldPos = new Vector3(cx * chunkWorldLength, 0f, cz * chunkWorldLength);
@@ -613,8 +613,8 @@ public class ChunkGridManager : MonoBehaviour
                 }
             }
 
-            // 2. Plano de Água Estilizada (Low-Poly Water)
-            UnityEditor.EditorUtility.DisplayProgressBar("Gerando Terreno Duskborn", "Configurando Água e Atmosfera...", 0.55f);
+            // 2. Stylized Water Plane (Low-Poly Water).
+            UnityEditor.EditorUtility.DisplayProgressBar("Generating Duskborn Terrain", "Configuring Water and Atmosphere...", 0.55f);
             if (generateWaterPlane)
             {
                 GenerateWaterPlane();
@@ -624,7 +624,7 @@ public class ChunkGridManager : MonoBehaviour
                 RemoveWaterPlane();
             }
 
-            // 3. Atmosfera & Partículas Ambientais (Pólen diurno / Vaga-lumes noturnos)
+            // 3. Atmosphere & Ambient Particles (daytime pollen / nighttime fireflies).
             if (generateAtmosphereFX)
             {
                 EnsureAtmosphereFX();
@@ -634,14 +634,14 @@ public class ChunkGridManager : MonoBehaviour
                 RemoveAtmosphereFX();
             }
 
-            // 4. Spawna nós de recursos, baús e clareiras (Popula o SpatialOccupancyMap)
-            UnityEditor.EditorUtility.DisplayProgressBar("Gerando Terreno Duskborn", "Distribuindo Recursos e Props Procedurais...", 0.7f);
+            // 4. Spawn resource nodes, chests, and clearings (populate SpatialOccupancyMap).
+            UnityEditor.EditorUtility.DisplayProgressBar("Generating Duskborn Terrain", "Distributing Procedural Resources and Props...", 0.7f);
             GenerateProps(activePropsSeed);
 
-            // 5. Folhagem Estilizada (Grama e Arbustos Procedurais respeitando o SpatialOccupancyMap)
+            // 5. Stylized Foliage (Procedural Grass and Shrubs respecting SpatialOccupancyMap)
             if (generateFoliage)
             {
-                UnityEditor.EditorUtility.DisplayProgressBar("Gerando Terreno Duskborn", "Plantando Folhagem e Grama...", 0.85f);
+                UnityEditor.EditorUtility.DisplayProgressBar("Generating Duskborn Terrain", "Planting Foliage and Grass...", 0.85f);
                 GenerateFoliage(activeSeed);
             }
             else
@@ -649,15 +649,15 @@ public class ChunkGridManager : MonoBehaviour
                 ClearFoliage();
             }
 
-            // 6. Baka o NavMesh englobando a malha do terreno e os colliders dos props
-            UnityEditor.EditorUtility.DisplayProgressBar("Gerando Terreno Duskborn", "Calculando NavMesh de Navegação...", 0.95f);
+            // 6. Bake NavMesh including terrain meshes and prop colliders.
+            UnityEditor.EditorUtility.DisplayProgressBar("Generating Duskborn Terrain", "Calculating Navigation NavMesh...", 0.95f);
             RebuildNavMesh();
 
             IsGenerating = false;
             IsWorldReady = true;
             OnWorldGenerationComplete?.Invoke();
 
-            Debug.Log($"[ChunkGridManager] Grid {config.chunksX}x{config.chunksZ} gerada com sucesso com TerrainSeed={activeSeed}, PropsSeed={activePropsSeed} ({loadedChunks.Count} chunks).");
+            Debug.Log($"[ChunkGridManager] {config.chunksX}x{config.chunksZ} grid generated successfully with TerrainSeed={activeSeed}, PropsSeed={activePropsSeed} ({loadedChunks.Count} chunks).");
         }
         finally
         {
@@ -668,7 +668,7 @@ public class ChunkGridManager : MonoBehaviour
 
         if (config == null)
         {
-            Debug.LogError("[ChunkGridManager] Nenhuma configuração atribuída!");
+            Debug.LogError("[ChunkGridManager] No configuration assigned!");
             return;
         }
 
@@ -709,7 +709,7 @@ public class ChunkGridManager : MonoBehaviour
             }
         }
 
-        // 2. Plano de Água Estilizada (Low-Poly Water)
+        // 2. Stylized Water Plane (Low-Poly Water).
         if (generateWaterPlane)
         {
             GenerateWaterPlane();
@@ -719,7 +719,7 @@ public class ChunkGridManager : MonoBehaviour
             RemoveWaterPlane();
         }
 
-        // 3. Atmosfera & Partículas Ambientais (Pólen diurno / Vaga-lumes noturnos)
+        // 3. Atmosphere & Ambient Particles (daytime pollen / nighttime fireflies).
         if (generateAtmosphereFX)
         {
             EnsureAtmosphereFX();
@@ -729,10 +729,10 @@ public class ChunkGridManager : MonoBehaviour
             RemoveAtmosphereFX();
         }
 
-        // 4. Spawna nós de recursos, baús e clareiras (Popula o SpatialOccupancyMap)
+        // 4. Spawn resource nodes, chests, and clearings (populate SpatialOccupancyMap).
         GenerateProps(activePropsSeed);
 
-        // 5. Folhagem Estilizada (Grama e Arbustos Procedurais respeitando o SpatialOccupancyMap)
+        // 5. Stylized Foliage (Procedural Grass and Shrubs respecting SpatialOccupancyMap)
         if (generateFoliage)
         {
             GenerateFoliage(activeSeed);
@@ -742,14 +742,14 @@ public class ChunkGridManager : MonoBehaviour
             ClearFoliage();
         }
 
-        // 6. Baka o NavMesh englobando a malha do terreno e os colliders dos props
+        // 6. Bake NavMesh including terrain meshes and prop colliders.
         RebuildNavMesh();
 
         IsGenerating = false;
         IsWorldReady = true;
         OnWorldGenerationComplete?.Invoke();
 
-        Debug.Log($"[ChunkGridManager] Grid {config.chunksX}x{config.chunksZ} gerada com sucesso com TerrainSeed={activeSeed}, PropsSeed={activePropsSeed} ({loadedChunks.Count} chunks).");
+        Debug.Log($"[ChunkGridManager] {config.chunksX}x{config.chunksZ} grid generated successfully with TerrainSeed={activeSeed}, PropsSeed={activePropsSeed} ({loadedChunks.Count} chunks).");
 #endif
     }
 
@@ -775,7 +775,7 @@ public class ChunkGridManager : MonoBehaviour
         }
     }
 
-    [ContextMenu("Regerar Apenas Folhagem")]
+    [ContextMenu("Regenerate Foliage Only")]
     public void RegenerateFoliageOnly()
     {
         EnsureFoliageMaterials();
@@ -816,7 +816,7 @@ public class ChunkGridManager : MonoBehaviour
         }
     }
 
-    [ContextMenu("Limpar Folhagem")]
+    [ContextMenu("Clear Foliage")]
     public void ClearFoliage()
     {
         var existingChunks = GetComponentsInChildren<TerrainChunk>(true);
@@ -833,7 +833,7 @@ public class ChunkGridManager : MonoBehaviour
         }
     }
 
-    [ContextMenu("Regerar Apenas Props")]
+    [ContextMenu("Regenerate Props Only")]
     public void RegeneratePropsOnly()
     {
         RegeneratePropsOnly(useRandomSeed);
@@ -841,11 +841,11 @@ public class ChunkGridManager : MonoBehaviour
 
     public void RegeneratePropsOnly(bool forceRandomSeed)
     {
-        // 1. Verifica se existem chunks de terreno na cena. Se não houver, gera a grid completa
+        // 1. Check for scene terrain chunks. Generate the complete grid if none exist.
         var existingChunks = GetComponentsInChildren<TerrainChunk>(true);
         if (existingChunks == null || existingChunks.Length == 0)
         {
-            Debug.LogWarning("[ChunkGridManager] Nenhum chunk de terreno encontrado para posicionar props. Gerando o terreno completo...");
+            Debug.LogWarning("[ChunkGridManager] No terrain chunk found for prop placement. Generating complete terrain...");
             GenerateGrid();
             return;
         }
@@ -860,7 +860,7 @@ public class ChunkGridManager : MonoBehaviour
         ClearProps();
         GenerateProps(activePropsSeed);
 
-        // Se a folhagem estiver ativada, regera para contornar perfeitamente os novos props e árvores
+        // If foliage is enabled, regenerate it to fit precisely around the new props and trees.
         if (generateFoliage)
         {
             GenerateFoliage(ActiveSeed);
@@ -868,7 +868,7 @@ public class ChunkGridManager : MonoBehaviour
 
         RebuildNavMesh();
 
-        Debug.Log($"[ChunkGridManager] Props e folhagem regerados com sucesso no mesmo relevo com PropsSeed={activePropsSeed}.");
+        Debug.Log($"[ChunkGridManager] Props and foliage successfully regenerated on the same terrain with PropsSeed={activePropsSeed}.");
     }
 
     private void GenerateProps(int activeSeed)
@@ -927,7 +927,7 @@ public class ChunkGridManager : MonoBehaviour
         RemoveAtmosphereFX();
     }
 
-    [ContextMenu("Regerar Plano de Água")]
+    [ContextMenu("Regenerate Water Plane")]
     public void GenerateWaterPlane()
     {
         if (!generateWaterPlane || config == null)
@@ -1066,12 +1066,12 @@ public class ChunkGridManager : MonoBehaviour
                 int current = z * (resX + 1) + x;
                 int next = current + resX + 1;
 
-                // Triângulo 1 (sentido horário olhando de cima / normal +Y)
+                // Triangle 1 (clockwise viewed from above / +Y normal).
                 triangles[ti++] = current;
                 triangles[ti++] = next;
                 triangles[ti++] = next + 1;
 
-                // Triângulo 2 (sentido horário olhando de cima / normal +Y)
+                // Triangle 2 (clockwise viewed from above / +Y normal).
                 triangles[ti++] = current;
                 triangles[ti++] = next + 1;
                 triangles[ti++] = current + 1;
@@ -1122,7 +1122,7 @@ public class ChunkGridManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Garante que haja um componente NavMeshSurface válido e devidamente configurado neste GameObject.
+    /// Ensure a valid, correctly configured NavMeshSurface component exists on this GameObject.
     /// </summary>
     public NavMeshSurface EnsureNavMeshSurface()
     {
@@ -1144,7 +1144,7 @@ public class ChunkGridManager : MonoBehaviour
             navMeshSurface.collectObjects = CollectObjects.All;
             navMeshSurface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
 
-            // Exclui camadas não-andáveis ou de entidades dinâmicas (Player, Inimigos, UI, TransparentFX, Água)
+            // Exclude nonwalkable or dynamic entity layers (Player, Enemies, UI, TransparentFX, Water).
             int excludeLayers = 0;
             string[] excludedLayerNames = { "Player", "Enemy", "UI", "TransparentFX", "Water" };
             foreach (string layerName in excludedLayerNames)
@@ -1169,16 +1169,16 @@ public class ChunkGridManager : MonoBehaviour
         if (navMeshSurface != null)
         {
             navMeshSurface.BuildNavMesh();
-            Debug.Log("[ChunkGridManager] NavMeshSurface baked com sucesso.");
+            Debug.Log("[ChunkGridManager] NavMeshSurface baked successfully.");
         }
         else
         {
-            Debug.LogWarning("[ChunkGridManager] Nenhum NavMeshSurface encontrado para assar o NavMesh.");
+            Debug.LogWarning("[ChunkGridManager] No NavMeshSurface found to bake NavMesh.");
         }
     }
 
     /// <summary>
-    /// Baka o NavMesh de forma assíncrona em worker threads para não travar a main thread.
+    /// Bake NavMesh asynchronously on worker threads to avoid blocking the main thread.
     /// </summary>
     public System.Collections.IEnumerator RebuildNavMeshAsync(System.Action<float, string> onProgress = null)
     {
@@ -1186,11 +1186,11 @@ public class ChunkGridManager : MonoBehaviour
 
         if (navMeshSurface == null)
         {
-            onProgress?.Invoke(1.0f, "Nenhum NavMeshSurface disponível.");
+            onProgress?.Invoke(1.0f, "No NavMeshSurface available.");
             yield break;
         }
 
-        onProgress?.Invoke(0.15f, "Coletando fontes de colisão e malhas...");
+        onProgress?.Invoke(0.15f, "Collecting collision sources and meshes...");
         yield return null;
 
         if (navMeshSurface.navMeshData == null)
@@ -1203,7 +1203,7 @@ public class ChunkGridManager : MonoBehaviour
         {
             while (!op.isDone)
             {
-                onProgress?.Invoke(Mathf.Lerp(0.25f, 0.95f, op.progress), $"Processando malha AI em background ({Mathf.RoundToInt(op.progress * 100)}%)...");
+                onProgress?.Invoke(Mathf.Lerp(0.25f, 0.95f, op.progress), $"Processing AI mesh in the background ({Mathf.RoundToInt(op.progress * 100)}%)...");
                 yield return null;
             }
         }
@@ -1212,7 +1212,7 @@ public class ChunkGridManager : MonoBehaviour
             navMeshSurface.BuildNavMesh();
         }
 
-        onProgress?.Invoke(1.0f, "Malha de navegação concluída.");
-        Debug.Log("[ChunkGridManager] NavMesh assíncrono concluído com sucesso.");
+        onProgress?.Invoke(1.0f, "Navigation mesh complete.");
+        Debug.Log("[ChunkGridManager] Asynchronous NavMesh completed successfully.");
     }
 }

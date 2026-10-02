@@ -5,8 +5,8 @@ using Duskborn.Gameplay.Player;
 namespace Duskborn.Gameplay.Equipment
 {
     /// <summary>
-    /// Item consumível no inventário e barra de ação do jogador.
-    /// Pode ser acionado com botão primário (LMB) para aplicar cura ou buffs temporários.
+    /// Consumable item in the player's inventory and action bar.
+    /// Can be activated with the primary button (LMB) to apply healing or temporary buffs.
     /// </summary>
     public class ConsumableItem : InventoryItemBase, ILeftClickAction, IStackable
     {

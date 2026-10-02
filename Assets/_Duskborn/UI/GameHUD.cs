@@ -148,7 +148,7 @@ namespace Duskborn.UI
             string period  = cycle  != null ? $"{cycle.PeriodDisplayName} [{cycle.ClockTimeString}]" : "—";
             string night   = cycle  != null ? cycle.CurrentNight.ToString()                         : "—";
             string timer   = cycle  != null 
-                ? (cycle.IsDay ? $"{cycle.PhaseTimeRemaining:F0}s até Noite" : $"{cycle.PhaseTimeRemaining:F0}s até Amanhecer")
+                ? (cycle.IsDay ? $"{cycle.PhaseTimeRemaining:F0}s until Night" : $"{cycle.PhaseTimeRemaining:F0}s until Dawn")
                 : "—";
             string gstate  = state  != null ? state.CurrentState.ToString()                         : "—";
             int    alive   = waveManager != null ? waveManager.AliveEnemyCount                      : 0;
@@ -157,32 +157,32 @@ namespace Duskborn.UI
 
             var players = PlayerRegistry.All;
             s_mainHudSb.Clear();
-            s_mainHudSb.AppendLine($"Fase:    {period} (Noite {night})");
-            s_mainHudSb.AppendLine($"Tempo:   {timer}");
+            s_mainHudSb.AppendLine($"Phase:   {period} (Night {night})");
+            s_mainHudSb.AppendLine($"Time:    {timer}");
             if (cycle != null && cycle.IsDusk)
             {
-                s_mainHudSb.AppendLine(">> AVISO: Crepúsculo! Retorne à base! <<");
+                s_mainHudSb.AppendLine(">> WARNING: Dusk! Return to base! <<");
             }
-            s_mainHudSb.AppendLine($"Estado:  {gstate}");
-            s_mainHudSb.AppendLine($"Ouro:    {gold}");
+            s_mainHudSb.AppendLine($"State:  {gstate}");
+            s_mainHudSb.AppendLine($"Gold:    {gold}");
             s_mainHudSb.AppendLine($"Buffs:   {(_inventory != null ? _inventory.Buffs.Count : 0)}");
             if (_resources != null)
             {
                 foreach (KeyValuePair<string, int> kv in _resources.Counts)
                     if (kv.Value > 0) s_mainHudSb.AppendLine($"{kv.Key}: {kv.Value}");
             }
-            s_mainHudSb.AppendLine($"Inimigos: {alive} vivos  |  {pending} na fila");
+            s_mainHudSb.AppendLine($"Enemies: {alive} alive  |  {pending} queued");
             s_mainHudSb.AppendLine("─────────────────");
             if (players.Count == 0)
-                s_mainHudSb.AppendLine("Nenhum jogador registrado");
+                s_mainHudSb.AppendLine("No player registered");
             else
                 for (int i = 0; i < players.Count; i++)
                     s_mainHudSb.AppendLine($"P{i + 1} HP: {players[i].CurrentHP:F0} / {players[i].MaxHP:F0}");
 
             s_mainHudSb.AppendLine("─────────────────");
-            s_mainHudSb.AppendLine("F1 Pular dia  F2 Encerrar noite");
-            s_mainHudSb.AppendLine("F3 Dano       F4 Linha do tempo");
-            s_mainHudSb.AppendLine("C  Painel do Personagem");
+            s_mainHudSb.AppendLine("F1 Skip day   F2 End night");
+            s_mainHudSb.AppendLine("F3 Damage     F4 Timeline");
+            s_mainHudSb.AppendLine("C  Character Panel");
 
             float w = 270f, h = (cycle != null && cycle.IsDusk) ? 252f : 234f;
             GUI.Box(new Rect(10, 10, w, h), GUIContent.none, _boxStyle);

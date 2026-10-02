@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: weapon_bone_blade
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.WeaponDefinition
   id: weapon_bone_blade
-  displayName: "L\xE2mina de Osso"
-  description: "L\xE2mina serrilhada esculpida a partir de f\xEAmures bestiais. Ataques
-    r\xE1pidos e cr\xEDticos frequentes."
+  displayName: "Bone Blade"
+  description: "Serrated blade carved from bestial femurs. Fast attacks and frequent critical hits."
   icon: {fileID: 2800000, guid: 6412511187ef44cab90344346a46c5a8, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 0

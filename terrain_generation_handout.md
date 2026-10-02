@@ -1,69 +1,69 @@
-# Guia de Implementação: Sistema de Geração de Terreno Low-Poly em Chunks (Unity)
+# Implementation Guide: Chunk-Based Low-Poly Terrain Generation (Unity)
 
-> **Destinatário:** Agente de Implementação / Desenvolvedor Unity  
-> **Objetivo:** Criar e integrar um sistema procedural e modular de terreno *low-poly* em grade de *chunks* ($M \times N$), altamente configurável via `ScriptableObject` ou Inspector, com suporte a física e *NavMesh* para navegação.  
-> **Nota de Escopo:** **Não** incluir lógica de baús ou inimigos nesta etapa (serão implementados posteriormente).
+> **Audience:** Implementation Agent / Unity Developer
+> **Objective:** Create and integrate a procedural modular *low-poly* terrain system in an $M \times N$ chunk grid, highly configurable through `ScriptableObject` or Inspector, with physics and navigation *NavMesh* support.
+> **Scope:** Do **not** include chest or enemy logic in this step (implemented later).
 
 ---
 
-## 1. Requisitos Técnicos & Arquitetura
+## 1. Technical Requirements & Architecture
 
-1. **Flat Shading Estilizado (*Low-Poly*):**
-   - Vértices **não** devem ser compartilhados entre faces vizinhas.
-   - Cada triângulo precisa de 3 vértices próprios com normais calculadas via produto vetorial ($\vec{N} = (\vec{B} - \vec{A}) \times (\vec{C} - \vec{A})$).
-2. **Junção Perfeita entre Chunks (*Seamless Borders*):**
-   - O cálculo do ruído deve utilizar coordenadas globais de mundo:
+1. **Stylized Flat Shading (*Low-Poly*):**
+   - Vertices must **not** be shared between neighboring faces.
+   - Each triangle needs 3 independent vertices with normals calculated by cross product ($\vec{N} = (\vec{B} - \vec{A}) \times (\vec{C} - \vec{A})$).
+2. **Seamless Chunk Borders:**
+   - Noise calculations must use global world coordinates:
      $$\text{worldX} = (\text{chunkCoord.x} \times \text{chunkSize} + \text{localX}) \times \text{cellSize}$$
-   - A matriz de alturas de cada *chunk* deve ter dimensão `(size + 1, size + 1)` para conectar perfeitamente com os vizinhos sem frestas.
-3. **Cores por Vértice (*Vertex Colors*):**
-   - Coloração dos biomas gravada diretamente em `mesh.colors32` (Água, Areia, Grama, Rocha, Neve), evitando dependência de múltiplas texturas e reduzindo *draw calls*.
-4. **Física & Caminhabilidade (*Walkability*):**
-   - Cada *chunk* deve instanciar ou atualizar seu próprio `MeshCollider`.
-   - Compatibilidade com `NavMeshSurface` (`com.unity.ai.navigation`) para *baking* em *runtime*.
+   - Each chunk's height matrix must have dimensions `(size + 1, size + 1)` to connect seamlessly with neighbors.
+3. **Vertex Colors:**
+   - Store biome coloring directly in `mesh.colors32` (Water, Sand, Grass, Rock, Snow), avoiding multiple texture dependencies and reducing draw calls.
+4. **Physics & Walkability:**
+   - Each chunk must instantiate or update its own `MeshCollider`.
+   - Support `NavMeshSurface` (`com.unity.ai.navigation`) for runtime baking.
 
 ---
 
-## 2. Estrutura de Arquivos Recomendada
+## 2. Recommended File Structure
 
-Organize os arquivos dentro do projeto Unity no seguinte padrão:
+Organize Unity project files in this pattern:
 
 ```text
 Assets/
 └── Scripts/
     └── Terrain/
-        ├── LowPolyTerrainConfig.cs   // ScriptableObject com todos os parâmetros
-        ├── TerrainNoise.cs           // Utilitário matemático de ruído fractal (fBm)
-        ├── TerrainChunk.cs           // Componente individual de cada Chunk (Mesh + Collider)
-        └── ChunkGridManager.cs       // Gerenciador central da Grid MxN
+        ├── LowPolyTerrainConfig.cs   // ScriptableObject with all parameters
+        ├── TerrainNoise.cs           // Fractal noise math utility (fBm)
+        ├── TerrainChunk.cs           // Individual Chunk component (Mesh + Collider)
+        └── ChunkGridManager.cs       // Central MxN Grid manager
 ```
 
 ---
 
-## 3. Scripts C# Prontos para Implementação
+## 3. C# Scripts Ready for Implementation
 
 ### 3.1 `LowPolyTerrainConfig.cs`
-Crie este arquivo em `Assets/Scripts/Terrain/LowPolyTerrainConfig.cs`:
+Create this file at `Assets/Scripts/Terrain/LowPolyTerrainConfig.cs`:
 
 ```csharp
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "NovoTerrenoConfig", menuName = "Terreno Roguelike/Configuração de Terreno")]
+[CreateAssetMenu(fileName = "NewTerrainConfig", menuName = "Roguelike Terrain/Terrain Configuration")]
 public class LowPolyTerrainConfig : ScriptableObject
 {
-    [Header("Dimensões da Grid de Chunks")]
-    [Tooltip("Quantidade de chunks no eixo X (ex: 1 para 1x3, 3 para 3x3, 5 para 5x5)")]
+    [Header("Chunk Grid Dimensions")]
+    [Tooltip("Number of chunks on the X axis (e.g. 1 for 1x3, 3 for 3x3, 5 for 5x5)")]
     [Range(1, 15)] public int chunksX = 3;
 
-    [Tooltip("Quantidade de chunks no eixo Z")]
+    [Tooltip("Number of chunks on the Z axis")]
     [Range(1, 15)] public int chunksZ = 3;
 
-    [Tooltip("Quantidade de quads por chunk (ex: 16x16 quads)")]
+    [Tooltip("Number of quads per chunk (e.g. 16x16 quads)")]
     [Range(4, 32)] public int chunkSize = 16;
 
-    [Tooltip("Tamanho de cada quad em unidades de mundo (metros)")]
+    [Tooltip("Size of each quad in world units (meters)")]
     [Range(0.5f, 10f)] public float cellSize = 2.0f;
 
-    [Header("Ruído Fractal (fBm) & Relevo")]
+    [Header("Fractal Noise (fBm) & Terrain")]
     public int seed = 4242;
     [Range(0.01f, 0.3f)] public float noiseScale = 0.07f;
     [Range(1, 6)] public int octaves = 3;
@@ -71,19 +71,19 @@ public class LowPolyTerrainConfig : ScriptableObject
     [Range(1f, 4f)] public float lacunarity = 2.0f;
     [Range(1f, 50f)] public float heightMultiplier = 12.0f;
 
-    [Header("Efeito Platô / Terracing")]
-    [Tooltip("0 = Desligado. Valores maiores criam degraus estilizados.")]
+    [Header("Plateau Effect / Terracing")]
+    [Tooltip("0 = Disabled. Higher values create stylized steps.")]
     [Range(0f, 10f)] public float terraceStep = 0f;
 
-    [Header("Biomas por Altura & Inclinação")]
+    [Header("Biomes by Height & Slope")]
     public float waterLevel = 2.0f;
     public Color waterColor = new Color(0.18f, 0.45f, 0.82f);
     public Color sandColor  = new Color(0.85f, 0.78f, 0.55f);
     public Color grassColor = new Color(0.28f, 0.65f, 0.25f);
     public Color rockColor  = new Color(0.45f, 0.45f, 0.48f);
     public Color snowColor  = new Color(0.95f, 0.95f, 0.98f);
-    
-    [Tooltip("Inclinação (em graus) acima da qual a face vira rocha")]
+
+    [Tooltip("Slope (degrees) above which the face becomes rock")]
     [Range(15f, 85f)] public float steepSlopeThreshold = 40.0f;
 }
 ```
@@ -91,7 +91,7 @@ public class LowPolyTerrainConfig : ScriptableObject
 ---
 
 ### 3.2 `TerrainNoise.cs`
-Crie este arquivo em `Assets/Scripts/Terrain/TerrainNoise.cs`:
+Create this file at `Assets/Scripts/Terrain/TerrainNoise.cs`:
 
 ```csharp
 using UnityEngine;
@@ -130,7 +130,7 @@ public static class TerrainNoise
         float normalizedHeight = totalHeight / maxPossibleHeight;
         float finalHeight = normalizedHeight * config.heightMultiplier;
 
-        // Aplicação opcional de platôs (Terracing)
+        // Optional terrace application (Terracing).
         if (config.terraceStep > 0f)
         {
             finalHeight = Mathf.Round(finalHeight / config.terraceStep) * config.terraceStep;
@@ -144,7 +144,7 @@ public static class TerrainNoise
 ---
 
 ### 3.3 `TerrainChunk.cs`
-Crie este arquivo em `Assets/Scripts/Terrain/TerrainChunk.cs`:
+Create this file at `Assets/Scripts/Terrain/TerrainChunk.cs`:
 
 ```csharp
 using System.Collections.Generic;
@@ -173,14 +173,14 @@ public class TerrainChunk : MonoBehaviour
         int size = config.chunkSize;
         float cellSize = config.cellSize;
 
-        // 1. Matriz de alturas com (size + 1) para junção contínua
+        // 1. Height matrix with (size + 1) for seamless joins.
         float[,] heightMap = new float[size + 1, size + 1];
 
         for (int z = 0; z <= size; z++)
         {
             for (int x = 0; x <= size; x++)
             {
-                // Coordenadas globais de mundo
+                // Global world coordinates.
                 float worldX = (ChunkCoord.x * size + x) * cellSize;
                 float worldZ = (ChunkCoord.y * size + z) * cellSize;
 
@@ -188,7 +188,7 @@ public class TerrainChunk : MonoBehaviour
             }
         }
 
-        // 2. Construção da Malha com Vértices Duplicados (Flat Shading)
+        // 2. Mesh Construction with Duplicated Vertices (Flat Shading).
         List<Vector3> vertices = new List<Vector3>();
         List<int> triangles = new List<int>();
         List<Color> colors = new List<Color>();
@@ -202,9 +202,9 @@ public class TerrainChunk : MonoBehaviour
                 Vector3 p01 = new Vector3(x * cellSize, heightMap[x, z + 1], (z + 1) * cellSize);
                 Vector3 p11 = new Vector3((x + 1) * cellSize, heightMap[x + 1, z + 1], (z + 1) * cellSize);
 
-                // Triângulo 1 (p00, p01, p10)
+                // Triangle 1 (p00, p01, p10).
                 AddFace(p00, p01, p10, vertices, triangles, colors);
-                // Triângulo 2 (p10, p01, p11)
+                // Triangle 2 (p10, p01, p11).
                 AddFace(p10, p01, p11, vertices, triangles, colors);
             }
         }
@@ -232,7 +232,7 @@ public class TerrainChunk : MonoBehaviour
         tris.Add(startIndex + 1);
         tris.Add(startIndex + 2);
 
-        // Calcula a normal da face para verificar inclinação
+        // Calculate face normal to check slope.
         Vector3 faceNormal = Vector3.Cross(b - a, c - a).normalized;
         float slopeAngle = Vector3.Angle(faceNormal, Vector3.up);
 
@@ -259,7 +259,7 @@ public class TerrainChunk : MonoBehaviour
 ---
 
 ### 3.4 `ChunkGridManager.cs`
-Crie este arquivo em `Assets/Scripts/Terrain/ChunkGridManager.cs`:
+Create this file at `Assets/Scripts/Terrain/ChunkGridManager.cs`:
 
 ```csharp
 using System.Collections.Generic;
@@ -271,10 +271,10 @@ using Unity.AI.Navigation;
 
 public class ChunkGridManager : MonoBehaviour
 {
-    [Header("Configuração Ativa")]
+    [Header("Active Configuration")]
     public LowPolyTerrainConfig config;
 
-    [Header("Renderização & Material")]
+    [Header("Rendering & Material")]
     public Material vertexColorMaterial;
 
     private readonly Dictionary<Vector2Int, TerrainChunk> loadedChunks = new Dictionary<Vector2Int, TerrainChunk>();
@@ -287,14 +287,14 @@ public class ChunkGridManager : MonoBehaviour
         }
     }
 
-    [ContextMenu("Regerar Grid de Terreno")]
+    [ContextMenu("Regenerate Terrain Grid")]
     public void GenerateGrid()
     {
         ClearGrid();
 
         if (config == null)
         {
-            Debug.LogError("[ChunkGridManager] Nenhuma configuração atribuída!");
+            Debug.LogError("[ChunkGridManager] No configuration assigned!");
             return;
         }
 
@@ -324,7 +324,7 @@ public class ChunkGridManager : MonoBehaviour
         }
 
         RebuildNavMeshIfAvailable();
-        Debug.Log($"[ChunkGridManager] Grid {config.chunksX}x{config.chunksZ} gerada com sucesso ({loadedChunks.Count} chunks).");
+        Debug.Log($"[ChunkGridManager] Grid {config.chunksX}x{config.chunksZ} generated successfully ({loadedChunks.Count} chunks).");
     }
 
     public void ClearGrid()
@@ -354,21 +354,21 @@ public class ChunkGridManager : MonoBehaviour
 
 ---
 
-## 4. Instruções Passo a Passo para o Agente Executor
+## 4. Step-by-Step Instructions for the Implementing Agent
 
-1. **Configuração do Material (Vertex Colors):**
-   - Crie um novo Material em `Assets/Materials/M_TerrainLowPoly.mat`.
-   - Configure o Shader para suportar cores de vértice:
-     - No **URP (Universal Render Pipeline)**: Use `Universal Render Pipeline/Unlit` ou `Universal Render Pipeline/Lit` e habilite *Vertex Color*.
-     - No **Built-in Pipeline**: Use `Mobile/Particles/VertexLit Blended` ou `Standard` com *Vertex Colors*.
-2. **Criação do ScriptableObject:**
-   - No Unity, clique com o botão direito na janela *Project* $\rightarrow$ `Create` $\rightarrow$ `Terreno Roguelike` $\rightarrow$ `Configuração de Terreno`.
-   - Ajuste `chunksX = 3`, `chunksZ = 3` (ou a dimensão desejada, como `1x3`, `5x5`), `chunkSize = 16`, `cellSize = 2.0`.
-3. **Configuração da Cena:**
-   - Crie um GameObject vazio na cena chamado `[TerrainManager]`.
-   - Adicione o componente `ChunkGridManager`.
-   - Arraste o `ScriptableObject` criado para o campo `Config` e o material para `VertexColorMaterial`.
-   - Pressione Play ou use o menu de contexto (`Regerar Grid de Terreno`) no Inspector para gerar a malha instantaneamente.
-4. **Verificação de Caminhabilidade:**
-   - Certifique-se de que o jogador possui um `CharacterController` ou `Rigidbody` + `CapsuleCollider`.
-   - Teste a locomoção sobre as faces da malha. O `MeshCollider` gerado em cada *chunk* garante colisão imediata e suporte a *Raycasts*.
+1. **Material Configuration (Vertex Colors):**
+   - Create a new Material at `Assets/Materials/M_TerrainLowPoly.mat`.
+   - Configure the Shader to support vertex colors:
+     - In **URP (Universal Render Pipeline)**: Use `Universal Render Pipeline/Unlit` or `Universal Render Pipeline/Lit` and enable *Vertex Color*.
+     - In the **Built-in Pipeline**: Use `Mobile/Particles/VertexLit Blended` or `Standard` with *Vertex Colors*.
+2. **Create the ScriptableObject:**
+   - In Unity, right-click the *Project* window $\rightarrow$ `Create` $\rightarrow$ `Roguelike Terrain` $\rightarrow$ `Terrain Configuration`.
+   - Set `chunksX = 3`, `chunksZ = 3` (or a desired size such as `1x3`, `5x5`), `chunkSize = 16`, and `cellSize = 2.0`.
+3. **Scene Configuration:**
+   - Create an empty scene GameObject named `[TerrainManager]`.
+   - Add the component `ChunkGridManager`.
+   - Drag the created `ScriptableObject` to `Config` and the material to `VertexColorMaterial`.
+   - Manual user check: use the Inspector context menu (`Regenerate Terrain Grid`) to generate the mesh. Agents use the project's non-interactive CLI.
+4. **Walkability Verification:**
+   - Ensure the player has a `CharacterController` or `Rigidbody` + `CapsuleCollider`.
+   - Test movement over mesh faces. Each chunk's generated `MeshCollider` provides immediate collision and Raycast support.

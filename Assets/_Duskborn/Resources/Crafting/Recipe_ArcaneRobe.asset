@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_ArcaneRobe
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_ArcaneRobe
-  recipeName: Veste de Seda Arcana
-  description: Veste de Seda Arcana
-  category: Armadura
+  recipeName: "Arcane Silk Robe"
+  description: "Arcane Silk Robe"
+  category: "Armor"
   tier: 4
   requiredStation: 3
   isAlwaysDiscovered: 0

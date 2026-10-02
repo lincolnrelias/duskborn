@@ -1,26 +1,26 @@
-# Prevenção de Vazamentos de Memória e Controle de GC Alloc
+# Memory Leak Prevention and GC Alloc Control
 
-No Unity com C#, vazamentos de memória geralmente ocorrem por:
-1. Referências mantidas em **Delegates e Eventos C#**.
-2. Instanciação não controlada de materiais (`renderer.material`).
-3. Objetos de rede do FishNet desativados ou destruídos sem desacoplar callbacks.
-4. Acúmulo de instâncias na memória nativa que o coletor de lixo (GC) não consegue liberar.
+In Unity C#, memory leaks usually result from:
+1. References retained by **C# Delegates and Events**.
+2. Uncontrolled material instantiation (`renderer.material`).
+3. FishNet network objects disabled or destroyed without detaching callbacks.
+4. Accumulating native memory instances that the garbage collector (GC) cannot release.
 
 ---
 
-## 1. Padrão Seguro para Eventos e Delegates
+## 1. Safe Event and Delegate Pattern
 
-Toda vez que uma classe registrar um método em um evento estático ou de instância, deve cancelá-lo no ciclo de vida apropriado:
+Whenever a class registers a method with a static or instance event, unsubscribe it at the appropriate lifecycle point:
 
 ```csharp
-// ❌ INCORRETO: Causa retenção de memória após destruição do GameObject
+// ❌ INCORRECT: Retains memory after GameObject destruction.
 private void Awake()
 {
     _currentHP.OnChange += OnHPChanged;
     PlayerRegistry.OnPlayerSpawned += HandlePlayerSpawned;
 }
 
-// ✔️ CORRETO: Cancelamento explícito em OnDestroy ou OnDisable
+// ✔️ CORRECT: Explicit unsubscription in OnDestroy or OnDisable.
 private void Awake()
 {
     _currentHP.OnChange += OnHPChanged;
@@ -44,16 +44,16 @@ private void OnDestroy()
 
 ---
 
-## 2. Eliminação de GC Alloc em Queries de Física
+## 2. Eliminate GC Alloc in Physics Queries
 
-Inimigos e armas frequentemente realizam checagens de proximidade e áreas de ataque (ex: Cleave do Guerreiro, ataques de inimigos).
+Enemies and weapons frequently check proximity and attack areas (e.g. Warrior Cleave and enemy attacks).
 
 ```csharp
-// ❌ INCORRETO: Aloca um array novo a cada chamada no Heap
+// ❌ INCORRECT: Allocates a new heap array on every call.
 Collider[] hits = Physics.OverlapSphere(transform.position, radius, mask);
 foreach (var hit in hits) { ... }
 
-// ✔️ CORRETO: Buffer pré-alocado estático ou reutilizável sem custo de GC
+// ✔️ CORRECT: Preallocated static or reusable buffer without GC overhead.
 private static readonly Collider[] HitBuffer = new Collider[32];
 
 public void ExecuteMeleeCleave(float radius, LayerMask mask)
@@ -62,25 +62,25 @@ public void ExecuteMeleeCleave(float radius, LayerMask mask)
     for (int i = 0; i < count; i++)
     {
         var col = HitBuffer[i];
-        // Processa o impacto
-        HitBuffer[i] = null; // Libera referência
+        // Process the impact.
+        HitBuffer[i] = null; // Release the reference.
     }
 }
 ```
 
 ---
 
-## 3. Gestão de Materiais e SRP Batcher
+## 3. Material Management and SRP Batcher
 
-Acessar `renderer.material` clona a propriedade do material na memória de vídeo (VRAM) e quebra a compatibilidade com o SRP Batcher:
+Accessing `renderer.material` clones the material property in video memory (VRAM) and breaks SRP Batcher compatibility:
 
-- Para ler propriedades: use `renderer.sharedMaterial`.
-- Para alterar cores ou efeitos temporários (ex: flash de dano / `HitFlash`):
-  - Utilize `MaterialPropertyBlock` configurado uma única vez por objeto ou compartilhado.
-  - Para contornos no Duskborn, utilize a modificação do canal de camada de renderização (`renderingLayerMask`) sem instanciar materiais.
+- To read properties: use `renderer.sharedMaterial`.
+- To change colors or temporary effects (e.g. damage flash / `HitFlash`):
+  - Use a `MaterialPropertyBlock` configured once per object or shared.
+  - For Duskborn outlines, modify the rendering layer channel (`renderingLayerMask`) without instantiating materials.
 
 ```csharp
-// ✔️ Exemplo correto com MaterialPropertyBlock
+// ✔️ Correct MaterialPropertyBlock example.
 private static readonly int ColorProperty = Shader.PropertyToID("_BaseColor");
 private MaterialPropertyBlock _propBlock;
 
@@ -99,31 +99,31 @@ public void SetFlash(Color color)
 
 ---
 
-## 4. Otimização de Corrotinas e Yields
+## 4. Coroutine and Yield Optimization
 
-Evite instanciar objetos de espera repetidamente:
+Avoid repeatedly instantiating wait objects:
 
 ```csharp
-// ❌ INCORRETO: 1 alocação a cada execução
+// ❌ INCORRECT: 1 allocation on every execution.
 IEnumerator DespawnTimer(float delay)
 {
     yield return new WaitForSeconds(delay);
     Despawn();
 }
 
-// ✔️ CORRETO: Cache de intervalos comuns ou uso de contadores manuais
+// ✔️ CORRECT: Cache common intervals or use manual counters.
 private static readonly WaitForSeconds WaitHalfSecond = new WaitForSeconds(0.5f);
 private static readonly WaitForSeconds WaitOneSecond = new WaitForSeconds(1.0f);
 ```
 
 ---
 
-## 5. Reciclagem e Pooling com FishNet
+## 5. Recycling and Pooling with FishNet
 
-No Duskborn, inimigos em ondas noturnas escalam para grandes quantidades. Em vez de `Instantiate` e `Destroy` via `DespawnType.Destroy`:
-- Utilize coleções pré-alocadas de instâncias (`EnemyPool`).
-- Ao desativar uma entidade:
-  1. Desative componentes pesados (`NavMeshAgent.enabled = false`, `Collider.enabled = false`).
-  2. Limpe alvos e referências (`CurrentTarget = null`).
-  3. Zere os timers de habilidades e efeitos (`ResetEnemy()`).
-  4. Recicle o `NetworkObject` via FishNet Pooling (`Despawn(..., DespawnType.Pool)`).
+In Duskborn, nighttime enemies scale to large counts. Instead of `Instantiate` and `Destroy` through `DespawnType.Destroy`:
+- Use preallocated instance collections (`EnemyPool`).
+- When disabling an entity:
+  1. Disable expensive components (`NavMeshAgent.enabled = false`, `Collider.enabled = false`).
+  2. Clear targets and references (`CurrentTarget = null`).
+  3. Reset skill and effect timers (`ResetEnemy()`).
+  4. Recycle the `NetworkObject` through FishNet pooling (`Despawn(..., DespawnType.Pool)`).

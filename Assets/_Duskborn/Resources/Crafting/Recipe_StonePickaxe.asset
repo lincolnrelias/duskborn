@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_StonePickaxe
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_StonePickaxe
-  recipeName: Picareta de Pedra
-  description: Picareta de Pedra
-  category: Ferramentas
+  recipeName: "Stone Pickaxe"
+  description: "Stone Pickaxe"
+  category: "Tools"
   tier: 2
   requiredStation: 0
   isAlwaysDiscovered: 1

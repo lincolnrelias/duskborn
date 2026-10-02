@@ -63,7 +63,7 @@ Shader "Duskborn/Loot/ItemRarityWaveOverlay"
             Varyings vert(Attributes input)
             {
                 Varyings output;
-                // Extrusão uniforme dos vértices ao longo das normais para silhueta exterior nítida
+                // Uniform vertex extrusion along normals for a crisp outer silhouette.
                 float3 extrudedPos = input.positionOS.xyz + normalize(input.normalOS) * _OutlineWidth;
                 output.positionCS = TransformObjectToHClip(extrudedPos);
                 return output;
@@ -130,25 +130,25 @@ Shader "Duskborn/Loot/ItemRarityWaveOverlay"
 
             half4 frag(Varyings input) : SV_Target
             {
-                // 1. Onda primária senoidal animada em gradiente ascendente
+                // 1. Primary animated sine wave with an upward gradient.
                 float timeVal = _Time.y * _WaveSpeed;
                 float wavePhase1 = (input.positionOS.y * _WaveFrequency - timeVal);
                 float wave1 = sin(wavePhase1 * 6.2831853) * 0.5 + 0.5;
                 wave1 = pow(wave1, 3.5);
 
-                // 2. Onda harmônica secundária para dar riqueza orgânica e fluxo contínuo
+                // 2. Secondary harmonic wave for organic variation and continuous flow.
                 float wavePhase2 = (input.positionOS.y * (_WaveFrequency * 1.5) - timeVal * 1.3 + 0.35);
                 float wave2 = sin(wavePhase2 * 6.2831853) * 0.5 + 0.5;
                 wave2 = pow(wave2, 4.0) * 0.45;
 
                 float totalWave = saturate(wave1 + wave2);
 
-                // 3. Efeito Fresnel nos contornos do modelo 3D
+                // 3. Fresnel effect along the 3D model contours.
                 float3 viewDirWS = normalize(GetCameraPositionWS() - input.positionWS);
                 float NdotV = saturate(dot(normalize(input.normalWS), viewDirWS));
                 float fresnel = pow(1.0 - NdotV, _FresnelPower);
 
-                // 4. Composição aditiva: gradiente da onda na cor do tier + brilho esbranquiçado na crista
+                // 4. Additive composition: wave gradient in the tier color + whitish crest glow.
                 half3 waveColor = _Color.rgb * (totalWave * _WaveGlow);
                 half3 rimColor  = _Color.rgb * (fresnel * _RimIntensity);
                 half3 crestHotspot = half3(1.0, 1.0, 1.0) * (pow(wave1, 6.0) * 0.6);

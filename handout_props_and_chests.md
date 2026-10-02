@@ -1,108 +1,108 @@
-﻿# Guia de Implementação: Integração de Recursos, Baús e POIs ao Terreno Procedural (Duskborn)
+﻿# Implementation Guide: Integrating Resources, Chests, and POIs into Procedural Terrain (Duskborn)
 
-> **Destinatário:** Agente de Implementação / Desenvolvedor Unity  
-> **Objetivo:** Integrar a geração procedural e determinística de nós de recursos (árvores, pedras, ferro, fibra), baús escalonados por distância e pontos de interesse (clareira de spawn, bancada, santuários) à malha de terreno *low-poly* em *chunks*, garantindo a melhor experiência *roguelike* cooperativa (1–5 jogadores).  
-> **Base de Design:** GDD §5 (Loot & Crafting), §7 (World & Map) e `terrain_generation_handout.md`.
-
----
-
-## 1. Visão Geral e Pilares de Game Design Roguelike
-
-Em *Duskborn*, a exploração diurna é uma corrida contra o tempo antes que a noite caia. A distribuição de recursos e itens no mapa deve criar decisões estratégicas significativas de **Risco vs. Recompensa**:
-
-1. **Clareira Central Segura (Spawn Hub):**
-   - O centro do mapa $(0,0)$ é garantidamente plano e seguro, livre de densidade excessiva de árvores ou barreiras de rocha.
-   - Contém o ponto de spawn dos jogadores, a bancada inicial de *crafting* (*Workbench*) e recursos básicos suficientes para fabricar os primeiros itens primitivos (*Tier 1*).
-   - Contém 1–2 baús básicos de baixo custo inicial ($25\text{--}50\text{g}$) para dar objetivo imediato.
-
-2. **Gradiente de Distância (Risk / Reward Radius):**
-   - **Centro (Segurança):** Recursos abundantes de Madeira e Pedra; baús baratos com itens Comuns.
-   - **Zona Média (Florestas e Planícies):** Densidade maior de recursos, arbustos de Fibra, baús médios ($75\text{--}100\text{g}$) com chance de itens Incomuns/Raros.
-   - **Bordas e Picos Montanhosos (Alto Risco):** Nós de Minério de Ferro (*Iron Ore*), desfiladeiros perigosos, baús dourados/lendários ($150\text{--}250\text{g}$) com itens Raros, Lendários ou Amaldiçoados (*Cursed*). Estar longe do centro ao anoitecer força o time a lutar em terreno acidentado ou correr de volta.
-
-3. **Geração Determinística via Semente (Multiplayer Sync):**
-   - Todos os clientes calculam as posições de árvores, pedras e baús através da mesma semente determinística (`SeededRNG` / `customSeed`), garantindo sincronia sem tráfego de rede para coordenadas de vegetação.
-   - Entidades interativas e destruíveis (`ResourceNode`, `Chest`) são gerenciadas com autoridade do Host via *FishNet* (`[ServerRpc]`, `SyncVar`, `LootManager`).
+> **Audience:** Implementation Agent / Unity Developer
+> **Objective:** Integrate procedural deterministic generation of resource nodes (trees, rocks, iron, fiber), distance-scaled chests, and points of interest (spawn clearing, workbench, sanctuaries) into the *low-poly chunk* terrain mesh for a cooperative *roguelike* experience (1–5 players).
+> **Design Basis:** GDD §5 (Loot & Crafting), §7 (World & Map), and `terrain_generation_handout.md`.
 
 ---
 
-## 2. Arquitetura Técnica do Sistema
+## 1. Overview and Roguelike Game Design Pillars
+
+In *Duskborn*, daytime exploration races against nightfall. Resource and item distribution must create meaningful strategic **Risk vs. Reward** decisions:
+
+1. **Safe Central Clearing (Spawn Hub):**
+   - The map center $(0,0)$ is guaranteed flat and safe, without excessive tree density or rock barriers.
+   - Contains player spawn points, the starting crafting *Workbench*, and enough basic resources for the first primitive *Tier 1* items.
+   - Contains 1–2 basic low-cost chests ($25\text{--}50\text{g}$) for an immediate objective.
+
+2. **Distance Gradient (Risk / Reward Radius):**
+   - **Center (Safety):** Abundant Wood and Stone; cheap chests containing Common items.
+   - **Middle Zone (Forests and Plains):** Higher resource density, Fiber shrubs, medium chests ($75\text{--}100\text{g}$) with Uncommon / Rare item chances.
+   - **Edges and Mountain Peaks (High Risk):** Iron Ore nodes, dangerous ravines, golden / legendary chests ($150\text{--}250\text{g}$) with Rare, Legendary, or Cursed items. Being far from the center at nightfall forces the team to fight on rough terrain or run back.
+
+3. **Deterministic Seed Generation (Multiplayer Sync):**
+   - All clients calculate tree, rock, and chest positions from the same deterministic seed (`SeededRNG` / `customSeed`), synchronizing vegetation coordinates without network traffic.
+   - Interactive destructible entities (`ResourceNode`, `Chest`) are managed with Host authority through *FishNet* (`[ServerRpc]`, `SyncVar`, `LootManager`).
+
+---
+
+## 2. Technical System Architecture
 
 ```text
-ChunkGridManager (Terreno)
+ChunkGridManager (Terrain)
   │
-  ├── 1. Gera as malhas de terreno de cada Chunk (TerrainChunk + MeshCollider)
+  ├── 1. Generate each Chunk's terrain mesh (TerrainChunk + MeshCollider)
   │
-  └── 2. WorldPropsPlacer (Novo Gerenciador de Props & Spawns)
-        ├── Inicializa SeededRNG com a semente da partida
-        ├── Raycast vertical contra os MeshColliders para posicionamento exato no relevo
+  └── 2. WorldPropsPlacer (New Props & Spawn Manager)
+        ├── Initialize SeededRNG with the session seed
+        ├── Vertical raycast against MeshColliders for exact terrain placement
         │
-        ├── [A] Clareira Central (Centro do Mapa)
-        │     ├── Limpa raio central (Clear radius)
+        ├── [A] Central Clearing (Map Center)
+        │     ├── Clear the central radius
         │     ├── Define PlayerSpawnPoints
-        │     └── Instancia Workbench Site
+        │     └── Instantiate Workbench Site
         │
-        ├── [B] Distribuição de Recursos (Resource Nodes)
-        │     ├── Florestas / Grama baixa: Árvores (Wood) + Fibras
-        │     ├── Zonas de Rocha / Altitude: Rochas (Stone) + Ferro (Iron Ore)
-        │     └── Encostas Íngremes: Boulders decorativos / Bloqueadores de passagem
+        ├── [B] Resource Distribution (Resource Nodes)
+        │     ├── Forests / Low Grass: Trees (Wood) + Fiber
+        │     ├── Rock / Altitude Zones: Rocks (Stone) + Iron Ore
+        │     └── Steep Slopes: Decorative boulders / Passage blockers
         │
-        ├── [C] Distribuição de Baús (Chests)
-        │     ├── Grid Jitter / Poisson-Disc sampling (evita acúmulo)
-        │     └── Escala de Custo e Tabela de Loot por distância ao centro
+        ├── [C] Chest Distribution
+        │     ├── Grid jitter / Poisson-disc sampling (avoid crowding)
+        │     └── Scale cost and loot table by distance from center
         │
-        └── 3. RebuildNavMesh() (Recalcula o NavMesh englobando árvores, rochas e baús)
+        └── 3. RebuildNavMesh() (Include trees, rocks, and chests in NavMesh recalculation)
 ```
 
 ---
 
-## 3. Mapeamento de Biomas e Regras de Posicionamento
+## 3. Biome Mapping and Placement Rules
 
-Cada tipo de objeto possui regras de filtragem por **Altitude ($Y$)**, **Inclinação (Slope)** e **Distância do Centro ($R$)**:
+Each object type has filtering rules for **Altitude ($Y$)**, **Slope**, and **Distance from Center ($R$)**:
 
-| Tipo de Prop | Prefab / Componente | Condição de Altitude / Terreno | Inclinação Máxima | Regra de Distância / Densidade |
+| Prop Type | Prefab / Component | Altitude / Terrain Condition | Maximum Slope | Distance / Density Rule |
 |---|---|---|---|---|
-| **Árvore (Madeira)** | `ResourceNode` (`TargetType.Tree`) | $Y > \text{waterLevel} + 0.5\text{m}$ e $Y < \text{snowLevel}$ | $\le 25^\circ$ (terreno caminhável) | Alta densidade em áreas de grama; fora do raio central de spawn |
-| **Rocha (Pedra)** | `ResourceNode` (`TargetType.MiningNode`) | Qualquer $Y > \text{waterLevel} + 0.3\text{m}$ | $\le 45^\circ$ | Média densidade; mais comum em zonas rochosas |
-| **Minério de Ferro** | `ResourceNode` (`TargetType.MiningNode`) | $Y \ge \text{heightMultiplier} \times 0.45$ ou Encostas | $\le 40^\circ$ | Raro; apenas em zonas de altitude ou bordas distantes |
-| **Arbusto (Fibra)** | `ResourceNode` / Pickup de Fibra | Zonas de planície / grama | $\le 20^\circ$ | Disperso em planícies abertas |
-| **Baú Comum** | `Chest.prefab` (Loot Comum/Incomum) | Solo seco ($Y > \text{waterLevel} + 0.5\text{m}$) | $\le 15^\circ$ | Raio central a intermediário ($R \le 40\text{m}$); Custo: $35\text{--}50\text{g}$ |
-| **Baú Avançado/Ouro**| `Chest.prefab` (Loot Raro/Lendário) | Solo seco, topos de colina ou bordas | $\le 20^\circ$ | Raio externo ($R > 40\text{m}$); Custo: $80\text{--}150\text{g}$ |
-| **Bancada (Workbench)**| `Workbench` prefab | Clareira central | $\le 5^\circ$ (plano) | 1 instância próxima ao spawn dos jogadores |
+| **Tree (Wood)** | `ResourceNode` (`TargetType.Tree`) | $Y > \text{waterLevel} + 0.5\text{m}$ and $Y < \text{snowLevel}$ | $\le 25^\circ$ (walkable terrain) | High density in grass areas; outside the central spawn radius |
+| **Rock (Stone)** | `ResourceNode` (`TargetType.MiningNode`) | Any $Y > \text{waterLevel} + 0.3\text{m}$ | $\le 45^\circ$ | Medium density; more common in rocky zones |
+| **Iron Ore** | `ResourceNode` (`TargetType.MiningNode`) | $Y \ge \text{heightMultiplier} \times 0.45$ or slopes | $\le 40^\circ$ | Rare; only at altitude or distant edges |
+| **Shrub (Fiber)** | `ResourceNode` / Fiber Pickup | Plains / grass zones | $\le 20^\circ$ | Scattered across open plains |
+| **Common Chest** | `Chest.prefab` (Common / Uncommon Loot) | Dry ground ($Y > \text{waterLevel} + 0.5\text{m}$) | $\le 15^\circ$ | Central to middle radius ($R \le 40\text{m}$); Cost: $35\text{--}50\text{g}$ |
+| **Advanced / Gold Chest** | `Chest.prefab` (Rare / Legendary Loot) | Dry ground, hilltops, or edges | $\le 20^\circ$ | Outer radius ($R > 40\text{m}$); Cost: $80\text{--}150\text{g}$ |
+| **Workbench** | `Workbench` prefab | Central clearing | $\le 5^\circ$ (flat) | 1 instance near player spawn |
 
 ---
 
-## 4. Estrutura de Arquivos Proposta
+## 4. Proposed File Structure
 
 ```text
 Assets/_Duskborn/
 ├── Gameplay/
 │   ├── World/
 │   │   ├── Props/
-│   │   │   ├── PropDefinition.cs       // SO: Prefab, densidade, regras de altura/slope, raio de exclusão
-│   │   │   ├── WorldPropsConfig.cs     // SO: Lista de props, baús por tier, raio de clareira
-│   │   │   └── WorldPropsPlacer.cs     // Componente que executa a amostragem e spawn dos props
-│   │   ├── LowPolyTerrainConfig.cs     // (Já implementado)
-│   │   ├── TerrainChunk.cs             // (Já implementado)
-│   │   └── ChunkGridManager.cs         // (Atualizado para chamar WorldPropsPlacer antes do NavMesh)
+│   │   │   ├── PropDefinition.cs       // SO: Prefab, density, height / slope rules, exclusion radius
+│   │   │   ├── WorldPropsConfig.cs     // SO: Prop list, chests by tier, clearing radius
+│   │   │   └── WorldPropsPlacer.cs     // Component sampling and spawning props
+│   │   ├── LowPolyTerrainConfig.cs     // (Already implemented)
+│   │   ├── TerrainChunk.cs             // (Already implemented)
+│   │   └── ChunkGridManager.cs         // (Updated to call WorldPropsPlacer before NavMesh)
 │   ├── Loot/
-│   │   ├── Chest.cs                    // (Já implementado com SyncVar e TargetRpc)
-│   │   ├── ResourceNode.cs             // (Já implementado com TargetType e LootDropper)
-│   │   └── LootTable.cs / DropLootTable.cs // (Já implementados)
+│   │   ├── Chest.cs                    // (Already implemented with SyncVar and TargetRpc)
+│   │   ├── ResourceNode.cs             // (Already implemented with TargetType and LootDropper)
+│   │   └── LootTable.cs / DropLootTable.cs // (Already implemented)
 │   └── Crafting/
-│       └── Workbench.cs                // Componente simples de interação da bancada
+│       └── Workbench.cs                // Simple workbench interaction component
 └── ScriptableObjects/
     └── World/
-        ├── PropsConfig_Default.asset   // Configuração padrão de árvores, rochas, ferro e baús
+        ├── PropsConfig_Default.asset   // Default trees, rocks, iron, and chest configuration
         └── ...
 ```
 
 ---
 
-## 5. Especificação Técnica dos Novos Scripts
+## 5. Technical Specification of New Scripts
 
 ### 5.1 `PropDefinition.cs` (ScriptableObject)
-Define as regras ecológicas de cada elemento decorativo ou interativo:
+Define ecological rules for each decorative or interactive element:
 
 ```csharp
 using UnityEngine;
@@ -115,22 +115,22 @@ namespace Duskborn.Gameplay.World
         public string propName = "Tree";
         public GameObject prefab;
 
-        [Header("Densidade por Chunk")]
+        [Header("Density per Chunk")]
         [Range(0, 50)] public int minPerChunk = 2;
         [Range(0, 50)] public int maxPerChunk = 6;
 
-        [Header("Condições de Terreno")]
+        [Header("Terrain Conditions")]
         public float minHeight = 2.5f;
         public float maxHeight = 20.0f;
         [Range(0f, 60f)] public float maxSlopeAngle = 25f;
 
-        [Header("Variação de Escala e Rotação")]
+        [Header("Scale and Rotation Variation")]
         public Vector2 scaleRange = new Vector2(0.85f, 1.25f);
         public bool randomYRotation = true;
         public bool alignToNormal = false;
 
-        [Header("Espaçamento")]
-        [Tooltip("Raio mínimo de distância de outros props")]
+        [Header("Spacing")]
+        [Tooltip("Minimum distance radius from other props")]
         public float exclusionRadius = 2.0f;
     }
 }
@@ -139,7 +139,7 @@ namespace Duskborn.Gameplay.World
 ---
 
 ### 5.2 `WorldPropsConfig.cs` (ScriptableObject)
-Agrupa as definições de todos os recursos, baús e regras da clareira:
+Group all resource, chest, and clearing rule definitions:
 
 ```csharp
 using UnityEngine;
@@ -150,18 +150,18 @@ namespace Duskborn.Gameplay.World
     [CreateAssetMenu(fileName = "WorldPropsConfig", menuName = "Duskborn/World/World Props Config")]
     public class WorldPropsConfig : ScriptableObject
     {
-        [Header("Clareira Central (Safe Spawn Zone)")]
-        [Tooltip("Raio em torno de (0,0) onde não serão geradas árvores ou rochas densas")]
+        [Header("Central Clearing (Safe Spawn Zone)")]
+        [Tooltip("Radius around (0,0) where dense trees or rocks are not generated")]
         public float centerClearingRadius = 10f;
         public GameObject workbenchPrefab;
 
-        [Header("Recursos Naturais (Resource Nodes)")]
+        [Header("Natural Resources (Resource Nodes)")]
         public PropDefinition treeProp;
         public PropDefinition stoneProp;
         public PropDefinition ironProp;
         public PropDefinition fiberProp;
 
-        [Header("Configuração de Baús")]
+        [Header("Chest Configuration")]
         public GameObject chestPrefab;
         [Range(1, 20)] public int totalChests = 8;
         public LootTable basicLootTable;
@@ -175,59 +175,59 @@ namespace Duskborn.Gameplay.World
 ---
 
 ### 5.3 `WorldPropsPlacer.cs` (Monobehaviour)
-Executa a geração procedural com **Raycasts** contra a malha recém-gerada:
+Run procedural generation using **Raycasts** against the newly generated mesh:
 
-1. **Amostragem em Grid com Jitter:** Divide cada *chunk* em sub-células e aplica jitter determinístico com `SeededRNG`.
-2. **Validação de Terreno:** Dispara um `Physics.Raycast` de cima para baixo ($Y = 100 \rightarrow -10$).
-   - Obtém `hit.point` (altura exata da face) e `hit.normal` (inclinação).
-   - Valida se `hit.point.y` e `slopeAngle` satisfazem `PropDefinition`.
-   - Rejeita se estiver dentro de `centerClearingRadius` (exceto itens da clareira).
-3. **Escalonamento de Baús:**
-   - Calcula a distância $d = \text{Vector3.Distance}(pos, \text{Vector3.zero})$.
-   - Normaliza $t = \text{Clamp01}(d / \text{mapRadius})$.
-   - Custo do baú: $\text{Lerp}(minCost, maxCost, t)$.
-   - Atribui `basicLootTable` se $t < 0.5$ ou `rareLootTable` se $t \ge 0.5$.
-4. **Instanciação:** Em *Host/Singleplayer*, se o objeto contiver `NetworkObject`, spawna via `InstanceFinder.ServerManager.Spawn(go)`.
+1. **Jittered Grid Sampling:** Divide each *chunk* into subcells and apply deterministic jitter using `SeededRNG`.
+2. **Terrain Validation:** Cast `Physics.Raycast` downward ($Y = 100 \rightarrow -10$).
+   - Obtain `hit.point` (exact face height) and `hit.normal` (slope).
+   - Validate that `hit.point.y` and `slopeAngle` satisfy `PropDefinition`.
+   - Reject points inside `centerClearingRadius` (except clearing items).
+3. **Chest Scaling:**
+   - Calculate distance $d = \text{Vector3.Distance}(pos, \text{Vector3.zero})$.
+   - Normalize $t = \text{Clamp01}(d / \text{mapRadius})$.
+   - Chest cost: $\text{Lerp}(minCost, maxCost, t)$.
+   - Assign `basicLootTable` if $t < 0.5$ or `rareLootTable` if $t \ge 0.5$.
+4. **Instantiation:** In *Host / Singleplayer*, spawn objects containing `NetworkObject` through `InstanceFinder.ServerManager.Spawn(go)`.
 
 ---
 
-## 6. Integração com `ChunkGridManager` e Ordem de Execução
+## 6. `ChunkGridManager` Integration and Execution Order
 
-O ciclo completo de geração passa a ser:
+The complete generation cycle becomes:
 
 ```csharp
 public void GenerateGrid()
 {
-    // 1. Limpa terreno e props antigos
+    // 1. Clear old terrain and props.
     ClearGrid();
     ClearProps();
 
-    // 2. Gera os Chunks e malhas com MeshColliders
+    // 2. Generate Chunks and meshes with MeshColliders.
     GenerateTerrainChunks();
 
-    // 3. Spawna os nós de recursos, baús e clareira
+    // 3. Spawn resource nodes, chests, and the clearing.
     if (propsPlacer != null)
     {
         propsPlacer.PlaceWorldProps(config, propsConfig, activeSeed);
     }
 
-    // 4. Baka o NavMesh englobando a malha do terreno e os colliders dos props
+    // 4. Bake NavMesh including terrain meshes and prop colliders.
     RebuildNavMesh();
 }
 ```
 
 ---
 
-## 7. Instruções Passo a Passo para o Agente Executor
+## 7. Step-by-Step Instructions for the Implementing Agent
 
-1. **Criação dos Scripts:**
-   - Criar `PropDefinition.cs`, `WorldPropsConfig.cs` e `WorldPropsPlacer.cs` em `Assets/_Duskborn/Gameplay/World/Props/`.
-   - Atualizar `ChunkGridManager.cs` e `ChunkGridManagerEditor.cs` para suportar o novo passo de *spawning*.
-2. **Criação dos ScriptableObjects:**
-   - Criar `Prop_Tree.asset`, `Prop_Stone.asset`, `Prop_Iron.asset`, `Prop_Fiber.asset`.
-   - Criar `WorldPropsConfig_Default.asset` vinculando os prefabs de `ResourceNode` e `Chest`.
-3. **Testes de Validação:**
-   - Clicar em **"Gerar Terreno"** no Inspector.
-   - Verificar se as árvores e pedras surgem cravadas no relevo sem flutuar nem afundar.
-   - Verificar se o centro $(0,0)$ permanece limpo e com a bancada.
-   - Verificar se o *NavMesh* foi assado contornando os troncos e baús corretamente.
+1. **Create Scripts:**
+   - Create `PropDefinition.cs`, `WorldPropsConfig.cs`, and `WorldPropsPlacer.cs` in `Assets/_Duskborn/Gameplay/World/Props/`.
+   - Update `ChunkGridManager.cs` and `ChunkGridManagerEditor.cs` to support the new spawning step.
+2. **Create ScriptableObjects:**
+   - Create `Prop_Tree.asset`, `Prop_Stone.asset`, `Prop_Iron.asset`, and `Prop_Fiber.asset`.
+   - Create `WorldPropsConfig_Default.asset` linking `ResourceNode` and `Chest` prefabs.
+3. **Validation Tests:**
+   - Manual user check: click **"Generate Terrain"** in the Inspector. Agents use the project's non-interactive CLI.
+   - Verify trees and rocks are grounded in the terrain without floating or sinking.
+   - Verify center $(0,0)$ remains clear and contains the workbench.
+   - Verify NavMesh is baked around trunks and chests correctly.

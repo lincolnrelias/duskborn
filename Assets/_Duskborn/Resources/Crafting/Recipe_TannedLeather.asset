@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_TannedLeather
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_TannedLeather
-  recipeName: Couro Curtido
-  description: Couro Curtido
-  category: Materiais
+  recipeName: "Tanned Leather"
+  description: "Tanned Leather"
+  category: "Materials"
   tier: 3
   requiredStation: 0
   isAlwaysDiscovered: 0

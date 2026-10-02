@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: consumable_fire_oil
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.ConsumableDefinition
   id: consumable_fire_oil
-  displayName: "\xD3leo Flamejante"
-  description: "Infunde a arma com ess\xEAncia ardente, aumentando o dano geral em
-    +25% por 40 segundos."
+  displayName: "Flaming Oil"
+  description: "Infuses the weapon with burning essence, increasing overall damage by +25% for 40 seconds."
   icon: {fileID: 2800000, guid: df4616650ef34fa7804b4fd36ed1f0a1, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 1
@@ -23,4 +22,4 @@ MonoBehaviour:
   effectValue: 0.25
   duration: 40
   maxStack: 3
-  effectDescription: +25% Dano de Ataque por 40s.
+  effectDescription: "+25% Attack Damage for 40s."

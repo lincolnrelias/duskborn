@@ -4,10 +4,10 @@ using UnityEngine;
 namespace InventorySystem.Core
 {
     /// <summary>
-    /// Registro compartilhado e estático de ícones de itens.
-    /// Garante que qualquer ícone conhecido pelo InventoryInstaller, ActionBarInstaller,
-    /// receitas de crafting ou definições de recursos esteja acessível globalmente ao mover
-    /// ou trocar itens entre diferentes painéis e a barra de ação.
+    /// Shared static registry of item icons.
+    /// Ensures that any icon known to InventoryInstaller, ActionBarInstaller,
+    /// crafting recipes, or resource definitions is globally available when moving
+    /// or swapping items between panels and the action bar.
     /// </summary>
     public static class ItemIconRegistry
     {

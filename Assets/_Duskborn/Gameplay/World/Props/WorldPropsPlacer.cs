@@ -13,11 +13,11 @@ namespace Duskborn.Gameplay.World
     [SelectionBase]
     public class WorldPropsPlacer : MonoBehaviour
     {
-        [Header("Hierarquia de Props & Spawns")]
-        [Tooltip("Transform pai onde todos os props instanciados serão agrupados. Criado automaticamente se nulo.")]
+        [Header("Props & Spawn Hierarchy")]
+        [Tooltip("Parent Transform grouping all instantiated props. Created automatically when null.")]
         [SerializeField] private Transform propsContainer;
 
-        [Tooltip("Transform pai onde os pontos de spawn de jogadores são gerados. Criado automaticamente se nulo.")]
+        [Tooltip("Parent Transform for generated player spawn points. Created automatically when null.")]
         [SerializeField] private Transform spawnPointsContainer;
 
         public Transform PropsContainer => propsContainer;
@@ -55,7 +55,7 @@ namespace Duskborn.Gameplay.World
 
             EnsureSpawnPointsReady();
 
-            // Se o servidor já iniciou antes ou durante o Start, spawna os props agora
+            // If the server started before or during Start, spawn props now.
             if (Application.isPlaying && InstanceFinder.ServerManager != null && InstanceFinder.ServerManager.Started)
             {
                 SpawnAllPropsOnServer();
@@ -154,19 +154,19 @@ namespace Duskborn.Gameplay.World
         {
             if (args.ConnectionState == LocalConnectionState.Started)
             {
-                // Se for um cliente remoto conectado (não é Host), limpa props da cena local
-                // para que receba apenas as instâncias de rede autoritativas sincronizadas pelo Host
+                // If connected as a remote client (not Host), clear local scene props
+                // to receive only authoritative network instances synchronized by the Host.
                 if (InstanceFinder.ServerManager == null || !InstanceFinder.ServerManager.Started)
                 {
-                    DuskLog.Log(LogChannel.World, "[WorldPropsPlacer] Conectado como CLIENT remoto. Limpando props locais da cena.");
+                    DuskLog.Log(LogChannel.World, "[WorldPropsPlacer] Connected as a remote CLIENT. Clearing local scene props.");
                     ClearProps();
                 }
             }
         }
 
         /// <summary>
-        /// Ativa e spawna todos os NetworkObjects contidos no propsContainer na rede FishNet.
-        /// Chamado assim que o servidor conclui sua inicialização.
+        /// Activate and spawn all NetworkObjects in propsContainer on the FishNet network.
+        /// Called as soon as the server finishes initialization.
         /// </summary>
         public void SpawnAllPropsOnServer()
         {
@@ -179,10 +179,10 @@ namespace Duskborn.Gameplay.World
             NetworkObject[] nobs = propsContainer.GetComponentsInChildren<NetworkObject>(true);
             if (nobs == null || nobs.Length == 0)
             {
-                // Se nenhum prop existe na cena, tenta gerar usando as configurações do ChunkGridManager
+                // If no scene props exist, try generating them using ChunkGridManager settings.
                 if (ChunkGridManager.Instance != null && ChunkGridManager.Instance.config != null && ChunkGridManager.Instance.propsConfig != null)
                 {
-                    DuskLog.Log(LogChannel.World, "[WorldPropsPlacer] Nenhum prop existente na cena. Gerando props procedurais no servidor...");
+                    DuskLog.Log(LogChannel.World, "[WorldPropsPlacer] No existing props in scene. Generating procedural props on the server...");
                     PlaceWorldProps(ChunkGridManager.Instance.config, ChunkGridManager.Instance.propsConfig, ChunkGridManager.Instance.ActivePropsSeed);
                 }
                 return;
@@ -194,18 +194,18 @@ namespace Duskborn.Gameplay.World
                 NetworkObject nob = nobs[i];
                 if (nob == null || nob.IsSpawned) continue;
 
-                // Reativa o GameObject que o FishNet desativou antes do servidor iniciar
+                // Reactivate the GameObject FishNet disabled before the server started.
                 nob.gameObject.SetActive(true);
                 InstanceFinder.ServerManager.Spawn(nob.gameObject);
                 spawnedCount++;
             }
 
-            DuskLog.Log(LogChannel.World, $"[WorldPropsPlacer] Servidor iniciado: {spawnedCount} props ativados e sincronizados na rede FishNet.");
+            DuskLog.Log(LogChannel.World, $"[WorldPropsPlacer] Server started: {spawnedCount} props activated and synchronized on the FishNet network.");
         }
 
         /// <summary>
-        /// Reativa todos os GameObjects no propsContainer localmente (sem rede).
-        /// Útil como fallback para testes em Play Mode offline sem inicialização de rede FishNet.
+        /// Reactivate all GameObjects in propsContainer locally (without networking).
+        /// Useful fallback for offline Play Mode tests without FishNet network initialization.
         /// </summary>
         public void ActivateAllPropsLocally()
         {
@@ -229,7 +229,7 @@ namespace Duskborn.Gameplay.World
             if (InstanceFinder.NetworkManager == null ||
                 (!InstanceFinder.ServerManager.Started && !InstanceFinder.ClientManager.Started))
             {
-                DuskLog.Log(LogChannel.World, "[WorldPropsPlacer] Rede inativa/offline detectada. Reativando props locais para modo de teste.");
+                DuskLog.Log(LogChannel.World, "[WorldPropsPlacer] Inactive / offline network detected. Reactivating local props for test mode.");
                 ActivateAllPropsLocally();
             }
         }
@@ -238,7 +238,7 @@ namespace Duskborn.Gameplay.World
         {
             if (terrainConfig == null || propsConfig == null)
             {
-                DuskLog.Warn(LogChannel.World, "[WorldPropsPlacer] Configuração de terreno ou de props nula!");
+                DuskLog.Warn(LogChannel.World, "[WorldPropsPlacer] Terrain or props configuration is null!");
                 return;
             }
 
@@ -246,22 +246,22 @@ namespace Duskborn.Gameplay.World
             ClearProps();
             _occupancyMap.Clear();
 
-            // Garante que os colliders recém-gerados dos chunks estejam sincronizados na física
+            // Ensure newly generated chunk colliders are synchronized with physics.
             Physics.SyncTransforms();
 
             SeededRNG rng = new SeededRNG(seed);
             _placedPositions.Clear();
 
-            // 1. Clareira Central (Centro do Mapa e Santuário)
+            // 1. Central Clearing (Map Center and Sanctuary).
             PlaceCentralClearing(terrainConfig, propsConfig, rng);
 
-            // 2. Clareiras de Combate Preservadas (30-40% área aberta para kite e batalhas)
+            // 2. Preserved Combat Clearings (30-40% open area for kiting and battles).
             PlaceCombatClearings(terrainConfig, propsConfig, rng);
 
-            // 3. Recursos Naturais (Resource Nodes) por Chunk com Agrupamento (Clustering)
+            // 3. Natural Resources (Resource Nodes) per Chunk with Clustering.
             PlaceResourceNodes(terrainConfig, propsConfig, rng);
 
-            // 4. Distribuição de Baús (Chests) com Escalonamento de Distância
+            // 4. Chest Distribution with Distance Scaling.
             PlaceChests(terrainConfig, propsConfig, rng);
 
 #if UNITY_EDITOR
@@ -281,15 +281,15 @@ namespace Duskborn.Gameplay.World
                         countReserialized++;
                     }
                 }
-                DuskLog.Log(LogChannel.World, $"[WorldPropsPlacer] Serializados {countReserialized} NetworkObjects com SceneIds válidos no Editor.");
+                DuskLog.Log(LogChannel.World, $"[WorldPropsPlacer] Serialized {countReserialized} NetworkObjects with valid SceneIds in the Editor.");
             }
 #endif
 
-            DuskLog.Log(LogChannel.World, $"[WorldPropsPlacer] Geração de props concluída! Total de posições: {_placedPositions.Count}, Ocupação indexada: {_occupancyMap.Count}.");
+            DuskLog.Log(LogChannel.World, $"[WorldPropsPlacer] Props generation complete! Total positions: {_placedPositions.Count}, Indexed occupancy: {_occupancyMap.Count}.");
         }
 
         /// <summary>
-        /// Versão assíncrona do posicionamento de props e recursos, respeitando o frame budget para manter 60+ FPS constante.
+        /// Asynchronous props and resource placement respecting the frame budget for consistent 60+ FPS.
         /// </summary>
         public IEnumerator PlaceWorldPropsAsync(
             LowPolyTerrainConfig terrainConfig,
@@ -300,7 +300,7 @@ namespace Duskborn.Gameplay.World
         {
             if (terrainConfig == null || propsConfig == null)
             {
-                DuskLog.Warn(LogChannel.World, "[WorldPropsPlacer] Configuração de terreno ou de props nula!");
+                DuskLog.Warn(LogChannel.World, "[WorldPropsPlacer] Terrain or props configuration is null!");
                 yield break;
             }
 
@@ -315,22 +315,22 @@ namespace Duskborn.Gameplay.World
             SeededRNG rng = new SeededRNG(seed);
             _placedPositions.Clear();
 
-            onProgress?.Invoke(0.05f, "Configurando Santuário Central e Spawns...");
+            onProgress?.Invoke(0.05f, "Configuring Central Sanctuary and Spawns...");
             PlaceCentralClearing(terrainConfig, propsConfig, rng);
             if (budget.ShouldYield()) yield return null;
 
-            onProgress?.Invoke(0.12f, "Preservando Clareiras de Combate...");
+            onProgress?.Invoke(0.12f, "Preserving Combat Clearings...");
             PlaceCombatClearings(terrainConfig, propsConfig, rng);
             if (budget.ShouldYield()) yield return null;
 
-            // 3. Recursos Naturais por Chunk com Time-Slicing
+            // 3. Natural Resources per Chunk with Time Slicing.
             yield return PlaceResourceNodesAsyncRoutine(terrainConfig, propsConfig, rng, budget, (p, detail) =>
             {
                 onProgress?.Invoke(Mathf.Lerp(0.15f, 0.85f, p), detail);
             });
 
-            // 4. Distribuição de Baús
-            onProgress?.Invoke(0.90f, "Distribuindo Baús de Tesouro...");
+            // 4. Chest Distribution.
+            onProgress?.Invoke(0.90f, "Distributing Treasure Chests...");
             PlaceChests(terrainConfig, propsConfig, rng);
             if (budget.ShouldYield()) yield return null;
 
@@ -351,12 +351,12 @@ namespace Duskborn.Gameplay.World
                         countReserialized++;
                     }
                 }
-                DuskLog.Log(LogChannel.World, $"[WorldPropsPlacer] Serializados {countReserialized} NetworkObjects com SceneIds válidos no Editor.");
+                DuskLog.Log(LogChannel.World, $"[WorldPropsPlacer] Serialized {countReserialized} NetworkObjects with valid SceneIds in the Editor.");
             }
 #endif
 
-            onProgress?.Invoke(1.0f, $"Props concluídos ({_placedPositions.Count} objetos).");
-            DuskLog.Log(LogChannel.World, $"[WorldPropsPlacer] Geração assíncrona de props concluída! Total de posições: {_placedPositions.Count}, Ocupação indexada: {_occupancyMap.Count}.");
+            onProgress?.Invoke(1.0f, $"Props complete ({_placedPositions.Count} objects).");
+            DuskLog.Log(LogChannel.World, $"[WorldPropsPlacer] Asynchronous props generation complete! Total positions: {_placedPositions.Count}, Indexed occupancy: {_occupancyMap.Count}.");
         }
 
         private IEnumerator PlaceResourceNodesAsyncRoutine(
@@ -408,7 +408,7 @@ namespace Duskborn.Gameplay.World
 
                     currentChunkIndex++;
                     float progress = (float)currentChunkIndex / totalChunks;
-                    onProgress?.Invoke(progress, $"Espalhando recursos naturais (Chunk {currentChunkIndex}/{totalChunks})...");
+                    onProgress?.Invoke(progress, $"Scattering natural resources (Chunk {currentChunkIndex}/{totalChunks})...");
 
                     foreach (var propDef in propDefs)
                     {
@@ -446,7 +446,7 @@ namespace Duskborn.Gameplay.World
 
             for (int i = 0; i < hits.Length; i++)
             {
-                // Prioriza acertos contra malhas de terreno (TerrainChunk ou MeshCollider do relevo)
+                // Prioritize terrain mesh hits (TerrainChunk or terrain MeshCollider).
                 if (hits[i].collider.GetComponent<TerrainChunk>() != null || hits[i].collider is MeshCollider)
                 {
                     if (hits[i].distance < closestDist)
@@ -458,7 +458,7 @@ namespace Duskborn.Gameplay.World
                 }
             }
 
-            // Fallback para qualquer collider se não encontrar TerrainChunk explícito
+            // Fallback to any collider if no explicit TerrainChunk is found.
             if (!found && hits.Length > 0)
             {
                 for (int i = 0; i < hits.Length; i++)
@@ -477,7 +477,7 @@ namespace Duskborn.Gameplay.World
 
         private void PlaceCentralClearing(LowPolyTerrainConfig terrainConfig, WorldPropsConfig propsConfig, SeededRNG rng)
         {
-            // Registra o Santuário central no mapa de ocupação
+            // Register the central Sanctuary in the occupancy map.
             _occupancyMap.RegisterClearing(Vector2.zero, propsConfig.centerClearingRadius, OccupancyType.Player_Sanctuary);
 
             Vector3 centerRayOrigin = new Vector3(0f, 150f, 0f);
@@ -488,10 +488,10 @@ namespace Duskborn.Gameplay.World
                 centerGroundY = centerHit.point.y;
             }
 
-            // A) Posicionamento / Atualização de Pontos de Spawn de Jogadores
+            // A) Place / Update Player Spawn Points.
             SetupPlayerSpawnPoints(propsConfig, centerGroundY);
 
-            // B) Posicionamento das Estações de Fabricação (Bancada, Forja, Caldeirão, Mesa Arcana)
+            // B) Place Crafting Stations (Workbench, Forge, Cauldron, Arcane Table).
             (GameObject prefab, Vector3 offset, float rotY)[] stationsToPlace = new[]
             {
                 (propsConfig.workbenchPrefab ?? Resources.Load<GameObject>("Stations/Workbench"), new Vector3(2.5f, 0f, 1.5f), -45f),
@@ -517,7 +517,7 @@ namespace Duskborn.Gameplay.World
                 _occupancyMap.Register(stPos, solidRadius: 1.5f, canopyRadius: 0f, OccupancyType.Resource_Solid);
             }
 
-            // C) Posicionamento de Nós de Recursos de Teste de Tiers (Comum -> Incomum -> Raro -> Épico -> Lendário)
+            // C) Place Tier Test Resource Nodes (Common -> Uncommon -> Rare -> Epic -> Legendary).
             EnsureContainer();
             StaticTierTestNodes.SpawnNodes(propsContainer, new Vector3(0f, centerGroundY, 0f), pos =>
             {
@@ -544,7 +544,7 @@ namespace Duskborn.Gameplay.World
             {
                 for (int cx = startX; cx < startX + terrainConfig.chunksX; cx++)
                 {
-                    // O chunk central já contém o Santuário inicial
+                    // The central chunk already contains the starting Sanctuary.
                     if (cx == 0 && cz == 0) continue;
 
                     float chunkMinX = cx * chunkWorldLength;
@@ -552,7 +552,7 @@ namespace Duskborn.Gameplay.World
                     float chunkMinZ = cz * chunkWorldLength;
                     float chunkMaxZ = chunkMinZ + chunkWorldLength;
 
-                    // Posiciona uma clareira de combate aberta por chunk para preservar arena de combate (30-40% do mapa)
+                    // Place one open combat clearing per chunk to preserve combat arenas (30-40% of the map).
                     for (int attempt = 0; attempt < 16; attempt++)
                     {
                         float sampleX = rng.Range(chunkMinX + 4f, chunkMaxX - 4f);
@@ -654,7 +654,7 @@ namespace Duskborn.Gameplay.World
             }
 
             SyncWithPlayerSpawners(_spawnPoints.ToArray());
-            DuskLog.Log(LogChannel.World, $"[WorldPropsPlacer] {_spawnPoints.Count} pontos de spawn de jogador gerados com sucesso com o relevo.");
+            DuskLog.Log(LogChannel.World, $"[WorldPropsPlacer] {_spawnPoints.Count} player spawn points generated successfully with the terrain.");
         }
 
         private void PlaceResourceNodes(LowPolyTerrainConfig terrainConfig, WorldPropsConfig propsConfig, SeededRNG rng)
@@ -742,27 +742,27 @@ namespace Duskborn.Gameplay.World
                     float distCenterSq = sampleX * sampleX + sampleZ * sampleZ;
                     float distCenter = Mathf.Sqrt(distCenterSq);
 
-                    // Rejeita santuário central
+                    // Reject the central sanctuary.
                     if (distCenterSq < centerRadiusSqr)
                         continue;
 
-                    // Zoneamento radial (se configurado no prop)
+                    // Radial zoning (if configured on the prop).
                     if (propDef.minRadialDistance > 0f && distCenter < propDef.minRadialDistance)
                         continue;
                     if (propDef.maxRadialDistance > 0f && distCenter > propDef.maxRadialDistance)
                         continue;
 
-                    // Margem de borda do mapa
+                    // Map boundary margin.
                     if (distCenter + cluster.clusterRadius > maxBoundaryRadius)
                         continue;
 
                     Vector2 centerXZ = new Vector2(sampleX, sampleZ);
 
-                    // Evita clareiras protegidas (Santuário e Arenas de Combate)
+                    // Avoid protected clearings (Sanctuary and Combat Arenas).
                     if (_occupancyMap.IsInClearing(centerXZ))
                         continue;
 
-                    // Espaçamento inter-cluster com outros recursos
+                    // Intercluster spacing from other resources.
                     if (_occupancyMap.IsSolidOccupied(centerXZ, cluster.interClusterSpacing))
                         continue;
 
@@ -770,7 +770,7 @@ namespace Duskborn.Gameplay.World
                     if (!RaycastGround(rayOrigin, out RaycastHit hit))
                         continue;
 
-                    // Solo seco
+                    // Dry ground
                     if (hit.point.y <= terrainConfig.waterLevel + 0.35f)
                         continue;
 
@@ -790,7 +790,7 @@ namespace Duskborn.Gameplay.World
                 if (!foundCenter)
                     continue;
 
-                // Spawna os nós do aglomerado (Intra-cluster Poisson Disc Sampling)
+                // Spawn cluster nodes (intracluster Poisson disc sampling).
                 int nodeCount = rng.Range(cluster.nodesPerCluster.x, cluster.nodesPerCluster.y + 1);
                 const int maxNodeAttempts = 24;
 
@@ -808,7 +808,7 @@ namespace Duskborn.Gameplay.World
                         if (_occupancyMap.IsInClearing(nodeXZ))
                             continue;
 
-                        // Espaçamento intra-cluster contra nós vizinhos
+                        // Intracluster spacing from neighboring nodes.
                         if (_occupancyMap.IsSolidOccupied(nodeXZ, cluster.intraClusterSpacing))
                             continue;
 
@@ -874,17 +874,17 @@ namespace Duskborn.Gameplay.World
                     float distSq = sampleX * sampleX + sampleZ * sampleZ;
                     float distFromCenter = Mathf.Sqrt(distSq);
 
-                    // Ignora clareira central de segurança
+                    // Skip the central safety clearing.
                     if (distSq < centerRadiusSqr)
                         continue;
 
-                    // Zoneamento radial
+                    // Radial zoning
                     if (propDef.minRadialDistance > 0f && distFromCenter < propDef.minRadialDistance)
                         continue;
                     if (propDef.maxRadialDistance > 0f && distFromCenter > propDef.maxRadialDistance)
                         continue;
 
-                    // Ignora áreas fora da borda jogável
+                    // Skip areas outside the playable boundary.
                     if (distSq > maxBoundaryRadius * maxBoundaryRadius)
                         continue;
 
@@ -892,7 +892,7 @@ namespace Duskborn.Gameplay.World
                     if (_occupancyMap.IsInClearing(sampleXZ))
                         continue;
 
-                    // Agrupamento orgânico legado
+                    // Legacy organic clustering.
                     if (propDef.useClustering)
                     {
                         float clusterNoise = Mathf.PerlinNoise(
@@ -908,7 +908,7 @@ namespace Duskborn.Gameplay.World
                     if (!RaycastGround(rayOrigin, out RaycastHit hit))
                         continue;
 
-                    // Solo seco
+                    // Dry ground
                     if (hit.point.y <= terrainConfig.waterLevel + 0.35f)
                         continue;
 
@@ -920,7 +920,7 @@ namespace Duskborn.Gameplay.World
                     if (slope > propDef.maxSlopeAngle)
                         continue;
 
-                    // Raio de exclusão
+                    // Exclusion radius.
                     if (_occupancyMap.IsSolidOccupied(sampleXZ, propDef.exclusionRadius))
                         continue;
 
@@ -971,11 +971,11 @@ namespace Duskborn.Gameplay.World
                     float sampleZ = rng.Range(-halfMapZ * 0.95f, halfMapZ * 0.95f);
                     float distFromCenter = Mathf.Sqrt(sampleX * sampleX + sampleZ * sampleZ);
 
-                    // Evita spawnar colado ao ponto de spawn imediato (raio < 3m)
+                    // Avoid spawning next to the immediate spawn point (radius < 3m).
                     if (distFromCenter < 3f)
                         continue;
 
-                    // Limite de segurança de borda
+                    // Boundary safety limit.
                     if (distFromCenter > maxBoundaryRadius)
                         continue;
 
@@ -983,20 +983,20 @@ namespace Duskborn.Gameplay.World
                     if (!RaycastGround(rayOrigin, out RaycastHit hit))
                         continue;
 
-                    // Solo seco (acima da água)
+                    // Dry ground (above water).
                     if (hit.point.y <= terrainConfig.waterLevel + 0.5f)
                         continue;
 
-                    // Inclinação suave para estabilidade do baú nos platôs de combate
+                    // Gentle slope for chest stability on combat plateaus.
                     float slope = Vector3.Angle(hit.normal, Vector3.up);
                     if (slope > 18f)
                         continue;
 
-                    // Exclusão de outros baús e props (raio de 3.0m)
+                    // Exclude other chests and props (3.0m radius).
                     if (_occupancyMap.IsSolidOccupied(new Vector2(hit.point.x, hit.point.z), 2.5f))
                         continue;
 
-                    // Escalonamento por Distância (Risk vs. Reward)
+                    // Distance Scaling (Risk vs. Reward).
                     float t = Mathf.Clamp01(distFromCenter / maxBoundaryRadius);
                     int cost = Mathf.RoundToInt(Mathf.Lerp(propsConfig.minChestCost, propsConfig.maxChestCost, t));
 
@@ -1025,7 +1025,7 @@ namespace Duskborn.Gameplay.World
                 }
             }
 
-            DuskLog.Log(LogChannel.Loot, $"[WorldPropsPlacer] {chestsPlaced}/{propsConfig.totalChests} baús posicionados com sucesso.");
+            DuskLog.Log(LogChannel.Loot, $"[WorldPropsPlacer] {chestsPlaced}/{propsConfig.totalChests} chests placed successfully.");
         }
 
         private GameObject InstantiateProp(GameObject prefab, Vector3 position, Quaternion rotation, Vector3 scale)
@@ -1052,7 +1052,7 @@ namespace Duskborn.Gameplay.World
 
             go.transform.localScale = scale;
 
-            // Suporte a spawn de rede FishNet durante partidas ativas
+            // Support FishNet network spawning during active sessions.
             if (Application.isPlaying && InstanceFinder.ServerManager != null && InstanceFinder.ServerManager.Started)
             {
                 if (go.TryGetComponent<NetworkObject>(out var nob))
@@ -1074,7 +1074,7 @@ namespace Duskborn.Gameplay.World
             _placedPositions.Clear();
             _occupancyMap.Clear();
 
-            // Encontra e limpa todos os contêineres "WorldPropsContainer" filhos deste objeto
+            // Find and clear all child "WorldPropsContainer" containers of this object.
             for (int i = transform.childCount - 1; i >= 0; i--)
             {
                 Transform child = transform.GetChild(i);

@@ -12,7 +12,7 @@ namespace Duskborn.Gameplay.Building
         public string id;
         public string displayName;
         [TextArea] public string description;
-        public string category = "Estações";
+        public string category = "Stations";
         public GameObject prefab;
         [Tooltip("Attached only to initialized placed buildings; never copied into placement previews.")]
         public Duskborn.Effects.FurnaceEffects operatingEffect;

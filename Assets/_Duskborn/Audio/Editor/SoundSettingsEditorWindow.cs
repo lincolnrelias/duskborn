@@ -7,9 +7,9 @@ using UnityEngine;
 namespace Duskborn.Audio.Editor
 {
     /// <summary>
-    /// Janela de gerenciamento centralizado de áudio do Duskborn.
-    /// Permite inspecionar, auditar (preview em tempo real), configurar volumes e substituir
-    /// todos os clipes de som do jogo em um único dashboard intuitivo.
+    /// Centralized Duskborn audio management window.
+    /// Allows inspection, auditing (real-time previews), volume configuration, and replacement of
+    /// all game sound clips in one intuitive dashboard.
     /// </summary>
     public class SoundSettingsEditorWindow : EditorWindow
     {
@@ -29,13 +29,13 @@ namespace Duskborn.Audio.Editor
 
         private static readonly string[] TabNames = new[]
         {
-            "🪓 Recursos",
-            "🏃 Jogador",
-            "⚔️ Combate",
-            "👾 Inimigos",
-            "📦 Loot & Baús",
+            "🪓 Resources",
+            "🏃 Player",
+            "⚔️ Combat",
+            "👾 Enemies",
+            "📦 Loot & Chests",
             "🖥️ Interface",
-            "🎵 Música",
+            "🎵 Music",
             "⚙️ Global"
         };
 
@@ -68,8 +68,8 @@ namespace Duskborn.Audio.Editor
 
             if (_database == null || _serializedDb == null)
             {
-                EditorGUILayout.HelpBox("Nenhum AudioDatabase encontrado. Clique no botão abaixo para criar.", MessageType.Warning);
-                if (GUILayout.Button("Criar AudioDatabase Central", GUILayout.Height(35)))
+                EditorGUILayout.HelpBox("No AudioDatabase found. Click the button below to create one.", MessageType.Warning);
+                if (GUILayout.Button("Create Central AudioDatabase", GUILayout.Height(35)))
                 {
                     _database = AudioDatabase.CreateDefaultAsset();
                     _serializedDb = new SerializedObject(_database);
@@ -118,7 +118,7 @@ namespace Duskborn.Audio.Editor
             GUILayout.Label("🔊 Duskborn — Central Sound Settings", EditorStyles.boldLabel);
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button("⏹ Parar Áudios", EditorStyles.miniButton, GUILayout.Width(100)))
+            if (GUILayout.Button("⏹ Stop Audio", EditorStyles.miniButton, GUILayout.Width(100)))
             {
                 AudioPreviewUtility.StopAll();
             }
@@ -129,10 +129,10 @@ namespace Duskborn.Audio.Editor
                 Selection.activeObject = _database;
             }
 
-            if (GUILayout.Button("🔄 Auto-Vincular", EditorStyles.miniButton, GUILayout.Width(110)))
+            if (GUILayout.Button("🔄 Auto-Link", EditorStyles.miniButton, GUILayout.Width(110)))
             {
-                if (EditorUtility.DisplayDialog("Auto-Vincular Clipes",
-                    "Deseja preencher automaticamente todos os campos vazios com os clipes detectados em Art/SFX e Audio/Music?", "Sim", "Cancelar"))
+                if (EditorUtility.DisplayDialog("Auto-Link Clips",
+                    "Automatically fill all empty fields with clips detected in Art/SFX and Audio/Music?", "Yes", "Cancel"))
                 {
                     _database.AutoPopulateDefaults();
                     _serializedDb.Update();
@@ -159,7 +159,7 @@ namespace Duskborn.Audio.Editor
             EditorGUILayout.LabelField($"Asset: Assets/_Duskborn/Resources/Audio/{_database.name}.asset", EditorStyles.miniLabel);
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button("💾 Salvar Alterações", GUILayout.Width(140), GUILayout.Height(24)))
+            if (GUILayout.Button("💾 Save Changes", GUILayout.Width(140), GUILayout.Height(24)))
             {
                 _serializedDb.ApplyModifiedProperties();
                 EditorUtility.SetDirty(_database);
@@ -170,259 +170,259 @@ namespace Duskborn.Audio.Editor
             EditorGUILayout.EndVertical();
         }
 
-        // ── 0. Recursos e Nós de Coleta ───────────────────────────────────────
+        // 0. Resources and Gathering Nodes
 
         private void DrawResourcesTab()
         {
-            DrawSectionHeader("Coleta & Destruição de Nós de Recursos",
-                "Configura os sons orgânicos de quebra e depleção ao esgotar veios de pedra, minério e árvores.");
+            DrawSectionHeader("Gathering & Resource Node Destruction",
+                "Configure organic break and depletion sounds for exhausted stone, ore, and tree nodes.");
 
             var resProp = _serializedDb.FindProperty("resources");
             if (resProp == null) return;
 
-            DrawClipArray(resProp.FindPropertyRelative("rockShatterClips"), "🪨 Quebra de Pedra (Rock Shatter)");
-            DrawClipArray(resProp.FindPropertyRelative("oreShatterClips"), "⛏️ Quebra de Minério (Ore Shatter)");
-            DrawClipArray(resProp.FindPropertyRelative("treeFallClips"), "🌲 Queda de Árvore (Tree Fall)");
+            DrawClipArray(resProp.FindPropertyRelative("rockShatterClips"), "🪨 Rock Shatter");
+            DrawClipArray(resProp.FindPropertyRelative("oreShatterClips"), "⛏️ Ore Shatter");
+            DrawClipArray(resProp.FindPropertyRelative("treeFallClips"), "🌲 Tree Fall");
 
             EditorGUILayout.Space(6);
-            DrawSectionBox("Parâmetros 3D & Volume", () =>
+            DrawSectionBox("3D Parameters & Volume", () =>
             {
-                EditorGUILayout.Slider(resProp.FindPropertyRelative("depletedVolume"), 0f, 1f, "Volume de Depleção");
-                EditorGUILayout.PropertyField(resProp.FindPropertyRelative("minDistance"), new GUIContent("Distância Mínima (3D)"));
-                EditorGUILayout.PropertyField(resProp.FindPropertyRelative("maxDistance"), new GUIContent("Distância Máxima (3D)"));
+                EditorGUILayout.Slider(resProp.FindPropertyRelative("depletedVolume"), 0f, 1f, "Depletion Volume");
+                EditorGUILayout.PropertyField(resProp.FindPropertyRelative("minDistance"), new GUIContent("Minimum Distance (3D)"));
+                EditorGUILayout.PropertyField(resProp.FindPropertyRelative("maxDistance"), new GUIContent("Maximum Distance (3D)"));
             });
         }
 
-        // ── 1. Jogador e Movimentação ─────────────────────────────────────────
+        // 1. Player and Movement
 
         private void DrawPlayerTab()
         {
-            DrawSectionHeader("Jogador: Passos, Locomoção & Vitalidade",
-                "Configura os passos por superfície, saltos, impactos de dano, morte e a batida cardíaca de perigo crítico.");
+            DrawSectionHeader("Player: Footsteps, Locomotion & Vitality",
+                "Configure footsteps by surface, jumps, damage impacts, death, and the critical danger heartbeat.");
 
             var pProp = _serializedDb.FindProperty("player");
             if (pProp == null) return;
 
-            DrawClipArray(pProp.FindPropertyRelative("grassSteps"), "🌱 Passos na Grama (Grass)");
-            DrawClipArray(pProp.FindPropertyRelative("dirtSteps"),  "🍂 Passos na Terra/Areia (Dirt/Sand)");
-            DrawClipArray(pProp.FindPropertyRelative("stoneSteps"), "🧱 Passos na Rocha/Pedra/Metal (Rock/Stone)");
-            DrawClipArray(pProp.FindPropertyRelative("waterSteps"), "🌊 Passos na Água (Water)");
+            DrawClipArray(pProp.FindPropertyRelative("grassSteps"), "🌱 Grass Footsteps");
+            DrawClipArray(pProp.FindPropertyRelative("dirtSteps"),  "🍂 Dirt / Sand Footsteps");
+            DrawClipArray(pProp.FindPropertyRelative("stoneSteps"), "🧱 Rock / Stone / Metal Footsteps");
+            DrawClipArray(pProp.FindPropertyRelative("waterSteps"), "🌊 Water Footsteps");
 
             EditorGUILayout.Space(6);
-            DrawSectionBox("Salto e Queda", () =>
+            DrawSectionBox("Jump and Fall", () =>
             {
-                DrawSingleClipWithPreview(pProp.FindPropertyRelative("jumpClip"), "Salto (Takeoff)");
-                DrawSingleClipWithPreview(pProp.FindPropertyRelative("landClip"), "Aterrissagem (Land)");
-                EditorGUILayout.Slider(pProp.FindPropertyRelative("footstepVolume"), 0f, 1f, "Volume dos Passos");
-                EditorGUILayout.Slider(pProp.FindPropertyRelative("jumpVolume"), 0f, 1f, "Volume do Salto");
-                EditorGUILayout.Slider(pProp.FindPropertyRelative("landVolume"), 0f, 1f, "Volume da Queda");
+                DrawSingleClipWithPreview(pProp.FindPropertyRelative("jumpClip"), "Jump (Takeoff)");
+                DrawSingleClipWithPreview(pProp.FindPropertyRelative("landClip"), "Landing");
+                EditorGUILayout.Slider(pProp.FindPropertyRelative("footstepVolume"), 0f, 1f, "Footstep Volume");
+                EditorGUILayout.Slider(pProp.FindPropertyRelative("jumpVolume"), 0f, 1f, "Jump Volume");
+                EditorGUILayout.Slider(pProp.FindPropertyRelative("landVolume"), 0f, 1f, "Landing Volume");
             });
 
             EditorGUILayout.Space(6);
-            DrawSectionBox("🌊 Interação com Água (Deslocamento & Splash)", () =>
+            DrawSectionBox("🌊 Water Interaction (Movement & Splash)", () =>
             {
-                DrawSingleClipWithPreview(pProp.FindPropertyRelative("waterWadeLoop"), "Loop de Movimento na Água (Wade Loop)");
-                DrawSingleClipWithPreview(pProp.FindPropertyRelative("waterEnterSplashClip"), "Splash ao Entrar na Água");
-                EditorGUILayout.Slider(pProp.FindPropertyRelative("waterWadeVolume"), 0f, 1f, "Volume do Deslocamento na Água");
-                EditorGUILayout.Slider(pProp.FindPropertyRelative("waterSplashVolume"), 0f, 1f, "Volume do Splash na Água");
+                DrawSingleClipWithPreview(pProp.FindPropertyRelative("waterWadeLoop"), "Water Movement Loop (Wading)");
+                DrawSingleClipWithPreview(pProp.FindPropertyRelative("waterEnterSplashClip"), "Water Entry Splash");
+                EditorGUILayout.Slider(pProp.FindPropertyRelative("waterWadeVolume"), 0f, 1f, "Water Movement Volume");
+                EditorGUILayout.Slider(pProp.FindPropertyRelative("waterSplashVolume"), 0f, 1f, "Water Splash Volume");
             });
 
             EditorGUILayout.Space(6);
-            DrawSectionBox("Vitalidade & Dano", () =>
+            DrawSectionBox("Vitality & Damage", () =>
             {
-                DrawClipArray(pProp.FindPropertyRelative("hurtClips"), "🩸 Gemidos de Dano (Hurt Grunts)");
-                DrawSingleClipWithPreview(pProp.FindPropertyRelative("deathClip"), "Morte do Jogador");
-                DrawSingleClipWithPreview(pProp.FindPropertyRelative("heartbeatLoopClip"), "Batimento Cardíaco (Loop)");
+                DrawClipArray(pProp.FindPropertyRelative("hurtClips"), "🩸 Hurt Grunts");
+                DrawSingleClipWithPreview(pProp.FindPropertyRelative("deathClip"), "Player Death");
+                DrawSingleClipWithPreview(pProp.FindPropertyRelative("heartbeatLoopClip"), "Heartbeat (Loop)");
 
-                EditorGUILayout.Slider(pProp.FindPropertyRelative("hurtVolume"), 0f, 1f, "Volume de Dano");
-                EditorGUILayout.Slider(pProp.FindPropertyRelative("deathVolume"), 0f, 1f, "Volume de Morte");
-                EditorGUILayout.Slider(pProp.FindPropertyRelative("lowHpThreshold"), 0.1f, 0.5f, "Gatilho de Vida Baixa (Heartbeat)");
-                EditorGUILayout.Slider(pProp.FindPropertyRelative("pitchVariation"), 0f, 0.2f, "Variação Orgânica de Pitch");
+                EditorGUILayout.Slider(pProp.FindPropertyRelative("hurtVolume"), 0f, 1f, "Damage Volume");
+                EditorGUILayout.Slider(pProp.FindPropertyRelative("deathVolume"), 0f, 1f, "Death Volume");
+                EditorGUILayout.Slider(pProp.FindPropertyRelative("lowHpThreshold"), 0.1f, 0.5f, "Low Health Threshold (Heartbeat)");
+                EditorGUILayout.Slider(pProp.FindPropertyRelative("pitchVariation"), 0f, 0.2f, "Organic Pitch Variation");
             });
         }
 
-        // ── 2. Combate e Superfícies ─────────────────────────────────────────
+        // 2. Combat and Surfaces
 
         private void DrawCombatTab()
         {
-            DrawSectionHeader("Combate: Impactos de Superfície & Swings",
-                "Define os sons de impacto padrão por superfície caso uma arma ou skill não possua override específico.");
+            DrawSectionHeader("Combat: Surface Impacts & Swings",
+                "Define default surface impact sounds when a weapon or skill has no specific override.");
 
             var cProp = _serializedDb.FindProperty("combat");
             if (cProp == null) return;
 
-            DrawClipArray(cProp.FindPropertyRelative("woodHitClips"), "🪵 Impacto em Madeira/Árvore");
-            DrawClipArray(cProp.FindPropertyRelative("stoneHitClips"), "🪨 Impacto em Pedra");
-            DrawClipArray(cProp.FindPropertyRelative("metalHitClips"), "🛡️ Impacto em Metal/Minério");
-            DrawClipArray(cProp.FindPropertyRelative("fleshHitClips"), "🥩 Impacto em Carne/Inimigo");
-            DrawClipArray(cProp.FindPropertyRelative("defaultHitClips"), "⚪ Impacto Padrão (Fallback)");
+            DrawClipArray(cProp.FindPropertyRelative("woodHitClips"), "🪵 Wood / Tree Impact");
+            DrawClipArray(cProp.FindPropertyRelative("stoneHitClips"), "🪨 Stone Impact");
+            DrawClipArray(cProp.FindPropertyRelative("metalHitClips"), "🛡️ Metal / Ore Impact");
+            DrawClipArray(cProp.FindPropertyRelative("fleshHitClips"), "🥩 Flesh / Enemy Impact");
+            DrawClipArray(cProp.FindPropertyRelative("defaultHitClips"), "⚪ Default Impact (Fallback)");
 
             EditorGUILayout.Space(6);
-            DrawClipArray(cProp.FindPropertyRelative("lightSwingClips"), "🗡️ Golpes Rápidos no Ar (Light Swings)");
-            DrawClipArray(cProp.FindPropertyRelative("heavySwingClips"), "🪓 Golpes Pesados no Ar (Heavy Swings)");
+            DrawClipArray(cProp.FindPropertyRelative("lightSwingClips"), "🗡️ Light Swings");
+            DrawClipArray(cProp.FindPropertyRelative("heavySwingClips"), "🪓 Heavy Swings");
 
             EditorGUILayout.Space(6);
-            DrawSectionBox("Perfis de Armas Registrados", () =>
+            DrawSectionBox("Registered Weapon Profiles", () =>
             {
                 var profilesProp = cProp.FindPropertyRelative("registeredProfiles");
                 if (profilesProp != null)
                 {
-                    EditorGUILayout.PropertyField(profilesProp, new GUIContent("Perfis Ativos"), true);
+                    EditorGUILayout.PropertyField(profilesProp, new GUIContent("Active Profiles"), true);
                 }
             });
         }
 
-        // ── 3. Inimigos ──────────────────────────────────────────────────────
+        // ── 3. Enemies ──
 
         private void DrawEnemiesTab()
         {
-            DrawSectionHeader("Inimigos: Vocalizações & Feedback",
-                "Configura os sons 3D de ataque, dano e morte para arquétipos de monstros.");
+            DrawSectionHeader("Enemies: Vocalizations & Feedback",
+                "Configure 3D attack, hurt, and death sounds for monster archetypes.");
 
             var eProp = _serializedDb.FindProperty("enemies");
             if (eProp == null) return;
 
-            DrawSectionBox("Inimigo: Swarmer", () =>
+            DrawSectionBox("Enemy: Swarmer", () =>
             {
-                DrawClipArray(eProp.FindPropertyRelative("swarmerAttackClips"), "⚔️ Ataques / Mordidas");
-                DrawClipArray(eProp.FindPropertyRelative("swarmerHurtClips"), "💥 Guinchos de Dano");
-                DrawClipArray(eProp.FindPropertyRelative("swarmerDeathClips"), "☠️ Morte Visceral");
+                DrawClipArray(eProp.FindPropertyRelative("swarmerAttackClips"), "⚔️ Attacks / Bites");
+                DrawClipArray(eProp.FindPropertyRelative("swarmerHurtClips"), "💥 Hurt Screeches");
+                DrawClipArray(eProp.FindPropertyRelative("swarmerDeathClips"), "☠️ Visceral Death");
 
                 EditorGUILayout.Space(4);
-                EditorGUILayout.Slider(eProp.FindPropertyRelative("attackVolume"), 0f, 1f, "Volume de Ataque");
-                EditorGUILayout.Slider(eProp.FindPropertyRelative("hurtVolume"), 0f, 1f, "Volume de Dano");
-                EditorGUILayout.Slider(eProp.FindPropertyRelative("deathVolume"), 0f, 1f, "Volume de Morte");
-                EditorGUILayout.PropertyField(eProp.FindPropertyRelative("minDistance"), new GUIContent("Distância Mínima (3D)"));
-                EditorGUILayout.PropertyField(eProp.FindPropertyRelative("maxDistance"), new GUIContent("Distância Máxima (3D)"));
+                EditorGUILayout.Slider(eProp.FindPropertyRelative("attackVolume"), 0f, 1f, "Attack Volume");
+                EditorGUILayout.Slider(eProp.FindPropertyRelative("hurtVolume"), 0f, 1f, "Damage Volume");
+                EditorGUILayout.Slider(eProp.FindPropertyRelative("deathVolume"), 0f, 1f, "Death Volume");
+                EditorGUILayout.PropertyField(eProp.FindPropertyRelative("minDistance"), new GUIContent("Minimum Distance (3D)"));
+                EditorGUILayout.PropertyField(eProp.FindPropertyRelative("maxDistance"), new GUIContent("Maximum Distance (3D)"));
             });
         }
 
-        // ── 4. Loot e Interações ─────────────────────────────────────────────
+        // 4. Loot and Interactions
 
         private void DrawLootTab()
         {
-            DrawSectionHeader("Loot, Baús & Coletáveis",
-                "Configura os sons de coleta e drop por raridade (Comum até Lendário), ouro e abertura de baús.");
+            DrawSectionHeader("Loot, Chests & Pickups",
+                "Configure pickup and drop sounds by rarity (Common to Legendary), gold, and chest opening.");
 
             var lProp = _serializedDb.FindProperty("loot");
             if (lProp == null) return;
 
-            DrawSectionBox("Coleta de Itens por Raridade (Pickup SFX)", () =>
+            DrawSectionBox("Item Pickups by Rarity (Pickup SFX)", () =>
             {
-                DrawSingleClipWithPreview(lProp.FindPropertyRelative("commonPickupClip"), "⚪ Coleta: Comum (Common)");
-                EditorGUILayout.Slider(lProp.FindPropertyRelative("commonPickupVolume"), 0f, 1f, "Volume Comum");
+                DrawSingleClipWithPreview(lProp.FindPropertyRelative("commonPickupClip"), "⚪ Pickup: Common");
+                EditorGUILayout.Slider(lProp.FindPropertyRelative("commonPickupVolume"), 0f, 1f, "Common Volume");
 
                 EditorGUILayout.Space(6);
-                DrawSingleClipWithPreview(lProp.FindPropertyRelative("uncommonPickupClip"), "🟢 Coleta: Incomum (Uncommon)");
-                EditorGUILayout.Slider(lProp.FindPropertyRelative("uncommonPickupVolume"), 0f, 1f, "Volume Incomum");
+                DrawSingleClipWithPreview(lProp.FindPropertyRelative("uncommonPickupClip"), "🟢 Pickup: Uncommon");
+                EditorGUILayout.Slider(lProp.FindPropertyRelative("uncommonPickupVolume"), 0f, 1f, "Uncommon Volume");
 
                 EditorGUILayout.Space(6);
-                DrawSingleClipWithPreview(lProp.FindPropertyRelative("rarePickupClip"), "🔵 Coleta: Raro (Rare)");
-                EditorGUILayout.Slider(lProp.FindPropertyRelative("rarePickupVolume"), 0f, 1f, "Volume Raro");
+                DrawSingleClipWithPreview(lProp.FindPropertyRelative("rarePickupClip"), "🔵 Pickup: Rare");
+                EditorGUILayout.Slider(lProp.FindPropertyRelative("rarePickupVolume"), 0f, 1f, "Rare Volume");
 
                 EditorGUILayout.Space(6);
-                DrawSingleClipWithPreview(lProp.FindPropertyRelative("epicPickupClip"), "🟣 Coleta: Épico (Epic)");
-                EditorGUILayout.Slider(lProp.FindPropertyRelative("epicPickupVolume"), 0f, 1f, "Volume Épico");
+                DrawSingleClipWithPreview(lProp.FindPropertyRelative("epicPickupClip"), "🟣 Pickup: Epic");
+                EditorGUILayout.Slider(lProp.FindPropertyRelative("epicPickupVolume"), 0f, 1f, "Epic Volume");
 
                 EditorGUILayout.Space(6);
-                DrawSingleClipWithPreview(lProp.FindPropertyRelative("legendaryPickupClip"), "🟠 Coleta: Lendário (Legendary)");
-                EditorGUILayout.Slider(lProp.FindPropertyRelative("legendaryPickupVolume"), 0f, 1f, "Volume Lendário");
+                DrawSingleClipWithPreview(lProp.FindPropertyRelative("legendaryPickupClip"), "🟠 Pickup: Legendary");
+                EditorGUILayout.Slider(lProp.FindPropertyRelative("legendaryPickupVolume"), 0f, 1f, "Legendary Volume");
             });
 
             EditorGUILayout.Space(10);
-            DrawSectionBox("Impacto / Drop no Chão por Raridade (Drop SFX)", () =>
+            DrawSectionBox("Ground Impact / Drop by Rarity (Drop SFX)", () =>
             {
-                DrawSingleClipWithPreview(lProp.FindPropertyRelative("commonDropClip"), "⚪ Drop: Comum (Common)");
-                EditorGUILayout.Slider(lProp.FindPropertyRelative("commonDropVolume"), 0f, 1f, "Volume Drop Comum");
+                DrawSingleClipWithPreview(lProp.FindPropertyRelative("commonDropClip"), "⚪ Drop: Common");
+                EditorGUILayout.Slider(lProp.FindPropertyRelative("commonDropVolume"), 0f, 1f, "Common Drop Volume");
 
                 EditorGUILayout.Space(6);
-                DrawSingleClipWithPreview(lProp.FindPropertyRelative("uncommonDropClip"), "🟢 Drop: Incomum (Uncommon)");
-                EditorGUILayout.Slider(lProp.FindPropertyRelative("uncommonDropVolume"), 0f, 1f, "Volume Drop Incomum");
+                DrawSingleClipWithPreview(lProp.FindPropertyRelative("uncommonDropClip"), "🟢 Drop: Uncommon");
+                EditorGUILayout.Slider(lProp.FindPropertyRelative("uncommonDropVolume"), 0f, 1f, "Uncommon Drop Volume");
 
                 EditorGUILayout.Space(6);
-                DrawSingleClipWithPreview(lProp.FindPropertyRelative("rareDropClip"), "🔵 Drop: Raro (Rare)");
-                EditorGUILayout.Slider(lProp.FindPropertyRelative("rareDropVolume"), 0f, 1f, "Volume Drop Raro");
+                DrawSingleClipWithPreview(lProp.FindPropertyRelative("rareDropClip"), "🔵 Drop: Rare");
+                EditorGUILayout.Slider(lProp.FindPropertyRelative("rareDropVolume"), 0f, 1f, "Rare Drop Volume");
 
                 EditorGUILayout.Space(6);
-                DrawSingleClipWithPreview(lProp.FindPropertyRelative("epicDropClip"), "🟣 Drop: Épico (Epic)");
-                EditorGUILayout.Slider(lProp.FindPropertyRelative("epicDropVolume"), 0f, 1f, "Volume Drop Épico");
+                DrawSingleClipWithPreview(lProp.FindPropertyRelative("epicDropClip"), "🟣 Drop: Epic");
+                EditorGUILayout.Slider(lProp.FindPropertyRelative("epicDropVolume"), 0f, 1f, "Epic Drop Volume");
 
                 EditorGUILayout.Space(6);
-                DrawSingleClipWithPreview(lProp.FindPropertyRelative("legendaryDropClip"), "🟠 Drop: Lendário (Legendary)");
-                EditorGUILayout.Slider(lProp.FindPropertyRelative("legendaryDropVolume"), 0f, 1f, "Volume Drop Lendário");
+                DrawSingleClipWithPreview(lProp.FindPropertyRelative("legendaryDropClip"), "🟠 Drop: Legendary");
+                EditorGUILayout.Slider(lProp.FindPropertyRelative("legendaryDropVolume"), 0f, 1f, "Legendary Drop Volume");
             });
 
             EditorGUILayout.Space(10);
-            DrawSectionBox("Ouro, Baús & Coleta Geral", () =>
+            DrawSectionBox("Gold, Chests & General Pickups", () =>
             {
-                DrawSingleClipWithPreview(lProp.FindPropertyRelative("goldPickupClip"), "🪙 Coleta de Ouro");
-                EditorGUILayout.Slider(lProp.FindPropertyRelative("goldVolume"), 0f, 1f, "Volume do Ouro");
+                DrawSingleClipWithPreview(lProp.FindPropertyRelative("goldPickupClip"), "🪙 Gold Pickup");
+                EditorGUILayout.Slider(lProp.FindPropertyRelative("goldVolume"), 0f, 1f, "Gold Volume");
 
                 EditorGUILayout.Space(6);
-                DrawSingleClipWithPreview(lProp.FindPropertyRelative("itemPickupClip"), "🎒 Coleta Padrão (Fallback)");
-                EditorGUILayout.Slider(lProp.FindPropertyRelative("itemVolume"), 0f, 1f, "Volume Padrão");
+                DrawSingleClipWithPreview(lProp.FindPropertyRelative("itemPickupClip"), "🎒 Default Pickup (Fallback)");
+                EditorGUILayout.Slider(lProp.FindPropertyRelative("itemVolume"), 0f, 1f, "Default Volume");
 
                 EditorGUILayout.Space(6);
-                DrawSingleClipWithPreview(lProp.FindPropertyRelative("chestOpenClip"), "📦 Abertura de Baú");
-                EditorGUILayout.Slider(lProp.FindPropertyRelative("chestVolume"), 0f, 1f, "Volume do Baú");
+                DrawSingleClipWithPreview(lProp.FindPropertyRelative("chestOpenClip"), "📦 Chest Opening");
+                EditorGUILayout.Slider(lProp.FindPropertyRelative("chestVolume"), 0f, 1f, "Chest Volume");
             });
         }
 
-        // ── 5. Interface de Usuário (UI) ──────────────────────────────────────
+        // 5. User Interface (UI)
 
         private void DrawUiTab()
         {
-            DrawSectionHeader("Interface de Usuário (UI)",
-                "Configura os efeitos sonoros táteis de cliques de botões, modais, criação de itens e avisos de erro.");
+            DrawSectionHeader("User Interface (UI)",
+                "Configure tactile sound effects for button clicks, modals, item crafting, and error alerts.");
 
             var uProp = _serializedDb.FindProperty("ui");
             if (uProp == null) return;
 
-            DrawSectionBox("Navegação & Modais", () =>
+            DrawSectionBox("Navigation & Modals", () =>
             {
-                DrawSingleClipWithPreview(uProp.FindPropertyRelative("buttonClickClip"), "🖱️ Clique de Botão");
-                EditorGUILayout.Slider(uProp.FindPropertyRelative("buttonClickVolume"), 0f, 1f, "Volume do Clique");
+                DrawSingleClipWithPreview(uProp.FindPropertyRelative("buttonClickClip"), "🖱️ Button Click");
+                EditorGUILayout.Slider(uProp.FindPropertyRelative("buttonClickVolume"), 0f, 1f, "Click Volume");
 
                 EditorGUILayout.Space(6);
-                DrawSingleClipWithPreview(uProp.FindPropertyRelative("modalOpenClip"), "📂 Abertura de Janela/Modal");
-                EditorGUILayout.Slider(uProp.FindPropertyRelative("modalOpenVolume"), 0f, 1f, "Volume do Modal");
+                DrawSingleClipWithPreview(uProp.FindPropertyRelative("modalOpenClip"), "📂 Window / Modal Opening");
+                EditorGUILayout.Slider(uProp.FindPropertyRelative("modalOpenVolume"), 0f, 1f, "Modal Volume");
 
                 EditorGUILayout.Space(6);
-                DrawSingleClipWithPreview(uProp.FindPropertyRelative("craftSuccessClip"), "⚒️ Sucesso de Fabricação (Craft)");
-                EditorGUILayout.Slider(uProp.FindPropertyRelative("craftSuccessVolume"), 0f, 1f, "Volume de Craft");
+                DrawSingleClipWithPreview(uProp.FindPropertyRelative("craftSuccessClip"), "⚒️ Crafting Success");
+                EditorGUILayout.Slider(uProp.FindPropertyRelative("craftSuccessVolume"), 0f, 1f, "Craft Volume");
 
                 EditorGUILayout.Space(6);
-                DrawSingleClipWithPreview(uProp.FindPropertyRelative("errorClip"), "⚠️ Som de Erro / Ação Inválida");
-                EditorGUILayout.Slider(uProp.FindPropertyRelative("errorVolume"), 0f, 1f, "Volume de Erro");
+                DrawSingleClipWithPreview(uProp.FindPropertyRelative("errorClip"), "⚠️ Error / Invalid Action Sound");
+                EditorGUILayout.Slider(uProp.FindPropertyRelative("errorVolume"), 0f, 1f, "Error Volume");
             });
         }
 
-        // ── 6. Música e Atmosfera ─────────────────────────────────────────────
+        // 6. Music and Atmosphere
 
         private void DrawMusicTab()
         {
-            DrawSectionHeader("Música & Atmosfera Dinâmica",
-                "Configura as trilhas sonoras e stingers com suporte a crossfade adaptativo.");
+            DrawSectionHeader("Music & Dynamic Atmosphere",
+                "Configure soundtracks and stingers with adaptive crossfade support.");
 
             var mProp = _serializedDb.FindProperty("music");
             if (mProp == null) return;
 
-            DrawSectionBox("Trilhas Musicais", () =>
+            DrawSectionBox("Music Tracks", () =>
             {
-                DrawSingleClipWithPreview(mProp.FindPropertyRelative("menuMusic"), "Menu Principal (Loop)");
-                DrawSingleClipWithPreview(mProp.FindPropertyRelative("dayMusic"), "Exploração Diurna (Loop)");
-                DrawSingleClipWithPreview(mProp.FindPropertyRelative("nightMusic"), "Combate Noturno (Loop)");
+                DrawSingleClipWithPreview(mProp.FindPropertyRelative("menuMusic"), "Main Menu (Loop)");
+                DrawSingleClipWithPreview(mProp.FindPropertyRelative("dayMusic"), "Daytime Exploration (Loop)");
+                DrawSingleClipWithPreview(mProp.FindPropertyRelative("nightMusic"), "Night Combat (Loop)");
 
                 EditorGUILayout.Space(4);
-                EditorGUILayout.PropertyField(mProp.FindPropertyRelative("musicFadeDuration"), new GUIContent("Duração do Crossfade (s)"));
+                EditorGUILayout.PropertyField(mProp.FindPropertyRelative("musicFadeDuration"), new GUIContent("Crossfade Duration (s)"));
             });
 
             EditorGUILayout.Space(6);
-            DrawSectionBox("Stingers e Berrantes de Transição", () =>
+            DrawSectionBox("Transition Stingers and Horns", () =>
             {
-                DrawSingleClipWithPreview(mProp.FindPropertyRelative("dawnHorn"), "📯 Berrante do Alvorecer (Dawn)");
-                DrawSingleClipWithPreview(mProp.FindPropertyRelative("nightHorn"), "📯 Berrante da Noite (Night)");
-                EditorGUILayout.Slider(mProp.FindPropertyRelative("hornVolume"), 0f, 1f, "Volume dos Berrantes");
+                DrawSingleClipWithPreview(mProp.FindPropertyRelative("dawnHorn"), "📯 Dawn Horn");
+                DrawSingleClipWithPreview(mProp.FindPropertyRelative("nightHorn"), "📯 Night Horn");
+                EditorGUILayout.Slider(mProp.FindPropertyRelative("hornVolume"), 0f, 1f, "Horn Volume");
             });
         }
 
@@ -430,25 +430,25 @@ namespace Duskborn.Audio.Editor
 
         private void DrawGlobalTab()
         {
-            DrawSectionHeader("Canais de Volume & AudioManager",
-                "Visão geral dos barramentos de áudio e configurações persistentes.");
+            DrawSectionHeader("Volume Channels & AudioManager",
+                "Overview of audio buses and persistent settings.");
 
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            EditorGUILayout.LabelField("Barramentos Padrão (AudioManager):", EditorStyles.boldLabel);
-            EditorGUILayout.LabelField("• Master: 1.0 (Canal mestre)");
-            EditorGUILayout.LabelField("• Music:  0.75 (Trilhas e ambiente sonoro)");
-            EditorGUILayout.LabelField("• SFX:    0.90 (Combate, passos, destruição e interações)");
-            EditorGUILayout.LabelField("• UI:     0.85 (Feedback tátil de interface)");
+            EditorGUILayout.LabelField("Default Buses (AudioManager):", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("• Master: 1.0 (Master channel)");
+            EditorGUILayout.LabelField("• Music:  0.75 (Soundtracks and ambience)");
+            EditorGUILayout.LabelField("• SFX:    0.90 (Combat, footsteps, destruction, and interactions)");
+            EditorGUILayout.LabelField("• UI:     0.85 (Tactile interface feedback)");
             EditorGUILayout.Space(6);
-            EditorGUILayout.HelpBox("Os volumes são automaticamente persistidos em PlayerPrefs pelo AudioManager durante a execução do jogo.", MessageType.Info);
+            EditorGUILayout.HelpBox("AudioManager automatically persists volumes in PlayerPrefs while the game runs.", MessageType.Info);
             EditorGUILayout.EndVertical();
 
             EditorGUILayout.Space(6);
-            DrawSectionBox("Operações do Banco de Dados", () =>
+            DrawSectionBox("Database Operations", () =>
             {
-                if (GUILayout.Button("Redefinir Tudo para Clipes Padrão do Projeto", GUILayout.Height(30)))
+                if (GUILayout.Button("Reset All to Default Project Clips", GUILayout.Height(30)))
                 {
-                    if (EditorUtility.DisplayDialog("Redefinir Áudios", "Tem certeza que deseja restaurar as configurações padrão?", "Sim", "Não"))
+                    if (EditorUtility.DisplayDialog("Reset Audio", "Are you sure you want to restore the default settings?", "Yes", "No"))
                     {
                         _database.AutoPopulateDefaults();
                         _serializedDb.Update();
@@ -511,12 +511,12 @@ namespace Duskborn.Audio.Editor
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.BeginHorizontal();
 
-            arrayProp.isExpanded = EditorGUILayout.Foldout(arrayProp.isExpanded, $"{title} ({arrayProp.arraySize} variações)", true);
+            arrayProp.isExpanded = EditorGUILayout.Foldout(arrayProp.isExpanded, $"{title} ({arrayProp.arraySize} variations)", true);
             GUILayout.FlexibleSpace();
 
             if (arrayProp.arraySize > 0)
             {
-                if (GUILayout.Button("🎲 Variação Aleatória", EditorStyles.miniButton, GUILayout.Width(130)))
+                if (GUILayout.Button("🎲 Random Variation", EditorStyles.miniButton, GUILayout.Width(130)))
                 {
                     int idx = UnityEngine.Random.Range(0, arrayProp.arraySize);
                     var elem = arrayProp.GetArrayElementAtIndex(idx);
@@ -532,7 +532,7 @@ namespace Duskborn.Audio.Editor
             if (arrayProp.isExpanded)
             {
                 EditorGUI.indentLevel++;
-                int newSize = EditorGUILayout.IntField("Tamanho", arrayProp.arraySize);
+                int newSize = EditorGUILayout.IntField("Size", arrayProp.arraySize);
                 if (newSize != arrayProp.arraySize && newSize >= 0)
                 {
                     arrayProp.arraySize = newSize;
@@ -542,7 +542,7 @@ namespace Duskborn.Audio.Editor
                 {
                     var elem = arrayProp.GetArrayElementAtIndex(i);
                     EditorGUILayout.BeginHorizontal();
-                    EditorGUILayout.PropertyField(elem, new GUIContent($"Variação {i + 1}"));
+                    EditorGUILayout.PropertyField(elem, new GUIContent($"Variation {i + 1}"));
 
                     var clip = elem.objectReferenceValue as AudioClip;
                     GUI.enabled = clip != null;

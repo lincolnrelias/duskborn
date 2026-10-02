@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: material_iron_bar
   m_EditorClassIdentifier: Assembly-CSharp::InventorySystem.Data.MaterialDefinition
   id: material_iron_bar
-  displayName: Barra de Ferro
-  description: Barra de ferro purificada na forja. Base da metalurgia.
+  displayName: "Iron Bar"
+  description: "Iron bar purified in the forge. The foundation of metallurgy."
   icon: {fileID: 2800000, guid: a8ed8409122a489c863542e28361e4bf, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 1

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: gear_iron_bracers
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.GearDefinition
   id: gear_iron_bracers
-  displayName: Braçadeiras de Ferro
+  displayName: "Iron Bracers"
   description: 'AttackSpeed: +5%  Damage: +3%'
   icon: {fileID: 2800000, guid: 14e1ff08e6164bf9b27294795e272708, type: 3}
   dropPrefab: {fileID: 0}

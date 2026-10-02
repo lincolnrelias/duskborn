@@ -5,31 +5,31 @@ using Duskborn.Gameplay.World;
 namespace Duskborn.Audio
 {
     /// <summary>
-    /// Sistema de áudio de locomoção e passos para o jogador.
-    /// Detecta a velocidade de deslocamento, identifica a superfície do solo via Raycast
-    /// (Grama, Terra/Areia, Rocha/Pedra e Água) e reproduz passos com cadência orgânica,
-    /// variação de pitch, além de sons de salto e aterrissagem.
+    /// Player locomotion and footstep audio system.
+    /// Detects movement speed, identifies the ground surface through a raycast
+    /// (Grass, Dirt / Sand, Rock / Stone, and Water), and plays footsteps with organic cadence,
+    /// pitch variation, and jump / landing sounds.
     /// </summary>
     [RequireComponent(typeof(CharacterController))]
     public class FootstepAudio : MonoBehaviour
     {
-        [Header("Clipes de Passos por Superfície")]
+        [Header("Footstep Clips by Surface")]
         [SerializeField] private AudioClip[] grassSteps;
         [SerializeField] private AudioClip[] dirtSteps;
         [SerializeField] private AudioClip[] stoneSteps;
         [SerializeField] private AudioClip[] waterSteps;
 
-        [Header("Salto e Queda")]
+        [Header("Jump and Fall")]
         [SerializeField] private AudioClip jumpClip;
         [SerializeField] private AudioClip landClip;
 
-        [Header("Cadência de Passos")]
+        [Header("Footstep Cadence")]
         [SerializeField] private float walkStepInterval = 0.44f;
         [SerializeField] private float sprintStepInterval = 0.30f;
         [SerializeField] private float velocityThreshold = 0.7f;
         [SerializeField] private float sprintSpeedThreshold = 5.8f;
 
-        [Header("Áudio")]
+        [Header("Audio")]
         [SerializeField] private AudioSource audioSource;
         [SerializeField] [Range(0f, 1f)] private float footstepVolume = 0.65f;
         [SerializeField] private float pitchVariation = 0.08f;
@@ -57,8 +57,8 @@ namespace Duskborn.Audio
 
             audioSource.playOnAwake = false;
 
-            // Configuração espacial: o jogador local precisa ouvir passos com clareza
-            // independente do raio de órbita da câmera em terceira pessoa
+            // Spatial configuration: the local player must hear footsteps clearly
+            // regardless of the third-person camera orbit radius.
             bool isLocalOwner = _playerController == null || _playerController.IsOwner;
             audioSource.spatialBlend = isLocalOwner ? 0.15f : 1.0f;
             audioSource.minDistance = isLocalOwner ? 5.0f : 2.0f;
@@ -142,7 +142,7 @@ namespace Duskborn.Audio
         {
             if (_cc == null) return;
 
-            // Suavização do estado de grounded para evitar interrupções em declives low-poly
+            // Smooth grounded state to avoid interruptions on low-poly slopes.
             bool rawGrounded = _cc.isGrounded;
             if (rawGrounded)
             {
@@ -155,7 +155,7 @@ namespace Duskborn.Audio
 
             bool isGrounded = rawGrounded || _coyoteGroundedTimer > 0f;
 
-            // Transição de aterrissagem
+            // Landing transition.
             if (!_wasGrounded && rawGrounded)
             {
                 if (_airborneTimer > 0.18f && landClip != null)
@@ -177,11 +177,11 @@ namespace Duskborn.Audio
                 return;
             }
 
-            // Cálculo robusto da velocidade horizontal
+            // Robust horizontal speed calculation.
             Vector3 horizontalVel = new Vector3(_cc.velocity.x, 0f, _cc.velocity.z);
             float ccSpeed = horizontalVel.magnitude;
 
-            // Cálculo por delta de posição para proteção contra sobreposições de física
+            // Calculate from position delta to protect against physics overlap.
             float dt = Mathf.Max(Time.deltaTime, 0.0001f);
             Vector3 posDelta = (transform.position - _lastPosition) / dt;
             float deltaSpeed = new Vector2(posDelta.x, posDelta.z).magnitude;
@@ -189,7 +189,7 @@ namespace Duskborn.Audio
 
             float speed = Mathf.Max(ccSpeed, deltaSpeed);
 
-            // Se o PlayerController local estiver movendo, assegura velocidade mínima
+            // Ensure a minimum speed when the local PlayerController is moving.
             if (_playerController != null && _playerController.IsMoving && speed < velocityThreshold)
             {
                 speed = _playerController.IsSprinting ? 7.5f : 5.0f;
@@ -200,7 +200,7 @@ namespace Duskborn.Audio
                 bool isSprinting = (_playerController != null && _playerController.IsSprinting) || speed > sprintSpeedThreshold;
                 float targetInterval = isSprinting ? sprintStepInterval : walkStepInterval;
 
-                // Na água a passada é ligeiramente mais cadenciada
+                // Steps in water have a slightly slower cadence.
                 if (CurrentSurface == SurfaceType.Water)
                 {
                     targetInterval *= 1.12f;
@@ -243,13 +243,13 @@ namespace Duskborn.Audio
 
         public SurfaceType DetectSurface()
         {
-            // 1. Prioridade Água: PlayerWaterInteraction
+            // 1. Water priority: PlayerWaterInteraction.
             if (_waterInteraction != null && _waterInteraction.IsInWater)
             {
                 return SurfaceType.Water;
             }
 
-            // 2. Prioridade Água: Posição vertical abaixo da lâmina d'água
+            // 2. Water priority: vertical position below the water surface.
             if (ChunkGridManager.Instance != null && ChunkGridManager.Instance.generateWaterPlane)
             {
                 float waterLevel = ChunkGridManager.Instance.EffectiveWaterLevel;
@@ -259,20 +259,20 @@ namespace Duskborn.Audio
                 }
             }
 
-            // 3. Raycast descendente ignorando colisor do próprio jogador e gatilhos
+            // 3. Downward raycast ignoring the player's own collider and triggers.
             int layerMask = ~LayerMask.GetMask("Player", "Ignore Raycast", "TransparentFX");
             Vector3 rayOrigin = transform.position + Vector3.up * 0.4f;
 
             if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, 2.0f, layerMask, QueryTriggerInteraction.Ignore))
             {
-                // 3a. Componente GroundSurface explícito
+                // 3a. Explicit GroundSurface component.
                 var explicitSurface = hit.collider.GetComponentInParent<GroundSurface>();
                 if (explicitSurface != null)
                 {
                     return explicitSurface.SurfaceType;
                 }
 
-                // 3b. Identificação por Tag
+                // 3b. Identification by tag.
                 string tag = hit.collider.tag;
                 if (!string.IsNullOrEmpty(tag) && tag != "Untagged")
                 {
@@ -294,7 +294,7 @@ namespace Duskborn.Audio
                         return SurfaceType.Grass;
                 }
 
-                // 3c. Identificação por PhysicMaterial
+                // 3c. Identification by PhysicMaterial.
                 var pMat = hit.collider.sharedMaterial;
                 if (pMat != null && !string.IsNullOrEmpty(pMat.name))
                 {
@@ -309,14 +309,14 @@ namespace Duskborn.Audio
                         return SurfaceType.Grass;
                 }
 
-                // 3d. Detecção por Bioma / Relevo no Terreno Low-Poly (TerrainChunk)
+                // 3d. Detection by biome / relief on low-poly terrain (TerrainChunk).
                 var chunk = hit.collider.GetComponentInParent<TerrainChunk>();
                 if (chunk != null || hit.collider.gameObject.name.StartsWith("Chunk_"))
                 {
                     return EvaluateTerrainSurface(hit);
                 }
 
-                // 3e. Identificação por Nome de GameObject / Mesh / Prefab
+                // 3e. Identification by GameObject / mesh / prefab name.
                 string goName = hit.collider.gameObject.name.ToLowerInvariant();
                 if (goName.Contains("rock") || goName.Contains("stone") || goName.Contains("boulder") ||
                     goName.Contains("cliff") || goName.Contains("monolith") || goName.Contains("ore") ||
@@ -336,7 +336,7 @@ namespace Duskborn.Audio
                     return SurfaceType.Water;
                 }
 
-                // 3f. Material do Renderer
+                // 3f. Renderer material.
                 var mr = hit.collider.GetComponent<Renderer>();
                 if (mr != null && mr.sharedMaterial != null)
                 {
@@ -367,31 +367,31 @@ namespace Duskborn.Audio
                 heightMultiplier = cfg.heightMultiplier;
             }
 
-            // Submerso ou tocando o lençol freático
+            // Submerged or touching the water table.
             if (hitY <= waterLevel + 0.15f)
             {
                 return SurfaceType.Water;
             }
 
-            // Paredões íngremes e escarpas
+            // Steep walls and cliffs.
             if (slopeAngle >= steepSlopeThreshold)
             {
                 return SurfaceType.Rock;
             }
 
-            // Picos altos e platôs montanhosos (acima de 62% da altitude)
+            // High peaks and mountain plateaus (above 62% of the altitude).
             if (hitY >= heightMultiplier * 0.62f)
             {
                 return SurfaceType.Rock;
             }
 
-            // Faixa de praia / terra costeira logo acima da água
+            // Beach / coastal dirt strip just above the water.
             if (hitY <= waterLevel + 1.8f)
             {
                 return SurfaceType.Dirt;
             }
 
-            // Planícies e vales
+            // Plains and valleys.
             return SurfaceType.Grass;
         }
 

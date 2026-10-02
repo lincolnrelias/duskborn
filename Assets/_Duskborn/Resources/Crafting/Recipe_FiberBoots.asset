@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_FiberBoots
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_FiberBoots
-  recipeName: Botas de Fibra
-  description: Botas de Fibra
-  category: Armadura
+  recipeName: "Fiber Boots"
+  description: "Fiber Boots"
+  category: "Armor"
   tier: 2
   requiredStation: 0
   isAlwaysDiscovered: 1

@@ -13,7 +13,7 @@ using InventorySystem.Data;
 namespace Duskborn.Editor
 {
     /// <summary>
-    /// Testes automatizados de validacao do sistema de crafting, bancada e interface movel.
+    /// Automated validation tests for the crafting system, workbench, and movable interface.
     /// </summary>
     public static class CraftingTests
     {
@@ -39,7 +39,7 @@ namespace Duskborn.Editor
             RunTest(Test_EquipmentTradeoffs_Calculations, ref passed, ref total);
             RunTest(Test_RecipeDiscoveryTracker_Logic, ref passed, ref total);
 
-            Debug.Log($"<color=#55FF55><b>[CraftingTests] {passed}/{total} testes passaram com sucesso!</b></color>");
+            Debug.Log($"<color=#55FF55><b>[CraftingTests] {passed}/{total} tests passed!</b></color>");
         }
 
         private static void RunTest(Action testMethod, ref int passed, ref int total)
@@ -61,60 +61,60 @@ namespace Duskborn.Editor
         {
             var recipe = Resources.Load<CraftingRecipe>("Crafting/Recipe_StoneAxe");
             if (recipe == null)
-                throw new Exception("Nao foi possivel carregar 'Crafting/Recipe_StoneAxe' via Resources.");
+                throw new Exception("Could not load 'Crafting/Recipe_StoneAxe' through Resources.");
 
             if (recipe.OutputItem == null)
-                throw new Exception("Recipe_StoneAxe nao possui OutputItem configurado.");
+                throw new Exception("Recipe_StoneAxe has no OutputItem configured.");
 
             if (recipe.OutputItem.Id != "stone_axe")
-                throw new Exception($"OutputItem esperado 'stone_axe', mas encontrado '{recipe.OutputItem.Id}'.");
+                throw new Exception($"Expected OutputItem 'stone_axe', but found '{recipe.OutputItem.Id}'.");
 
             if (recipe.Ingredients == null || recipe.Ingredients.Count != 2)
-                throw new Exception("Recipe_StoneAxe deve conter exatamente 2 ingredientes (Madeira e Pedra).");
+                throw new Exception("Recipe_StoneAxe must contain exactly 2 ingredients (Wood and Stone).");
 
             var woodIng = FindIngredient(recipe, "material_wood");
             var stoneIng = FindIngredient(recipe, "material_stone");
 
             if (woodIng.amount != 5 || stoneIng.amount != 5)
-                throw new Exception($"Quantidades invalidas de ingredientes: Wood={woodIng.amount}, Stone={stoneIng.amount}");
+                throw new Exception($"Invalid ingredient quantities: Wood={woodIng.amount}, Stone={stoneIng.amount}");
 
             var weaponDef = recipe.OutputItem as WeaponDefinition;
             if (weaponDef == null)
-                throw new Exception("stone_axe deve ser do tipo WeaponDefinition.");
+                throw new Exception("stone_axe must be a WeaponDefinition.");
 
             float mult = TypeDamageModifier.GetBestMultiplier(weaponDef.TypeModifiers, TargetType.Tree);
             if (Mathf.Abs(mult - 4.0f) > 0.05f)
-                throw new Exception($"stone_axe deveria ter multiplicador de dano 4.0x (base + 300%) contra Tree, mas tem {mult}x.");
+                throw new Exception($"stone_axe should have a damage multiplier of 4.0x (base + 300%) against Tree, but has {mult}x.");
         }
 
         private static void Test_StonePickaxe_RecipeIntegrity()
         {
             var recipe = Resources.Load<CraftingRecipe>("Crafting/Recipe_StonePickaxe");
             if (recipe == null)
-                throw new Exception("Nao foi possivel carregar 'Crafting/Recipe_StonePickaxe' via Resources.");
+                throw new Exception("Could not load 'Crafting/Recipe_StonePickaxe' through Resources.");
 
             if (recipe.OutputItem == null)
-                throw new Exception("Recipe_StonePickaxe nao possui OutputItem configurado.");
+                throw new Exception("Recipe_StonePickaxe has no OutputItem configured.");
 
             if (recipe.OutputItem.Id != "stone_pickaxe")
-                throw new Exception($"OutputItem esperado 'stone_pickaxe', mas encontrado '{recipe.OutputItem.Id}'.");
+                throw new Exception($"Expected OutputItem 'stone_pickaxe', but found '{recipe.OutputItem.Id}'.");
 
             if (recipe.Ingredients == null || recipe.Ingredients.Count != 2)
-                throw new Exception("Recipe_StonePickaxe deve conter exatamente 2 ingredientes (Madeira e Pedra).");
+                throw new Exception("Recipe_StonePickaxe must contain exactly 2 ingredients (Wood and Stone).");
 
             var woodIng = FindIngredient(recipe, "material_wood");
             var stoneIng = FindIngredient(recipe, "material_stone");
 
             if (woodIng.amount != 5 || stoneIng.amount != 5)
-                throw new Exception($"Quantidades invalidas de ingredientes: Wood={woodIng.amount}, Stone={stoneIng.amount}");
+                throw new Exception($"Invalid ingredient quantities: Wood={woodIng.amount}, Stone={stoneIng.amount}");
 
             var weaponDef = recipe.OutputItem as WeaponDefinition;
             if (weaponDef == null)
-                throw new Exception("stone_pickaxe deve ser do tipo WeaponDefinition.");
+                throw new Exception("stone_pickaxe must be a WeaponDefinition.");
 
             float mult = TypeDamageModifier.GetBestMultiplier(weaponDef.TypeModifiers, TargetType.MiningNode);
             if (Mathf.Abs(mult - 4.0f) > 0.05f)
-                throw new Exception($"stone_pickaxe deveria ter multiplicador de dano 4.0x (base + 300%) contra MiningNode, mas tem {mult}x.");
+                throw new Exception($"stone_pickaxe should have a damage multiplier of 4.0x (base + 300%) against MiningNode, but has {mult}x.");
         }
 
         private static void Test_Recipe_CanCraft_Validation()
@@ -138,11 +138,11 @@ namespace Duskborn.Editor
             resInv.Add("stone", 10);
 
             if (recipe.CanCraft(resInv))
-                throw new Exception("CanCraft deveria retornar false quando falta madeira (9/10).");
+                throw new Exception("CanCraft should return false when wood is insufficient (9/10).");
 
             resInv.Add("wood", 1);
             if (!recipe.CanCraft(resInv))
-                throw new Exception("CanCraft deveria retornar true com 10 madeira e 10 pedra.");
+                throw new Exception("CanCraft should return true with 10 wood and 10 stone.");
 
             UnityEngine.Object.DestroyImmediate(go);
             UnityEngine.Object.DestroyImmediate(recipe);
@@ -172,19 +172,19 @@ namespace Duskborn.Editor
 
             bool success = recipe.TrySpendIngredients(resInv);
             if (success)
-                throw new Exception("TrySpendIngredients nao deveria suceder com pedra insuficiente.");
+                throw new Exception("TrySpendIngredients should not succeed with insufficient stone.");
             if (resInv.GetCount("wood") != 8)
-                throw new Exception("TrySpendIngredients nao deveria deduzir recursos em caso de falha.");
+                throw new Exception("TrySpendIngredients should not deduct resources on failure.");
 
             resInv.Add("stone", 5);
             success = recipe.TrySpendIngredients(resInv);
             if (!success)
-                throw new Exception("TrySpendIngredients falhou com recursos suficientes.");
+                throw new Exception("TrySpendIngredients failed with sufficient resources.");
 
             if (resInv.GetCount("wood") != 3)
-                throw new Exception($"Saldo esperado de madeira: 3, obtido: {resInv.GetCount("wood")}");
+                throw new Exception($"Expected wood balance: 3, got: {resInv.GetCount("wood")}");
             if (resInv.GetCount("stone") != 4)
-                throw new Exception($"Saldo esperado de pedra: 4, obtido: {resInv.GetCount("stone")}");
+                throw new Exception($"Expected stone balance: 4, got: {resInv.GetCount("stone")}");
 
             UnityEngine.Object.DestroyImmediate(go);
             UnityEngine.Object.DestroyImmediate(recipe);
@@ -196,14 +196,14 @@ namespace Duskborn.Editor
         {
             var recipe = Resources.Load<CraftingRecipe>("Crafting/Recipe_StoneAxe");
             if (recipe == null)
-                throw new Exception("Nao foi possivel carregar Recipe_StoneAxe.");
+                throw new Exception("Could not load Recipe_StoneAxe.");
 
             IInventoryItem item = recipe.CreateOutputItem();
             if (item == null)
-                throw new Exception("CreateOutputItem retornou null.");
+                throw new Exception("CreateOutputItem returned null.");
 
             if (item.Id != "stone_axe")
-                throw new Exception($"Id do item criado incorreto: {item.Id}");
+                throw new Exception($"Incorrect created item ID: {item.Id}");
         }
 
         private static void Test_Workbench_ProximityCalculation()
@@ -214,11 +214,11 @@ namespace Duskborn.Editor
 
             Vector3 nearPos = new Vector3(12f, 0f, 10f);
             if (!wb.IsInRange(nearPos, 3.5f))
-                throw new Exception("Workbench.IsInRange deveria retornar true para distancia 2.0m.");
+                throw new Exception("Workbench.IsInRange should return true at a distance of 2.0m.");
 
             Vector3 farPos = new Vector3(15f, 0f, 10f);
             if (wb.IsInRange(farPos, 3.5f))
-                throw new Exception("Workbench.IsInRange deveria retornar false para distancia 5.0m.");
+                throw new Exception("Workbench.IsInRange should return false at a distance of 5.0m.");
 
             UnityEngine.Object.DestroyImmediate(wbGo);
         }
@@ -227,29 +227,29 @@ namespace Duskborn.Editor
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Duskborn/Prefabs/World/Workbench.prefab");
             if (prefab == null)
-                throw new Exception("Nao foi possivel carregar 'Assets/_Duskborn/Prefabs/World/Workbench.prefab'.");
+                throw new Exception("Could not load 'Assets/_Duskborn/Prefabs/World/Workbench.prefab'.");
 
             var mf = prefab.GetComponent<MeshFilter>();
             if (mf == null || mf.sharedMesh == null)
-                throw new Exception("Workbench.prefab nao possui MeshFilter ou Mesh valido.");
+                throw new Exception("Workbench.prefab has no valid MeshFilter or Mesh.");
 
             if (mf.sharedMesh.name != "Workbench")
-                throw new Exception($"Mesh esperado 'Workbench', mas encontrado '{mf.sharedMesh.name}'.");
+                throw new Exception($"Expected mesh 'Workbench', but found '{mf.sharedMesh.name}'.");
 
             var mr = prefab.GetComponent<MeshRenderer>();
             if (mr == null || mr.sharedMaterials == null || mr.sharedMaterials.Length < 3)
-                throw new Exception("Workbench.prefab MeshRenderer deve possuir 3 materiais (Wood, Iron, Stone).");
+                throw new Exception("Workbench.prefab MeshRenderer must have 3 materials (Wood, Iron, Stone).");
 
             var col = prefab.GetComponent<BoxCollider>();
             if (col == null)
-                throw new Exception("Workbench.prefab deve possuir um BoxCollider.");
+                throw new Exception("Workbench.prefab must have a BoxCollider.");
 
             if (col.size.x < 1.0f || col.size.y < 0.8f || col.size.z < 0.8f)
-                throw new Exception($"Dimensoes do BoxCollider invalidas: {col.size}");
+                throw new Exception($"Invalid BoxCollider dimensions: {col.size}");
 
             var wb = prefab.GetComponent<Workbench>();
             if (wb == null)
-                throw new Exception("Workbench.prefab deve possuir o componente Workbench.");
+                throw new Exception("Workbench.prefab must have the Workbench component.");
         }
 
         private static void Test_ArcaneTable_PrefabModelIntegrity()
@@ -263,53 +263,53 @@ namespace Duskborn.Editor
             {
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
                 if (prefab == null)
-                    throw new Exception($"Nao foi possivel carregar '{path}'.");
+                    throw new Exception($"Could not load '{path}'.");
 
                 var mf = prefab.GetComponent<MeshFilter>();
                 if (mf != null && mf.sharedMesh != null && mf.sharedMesh.name != "Moonwell_Shrine")
-                    throw new Exception($"{path} ainda contem MeshFilter legado na raiz.");
+                    throw new Exception($"{path} still contains a legacy MeshFilter at the root.");
 
                 var visual = prefab.transform.Find("Visual");
                 if (visual == null)
-                    throw new Exception($"{path} deve possuir o filho 'Visual' contendo o modelo do Moonwell.");
+                    throw new Exception($"{path} must have a 'Visual' child containing the Moonwell model.");
 
                 var animator = visual.GetComponent<Animator>();
                 if (animator == null)
-                    throw new Exception($"{path}/Visual deve possuir um componente Animator.");
+                    throw new Exception($"{path}/Visual must have an Animator component.");
 
                 if (animator.runtimeAnimatorController == null)
-                    throw new Exception($"{path}/Visual Animator deve possuir um RuntimeAnimatorController configurado.");
+                    throw new Exception($"{path}/Visual Animator must have a RuntimeAnimatorController configured.");
 
                 if (animator.cullingMode != AnimatorCullingMode.AlwaysAnimate)
-                    throw new Exception($"{path}/Visual Animator cullingMode deve ser AlwaysAnimate para evitar congelamento da animação.");
+                    throw new Exception($"{path}/Visual Animator cullingMode must be AlwaysAnimate to prevent animation freezing.");
 
                 var renderers = visual.GetComponentsInChildren<Renderer>(true);
                 if (renderers == null || renderers.Length < 4)
-                    throw new Exception($"{path}/Visual deve possuir pelo menos 4 renderizadores (Tabela, Cristais, Livro, Pagina).");
+                    throw new Exception($"{path}/Visual must have at least 4 renderers (Table, Crystals, Book, Page).");
 
                 var skinnedPage = visual.GetComponentsInChildren<SkinnedMeshRenderer>(true);
                 if (skinnedPage == null || skinnedPage.Length == 0)
-                    throw new Exception($"{path}/Visual deve conter SkinnedMeshRenderer para a pagina do livro animado.");
+                    throw new Exception($"{path}/Visual must contain a SkinnedMeshRenderer for the animated book page.");
 
                 if (!skinnedPage[0].updateWhenOffscreen)
-                    throw new Exception($"{path} SkinnedMeshRenderer deve ter updateWhenOffscreen = true para evitar congelamento por frustum culling.");
+                    throw new Exception($"{path} SkinnedMeshRenderer must have updateWhenOffscreen = true to prevent freezing from frustum culling.");
 
                 var col = prefab.GetComponent<BoxCollider>();
                 if (col == null)
-                    throw new Exception($"{path} deve possuir um BoxCollider na raiz.");
+                    throw new Exception($"{path} must have a BoxCollider at the root.");
 
                 if (col.size.x < 1.5f || col.size.z < 1.5f)
-                    throw new Exception($"{path} BoxCollider deve ter dimensoes compativeis com Moonwell (>= 1.5m): {col.size}");
+                    throw new Exception($"{path} BoxCollider must have dimensions compatible with Moonwell (>= 1.5m): {col.size}");
 
                 var wb = prefab.GetComponent<Workbench>();
                 if (wb == null)
-                    throw new Exception($"{path} deve possuir o componente Workbench.");
+                    throw new Exception($"{path} must have the Workbench component.");
 
-                if (wb.StationType != CraftingStationType.MesaArcana)
-                    throw new Exception($"{path} Workbench StationType deve ser MesaArcana, obtido: {wb.StationType}");
+                if (wb.StationType != CraftingStationType.ArcaneTable)
+                    throw new Exception($"{path} Workbench StationType must be ArcaneTable, got: {wb.StationType}");
             }
 
-            // Valida tambem se BuildingWorld.CreateVisual clona corretamente SkinnedMeshRenderer e Animator
+            // Also validate that BuildingWorld.CreateVisual correctly clones SkinnedMeshRenderer and Animator.
             var buildDef = Resources.Load<Duskborn.Gameplay.Building.BuildableDefinition>("Building/Build_arcane_table");
             if (buildDef != null)
             {
@@ -318,17 +318,17 @@ namespace Duskborn.Editor
                 {
                     var anim = visualInstance.GetComponentInChildren<Animator>();
                     if (anim == null)
-                        throw new Exception("BuildingWorld.CreateVisual não copiou o Animator da Mesa Arcana.");
+                        throw new Exception("BuildingWorld.CreateVisual did not copy the Arcane Table Animator.");
 
                     if (anim.runtimeAnimatorController == null)
-                        throw new Exception("BuildingWorld.CreateVisual Animator não possui controller associado.");
+                        throw new Exception("BuildingWorld.CreateVisual Animator has no associated controller.");
 
                     var smr = visualInstance.GetComponentInChildren<SkinnedMeshRenderer>();
                     if (smr == null)
-                        throw new Exception("BuildingWorld.CreateVisual não copiou o SkinnedMeshRenderer da Mesa Arcana.");
+                        throw new Exception("BuildingWorld.CreateVisual did not copy the Arcane Table SkinnedMeshRenderer.");
 
                     if (!smr.updateWhenOffscreen)
-                        throw new Exception("BuildingWorld.CreateVisual SkinnedMeshRenderer deve ter updateWhenOffscreen = true.");
+                        throw new Exception("BuildingWorld.CreateVisual SkinnedMeshRenderer must have updateWhenOffscreen = true.");
                 }
                 finally
                 {
@@ -339,28 +339,28 @@ namespace Duskborn.Editor
 
         private static void Test_DraggablePanel_BindingAndCanvasResolution()
         {
-            // Cria um GameObject com Canvas
+            // Create a GameObject with a Canvas.
             var canvasGO = new GameObject("Test_Canvas", typeof(RectTransform), typeof(Canvas));
             var canvas = canvasGO.GetComponent<Canvas>();
 
-            // Cria um painel filho simulando a janela de Crafting/Inventário
+            // Create a child panel simulating the Crafting / Inventory window.
             var panelGO = new GameObject("Test_Panel", typeof(RectTransform), typeof(CanvasRenderer));
             var panelRect = panelGO.GetComponent<RectTransform>();
 
-            // Adiciona DraggablePanel ANTES de setar o parent (reproduz o caso dinâmico de instanciação)
+            // Add DraggablePanel BEFORE setting the parent (reproduces dynamic instantiation).
             var drag = panelGO.AddComponent<DraggablePanel>();
 
-            // Verifica auto-vinculação do TargetPanel
+            // Check automatic TargetPanel binding.
             if (drag.TargetPanel != panelRect)
-                throw new Exception("DraggablePanel.TargetPanel deveria retornar o próprio RectTransform quando não explicitado.");
+                throw new Exception("DraggablePanel.TargetPanel should return its own RectTransform when not explicitly assigned.");
 
-            // Agora conecta ao Canvas
+            // Now connect to the Canvas.
             panelGO.transform.SetParent(canvasGO.transform, false);
 
-            // Verifica resolução preguiçosa (lazy) do Canvas
+            // Check lazy Canvas resolution.
             var resolvedCanvas = drag.EnsureCanvas();
             if (resolvedCanvas != canvas)
-                throw new Exception("DraggablePanel.EnsureCanvas() deveria encontrar o Canvas pai após SetParent.");
+                throw new Exception("DraggablePanel.EnsureCanvas() should find the parent Canvas after SetParent.");
 
             UnityEngine.Object.DestroyImmediate(panelGO);
             UnityEngine.Object.DestroyImmediate(canvasGO);
@@ -381,22 +381,22 @@ namespace Duskborn.Editor
             childRect.anchorMin = new Vector2(0.5f, 0.5f);
             childRect.anchorMax = new Vector2(0.5f, 0.5f);
 
-            // Tenta mover a janela para muito além da borda direita (ex: x = 2000)
+            // Try moving the window far beyond the right edge (e.g. x = 2000).
             Vector2 outOfBoundsPos = new Vector2(2000, 0);
             Vector2 clamped = DraggablePanel.ClampWithinParent(outOfBoundsPos, childRect, parentRect);
 
-            // O limite direito máximo para pivô no centro (1920/2 - 400/2 = 960 - 200 = 760)
+            // Maximum right limit for a centered pivot (1920/2 - 400/2 = 960 - 200 = 760).
             float expectedMaxX = (1920f * 0.5f) - (400f * 0.5f);
             if (Mathf.Abs(clamped.x - expectedMaxX) > 1.0f)
-                throw new Exception($"ClampWithinParent falhou no limite direito: esperado ~{expectedMaxX}, obtido {clamped.x}");
+                throw new Exception($"ClampWithinParent failed at the right boundary: expected ~{expectedMaxX}, got {clamped.x}");
 
-            // Tenta mover a janela para muito além da borda inferior (ex: y = -2000)
+            // Try moving the window far beyond the bottom edge (e.g. y = -2000).
             Vector2 outOfBoundsBottom = new Vector2(0, -2000);
             Vector2 clampedBottom = DraggablePanel.ClampWithinParent(outOfBoundsBottom, childRect, parentRect);
 
             float expectedMinY = (-1080f * 0.5f) + (500f * 0.5f);
             if (Mathf.Abs(clampedBottom.y - expectedMinY) > 1.0f)
-                throw new Exception($"ClampWithinParent falhou no limite inferior: esperado ~{expectedMinY}, obtido {clampedBottom.y}");
+                throw new Exception($"ClampWithinParent failed at the bottom boundary: expected ~{expectedMinY}, got {clampedBottom.y}");
 
             UnityEngine.Object.DestroyImmediate(childGO);
             UnityEngine.Object.DestroyImmediate(parentGO);
@@ -405,7 +405,7 @@ namespace Duskborn.Editor
         private static void Test_AllFourCraftingStations_Integrity()
         {
             string[] prefabs = { "Workbench", "Station_Forge", "Station_Cauldron", "Station_ArcaneTable" };
-            CraftingStationType[] expectedTypes = { CraftingStationType.Bancada, CraftingStationType.Forja, CraftingStationType.Caldeirao, CraftingStationType.MesaArcana };
+            CraftingStationType[] expectedTypes = { CraftingStationType.Workbench, CraftingStationType.Forge, CraftingStationType.Cauldron, CraftingStationType.ArcaneTable };
 
             for (int i = 0; i < prefabs.Length; i++)
             {
@@ -414,14 +414,14 @@ namespace Duskborn.Editor
                     prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"Assets/_Duskborn/Prefabs/World/{prefabs[i]}.prefab");
 
                 if (prefab == null)
-                    throw new Exception($"Prefab da estação '{prefabs[i]}' não foi encontrado em Resources ou Prefabs/World.");
+                    throw new Exception($"Station prefab '{prefabs[i]}' was not found in Resources or Prefabs/World.");
 
                 var wb = prefab.GetComponent<Workbench>();
                 if (wb == null)
-                    throw new Exception($"Prefab '{prefabs[i]}' não possui o componente Workbench.");
+                    throw new Exception($"Prefab '{prefabs[i]}' has no Workbench component.");
 
                 if (wb.StationType != expectedTypes[i])
-                    throw new Exception($"Estação '{prefabs[i]}' esperava StationType {expectedTypes[i]}, mas possui {wb.StationType}.");
+                    throw new Exception($"Station '{prefabs[i]}' expected StationType {expectedTypes[i]}, but has {wb.StationType}.");
             }
         }
 
@@ -429,46 +429,46 @@ namespace Duskborn.Editor
         {
             var recipes = Resources.LoadAll<CraftingRecipe>("Crafting");
             if (recipes == null || recipes.Length < 25)
-                throw new Exception($"Esperado pelo menos 25 receitas no sistema de progressão, mas encontradas {recipes?.Length ?? 0}.");
+                throw new Exception($"Expected at least 25 recipes in the progression system, but found {recipes?.Length ?? 0}.");
 
             bool hasT1 = false, hasT2 = false, hasT3 = false, hasT4 = false;
-            bool hasBancada = false, hasForja = false, hasCaldeirao = false, hasMesaArcana = false;
+            bool hasWorkbench = false, hasForge = false, hasCauldron = false, hasArcaneTable = false;
 
             foreach (var r in recipes)
             {
                 if (r == null) continue;
-                if (r.Tier == CraftingTier.Primitivo) hasT1 = true;
-                if (r.Tier == CraftingTier.Ferro) hasT2 = true;
-                if (r.Tier == CraftingTier.Reforcado) hasT3 = true;
-                if (r.Tier == CraftingTier.Espinheiro) hasT4 = true;
+                if (r.Tier == CraftingTier.Primitive) hasT1 = true;
+                if (r.Tier == CraftingTier.Iron) hasT2 = true;
+                if (r.Tier == CraftingTier.Reinforced) hasT3 = true;
+                if (r.Tier == CraftingTier.Thornheart) hasT4 = true;
 
-                if (r.RequiredStation == CraftingStationType.Bancada) hasBancada = true;
-                if (r.RequiredStation == CraftingStationType.Forja) hasForja = true;
-                if (r.RequiredStation == CraftingStationType.Caldeirao) hasCaldeirao = true;
-                if (r.RequiredStation == CraftingStationType.MesaArcana) hasMesaArcana = true;
+                if (r.RequiredStation == CraftingStationType.Workbench) hasWorkbench = true;
+                if (r.RequiredStation == CraftingStationType.Forge) hasForge = true;
+                if (r.RequiredStation == CraftingStationType.Cauldron) hasCauldron = true;
+                if (r.RequiredStation == CraftingStationType.ArcaneTable) hasArcaneTable = true;
             }
 
             if (!hasT1 || !hasT2 || !hasT3 || !hasT4)
-                throw new Exception($"Faltam receitas em algum dos 4 Tiers de progressão (T1={hasT1}, T2={hasT2}, T3={hasT3}, T4={hasT4}).");
+                throw new Exception($"Recipes are missing from one of the 4 progression tiers (T1={hasT1}, T2={hasT2}, T3={hasT3}, T4={hasT4}).");
 
-            if (!hasBancada || !hasForja || !hasCaldeirao || !hasMesaArcana)
-                throw new Exception($"Faltam receitas atribuídas para alguma das 4 estações de fabricação (Bancada={hasBancada}, Forja={hasForja}, Caldeirao={hasCaldeirao}, MesaArcana={hasMesaArcana}).");
+            if (!hasWorkbench || !hasForge || !hasCauldron || !hasArcaneTable)
+                throw new Exception($"Recipes are missing from one of the 4 crafting stations (Workbench={hasWorkbench}, Forge={hasForge}, Cauldron={hasCauldron}, ArcaneTable={hasArcaneTable}).");
         }
 
         private static void Test_ConsumableItems_Functionality()
         {
             var consumableItem = new ConsumableItem(
-                "test_tonic", "Tônico Teste", "Restaura vida", "icon_tonic",
+                "test_tonic", "Test Tonic", "Restores health", "icon_tonic",
                 ConsumableEffectType.InstantHeal, 50f, 0f, 5);
 
             if (consumableItem.EffectType != ConsumableEffectType.InstantHeal)
-                throw new Exception("ConsumableItem não reteve o EffectType correto.");
+                throw new Exception("ConsumableItem did not retain the correct EffectType.");
 
             if (Mathf.Abs(consumableItem.EffectValue - 50f) > 0.01f)
-                throw new Exception("ConsumableItem não reteve o EffectValue correto.");
+                throw new Exception("ConsumableItem did not retain the correct EffectValue.");
 
             if (consumableItem.StackSize != 5)
-                throw new Exception("ConsumableItem não reteve o StackSize correto.");
+                throw new Exception("ConsumableItem did not retain the correct StackSize.");
         }
 
         private static void Test_EquipmentTradeoffs_Calculations()
@@ -480,16 +480,16 @@ namespace Duskborn.Editor
                 moveSpeed = 5f
             };
 
-            // Simula bônus positivo e negativo (tradeoff)
+            // Simulate positive and negative bonuses (trade-off).
             stats.DamageBuffAdditive = 5f;
-            stats.MoveSpeedMultiplier = 0.85f; // Penalidade de -15% de velocidade
+            stats.MoveSpeedMultiplier = 0.85f; // -15% speed penalty.
 
             if (stats.Damage < 14f)
-                throw new Exception("Cálculo de dano de EntityStats incorreto.");
+                throw new Exception("Incorrect EntityStats damage calculation.");
 
             // Base 5.0 * 0.85 = 4.25f
             if (Mathf.Abs(stats.MoveSpeed - 4.25f) > 0.05f)
-                throw new Exception($"Cálculo de MoveSpeed com tradeoff falhou: esperado ~4.25, obtido {stats.MoveSpeed}");
+                throw new Exception($"MoveSpeed calculation with trade-off failed: expected ~4.25, got {stats.MoveSpeed}");
         }
 
         private static void Test_RecipeDiscoveryTracker_Logic()
@@ -500,13 +500,13 @@ namespace Duskborn.Editor
             var recipe = Resources.Load<CraftingRecipe>("Crafting/Recipe_SmeltIronBar");
             if (recipe != null)
             {
-                // Antes da descoberta
+                // Before discovery.
                 bool initial = tracker.IsDiscovered(recipe);
                 tracker.ForceDiscover(recipe);
                 bool after = tracker.IsDiscovered(recipe);
 
                 if (!after)
-                    throw new Exception("RecipeDiscoveryTracker não registrou a descoberta da receita.");
+                    throw new Exception("RecipeDiscoveryTracker did not record the recipe discovery.");
             }
 
             UnityEngine.Object.DestroyImmediate(go);
@@ -519,7 +519,7 @@ namespace Duskborn.Editor
                 if (ing.material != null && ing.material.Id == materialId)
                     return ing;
             }
-            throw new Exception($"Ingrediente com id '{materialId}' nao encontrado na receita.");
+            throw new Exception($"Ingredient with ID '{materialId}' not found in the recipe.");
         }
 
         private static void SetPrivateField(object target, string fieldName, object value)

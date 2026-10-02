@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: weapon_wooden_sword
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.WeaponDefinition
   id: weapon_wooden_sword
-  displayName: Espada de Madeira
-  description: "Espada leve de treino entalhada em madeira maci\xE7a."
+  displayName: "Wooden Sword"
+  description: "Light training sword carved from solid wood."
   icon: {fileID: 2800000, guid: dac1baea2dd64dafb944d472122bc181, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 0

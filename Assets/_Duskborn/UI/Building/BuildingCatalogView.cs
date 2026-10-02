@@ -53,12 +53,12 @@ namespace Duskborn.UI.Building
             BuildingUIElements.Anchors(rootRect, new Vector2(.035f, .11f), new Vector2(.8f, .93f), Vector2.zero, Vector2.zero);
 
             var title = BuildingUIElements.Label("Title", root.transform, 28);
-            title.text = "CONSTRUIR INFRAESTRUTURA";
+            title.text = "BUILD INFRASTRUCTURE";
             title.fontStyle = FontStyle.Bold;
             BuildingUIElements.Anchors(title.rectTransform, new Vector2(.035f, .89f), new Vector2(.78f, .98f), Vector2.zero, Vector2.zero);
 
             var subtitle = BuildingUIElements.Label("Subtitle", root.transform, 15);
-            subtitle.text = "Escolha uma estação e confira o custo antes de posicionar.";
+            subtitle.text = "Choose a station and check its cost before placing it.";
             subtitle.color = BuildingUIElements.Muted;
             BuildingUIElements.Anchors(subtitle.rectTransform, new Vector2(.035f, .845f), new Vector2(.82f, .9f), Vector2.zero, Vector2.zero);
 
@@ -94,7 +94,7 @@ namespace Duskborn.UI.Building
             BuildingUIElements.Anchors(detailCosts.rectTransform, new Vector2(.05f, .25f), new Vector2(.95f, .44f), Vector2.zero, Vector2.zero);
             detailReason = BuildingUIElements.Label("Reason", details.transform, 15);
             BuildingUIElements.Anchors(detailReason.rectTransform, new Vector2(.05f, .15f), new Vector2(.95f, .25f), Vector2.zero, Vector2.zero);
-            placeButton = BuildingUIElements.Button("Place", details.transform, "POSICIONAR", PlaceSelected);
+            placeButton = BuildingUIElements.Button("Place", details.transform, "PLACE", PlaceSelected);
             BuildingUIElements.Anchors((RectTransform)placeButton.transform, new Vector2(.05f, .035f), new Vector2(.95f, .14f), Vector2.zero, Vector2.zero);
 
             root.SetActive(false);
@@ -117,14 +117,14 @@ namespace Duskborn.UI.Building
             var closeButton = root.transform.Find("Close")?.GetComponent<Button>();
             if (closeButton == null)
             {
-                closeButton = BuildingUIElements.Button("Close", root.transform, "FECHAR  [B / Esc]", close);
+                closeButton = BuildingUIElements.Button("Close", root.transform, "CLOSE  [B / Esc]", close);
                 BuildingUIElements.Anchors((RectTransform)closeButton.transform, new Vector2(.82f, .905f), new Vector2(.97f, .97f), Vector2.zero, Vector2.zero);
-                var saveButton = BuildingUIElements.Button("Save", root.transform, "SALVAR", save);
+                var saveButton = BuildingUIElements.Button("Save", root.transform, "SAVE", save);
                 BuildingUIElements.Anchors((RectTransform)saveButton.transform, new Vector2(.025f, .035f), new Vector2(.18f, .105f), Vector2.zero, Vector2.zero);
-                var loadButton = BuildingUIElements.Button("Load", root.transform, "CARREGAR", load);
+                var loadButton = BuildingUIElements.Button("Load", root.transform, "LOAD", load);
                 BuildingUIElements.Anchors((RectTransform)loadButton.transform, new Vector2(.19f, .035f), new Vector2(.345f, .105f), Vector2.zero, Vector2.zero);
                 var note = BuildingUIElements.Label("SaveNote", root.transform, 13);
-                note.text = "Checkpoint de infraestrutura • host solo";
+                note.text = "Infrastructure checkpoint • solo host";
                 note.color = BuildingUIElements.Muted;
                 BuildingUIElements.Anchors(note.rectTransform, new Vector2(.36f, .035f), new Vector2(.76f, .105f), Vector2.zero, Vector2.zero);
             }
@@ -217,7 +217,7 @@ namespace Duskborn.UI.Building
                 chip.Value.text = cost.DisplayName + "\n" + cost.Owned + "/" + cost.Required;
                 chip.Value.color = cost.Missing == 0 ? BuildingUIElements.Positive : BuildingUIElements.Negative;
             }
-            card.State.text = !model.IsUnlocked ? "BLOQUEADO" : !model.IsAvailable ? "INDISPONÍVEL" : model.IsAffordable ? "PRONTO" : "FALTA";
+            card.State.text = !model.IsUnlocked ? "BLOQUEADO" : !model.IsAvailable ? "UNAVAILABLE" : model.IsAffordable ? "READY" : "MISSING";
             card.State.color = model.CanPlace ? BuildingUIElements.Positive : !model.IsUnlocked ? BuildingUIElements.Muted : BuildingUIElements.Negative;
             card.Button.targetGraphic.color = card.Definition.id == selectedId
                 ? new Color(.2f, .25f, .31f, 1f)
@@ -235,14 +235,14 @@ namespace Duskborn.UI.Building
             detailName.text = model.Definition.displayName;
             detailCategory.text = model.Definition.category + " • " + model.Definition.station;
             detailDescription.text = model.Definition.description;
-            detailCapability.text = "FUNÇÃO\n" + model.Capability;
-            detailCosts.text = "CUSTO\n" + string.Join("\n", model.Costs.Select(cost =>
+            detailCapability.text = "FUNCTION\n" + model.Capability;
+            detailCosts.text = "COST\n" + string.Join("\n", model.Costs.Select(cost =>
                 (cost.Missing == 0 ? "✓  " : "!  ") + cost.DisplayName + "   " + cost.Owned + " / " + cost.Required +
-                (cost.Missing > 0 ? "   (faltam " + cost.Missing + ")" : string.Empty)));
-            detailReason.text = model.CanPlace ? "Tudo pronto para posicionar." : model.DisabledReason;
+                (cost.Missing > 0 ? "   (missing " + cost.Missing + ")" : string.Empty)));
+            detailReason.text = model.CanPlace ? "Ready to place." : model.DisabledReason;
             detailReason.color = model.CanPlace ? BuildingUIElements.Positive : BuildingUIElements.Negative;
             placeButton.interactable = model.CanPlace;
-            BuildingUIElements.SetButtonCaption(placeButton, model.CanPlace ? "POSICIONAR" : "INDISPONÍVEL");
+            BuildingUIElements.SetButtonCaption(placeButton, model.CanPlace ? "PLACE" : "UNAVAILABLE");
         }
 
         private void PlaceSelected()

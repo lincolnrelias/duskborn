@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Build_cauldron
   m_EditorClassIdentifier: 
   id: cauldron
-  displayName: "Caldeir\xE3o"
-  description: "Transforma materiais org\xE2nicos em t\xF4nicos e \xF3leos."
-  category: "Esta\xE7\xF5es"
+  displayName: "Cauldron"
+  description: "Transforms organic materials into tonics and oils."
+  category: "Stations"
   prefab: {fileID: 606149192729443004, guid: c9349ce6e82c4a8baca0026bef3af606, type: 3}
   operatingEffect: {fileID: 0}
   icon: {fileID: 0}

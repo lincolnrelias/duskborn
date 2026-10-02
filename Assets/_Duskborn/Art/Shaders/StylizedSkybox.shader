@@ -179,11 +179,11 @@ Shader "Duskborn/StylizedSkybox"
             Varyings vert(Attributes input)
             {
                 Varyings output;
-                // No espaço do skybox, a posição do vértice normalizada é a direção de visão
+                // In skybox space, the normalized vertex position is the viewing direction.
                 output.viewDirWS = normalize(input.positionOS.xyz);
                 output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
 
-                // Força o skybox para o plano distante (far clip plane)
+                // Force the skybox onto the far clip plane.
                 #if UNITY_REVERSED_Z
                     output.positionCS.z = 1.0e-5f;
                 #else
@@ -194,7 +194,7 @@ Shader "Duskborn/StylizedSkybox"
             }
 
             // ==========================================
-            // Ruído Procedural para Estrelas & Nuvens
+            // Procedural noise for stars & clouds.
             // ==========================================
             float Hash3D(float3 p)
             {

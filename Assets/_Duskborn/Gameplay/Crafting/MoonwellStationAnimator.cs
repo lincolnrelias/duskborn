@@ -3,8 +3,8 @@ using UnityEngine;
 namespace Duskborn.Gameplay.Crafting
 {
     /// <summary>
-    /// Garante que as animações de bancadas/estações animadas (como a Mesa Arcana / Moonwell Shrine)
-    /// executem continuamente sem sofrer culling por câmera ou congelamento de blend shapes.
+    /// Ensures animated workbench / station animations (such as the Arcane Table / Moonwell Shrine)
+    /// run continuously without camera culling or blend shape freezing.
     /// </summary>
     [DisallowMultipleComponent]
     public class MoonwellStationAnimator : MonoBehaviour

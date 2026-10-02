@@ -6,7 +6,7 @@ using Duskborn.Effects;
 namespace Duskborn.Editor
 {
     /// <summary>
-    /// Testes automatizados de validacao matematica, posicionamento e identidade visual do WorldHealthBar.
+    /// Automated tests for WorldHealthBar mathematical validation, placement, and visual identity.
     /// </summary>
     public static class WorldHealthBarTests
     {
@@ -19,12 +19,12 @@ namespace Duskborn.Editor
             RunTest(Test_HeightCappingOnTallNode, ref passed, ref total);
             RunTest(Test_ColliderPriorityOverFoliageMesh, ref passed, ref total);
             RunTest(Test_ColorThresholdGradients, ref passed, ref total);
-            RunTest(Test_PortugueseDisplayNameResolution, ref passed, ref total);
+            RunTest(Test_EnglishDisplayNameResolution, ref passed, ref total);
             RunTest(Test_ScreenViewportClampingMath, ref passed, ref total);
             RunTest(Test_ForwardOffsetProjection, ref passed, ref total);
             RunTest(Test_BigTreeNodeFoliageExpansion, ref passed, ref total);
 
-            Debug.Log($"<color=#55FF55><b>[WorldHealthBarTests] {passed}/{total} testes passaram com sucesso!</b></color>");
+            Debug.Log($"<color=#55FF55><b>[WorldHealthBarTests] {passed}/{total} tests passed!</b></color>");
         }
 
         private static void RunTest(Action testMethod, ref int passed, ref int total)
@@ -50,7 +50,7 @@ namespace Duskborn.Editor
         private static void AssertApproximately(float a, float b, float maxDelta, string message)
         {
             if (Mathf.Abs(a - b) > maxDelta)
-                throw new Exception($"{message} (Esperado: {b}, Obtido: {a}, Delta: {Mathf.Abs(a - b)})");
+                throw new Exception($"{message} (Expected: {b}, Actual: {a}, Delta: {Mathf.Abs(a - b)})");
         }
 
         private static void Test_HeightCappingOnTallNode()
@@ -81,8 +81,8 @@ namespace Duskborn.Editor
             method.Invoke(bar, null);
 
             float localY = barGo.transform.localPosition.y;
-            AssertTrue(localY <= 3.8f, $"A barra deveria ter altura limitada em torno de 3.6m, mas obteve {localY}m");
-            AssertTrue(localY >= 3.3f, $"A barra ficou abaixo da altura minima esperada: {localY}m");
+            AssertTrue(localY <= 3.8f, $"The bar should have a capped height around 3.6m, but got {localY}m");
+            AssertTrue(localY >= 3.3f, $"The bar fell below the expected minimum height: {localY}m");
 
             GameObject.DestroyImmediate(barGo);
             GameObject.DestroyImmediate(parentGo);
@@ -117,7 +117,7 @@ namespace Duskborn.Editor
             method.Invoke(bar, null);
 
             float localY = barGo.transform.localPosition.y;
-            AssertApproximately(localY, 3.95f, 0.25f, "A altura do tronco (colisor) deve ser respeitada em vez do vertice de folha");
+            AssertApproximately(localY, 3.95f, 0.25f, "Trunk height (collider) must be respected instead of a leaf vertex");
 
             GameObject.DestroyImmediate(barGo);
             GameObject.DestroyImmediate(parentGo);
@@ -146,21 +146,21 @@ namespace Duskborn.Editor
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
             Color cFull = (Color)method.Invoke(bar, new object[] { 1.0f });
-            AssertApproximately(cFull.g, 1.0f, 0.05f, "HP a 100% deve ser Verde");
+            AssertApproximately(cFull.g, 1.0f, 0.05f, "HP at 100% must be Green");
 
             Color cMid = (Color)method.Invoke(bar, new object[] { 0.5f });
-            AssertApproximately(cMid.r, 1.0f, 0.05f, "HP a 50% deve conter canal R alto (Amarelo)");
-            AssertApproximately(cMid.g, config.midColor.g, 0.05f, "HP a 50% deve conter canal G alto (Amarelo)");
+            AssertApproximately(cMid.r, 1.0f, 0.05f, "HP at 50% must contain a high R channel (Yellow)");
+            AssertApproximately(cMid.g, config.midColor.g, 0.05f, "HP at 50% must contain a high G channel (Yellow)");
 
             Color cLow = (Color)method.Invoke(bar, new object[] { 0.1f });
-            AssertApproximately(cLow.r, 1.0f, 0.05f, "HP critico deve ser Vermelho");
-            AssertApproximately(cLow.g, 0.0f, 0.05f, "HP critico nao deve ter canal Verde");
+            AssertApproximately(cLow.r, 1.0f, 0.05f, "Critical HP must be Red");
+            AssertApproximately(cLow.g, 0.0f, 0.05f, "Critical HP must not have a Green channel");
 
             GameObject.DestroyImmediate(barGo);
             ScriptableObject.DestroyImmediate(config);
         }
 
-        private static void Test_PortugueseDisplayNameResolution()
+        private static void Test_EnglishDisplayNameResolution()
         {
             var barGo = new GameObject("WorldHealthBar");
             var bar = barGo.AddComponent<WorldHealthBar>();
@@ -182,11 +182,11 @@ namespace Duskborn.Editor
 
             string[] expectedNames = new string[]
             {
-                "Pinheiro",
-                "Bétula",
-                "Monólito de Pedra",
-                "Veio de Ferro",
-                "Ervas Silvestres",
+                "Pine",
+                "Birch",
+                "Stone Monolith",
+                "Iron Vein",
+                "Wild Herbs",
                 "Enxameante",
                 "Explorador"
             };
@@ -198,7 +198,7 @@ namespace Duskborn.Editor
 
                 string resolved = (string)method.Invoke(bar, null);
                 AssertTrue(resolved == expectedNames[i],
-                    $"Nome incorreto para {testNames[i]}: esperado '{expectedNames[i]}', obtido '{resolved}'");
+                    $"Incorrect name for {testNames[i]}: expected '{expectedNames[i]}', got '{resolved}'");
 
                 barGo.transform.SetParent(null, false);
                 GameObject.DestroyImmediate(parentGo);
@@ -214,10 +214,10 @@ namespace Duskborn.Editor
             float maxViewportY = 0.88f;
 
             float clampedY = Mathf.Clamp(offscreenVp.y, minViewportY, maxViewportY);
-            AssertApproximately(clampedY, 0.88f, 0.001f, "Viewport Y fora da tela deve ser travado a 0.88");
+            AssertApproximately(clampedY, 0.88f, 0.001f, "Offscreen viewport Y must be clamped to 0.88");
 
             float clampedX = Mathf.Clamp(1.15f, 0.06f, 0.94f);
-            AssertApproximately(clampedX, 0.94f, 0.001f, "Viewport X fora da tela deve ser travado a 0.94");
+            AssertApproximately(clampedX, 0.94f, 0.001f, "Offscreen viewport X must be clamped to 0.94");
         }
 
         private static void Test_ForwardOffsetProjection()
@@ -250,10 +250,10 @@ namespace Duskborn.Editor
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             float radius = (float)radiusField.GetValue(bar);
 
-            AssertApproximately(radius, 0.45f, 0.01f, "Raio horizontal deve corresponder ao raio do tronco do pinheiro");
+            AssertApproximately(radius, 0.45f, 0.01f, "Horizontal radius must match the pine trunk radius");
 
             float expectedTotalForward = radius + config.forwardOffset;
-            AssertApproximately(expectedTotalForward, 0.80f, 0.01f, "Distância total frontal deve ser raio + offset");
+            AssertApproximately(expectedTotalForward, 0.80f, 0.01f, "Total forward distance must be radius + offset");
 
             GameObject.DestroyImmediate(barGo);
             GameObject.DestroyImmediate(parentGo);
@@ -268,13 +268,13 @@ namespace Duskborn.Editor
             var parentGo = new GameObject("ResourceNode_BigBirch");
             parentGo.transform.position = Vector3.zero;
 
-            // Colisor fino do tronco
+            // Thin trunk collider.
             var col = parentGo.AddComponent<CapsuleCollider>();
             col.radius = 0.45f;
             col.height = 3.6f;
             col.center = new Vector3(0, 1.8f, 0);
 
-            // Malha visual larga representando a copa/folhagem de árvore grande
+            // Wide visual mesh representing the canopy / foliage of a large tree.
             var meshFilter = parentGo.AddComponent<MeshFilter>();
             var mesh = new Mesh();
             mesh.vertices = new Vector3[]
@@ -307,11 +307,11 @@ namespace Duskborn.Editor
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             float radius = (float)radiusField.GetValue(bar);
 
-            AssertTrue(radius >= 2.3f, $"O raio horizontal deve cobrir a malha da copa larga (esperado >= 2.3m, obtido: {radius}m)");
-            AssertTrue(radius > 2.0f, "O raio horizontal não deve estar artificialmente travado em 2.0m");
+            AssertTrue(radius >= 2.3f, $"Horizontal radius must cover the wide canopy mesh (expected >= 2.3m, got: {radius}m)");
+            AssertTrue(radius > 2.0f, "Horizontal radius must not be artificially clamped to 2.0m");
 
             float expectedTotalForward = radius + config.forwardOffset;
-            AssertTrue(expectedTotalForward >= 2.65f, $"A projeção frontal total deve garantir que a barra fique à frente das folhas ({expectedTotalForward}m)");
+            AssertTrue(expectedTotalForward >= 2.65f, $"Total forward projection must ensure the bar is in front of the leaves ({expectedTotalForward}m)");
 
             GameObject.DestroyImmediate(barGo);
             GameObject.DestroyImmediate(parentGo);

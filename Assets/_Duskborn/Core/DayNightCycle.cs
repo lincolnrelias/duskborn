@@ -9,14 +9,14 @@ namespace Duskborn.Core
 
     public enum CyclePeriod
     {
-        Dawn,       // Alvorecer / Amanhecer
-        Morning,    // Manhã
-        Midday,     // Meio-dia
-        Afternoon,  // Entardecer / Tarde
-        Dusk,       // Crepúsculo (Aviso tático)
-        Nightfall,  // Anoitecer (Início da Noite e das hordas)
-        Midnight,   // Meia-noite (Pico)
-        PreDawn     // Madrugada (Fim da noite)
+        Dawn,       // Dawn / Sunrise
+        Morning,    // Morning.
+        Midday,     // Noon.
+        Afternoon,  // Dusk / Afternoon
+        Dusk,       // Dusk (tactical warning).
+        Nightfall,  // Nightfall (start of the night and hordes).
+        Midnight,   // Midnight (peak).
+        PreDawn     // Predawn (end of the night).
     }
 
     [ExecuteAlways]
@@ -33,43 +33,43 @@ namespace Duskborn.Core
         [SerializeField] private Gradient       dayNightLightColor;
         [SerializeField] private AnimationCurve dayNightIntensity;
 
-        [Header("Skybox & Atmosfera Estilizada")]
-        [Tooltip("Material do Skybox Estilizado (ex: M_Skybox_Stylized com shader Duskborn/StylizedSkybox).")]
+        [Header("Stylized Skybox and Atmosphere")]
+        [Tooltip("Stylized skybox material (e.g. M_Skybox_Stylized using the Duskborn/StylizedSkybox shader).")]
         [SerializeField] private Material       skyboxMaterial;
-        [Tooltip("Sincroniza a cor do Fog com a cor do horizonte do skybox em tempo real.")]
+        [Tooltip("Synchronize fog color with the skybox horizon color in real time.")]
         [SerializeField] private bool           syncFogWithHorizon = true;
-        [Tooltip("Controla a rotação dos corpos celestes (arco do Sol e da Lua).")]
+        [Tooltip("Control celestial body rotation (sun and moon arcs).")]
         [SerializeField] private bool           rotateCelestialBodies = true;
-        [Tooltip("Curva de transição Dia -> Noite (0 = Dia, 1 = Noite). Se vazia, utiliza transição suave automática.")]
+        [Tooltip("Day -> night transition curve (0 = day, 1 = night). Uses an automatic smooth transition when empty.")]
         [SerializeField] private AnimationCurve skyboxNightBlendCurve;
 
-        [Header("Neblina Atmosférica Dinâmica")]
-        [Tooltip("Ativa a modulação contínua da densidade da neblina de acordo com a fase do dia/noite.")]
+        [Header("Dynamic Atmospheric Fog")]
+        [Tooltip("Enable continuous fog density modulation according to the day/night phase.")]
         [SerializeField] private bool           dynamicFogDensity = true;
-        [Tooltip("Densidade da neblina durante o dia claro (visibilidade ampla e límpida).")]
+        [Tooltip("Fog density during clear daylight (wide, clear visibility).")]
         [Range(0.001f, 0.03f)]
         [SerializeField] private float          dayFogDensity = 0.0038f;
-        [Tooltip("Densidade da neblina no alvorecer e crepúsculo (névoa atmosférica dourada/âmbar).")]
+        [Tooltip("Fog density at dawn and dusk (golden / amber atmospheric mist).")]
         [Range(0.001f, 0.03f)]
         [SerializeField] private float          duskDawnFogDensity = 0.0068f;
-        [Tooltip("Densidade da neblina à noite (profundidade misteriosa e atmosfera enluarada).")]
+        [Tooltip("Fog density at night (mysterious depth and moonlit atmosphere).")]
         [Range(0.001f, 0.04f)]
         [SerializeField] private float          nightFogDensity = 0.0095f;
-        [Tooltip("Densidade da neblina na Noite 7 do Chefe (bruma carmesim opressiva).")]
+        [Tooltip("Fog density on boss night 7 (oppressive crimson mist).")]
         [Range(0.001f, 0.05f)]
         [SerializeField] private float          bossNightFogDensity = 0.0145f;
 
-        [Header("Elevação Solar & Lunar (Anti-Sombras Esticadas)")]
-        [Tooltip("Ângulo mínimo de elevação do Sol (evita sombras esticadas e distorcidas no amanhecer/entardecer).")]
+        [Header("Solar & Lunar Elevation (Prevent Stretched Shadows)")]
+        [Tooltip("Minimum sun elevation angle (prevents stretched, distorted shadows at dawn / dusk).")]
         [Range(15f, 60f)]
         [SerializeField] private float minSunPitch = 32f;
-        [Tooltip("Ângulo máximo de elevação do Sol ao meio-dia.")]
+        [Tooltip("Maximum sun elevation angle at noon.")]
         [Range(45f, 85f)]
         [SerializeField] private float maxSunPitch = 68f;
-        [Tooltip("Ângulo mínimo de elevação da Lua à noite.")]
+        [Tooltip("Minimum moon elevation angle at night.")]
         [Range(15f, 60f)]
         [SerializeField] private float minMoonPitch = 28f;
-        [Tooltip("Ângulo máximo de elevação da Lua à meia-noite.")]
+        [Tooltip("Maximum moon elevation angle at midnight.")]
         [Range(45f, 85f)]
         [SerializeField] private float maxMoonPitch = 62f;
 
@@ -89,7 +89,7 @@ namespace Duskborn.Core
         public float       CycleProgress      { get; private set; }
         public float       ClockHours         { get; private set; }
         public string      ClockTimeString    { get; private set; } = "06:00";
-        public string      PeriodDisplayName  { get; private set; } = "Alvorecer";
+        public string      PeriodDisplayName  { get; private set; } = "Dawn";
         public bool        IsDay              => Phase == DayPhase.Day;
         public bool        IsNight            => Phase == DayPhase.Night;
         public bool        IsDusk             => CurrentPeriod == CyclePeriod.Dusk;
@@ -217,7 +217,7 @@ namespace Duskborn.Core
             if (isDay)
             {
                 CycleProgress = p * dayFraction;
-                // Dia cobre 06:00 às 20:00 (14 horas de claridade)
+                // Day covers 06:00 to 20:00 (14 hours of daylight).
                 ClockHours = 6f + p * 14f;
 
                 if (p < 0.15f)
@@ -234,7 +234,7 @@ namespace Duskborn.Core
             else
             {
                 CycleProgress = dayFraction + p * nightFraction;
-                // Noite cobre 20:00 às 06:00 (10 horas de escuridão)
+                // Night covers 20:00 to 06:00 (10 hours of darkness).
                 ClockHours = (20f + p * 10f) % 24f;
 
                 if (p < 0.25f)
@@ -251,15 +251,15 @@ namespace Duskborn.Core
 
             PeriodDisplayName = CurrentPeriod switch
             {
-                CyclePeriod.Dawn      => "Alvorecer",
-                CyclePeriod.Morning   => "Manhã",
-                CyclePeriod.Midday    => "Meio-dia",
-                CyclePeriod.Afternoon => "Entardecer",
-                CyclePeriod.Dusk      => "Crepúsculo",
-                CyclePeriod.Nightfall => "Anoitecer",
-                CyclePeriod.Midnight  => "Meia-noite",
-                CyclePeriod.PreDawn   => "Madrugada",
-                _                     => "Dia"
+                CyclePeriod.Dawn      => "Dawn",
+                CyclePeriod.Morning   => "Morning",
+                CyclePeriod.Midday    => "Noon",
+                CyclePeriod.Afternoon => "Dusk",
+                CyclePeriod.Dusk      => "Dusk",
+                CyclePeriod.Nightfall => "Nightfall",
+                CyclePeriod.Midnight  => "Midnight",
+                CyclePeriod.PreDawn   => "Predawn",
+                _                     => "Day"
             };
 
             if (CurrentPeriod != _lastPeriod)
@@ -374,7 +374,7 @@ namespace Duskborn.Core
             bool isDay = Phase == DayPhase.Day;
             float progress = PhaseProgress;
 
-            // 1. Rotação Orbital Celeste Contínua e Sem Saltos
+            // 1. Continuous celestial orbital rotation without jumps.
             CalculateCelestialVectors(
                 isDay, progress, minSunPitch, maxSunPitch, minMoonPitch, maxMoonPitch,
                 out Vector3 sunSkyDir, out Vector3 moonSkyDir, out Vector3 lightForward
@@ -385,7 +385,7 @@ namespace Duskborn.Core
                 directionalLight.transform.rotation = Quaternion.LookRotation(lightForward, Vector3.up);
             }
 
-            // 2. Cor e Intensidade Progressivas da Luz Direcional
+            // 2. Progressive directional light color and intensity.
             Color lightColor;
             if (dayNightLightColor != null && dayNightLightColor.colorKeys.Length > 2)
             {
@@ -396,7 +396,7 @@ namespace Duskborn.Core
                 lightColor = EvaluateProceduralLightColor(isDay, progress);
             }
 
-            // Boss Night 7: Matiz carmesim do chefe
+            // Boss Night 7: boss crimson hue.
             bool isBossNight = !isDay && CurrentNight >= TotalNights;
             if (isBossNight)
             {
@@ -419,15 +419,15 @@ namespace Duskborn.Core
             }
             directionalLight.intensity = intensity;
 
-            // Ajuste dinâmico de sombra (sombras nítidas de dia, etéreas e suaves à noite)
+            // Dynamic shadow adjustment (crisp shadows by day, ethereal and soft at night).
             directionalLight.shadowStrength = isDay 
                 ? Mathf.Lerp(0.75f, 0.85f, Mathf.Sin(progress * Mathf.PI))
                 : (isBossNight ? 0.70f : 0.55f);
 
-            // 3. Fator de Transição Contínuo do Skybox (0 = Dia, 1 = Noite)
+            // 3. Continuous skybox transition factor (0 = day, 1 = night).
             float nightBlend = CalculateNightBlendFactor(isDay, progress, skyboxNightBlendCurve);
 
-            // 4. Atualização das propriedades do Material Skybox
+            // 4. Update skybox material properties.
             if (skyboxMaterial != null)
             {
                 skyboxMaterial.SetFloat("_DayNightBlend", nightBlend);
@@ -436,7 +436,7 @@ namespace Duskborn.Core
                 skyboxMaterial.SetVector("_MoonDirection", moonSkyDir);
             }
 
-            // 5. Sincronização Contínua de Neblina com o Horizonte e Alvorada/Crepúsculo
+            // 5. Continuous fog synchronization with the horizon and dawn / dusk.
             if (syncFogWithHorizon)
             {
                 Color dayHoriz = (skyboxMaterial != null && skyboxMaterial.HasProperty("_DayHorizonColor")) 
@@ -456,7 +456,7 @@ namespace Duskborn.Core
 
                 Color horizonCol = Color.Lerp(dayHoriz, nightHoriz, nightBlend);
 
-                // Realce de Crepúsculo e Alvorecer na névoa com curva parabólica contínua
+                // Dusk and dawn mist highlights using a continuous parabolic curve.
                 float twilightFactor = 0f;
                 if (isDay)
                 {
@@ -494,7 +494,7 @@ namespace Duskborn.Core
                     RenderSettings.fogDensity = 0.0055f;
                 }
 
-                // Iluminação Ambiente Trilight Coerente e Suave
+                // Consistent, smooth trilight ambient lighting.
                 Color dayZenith = (skyboxMaterial != null && skyboxMaterial.HasProperty("_DayZenithColor")) ? skyboxMaterial.GetColor("_DayZenithColor") : new Color(0.28f, 0.58f, 0.95f);
                 Color nightZenith = (skyboxMaterial != null && skyboxMaterial.HasProperty("_NightZenithColor")) ? skyboxMaterial.GetColor("_NightZenithColor") : new Color(0.04f, 0.06f, 0.16f);
                 Color dayGround = (skyboxMaterial != null && skyboxMaterial.HasProperty("_DayGroundColor")) ? skyboxMaterial.GetColor("_DayGroundColor") : new Color(0.35f, 0.45f, 0.38f);
@@ -511,7 +511,7 @@ namespace Duskborn.Core
                 RenderSettings.ambientEquatorColor = Color.Lerp(horizonCol * 0.55f, nightHoriz * 0.35f, nightBlend);
                 RenderSettings.ambientGroundColor = Color.Lerp(dayGround * 0.45f, nightGround * 0.25f, nightBlend);
 
-                // Sincronização da cor de sombra subtrativa
+                // Synchronize subtractive shadow color.
                 Color dayShadowColor = new Color(0.42f, 0.48f, 0.63f, 1.0f);
                 Color nightShadowColor = isBossNight ? new Color(0.35f, 0.10f, 0.12f, 1.0f) : new Color(0.12f, 0.14f, 0.25f, 1.0f);
                 RenderSettings.subtractiveShadowColor = Color.Lerp(dayShadowColor, nightShadowColor, nightBlend);
@@ -529,19 +529,19 @@ namespace Duskborn.Core
             out Vector3 moonSkyDir,
             out Vector3 lightForward)
         {
-            // O Sol nasce a Leste (yaw 75°), passa pelo Sul ao meio-dia (yaw 180°), e se põe a Oeste (yaw 285°)
+            // The sun rises in the east (yaw 75°), passes south at noon (yaw 180°), and sets in the west (yaw 285°).
             float daySunYaw = Mathf.Lerp(75f, 285f, progress);
             float daySunPitch = Mathf.Sin(progress * Mathf.PI) * (maxSunPitch + 6f) - 3f;
 
-            // À noite, o Sol viaja sob a terra pelo Norte
+            // At night, the sun travels beneath the ground through the north.
             float nightSunYaw = Mathf.Lerp(285f, 435f, progress) % 360f;
             float nightSunPitch = -Mathf.Sin(progress * Mathf.PI) * (maxSunPitch + 6f) - 3f;
 
-            // A Lua nasce a Leste ao anoitecer, passa pelo Sul à meia-noite, e se põe a Oeste ao amanhecer
+            // The moon rises in the east at nightfall, passes south at midnight, and sets in the west at dawn.
             float nightMoonYaw = Mathf.Lerp(75f, 285f, progress);
             float nightMoonPitch = Mathf.Sin(progress * Mathf.PI) * (maxMoonPitch + 6f) - 3f;
 
-            // De dia, a Lua viaja sob a terra pelo Norte
+            // During the day, the moon travels beneath the ground through the north.
             float dayMoonYaw = Mathf.Lerp(285f, 435f, progress) % 360f;
             float dayMoonPitch = -Mathf.Sin(progress * Mathf.PI) * (maxMoonPitch + 6f) - 3f;
 
@@ -551,38 +551,38 @@ namespace Duskborn.Core
             float moonPitch = isDay ? dayMoonPitch : nightMoonPitch;
             float moonYaw   = isDay ? dayMoonYaw   : nightMoonYaw;
 
-            // Vetores celestes tridimensionais absolutos (Y > 0 quando visível no céu)
+            // Absolute three-dimensional celestial vectors (Y > 0 when visible in the sky).
             sunSkyDir = SphericalToDirection(sunPitch, sunYaw);
             moonSkyDir = SphericalToDirection(moonPitch, moonYaw);
 
-            // Cálculo dos vetores de luz direcional para o solo (com pitch mínimo anti-sombras esticadas)
+            // Calculate directional light vectors toward the ground (minimum pitch prevents stretched shadows).
             float sunLightPitch = Mathf.Max(minSunPitch, sunPitch);
             Vector3 sunLightForward = -SphericalToDirection(sunLightPitch, daySunYaw);
 
             float moonLightPitch = Mathf.Max(minMoonPitch, nightMoonPitch);
             Vector3 moonLightForward = -SphericalToDirection(moonLightPitch, nightMoonYaw);
 
-            // Vetores âncora para transição sem estalos nem descontinuidades nas passagens Dia/Noite
-            // No poente: o Sol se põe a Oeste (285°), e a Lua nasce a Leste (75°)
+            // Anchor vectors for transitions without pops or discontinuities at day/night boundaries.
+            // At sunset: the sun sets in the west (285°), and the moon rises in the east (75°).
             Vector3 sunsetSunLightFwd    = -SphericalToDirection(minSunPitch, 285f);
             Vector3 moonriseMoonLightFwd = -SphericalToDirection(minMoonPitch, 75f);
 
-            // Na alvorada: a Lua se põe a Oeste (285°), e o Sol nasce a Leste (75°)
+            // At dawn: the moon sets in the west (285°), and the sun rises in the east (75°).
             Vector3 moonsetMoonLightFwd  = -SphericalToDirection(minMoonPitch, 285f);
             Vector3 sunriseSunLightFwd   = -SphericalToDirection(minSunPitch, 75f);
 
-            // Continuidade perfeita entre Pôr do Sol e Nascer da Lua (e vice-versa)
+            // Seamless continuity between sunset and moonrise (and vice versa).
             if (isDay)
             {
                 if (progress > 0.90f)
                 {
-                    // Últimos 10% do dia: Slerp contínuo entre o poente do Sol (Oeste) e o levante da Lua (Leste)
+                    // Last 10% of the day: continuous Slerp from the setting sun (west) to the rising moon (east).
                     float t = Mathf.SmoothStep(0f, 1f, (progress - 0.90f) / 0.10f * 0.5f);
                     lightForward = Vector3.Slerp(sunLightForward, moonriseMoonLightFwd, t);
                 }
                 else if (progress < 0.08f)
                 {
-                    // Primeiros 8% do dia: transição contínua a partir do poente da Lua (Oeste) para o Sol nascente (Leste)
+                    // First 8% of the day: continuous transition from the setting moon (west) to the rising sun (east).
                     float t = Mathf.SmoothStep(0f, 1f, 0.5f + (progress / 0.08f) * 0.5f);
                     lightForward = Vector3.Slerp(moonsetMoonLightFwd, sunLightForward, t);
                 }
@@ -595,13 +595,13 @@ namespace Duskborn.Core
             {
                 if (progress < 0.10f)
                 {
-                    // Primeiros 10% da noite: continuidade exata com o fim do dia
+                    // First 10% of the night: exact continuity with the end of the day.
                     float t = Mathf.SmoothStep(0f, 1f, 0.5f + (progress / 0.10f) * 0.5f);
                     lightForward = Vector3.Slerp(sunsetSunLightFwd, moonLightForward, t);
                 }
                 else if (progress > 0.92f)
                 {
-                    // Últimos 8% da noite: transição suave e contínua para o nascer do Sol (Leste)
+                    // Last 8% of the night: smooth, continuous transition toward sunrise (east).
                     float t = Mathf.SmoothStep(0f, 1f, (progress - 0.92f) / 0.08f * 0.5f);
                     lightForward = Vector3.Slerp(moonLightForward, sunriseSunLightFwd, t);
                 }
@@ -635,12 +635,12 @@ namespace Duskborn.Core
             {
                 if (progress < 0.15f)
                 {
-                    // Alvorecer: transita de 0.50f (aurora da madrugada) para 0.0f (dia límpido)
+                    // Dawn: transition from 0.50f (predawn glow) to 0.0f (clear daylight).
                     return Mathf.Lerp(0.50f, 0.0f, Mathf.SmoothStep(0f, 1f, progress / 0.15f));
                 }
                 if (progress > 0.80f)
                 {
-                    // Crepúsculo: transita suavemente de 0.0f para 0.65f (pôr do sol avermelhado)
+                    // Dusk: transition smoothly from 0.0f to 0.65f (reddish sunset).
                     return Mathf.Lerp(0.0f, 0.65f, Mathf.SmoothStep(0f, 1f, (progress - 0.80f) / 0.20f));
                 }
                 return 0f;
@@ -649,12 +649,12 @@ namespace Duskborn.Core
             {
                 if (progress < 0.15f)
                 {
-                    // Início da noite: continua de 0.65f até 1.0f (noite completa)
+                    // Early night: continue from 0.65f to 1.0f (full night).
                     return Mathf.Lerp(0.65f, 1.0f, Mathf.SmoothStep(0f, 1f, progress / 0.15f));
                 }
                 if (progress > 0.82f)
                 {
-                    // Madrugada: transita suavemente de 1.0f para 0.50f (primeira claridade da alvorada)
+                    // Predawn: transition smoothly from 1.0f to 0.50f (first dawn light).
                     return Mathf.Lerp(1.0f, 0.50f, Mathf.SmoothStep(0f, 1f, (progress - 0.82f) / 0.18f));
                 }
                 return 1f;
@@ -675,13 +675,13 @@ namespace Duskborn.Core
 
         private Color EvaluateProceduralLightColor(bool isDay, float progress)
         {
-            Color dawnColor      = new Color(1.0f, 0.82f, 0.68f); // Alvorecer dourado suave
-            Color dayColor       = new Color(1.0f, 0.96f, 0.88f); // Dia límpido e quente
-            Color afternoonColor = new Color(1.0f, 0.90f, 0.74f); // Tarde dourada
-            Color duskColor      = new Color(1.0f, 0.52f, 0.24f); // Crepúsculo carmesim/âmbar
-            Color twilightColor  = new Color(0.48f, 0.52f, 0.72f); // Transição crepúsculo/noite
-            Color nightColor     = new Color(0.60f, 0.75f, 1.0f);  // Luar etéreo
-            Color preDawnColor   = new Color(0.70f, 0.65f, 0.88f); // Madrugada violeta suave
+            Color dawnColor      = new Color(1.0f, 0.82f, 0.68f); // Soft golden dawn
+            Color dayColor       = new Color(1.0f, 0.96f, 0.88f); // Clear, warm daylight.
+            Color afternoonColor = new Color(1.0f, 0.90f, 0.74f); // Golden afternoon
+            Color duskColor      = new Color(1.0f, 0.52f, 0.24f); // Crimson / amber dusk.
+            Color twilightColor  = new Color(0.48f, 0.52f, 0.72f); // Dusk / night transition.
+            Color nightColor     = new Color(0.60f, 0.75f, 1.0f);  // Ethereal moonlight.
+            Color preDawnColor   = new Color(0.70f, 0.65f, 0.88f); // Soft violet predawn
 
             if (isDay)
             {

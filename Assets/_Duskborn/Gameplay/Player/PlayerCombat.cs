@@ -382,7 +382,7 @@ namespace Duskborn.Gameplay.Player
                 float lifestealFraction = _stats.EffectiveLifesteal;
                 if (lifestealFraction > 0f)
                 {
-                    // Calcula o dano total aplicado neste ataque para lifesteal
+                    // Calculate total damage dealt by this attack for life steal.
                     float baseDmg = _stats.Damage * damageMultiplier;
                     float totalDamageDealt = baseDmg * HitEnemiesCache.Count;
                     float healAmount = totalDamageDealt * lifestealFraction;
@@ -436,7 +436,7 @@ namespace Duskborn.Gameplay.Player
                 float lifestealFraction = _stats.EffectiveLifesteal;
                 if (lifestealFraction > 0f)
                 {
-                    // Calcula o dano total aplicado neste ataque para lifesteal
+                    // Calculate total damage dealt by this attack for life steal.
                     float baseDmg = _stats.Damage * comboMultiplier;
                     float totalDamageDealt = baseDmg * HitEnemiesCache.Count;
                     float healAmount = totalDamageDealt * lifestealFraction;
@@ -561,15 +561,15 @@ namespace Duskborn.Gameplay.Player
             float gatheringSpeed = _stats.EffectiveGatheringSpeed;
             float damage = _stats.Damage * typeMultiplier * (1f + gatheringSpeed);
 
-            // Gating de ferramenta: nós avançados exigem ferramentas do tipo e tier adequados
+            // Tool gating: advanced nodes require the appropriate tool type and tier.
             bool toolAdequate = true;
-            if (node.RequiredHarvestTier > Crafting.CraftingTier.Primitivo)
+            if (node.RequiredHarvestTier > Crafting.CraftingTier.Primitive)
             {
                 if (typeMultiplier <= 1.0f)
                 {
                     toolAdequate = false;
                 }
-                else if (node.RequiredHarvestTier >= Crafting.CraftingTier.Reforcado && typeMultiplier < 4.0f)
+                else if (node.RequiredHarvestTier >= Crafting.CraftingTier.Reinforced && typeMultiplier < 4.0f)
                 {
                     toolAdequate = false;
                 }
@@ -577,7 +577,7 @@ namespace Duskborn.Gameplay.Player
 
             if (!toolAdequate)
             {
-                damage = Mathf.Min(damage, 1f); // Golpe resvalado / ferramenta insuficiente
+                damage = Mathf.Min(damage, 1f); // Glancing hit / insufficient tool
             }
 
             string surfaceTag = node.GetSurfaceTag();

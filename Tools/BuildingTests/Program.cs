@@ -28,7 +28,7 @@ class Program
         Assert(!MaterialCosts.CanPay(inventory,bad), "null material does not become a free cost");
         var recipe = new CraftingRecipe(); Set(recipe,"recipeId","smelt"); Set(recipe,"outputItem",new MaterialDefinition { Id="bar" }); Set(recipe,"outputAmount",1); Set(recipe,"processingSeconds",5f);
         BuildingWorld.Recipes["smelt"] = recipe;
-        var definition = new BuildableDefinition { capacity = 1, processingSpeed = 1, station = CraftingStationType.Forja };
+        var definition = new BuildableDefinition { capacity = 1, processingSpeed = 1, station = CraftingStationType.Forge };
         var station = new PlacedBuilding(); var state = new BuildingState(); state.jobs.Add(new ProcessingJob { recipe="smelt", remaining=5 });
         station.Initialize(definition,state); station.Tick(2);
         Assert(station.IsProcessing, "paid queued job burns with no stored fuel");

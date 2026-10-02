@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_HeavyIronChest
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_HeavyIronChest
-  recipeName: Placa Pesada de Ferro
-  description: Placa Pesada de Ferro
-  category: Armadura
+  recipeName: "Heavy Iron Plate"
+  description: "Heavy Iron Plate"
+  category: "Armor"
   tier: 3
   requiredStation: 1
   isAlwaysDiscovered: 0

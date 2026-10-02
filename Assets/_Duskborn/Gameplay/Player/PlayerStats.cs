@@ -201,7 +201,7 @@ namespace Duskborn.Gameplay.Player
             _currentHP.Value = Mathf.Max(0f, _currentHP.Value - actual);
             RpcShowDamageNumber(transform.position, actual, isCrit);
 
-            // ── Dano de Espinhos (Thorns) ────────────────────────────────────
+            // Thorns Damage
             float thorns = EffectiveThornsDamage;
             if (thorns > 0f && attacker != null && actual > 0f)
             {

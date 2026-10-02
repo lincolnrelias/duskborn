@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InventorySystem.Data.MaterialDefinition
   id: test_uncommon
   displayName: Flora (Uncommon)
-  description: Erva de teste incomum
+  description: "Uncommon test herb"
   icon: {fileID: 0}
   dropPrefab: {fileID: 5752967656333843250, guid: d7195ba283cf41d9a24490f89e27c022, type: 3}
   category: common

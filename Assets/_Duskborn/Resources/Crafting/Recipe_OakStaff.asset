@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_OakStaff
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_OakStaff
-  recipeName: Cajado de Carvalho
-  description: Cajado de Carvalho
-  category: Armas
+  recipeName: "Oak Staff"
+  description: "Oak Staff"
+  category: "Weapons"
   tier: 1
   isAlwaysDiscovered: 1
   outputItem: {fileID: 0}

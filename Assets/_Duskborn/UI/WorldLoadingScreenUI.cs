@@ -5,11 +5,11 @@ using UnityEngine;
 namespace Duskborn.UI
 {
     /// <summary>
-    /// Tela de carregamento procedural estilizada em tema Medieval/Fantasy Low-Poly ("Grimório & Bússola Rúnica").
-    /// Apresenta molduras de ferro forjado e ouro envelhecido, bússola/estrela rúnica facetada giratória em 3D,
-    /// partículas de brasas do crepúsculo flutuantes, barra de progresso em âmbar/cristal com brilho dinâmico,
-    /// títulos épicos de forja do mundo e ensinamentos ancestrais de sobrevivência.
-    /// Funciona 100% via OnGUI com texturas geradas dinamicamente, sem dependências de prefabs externos.
+    /// Stylized procedural loading screen with a Medieval / Fantasy Low-Poly theme ("Grimoire & Runic Compass").
+    /// Features wrought iron and aged gold frames, a rotating faceted 3D runic compass / star,
+    /// floating twilight ember particles, an amber / crystal progress bar with dynamic glow,
+    /// epic world-forging titles, and ancestral survival teachings.
+    /// Works entirely through OnGUI with dynamically generated textures, without external prefab dependencies.
     /// </summary>
     public class WorldLoadingScreenUI : MonoBehaviour
     {
@@ -21,14 +21,14 @@ namespace Duskborn.UI
             Instance = null;
         }
 
-        [Header("Estado de Carregamento")]
+        [Header("Loading State")]
         [Range(0f, 1f)] public float targetProgress = 0f;
         public float currentProgress = 0f;
-        public string stageTitle = "Evocando o Crepúsculo...";
-        public string stageDetail = "Despertando as sementes do mundo ancestral...";
+        public string stageTitle = "Summoning the Twilight...";
+        public string stageDetail = "Awakening the seeds of the ancestral world...";
         public bool isGenerating = false;
 
-        [Header("Configuração Visual")]
+        [Header("Visual Configuration")]
         public bool autoFadeOut = true;
         public float fadeOutSpeed = 2.2f;
 
@@ -41,7 +41,7 @@ namespace Duskborn.UI
         private float _starRotation = 0f;
         private float _shimmerOffset = 0f;
 
-        // Partículas atmosféricas de brasas do crepúsculo
+        // Atmospheric twilight ember particles.
         private struct DuskEmber
         {
             public float xRatio;
@@ -54,16 +54,16 @@ namespace Duskborn.UI
 
         private static readonly string[] SurvivalTips = new string[]
         {
-            "✦ Nas horas douradas do Crepúsculo, acumule madeira e ferro; a escuridão oculta horrores vorazes.",
-            "✦ O Santuário Central emana uma barreira sagrada. Proteja o coração do seu refúgio a qualquer custo.",
-            "✦ Lâminas de aço puro quebram a guarda de armaduras pesadas e rompem a carapaça de abominações.",
-            "✦ A esquiva tática [Espaço] consome fôlego, mas garante imunidade temporária contra golpes esmagadores.",
-            "✦ Baús antigos espalhados nos confins do ermo guardam relíquias perdidas dos reis caídos.",
-            "✦ Mantenha fogueiras e tochas acesas: a luz é a única fronteira que as criaturas da noite hesitam cruzar.",
-            "✦ A bancada de trabalho na clareira permite forjar armas arcanas combinando madeira nobre e minério refinado."
+            "✦ In the golden hours of Twilight, stockpile wood and iron; darkness hides ravenous horrors.",
+            "✦ The Central Sanctuary radiates a sacred barrier. Protect the heart of your refuge at any cost.",
+            "✦ Pure steel blades break through heavy armor and pierce the shells of abominations.",
+            "✦ Tactical dodging [Space] consumes stamina, but grants temporary immunity to crushing strikes.",
+            "✦ Ancient chests scattered across the wilds hold lost relics of fallen kings.",
+            "✦ Keep campfires and torches lit: light is the only boundary that creatures of the night hesitate to cross.",
+            "✦ The workbench in the clearing lets you forge arcane weapons by combining fine wood and refined ore."
         };
 
-        // Texturas procedurais com estética Medieval Fantasy Low-Poly
+        // Procedural textures with a Medieval Fantasy Low-Poly aesthetic.
         private Texture2D _slateTexture;
         private Texture2D _ironFrameTexture;
         private Texture2D _goldTrimTexture;
@@ -111,7 +111,7 @@ namespace Duskborn.UI
             return Instance;
         }
 
-        public void Show(string initialStage = "Forjando o Relevo Ancestral...", string initialDetail = "Alocando dados geológicos...")
+        public void Show(string initialStage = "Forging the Ancient Terrain...", string initialDetail = "Allocating geological data...")
         {
             gameObject.SetActive(true);
             isGenerating = true;
@@ -133,8 +133,8 @@ namespace Duskborn.UI
         public void CompleteAndFadeOut(Action onFinished = null)
         {
             targetProgress = 1.0f;
-            stageTitle = "O Crepúsculo se Revela!";
-            stageDetail = "Mundo consagrado. Entrando na terra dos ermos...";
+            stageTitle = "The Twilight Reveals Itself!";
+            stageDetail = "World consecrated. Entering the wild lands...";
             StartCoroutine(FadeOutRoutine(onFinished));
         }
 
@@ -187,14 +187,14 @@ namespace Duskborn.UI
         {
             if (!isGenerating && _currentAlpha <= 0.001f) return;
 
-            // Interpolação suave do progresso
+            // Smooth progress interpolation.
             currentProgress = Mathf.MoveTowards(currentProgress, targetProgress, Time.unscaledDeltaTime * 0.75f);
 
-            // Rotação suave da estrela rúnica medieval
+            // Smooth medieval runic star rotation.
             _starRotation += Time.unscaledDeltaTime * 45f;
             _shimmerOffset += Time.unscaledDeltaTime * 1.5f;
 
-            // Movimento das brasas atmosféricas
+            // Atmospheric ember movement.
             if (_embers != null)
             {
                 for (int i = 0; i < _embers.Length; i++)
@@ -208,7 +208,7 @@ namespace Duskborn.UI
                 }
             }
 
-            // Rotação dos ensinamentos de sobrevivência
+            // Rotate survival teachings.
             _tipTimer += Time.unscaledDeltaTime;
             if (_tipTimer >= 5f)
             {
@@ -234,27 +234,27 @@ namespace Duskborn.UI
             Color prevGuiColor = GUI.color;
             GUI.color = new Color(1f, 1f, 1f, _currentAlpha);
 
-            // 1. Fundo de Ardósia/Obsidiana Gótica
+            // 1. Gothic Slate / Obsidian Background.
             GUI.DrawTexture(new Rect(0, 0, virtualW, virtualH), _slateTexture, ScaleMode.StretchToFill);
 
-            // 2. Brasas Místicas Flutuantes
+            // 2. Floating Mystical Embers.
             DrawEmbers(virtualW, virtualH);
 
-            // 3. Moldura Ornamental e Cantoneiras de Ferro & Ouro Low-Poly
+            // 3. Ornamental Frame and Low-Poly Iron & Gold Corners.
             DrawMedievalScreenBorders(virtualW, virtualH);
 
-            // 4. Brasão & Título Heraldico Principal
+            // 4. Main Heraldic Crest & Title.
             float centerY = virtualH * 0.32f;
             GUI.Label(new Rect(0, centerY - 80, virtualW, 42), "❖  D U S K B O R N  ❖", _crestTitleStyle);
-            GUI.Label(new Rect(0, centerY - 32, virtualW, 22), "✦ FORJANDO O REINO DO CREPÚSCULO ✦", _crestSubStyle);
+            GUI.Label(new Rect(0, centerY - 32, virtualW, 22), "✦ FORGING THE TWILIGHT REALM ✦", _crestSubStyle);
 
-            // 5. Linha divisória de ouro com runa central
+            // 5. Gold divider line with central rune.
             DrawRunicDivider((virtualW - 420f) * 0.5f, centerY - 4f, 420f);
 
-            // 6. Título da Fase Atual
+            // 6. Current Phase Title.
             GUI.Label(new Rect(0, centerY + 18, virtualW, 30), stageTitle, _stageStyle);
 
-            // 7. Barra de Progresso em Ferro Forjado e Cristal de Âmbar
+            // 7. Wrought Iron and Amber Crystal Progress Bar.
             float barW = Mathf.Min(virtualW * 0.65f, 620f);
             float barH = 32f;
             float barX = (virtualW - barW) * 0.5f;
@@ -262,17 +262,17 @@ namespace Duskborn.UI
 
             DrawMedievalProgressBar(barX, barY, barW, barH, currentProgress);
 
-            // 8. Percentual Rúnico Destacado
+            // 8. Highlighted Runic Percentage.
             int percentInt = Mathf.Clamp(Mathf.RoundToInt(currentProgress * 100f), 0, 100);
             GUI.Label(new Rect(0, barY + barH + 10f, virtualW, 28), $"◈  {percentInt}%  ◈", _percentStyle);
 
-            // 9. Detalhe Geológico / Operação Técnica
+            // 9. Geological Detail / Technical Operation.
             GUI.Label(new Rect(0, barY + barH + 42f, virtualW, 22), stageDetail, _detailStyle);
 
-            // 10. Bússola Rúnica Low-Poly Giratória no canto inferior direito
+            // 10. Rotating Low-Poly Runic Compass in the lower-right corner.
             DrawLowPolyRunicStar(virtualW - 85f, virtualH - 85f, 54f);
 
-            // 11. Placa de Pergaminho com Ensinamento de Sobrevivência
+            // 11. Parchment Plaque with Survival Teaching.
             float plaqueW = Mathf.Min(virtualW * 0.85f, 780f);
             float plaqueH = 46f;
             float plaqueX = (virtualW - plaqueW) * 0.5f;
@@ -304,19 +304,19 @@ namespace Duskborn.UI
 
         private void DrawMedievalScreenBorders(float w, float h)
         {
-            // Borda externa de ferro forjado
+            // Outer wrought iron border.
             GUI.DrawTexture(new Rect(0, 0, w, 6), _ironFrameTexture);
             GUI.DrawTexture(new Rect(0, h - 6, w, 6), _ironFrameTexture);
             GUI.DrawTexture(new Rect(0, 0, 6, h), _ironFrameTexture);
             GUI.DrawTexture(new Rect(w - 6, 0, 6, h), _ironFrameTexture);
 
-            // Friso de ouro interior
+            // Inner gold trim.
             GUI.DrawTexture(new Rect(18, 18, w - 36, 1), _goldTrimTexture);
             GUI.DrawTexture(new Rect(18, h - 19, w - 36, 1), _goldTrimTexture);
             GUI.DrawTexture(new Rect(18, 18, 1, h - 36), _goldTrimTexture);
             GUI.DrawTexture(new Rect(w - 19, 18, 1, h - 36), _goldTrimTexture);
 
-            // Cantoneiras ornamentadas de ouro nos 4 cantos
+            // Ornamental gold brackets at all 4 corners.
             float cornerSize = 24f;
             DrawCornerBracket(16, 16, cornerSize, cornerSize, true, true);
             DrawCornerBracket(w - 16 - cornerSize, 16, cornerSize, cornerSize, false, true);
@@ -328,7 +328,7 @@ namespace Duskborn.UI
         {
             GUI.DrawTexture(new Rect(x, y, w, 3), _goldTrimTexture);
             GUI.DrawTexture(new Rect(x, y, 3, h), _goldTrimTexture);
-            // Rebite de ferro dourado no vértice
+            // Golden iron rivet at the corner.
             float dotX = left ? x : x + w - 5;
             float dotY = top ? y : y + h - 5;
             GUI.DrawTexture(new Rect(dotX - 1, dotY - 1, 6, 6), _goldTrimTexture);
@@ -339,31 +339,31 @@ namespace Duskborn.UI
             float halfW = width * 0.44f;
             GUI.DrawTexture(new Rect(x, y + 5, halfW, 2), _goldTrimTexture);
             GUI.DrawTexture(new Rect(x + width - halfW, y + 5, halfW, 2), _goldTrimTexture);
-            // Losango / Runa central
+            // Diamond / Central rune
             GUI.DrawTexture(new Rect(x + halfW + 10f, y + 2, 8, 8), _goldTrimTexture);
         }
 
         private void DrawMedievalProgressBar(float x, float y, float width, float height, float progress)
         {
-            // 1. Moldura externa de ferro forjado
+            // 1. Outer wrought iron frame.
             GUI.DrawTexture(new Rect(x - 4, y - 4, width + 8, height + 8), _ironFrameTexture);
 
-            // 2. Friso biselado de ouro
+            // 2. Beveled gold trim.
             GUI.DrawTexture(new Rect(x - 2, y - 2, width + 4, height + 4), _goldTrimTexture);
 
-            // 3. Calha em pedra escura
+            // 3. Dark stone track.
             GUI.DrawTexture(new Rect(x, y, width, height), _barTroughTexture);
 
-            // 4. Preenchimento em Cristal de Âmbar
+            // 4. Amber Crystal Fill.
             float fillWidth = Mathf.Clamp(width * progress, 0f, width);
             if (fillWidth > 2f)
             {
                 GUI.DrawTexture(new Rect(x, y, fillWidth, height), _amberFillTexture);
 
-                // Brilho pulsante no topo
+                // Pulsing glow at the top.
                 GUI.DrawTexture(new Rect(x, y, fillWidth, 3f), _goldTrimTexture);
 
-                // Shimmer glint que viaja pela barra
+                // Shimmer glint traveling along the bar.
                 float shimmerX = x + Mathf.Repeat(_shimmerOffset * width, width);
                 if (shimmerX < x + fillWidth)
                 {
@@ -375,7 +375,7 @@ namespace Duskborn.UI
                 }
             }
 
-            // Rebites nos quatro cantos da barra
+            // Rivets at the bar's four corners.
             GUI.DrawTexture(new Rect(x - 6, y - 6, 5, 5), _goldTrimTexture);
             GUI.DrawTexture(new Rect(x + width + 1, y - 6, 5, 5), _goldTrimTexture);
             GUI.DrawTexture(new Rect(x - 6, y + height + 1, 5, 5), _goldTrimTexture);
@@ -390,7 +390,7 @@ namespace Duskborn.UI
             Vector2 pivot = new Vector2(cx + size * 0.5f, cy + size * 0.5f);
             GUIUtility.RotateAroundPivot(_starRotation, pivot);
 
-            // Estrela rúnica facetada com iluminação de normais simulada
+            // Faceted runic star with simulated normal lighting.
             float pulse = 0.88f + 0.12f * Mathf.Sin(Time.realtimeSinceStartup * 4f);
             Color prev = GUI.color;
             GUI.color = new Color(1f, 0.9f, 0.65f, pulse * _currentAlpha);
@@ -402,14 +402,14 @@ namespace Duskborn.UI
 
         private void DrawLorePlaque(float x, float y, float w, float h, string text)
         {
-            // Fundo escuro de pergaminho/ardósia
+            // Dark parchment / slate background.
             GUI.DrawTexture(new Rect(x, y, w, h), _parchmentPlaqueTexture);
 
-            // Friso sutil de ouro na placa
+            // Subtle gold trim on the plaque.
             GUI.DrawTexture(new Rect(x, y, w, 1), _goldTrimTexture);
             GUI.DrawTexture(new Rect(x, y + h - 1, w, 1), _goldTrimTexture);
 
-            // Texto do ensinamento
+            // Teaching text.
             GUI.Label(new Rect(x + 16, y + 6, w - 32, h - 12), text, _loreStyle);
         }
 
@@ -417,7 +417,7 @@ namespace Duskborn.UI
         {
             if (_stylesInitialized) return;
 
-            // 1. Texturas Procedurais
+            // 1. Procedural Textures
             _slateTexture = CreateSlateTexture(32, 32, new Color(0.08f, 0.09f, 0.12f), new Color(0.05f, 0.06f, 0.08f));
             _ironFrameTexture = CreateSolidTexture(new Color(0.14f, 0.16f, 0.20f, 1f));
             _goldTrimTexture = CreateSolidTexture(new Color(0.85f, 0.72f, 0.35f, 0.95f));
@@ -427,7 +427,7 @@ namespace Duskborn.UI
             _parchmentPlaqueTexture = CreateSolidTexture(new Color(0.09f, 0.10f, 0.14f, 0.90f));
             _runicStarTexture = CreateLowPolyRunicStarTexture(64);
 
-            // 2. Estilos Tipográficos Medieval/Fantasy
+            // 2. Medieval / Fantasy Typography Styles.
             _crestTitleStyle = new GUIStyle
             {
                 fontSize = 32,
@@ -498,7 +498,7 @@ namespace Duskborn.UI
             {
                 for (int x = 0; x < w; x++)
                 {
-                    // Padrão de lajotas de pedra/ardósia com veios suaves
+                    // Stone / slate tile pattern with subtle veins.
                     bool isBorder = (x % 16 == 0) || (y % 16 == 0);
                     float noise = Mathf.PerlinNoise(x * 0.15f, y * 0.15f) * 0.12f;
                     Color c = Color.Lerp(baseCol, darkCol, noise);
@@ -514,9 +514,9 @@ namespace Duskborn.UI
         private Texture2D CreateAmberGradientTexture(int w, int h)
         {
             Texture2D tex = new Texture2D(w, h);
-            Color cLeft = new Color(0.85f, 0.45f, 0.12f);   // Âmbar quente
-            Color cMid = new Color(0.98f, 0.75f, 0.22f);    // Ouro radiante
-            Color cRight = new Color(0.92f, 0.88f, 0.45f);  // Cristal luz
+            Color cLeft = new Color(0.85f, 0.45f, 0.12f);   // Warm amber.
+            Color cMid = new Color(0.98f, 0.75f, 0.22f);    // Radiant gold.
+            Color cRight = new Color(0.92f, 0.88f, 0.45f);  // Crystal light.
 
             Color[] cols = new Color[w * h];
             for (int y = 0; y < h; y++)
@@ -525,7 +525,7 @@ namespace Duskborn.UI
                 {
                     float t = (float)x / (w - 1);
                     Color c = t < 0.6f ? Color.Lerp(cLeft, cMid, t / 0.6f) : Color.Lerp(cMid, cRight, (t - 0.6f) / 0.4f);
-                    // Destaque na borda superior para sensação chanfrada
+                    // Upper edge highlight for a beveled feel.
                     if (y >= h - 2) c = Color.Lerp(c, Color.white, 0.45f);
                     cols[y * w + x] = c;
                 }
@@ -561,10 +561,10 @@ namespace Duskborn.UI
             Vector2 center = new Vector2((size - 1) * 0.5f, (size - 1) * 0.5f);
             float maxR = (size - 1) * 0.48f;
 
-            Color cLit = new Color(1f, 0.88f, 0.45f, 1f);     // Ouro iluminado
-            Color cMid = new Color(0.85f, 0.65f, 0.25f, 1f);    // Âmbar base
-            Color cShadow = new Color(0.55f, 0.38f, 0.12f, 1f); // Sombra de oclusão
-            Color cCore = new Color(0.98f, 0.95f, 0.85f, 1f);   // Núcleo cristalino
+            Color cLit = new Color(1f, 0.88f, 0.45f, 1f);     // Illuminated gold.
+            Color cMid = new Color(0.85f, 0.65f, 0.25f, 1f);    // Base amber.
+            Color cShadow = new Color(0.55f, 0.38f, 0.12f, 1f); // Occlusion shadow.
+            Color cCore = new Color(0.98f, 0.95f, 0.85f, 1f);   // Crystal core.
 
             for (int y = 0; y < size; y++)
             {
@@ -581,7 +581,7 @@ namespace Duskborn.UI
                     float angle = Mathf.Atan2(p.y, p.x) * Mathf.Rad2Deg;
                     if (angle < 0) angle += 360f;
 
-                    // 8 pontas (45 graus cada ponta)
+                    // 8 points (45 degrees per point).
                     float segment = angle % 45f;
                     float radiusAtAngle = maxR * (0.35f + 0.65f * Mathf.Cos((segment - 22.5f) * Mathf.Deg2Rad * 4f));
                     if (dist > radiusAtAngle)
@@ -590,11 +590,11 @@ namespace Duskborn.UI
                         continue;
                     }
 
-                    // Shading facetado Low-Poly: metade da ponta iluminada, metade sombreada
+                    // Faceted low-poly shading: half the tip lit, half shaded.
                     bool isLitFacet = (segment < 22.5f);
                     Color facetCol = isLitFacet ? cLit : cShadow;
 
-                    // Núcleo radiante
+                    // Radiant core.
                     if (dist < maxR * 0.28f)
                     {
                         facetCol = Color.Lerp(cCore, cMid, dist / (maxR * 0.28f));

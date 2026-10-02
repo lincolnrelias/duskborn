@@ -44,11 +44,11 @@ namespace Duskborn.Editor
                     EditorSceneManager.MarkSceneDirty(installer.gameObject.scene);
                 }
 
-                Debug.Log("<color=#55FF55><b>[ActionBarResolutionFixEditor] ActionBar sincronizada com sucesso com o Canvas do Inventário (800x600)!</b></color>");
+                Debug.Log("<color=#55FF55><b>[ActionBarResolutionFixEditor] ActionBar successfully synchronized with the Inventory Canvas (800x600)!</b></color>");
             }
 
             bool sceneDirty = false;
-            // Remove quaisquer objetos temporários de teste deixados acidentalmente na cena
+            // Remove temporary test objects accidentally left in the scene.
             string[] testNames = new string[] { "Test_ScreenCanvas", "Test_CraftingManager", "Test_WorldCanvas", "Test_ActionBarCanvas", "Test_Canvas", "Test_Panel", "Test_ActionBarInstaller", "Test_Installer", "Test_Grid", "Test_ActionBarRoot" };
             foreach (var name in testNames)
             {
@@ -61,7 +61,7 @@ namespace Duskborn.Editor
                 }
             }
 
-            // Remove CraftingFrame caso tenha sido gerado em Edit Mode fora do Play Mode
+            // Remove CraftingFrame if generated in Edit Mode outside Play Mode.
             if (!Application.isPlaying)
             {
                 var leakedFrame = GameObject.Find("CraftingFrame");

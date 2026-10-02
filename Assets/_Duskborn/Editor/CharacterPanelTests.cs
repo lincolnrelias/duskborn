@@ -13,9 +13,9 @@ using InventorySystem.Core;
 namespace Duskborn.Editor
 {
     /// <summary>
-    /// Testes automatizados para o Painel de Personagem (Character Section),
-    /// incluindo equipar via clique direito no inventário, desequipar,
-    /// estados de slots vazios/equipados, alternância de anéis e foco de menus.
+    /// Automated tests for the character panel (Character Section),
+    /// including right-click equipping from inventory, unequipping,
+    /// empty / equipped slot states, ring selection, and menu focus.
     /// </summary>
     public static class CharacterPanelTests
     {
@@ -34,7 +34,7 @@ namespace Duskborn.Editor
             RunTest(Test_InGameMenuController_EscapeClosesCharacterPanelFirst, ref passed, ref total);
             RunTest(Test_InventoryUIManager_PopulatePlaceholderTestGear, ref passed, ref total);
 
-            Debug.Log($"<color=#55FF55><b>[CharacterPanelTests] {passed}/{total} testes passaram com sucesso!</b></color>");
+            Debug.Log($"<color=#55FF55><b>[CharacterPanelTests] {passed}/{total} tests passed!</b></color>");
         }
 
         private static void RunTest(Action testMethod, ref int passed, ref int total)
@@ -68,16 +68,16 @@ namespace Duskborn.Editor
             try
             {
                 var charUI = EditModeTestSupport.AddInitialized<CharacterUIManager>(go);
-                AssertTrue(CharacterUIManager.Instance == charUI, "CharacterUIManager.Instance deve apontar para a instância criada.");
-                AssertFalse(charUI.IsOpen, "Painel deve iniciar fechado.");
-                AssertTrue(charUI.LastClosedFrame == -1, "LastClosedFrame inicial deve ser -1.");
+                AssertTrue(CharacterUIManager.Instance == charUI, "CharacterUIManager.Instance must point to the created instance.");
+                AssertFalse(charUI.IsOpen, "The panel must start closed.");
+                AssertTrue(charUI.LastClosedFrame == -1, "Initial LastClosedFrame must be -1.");
 
                 charUI.Open();
-                AssertTrue(charUI.IsOpen, "Painel deve estar aberto após Open().");
+                AssertTrue(charUI.IsOpen, "The panel must be open after Open().");
 
                 charUI.Close();
-                AssertFalse(charUI.IsOpen, "Painel deve estar fechado após Close().");
-                AssertTrue(charUI.LastClosedFrame == Time.frameCount, "LastClosedFrame deve ser atualizado para Time.frameCount ao fechar.");
+                AssertFalse(charUI.IsOpen, "The panel must be closed after Close().");
+                AssertTrue(charUI.LastClosedFrame == Time.frameCount, "LastClosedFrame must update to Time.frameCount on closing.");
             }
             finally
             {
@@ -94,17 +94,17 @@ namespace Duskborn.Editor
                 var camCtrl = goCam.AddComponent<PlayerCameraController>();
                 PlayerCameraController.LocalInstance = camCtrl;
                 camCtrl.SetRotationLocked(false);
-                AssertFalse(camCtrl.IsRotationLocked, "Câmera deve iniciar destravada.");
+                AssertFalse(camCtrl.IsRotationLocked, "The camera must start unlocked.");
 
                 var charUI = EditModeTestSupport.AddInitialized<CharacterUIManager>(go);
                 charUI.Close();
 
                 charUI.Open();
-                AssertTrue(PlayerCameraController.IsAnyMenuOpen(), "PlayerCameraController.IsAnyMenuOpen deve retornar true com CharacterUIManager aberto.");
-                AssertTrue(camCtrl.IsRotationLocked, "Câmera deve travar rotação quando CharacterUIManager abre.");
+                AssertTrue(PlayerCameraController.IsAnyMenuOpen(), "PlayerCameraController.IsAnyMenuOpen must return true while CharacterUIManager is open.");
+                AssertTrue(camCtrl.IsRotationLocked, "The camera must lock rotation when CharacterUIManager opens.");
 
                 charUI.Close();
-                AssertFalse(camCtrl.IsRotationLocked, "Câmera deve destravar rotação quando CharacterUIManager fecha e nenhum outro menu está aberto.");
+                AssertFalse(camCtrl.IsRotationLocked, "The camera must unlock rotation when CharacterUIManager closes and no other menu is open.");
             }
             finally
             {
@@ -123,26 +123,26 @@ namespace Duskborn.Editor
                 go.AddComponent<PlayerBuffContainer>();
                 var equip = go.AddComponent<PlayerEquipmentContainer>();
 
-                var helm1 = new GearItem("helm_01", "Elmo de Teste 1", "HP: +5%", "", EquipmentSlot.Head,
+                var helm1 = new GearItem("helm_01", "Test Helm 1", "HP: +5%", "", EquipmentSlot.Head,
                     new[] { new StatBonus { Type = StatType.HP, Value = 0.05f } });
-                var helm2 = new GearItem("helm_02", "Elmo de Teste 2", "HP: +10%", "", EquipmentSlot.Head,
+                var helm2 = new GearItem("helm_02", "Test Helm 2", "HP: +10%", "", EquipmentSlot.Head,
                     new[] { new StatBonus { Type = StatType.HP, Value = 0.10f } });
 
                 bool equipped = equip.TryEquipToSlot(EquipmentSlot.Head, helm1, out var prev);
-                AssertTrue(equipped, "TryEquipToSlot deve retornar true para item válido.");
-                AssertTrue(prev == null, "Primeiro item equipado não deve ter item substituído.");
-                AssertTrue(equip.GetEquipped(EquipmentSlot.Head) == helm1, "GetEquipped deve retornar helm1.");
+                AssertTrue(equipped, "TryEquipToSlot must return true for a valid item.");
+                AssertTrue(prev == null, "The first equipped item must not replace another item.");
+                AssertTrue(equip.GetEquipped(EquipmentSlot.Head) == helm1, "GetEquipped must return helm1.");
 
-                // Substitui pelo helm2
+                // Replace with helm2.
                 bool replaced = equip.TryEquipToSlot(EquipmentSlot.Head, helm2, out var displaced);
-                AssertTrue(replaced, "Substituição deve retornar true.");
-                AssertTrue(displaced == helm1, "Item substituído deve ser helm1.");
-                AssertTrue(equip.GetEquipped(EquipmentSlot.Head) == helm2, "GetEquipped deve retornar helm2.");
+                AssertTrue(replaced, "Replacement must return true.");
+                AssertTrue(displaced == helm1, "The replaced item must be helm1.");
+                AssertTrue(equip.GetEquipped(EquipmentSlot.Head) == helm2, "GetEquipped must return helm2.");
 
                 // Desequipa
                 var unequipped = equip.Unequip(EquipmentSlot.Head);
-                AssertTrue(unequipped == helm2, "Unequip deve retornar helm2.");
-                AssertTrue(equip.GetEquipped(EquipmentSlot.Head) == null, "Slot deve estar vazio após Unequip.");
+                AssertTrue(unequipped == helm2, "Unequip must return helm2.");
+                AssertTrue(equip.GetEquipped(EquipmentSlot.Head) == null, "The slot must be empty after Unequip.");
             }
             finally
             {
@@ -159,32 +159,32 @@ namespace Duskborn.Editor
                 go.AddComponent<PlayerBuffContainer>();
                 var equip = go.AddComponent<PlayerEquipmentContainer>();
 
-                var ring1 = new GearItem("ring_01", "Anel de Cobre", "Crit: +5%", "", EquipmentSlot.Ring1, null);
-                var ring2 = new GearItem("ring_02", "Anel de Ouro", "Crit: +10%", "", EquipmentSlot.Ring1, null);
-                var ring3 = new GearItem("ring_03", "Anel de Rubi", "Crit: +15%", "", EquipmentSlot.Ring1, null);
+                var ring1 = new GearItem("ring_01", "Copper Ring", "Crit: +5%", "", EquipmentSlot.Ring1, null);
+                var ring2 = new GearItem("ring_02", "Gold Ring", "Crit: +10%", "", EquipmentSlot.Ring1, null);
+                var ring3 = new GearItem("ring_03", "Ruby Ring", "Crit: +15%", "", EquipmentSlot.Ring1, null);
 
-                // 1º anel: Ring1 está vazio -> equipa em Ring1
+                // First ring: Ring1 is empty -> equip in Ring1.
                 equip.TryEquipToSlot(EquipmentSlot.Ring1, ring1, out _);
-                AssertTrue(equip.GetEquipped(EquipmentSlot.Ring1) == ring1, "Primeiro anel deve ir para Ring1.");
-                AssertTrue(equip.GetEquipped(EquipmentSlot.Ring2) == null, "Ring2 deve continuar vazio.");
+                AssertTrue(equip.GetEquipped(EquipmentSlot.Ring1) == ring1, "The first ring must go to Ring1.");
+                AssertTrue(equip.GetEquipped(EquipmentSlot.Ring2) == null, "Ring2 must remain empty.");
 
-                // 2º anel: Ring1 ocupado e Ring2 vazio -> lógica de equipar escolhe Ring2
+                // Second ring: Ring1 occupied and Ring2 empty -> equip logic selects Ring2.
                 EquipmentSlot target = equip.GetEquipped(EquipmentSlot.Ring1) == null ? EquipmentSlot.Ring1
                     : (equip.GetEquipped(EquipmentSlot.Ring2) == null ? EquipmentSlot.Ring2 : EquipmentSlot.Ring1);
 
-                AssertTrue(target == EquipmentSlot.Ring2, "Alvo deve ser Ring2 quando Ring1 estiver ocupado.");
+                AssertTrue(target == EquipmentSlot.Ring2, "The target must be Ring2 when Ring1 is occupied.");
                 equip.TryEquipToSlot(target, ring2, out _);
-                AssertTrue(equip.GetEquipped(EquipmentSlot.Ring2) == ring2, "Segundo anel deve estar em Ring2.");
+                AssertTrue(equip.GetEquipped(EquipmentSlot.Ring2) == ring2, "The second ring must be in Ring2.");
 
-                // 3º anel: ambos ocupados -> substitui Ring1
+                // Third ring: both occupied -> replace Ring1.
                 target = equip.GetEquipped(EquipmentSlot.Ring1) == null ? EquipmentSlot.Ring1
                     : (equip.GetEquipped(EquipmentSlot.Ring2) == null ? EquipmentSlot.Ring2 : EquipmentSlot.Ring1);
 
-                AssertTrue(target == EquipmentSlot.Ring1, "Alvo deve ser Ring1 quando ambos estiverem ocupados.");
+                AssertTrue(target == EquipmentSlot.Ring1, "The target must be Ring1 when both are occupied.");
                 equip.TryEquipToSlot(target, ring3, out var displacedRing);
-                AssertTrue(displacedRing == ring1, "Anel substituído deve ser ring1.");
-                AssertTrue(equip.GetEquipped(EquipmentSlot.Ring1) == ring3, "Ring1 agora deve ter ring3.");
-                AssertTrue(equip.GetEquipped(EquipmentSlot.Ring2) == ring2, "Ring2 deve permanecer intacto.");
+                AssertTrue(displacedRing == ring1, "The replaced ring must be ring1.");
+                AssertTrue(equip.GetEquipped(EquipmentSlot.Ring1) == ring3, "Ring1 must now contain ring3.");
+                AssertTrue(equip.GetEquipped(EquipmentSlot.Ring2) == ring2, "Ring2 must remain unchanged.");
             }
             finally
             {
@@ -205,28 +205,28 @@ namespace Duskborn.Editor
 
                 var invUI = EditModeTestSupport.AddInventory(goInv);
 
-                // Configura um serviço mock de inventário
+                // Configure a mock inventory service.
                 var grid = new InventoryGrid(4, 4);
                 var service = new InventoryService(grid);
 
-                // Usa reflexão para injetar o _playerEquipment no InventoryUIManager para o teste
+                // Use reflection to inject _playerEquipment into InventoryUIManager for the test.
                 var fieldEquip = typeof(InventoryUIManager).GetField("_playerEquipment", BindingFlags.NonPublic | BindingFlags.Instance);
                 fieldEquip?.SetValue(invUI, equip);
 
-                // Cria item de armadura
-                var armor = new GearItem("chest_01", "Armadura de Couro", "HP: +8%", "", EquipmentSlot.Chest,
+                // Create an armor item.
+                var armor = new GearItem("chest_01", "Leather Armor", "HP: +8%", "", EquipmentSlot.Chest,
                     new[] { new StatBonus { Type = StatType.HP, Value = 0.08f } });
 
                 service.TryPlaceItemAt(0, armor);
-                AssertTrue(service.GetItem(0) == armor, "Item deve estar no slot 0 do inventário.");
-                AssertTrue(equip.GetEquipped(EquipmentSlot.Chest) == null, "Chest deve estar inicialmente vazio.");
+                AssertTrue(service.GetItem(0) == armor, "The item must be in inventory slot 0.");
+                AssertTrue(equip.GetEquipped(EquipmentSlot.Chest) == null, "Chest must initially be empty.");
 
-                // Testa o método de equipar direto
+                // Test the direct equip method.
                 equip.TryEquipToSlot(armor.Slot, armor, out var displaced);
                 service.RemoveItem(0);
 
-                AssertTrue(equip.GetEquipped(EquipmentSlot.Chest) == armor, "Chest deve conter o item equipado.");
-                AssertTrue(service.GetItem(0) == null, "Slot 0 do inventário deve estar vazio após equipar.");
+                AssertTrue(equip.GetEquipped(EquipmentSlot.Chest) == armor, "Chest must contain the equipped item.");
+                AssertTrue(service.GetItem(0) == null, "Inventory slot 0 must be empty after equipping.");
             }
             finally
             {
@@ -252,14 +252,14 @@ namespace Duskborn.Editor
 
                 slotView.Initialize(EquipmentSlot.Head, null, silImg, itemImg, outline);
 
-                // Estado Vazio: Silhueta ativa, ícone de item desativado
+                // Empty state: silhouette active, item icon disabled.
                 slotView.SetEmpty(null);
-                AssertFalse(itemImg.gameObject.activeSelf, "Ícone de item deve estar desativado quando vazio.");
+                AssertFalse(itemImg.gameObject.activeSelf, "The item icon must be disabled when empty.");
 
-                // Estado Equipado: Ícone de item ativo, silhueta desativada
-                var helm = new GearItem("helm_test", "Elmo", "HP: +5%", "", EquipmentSlot.Head, null);
+                // Equipped state: item icon active, silhouette disabled.
+                var helm = new GearItem("helm_test", "Helm", "HP: +5%", "", EquipmentSlot.Head, null);
                 slotView.SetEquipped(helm, null);
-                AssertFalse(silImg.gameObject.activeSelf, "Silhueta deve estar desativada quando equipado.");
+                AssertFalse(silImg.gameObject.activeSelf, "The silhouette must be disabled when equipped.");
             }
             finally
             {
@@ -276,19 +276,19 @@ namespace Duskborn.Editor
                 var menu = goMenu.AddComponent<InGameMenuController>();
                 var charUI = EditModeTestSupport.AddInitialized<CharacterUIManager>(goChar);
 
-                // Simula que o painel de personagem acabou de fechar neste frame
+                // Simulate the character panel closing in this frame.
                 charUI.Open();
                 charUI.Close();
-                AssertTrue(charUI.LastClosedFrame == Time.frameCount, "LastClosedFrame deve registrar fechamento no frame atual.");
+                AssertTrue(charUI.LastClosedFrame == Time.frameCount, "LastClosedFrame must record closing in the current frame.");
 
-                // Invoca HandleEscapeKey via Reflection para verificar a prioridade
+                // Invoke HandleEscapeKey through reflection to check priority.
                 var method = typeof(InGameMenuController).GetMethod("HandleEscapeKey", BindingFlags.NonPublic | BindingFlags.Instance);
-                AssertTrue(method != null, "Método HandleEscapeKey deve existir.");
+                AssertTrue(method != null, "The HandleEscapeKey method must exist.");
 
                 method.Invoke(menu, null);
 
-                // Como o painel fechou no mesmo frame, o menu de pausa NÃO deve abrir!
-                AssertFalse(menu.IsOpen, "Menu de pausa NÃO deve abrir no mesmo frame em que o painel de personagem foi fechado.");
+                // Since the panel closed in the same frame, the pause menu must NOT open!
+                AssertFalse(menu.IsOpen, "The pause menu must NOT open in the same frame as the character panel closes.");
             }
             finally
             {
@@ -306,31 +306,31 @@ namespace Duskborn.Editor
                 var installer = goInv.GetComponent<InventoryInstaller>();
                 var mgr = goMgr.GetComponent<InventoryUIManager>();
 
-                // Injeta installer no manager via reflection
+                // Inject installer into manager through reflection.
                 var fieldInstaller = typeof(InventoryUIManager).GetField("installer", BindingFlags.NonPublic | BindingFlags.Instance);
                 fieldInstaller?.SetValue(mgr, installer);
 
-                // Configura serviço do installer via reflection
+                // Configure the installer service through reflection.
                 var grid = new InventoryGrid(4, 4);
                 var service = new InventoryService(grid);
                 var fieldService = typeof(InventoryInstaller).GetField("_service", BindingFlags.NonPublic | BindingFlags.Instance);
                 fieldService?.SetValue(installer, service);
 
-                AssertTrue(mgr.InstallerReady, "InstallerReady deve ser true quando installer e service estiverem configurados.");
+                AssertTrue(mgr.InstallerReady, "InstallerReady must be true when installer and service are configured.");
 
-                // Executa a população de itens de teste
+                // Populate the test items.
                 mgr.PopulatePlaceholderTestGear();
 
-                // Verifica que os itens foram inseridos
+                // Check that the items were inserted.
                 int count = 0;
                 for (int i = 0; i < grid.SlotCount; i++)
                 {
                     if (service.GetItem(i) is GearItem) count++;
                 }
 
-                AssertTrue(count > 0, "PopulatePlaceholderTestGear deve adicionar itens de teste ao inventário.");
+                AssertTrue(count > 0, "PopulatePlaceholderTestGear must add test items to inventory.");
 
-                // Executar uma segunda vez não deve duplicar itens existentes
+                // Running a second time must not duplicate existing items.
                 int countBefore = count;
                 mgr.PopulatePlaceholderTestGear();
                 int countAfter = 0;
@@ -339,7 +339,7 @@ namespace Duskborn.Editor
                     if (service.GetItem(i) is GearItem) countAfter++;
                 }
 
-                AssertTrue(countBefore == countAfter, "PopulatePlaceholderTestGear não deve duplicar itens já existentes.");
+                AssertTrue(countBefore == countAfter, "PopulatePlaceholderTestGear must not duplicate existing items.");
             }
             finally
             {
@@ -355,11 +355,11 @@ namespace Duskborn.Editor
             if (invUI != null)
             {
                 invUI.PopulatePlaceholderTestGear();
-                Debug.Log("<color=#55FF55>[Duskborn] Itens de teste adicionados com sucesso ao inventário!</color>");
+                Debug.Log("<color=#55FF55>[Duskborn] Test items successfully added to inventory!</color>");
             }
             else
             {
-                Debug.LogWarning("[Duskborn] InventoryUIManager não encontrado na cena ativa.");
+                Debug.LogWarning("[Duskborn] InventoryUIManager not found in the active scene.");
             }
         }
     }

@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Build_storage
   m_EditorClassIdentifier: 
   id: storage
-  displayName: "Ba\xFA de materiais"
-  description: "Guarda at\xE9 200 unidades de materiais; compartilha com o grupo."
-  category: "Esta\xE7\xF5es"
+  displayName: "Material Chest"
+  description: "Stores up to 200 material units; shared with the group."
+  category: "Stations"
   prefab: {fileID: 606149192729443004, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
   icon: {fileID: 0}
   station: 0

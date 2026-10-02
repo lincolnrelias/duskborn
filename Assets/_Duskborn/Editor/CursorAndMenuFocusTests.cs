@@ -11,8 +11,8 @@ using InventorySystem.UI;
 namespace Duskborn.Editor
 {
     /// <summary>
-    /// Testes automatizados para validação do comportamento de foco do cursor,
-    /// clique em área vazia e hierarquia da tecla Escape entre menus e o menu de pausa.
+    /// Automated tests to validate cursor focus behavior,
+    /// empty-area clicks, and Escape key priority between menus and the pause menu.
     /// </summary>
     public static class CursorAndMenuFocusTests
     {
@@ -32,7 +32,7 @@ namespace Duskborn.Editor
             RunTest(Test_WhenMenuHidden_CursorDisappearsAndLocks, ref passed, ref total);
             RunTest(Test_PlayerCameraController_SetRotationLocked_False_LocksCursor, ref passed, ref total);
 
-            Debug.Log($"<color=#55FF55><b>[CursorAndMenuFocusTests] {passed}/{total} testes passaram com sucesso!</b></color>");
+            Debug.Log($"<color=#55FF55><b>[CursorAndMenuFocusTests] {passed}/{total} tests passed!</b></color>");
         }
 
         private static void RunTest(Action testMethod, ref int passed, ref int total)
@@ -66,13 +66,13 @@ namespace Duskborn.Editor
             try
             {
                 var hud = EditModeTestSupport.AddInitialized<GameHUD>(go);
-                AssertTrue(GameHUD.Instance == hud, "GameHUD.Instance deve apontar para a instância criada.");
+                AssertTrue(GameHUD.Instance == hud, "GameHUD.Instance must point to the created instance.");
 
                 hud.ShowStats = true;
-                AssertTrue(hud.ShowStats, "ShowStats deve ser true após atribuição.");
+                AssertTrue(hud.ShowStats, "ShowStats must be true after assignment.");
 
                 hud.CloseStats();
-                AssertFalse(hud.ShowStats, "ShowStats deve ser false após CloseStats().");
+                AssertFalse(hud.ShowStats, "ShowStats must be false after CloseStats().");
             }
             finally
             {
@@ -87,13 +87,13 @@ namespace Duskborn.Editor
             {
                 var hud = EditModeTestSupport.AddInitialized<GameHUD>(go);
                 hud.ShowStats = false;
-                AssertFalse(PlayerCameraController.IsAnyMenuOpen(), "Nenhum menu deve estar aberto inicialmente.");
+                AssertFalse(PlayerCameraController.IsAnyMenuOpen(), "No menu must be open initially.");
 
                 hud.ShowStats = true;
-                AssertTrue(PlayerCameraController.IsAnyMenuOpen(), "IsAnyMenuOpen deve retornar true quando hud.ShowStats estiver ativo.");
+                AssertTrue(PlayerCameraController.IsAnyMenuOpen(), "IsAnyMenuOpen must return true when hud.ShowStats is active.");
 
                 hud.CloseStats();
-                AssertFalse(PlayerCameraController.IsAnyMenuOpen(), "IsAnyMenuOpen deve retornar false após fechar stats.");
+                AssertFalse(PlayerCameraController.IsAnyMenuOpen(), "IsAnyMenuOpen must return false after closing stats.");
             }
             finally
             {
@@ -107,12 +107,12 @@ namespace Duskborn.Editor
             try
             {
                 var inv = EditModeTestSupport.AddInventory(go);
-                AssertTrue(InventoryUIManager.Instance == inv, "InventoryUIManager.Instance deve apontar para a instância criada.");
-                AssertTrue(inv.LastClosedFrame == -1, "LastClosedFrame inicial deve ser -1.");
+                AssertTrue(InventoryUIManager.Instance == inv, "InventoryUIManager.Instance must point to the created instance.");
+                AssertTrue(inv.LastClosedFrame == -1, "Initial LastClosedFrame must be -1.");
 
                 inv.Open();
                 inv.Close();
-                AssertTrue(inv.LastClosedFrame == Time.frameCount, "LastClosedFrame deve ser atualizado para Time.frameCount ao fechar.");
+                AssertTrue(inv.LastClosedFrame == Time.frameCount, "LastClosedFrame must update to Time.frameCount on closing.");
             }
             finally
             {
@@ -126,13 +126,13 @@ namespace Duskborn.Editor
             try
             {
                 var crafting = EditModeTestSupport.AddInitialized<CraftingUIManager>(go);
-                AssertTrue(CraftingUIManager.Instance == crafting, "CraftingUIManager.Instance deve apontar para a instância criada.");
-                AssertTrue(crafting.LastClosedFrame == -1, "LastClosedFrame inicial deve ser -1.");
+                AssertTrue(CraftingUIManager.Instance == crafting, "CraftingUIManager.Instance must point to the created instance.");
+                AssertTrue(crafting.LastClosedFrame == -1, "Initial LastClosedFrame must be -1.");
 
                 var workbench = go.AddComponent<Duskborn.Gameplay.Crafting.Workbench>();
                 crafting.Open(workbench);
                 crafting.Close();
-                AssertTrue(crafting.LastClosedFrame == Time.frameCount, "LastClosedFrame deve ser atualizado ao fechar.");
+                AssertTrue(crafting.LastClosedFrame == Time.frameCount, "LastClosedFrame must update on closing.");
             }
             finally
             {
@@ -149,19 +149,19 @@ namespace Duskborn.Editor
                 var menu = goMenu.AddComponent<InGameMenuController>();
                 var inv = EditModeTestSupport.AddInventory(goInv);
 
-                // Simula que o inventário acabou de fechar neste frame
+                // Simulate the inventory closing in this frame.
                 inv.Open();
                 inv.Close();
-                AssertTrue(inv.LastClosedFrame == Time.frameCount, "Inventário deve registrar fechamento no frame atual.");
+                AssertTrue(inv.LastClosedFrame == Time.frameCount, "Inventory must record closing in the current frame.");
 
-                // Invoca HandleEscapeKey via Reflection para verificar a prioridade
+                // Invoke HandleEscapeKey through reflection to check priority.
                 var method = typeof(InGameMenuController).GetMethod("HandleEscapeKey", BindingFlags.NonPublic | BindingFlags.Instance);
-                AssertTrue(method != null, "Método HandleEscapeKey deve existir.");
+                AssertTrue(method != null, "The HandleEscapeKey method must exist.");
 
                 method.Invoke(menu, null);
 
-                // Como o inventário fechou neste frame, o menu de pausa NÃO deve ter aberto!
-                AssertFalse(menu.IsOpen, "Menu de pausa NÃO deve abrir no mesmo frame em que outro menu foi fechado.");
+                // Since inventory closed in this frame, the pause menu must NOT have opened!
+                AssertFalse(menu.IsOpen, "The pause menu must NOT open in the same frame as another menu closes.");
             }
             finally
             {
@@ -173,19 +173,19 @@ namespace Duskborn.Editor
         private static void Test_InventoryDragController_IsDraggingPropertyExposed()
         {
             var prop = typeof(InventoryDragController).GetProperty("IsDragging", BindingFlags.Public | BindingFlags.Instance);
-            AssertTrue(prop != null, "InventoryDragController deve possuir a propriedade pública IsDragging.");
+            AssertTrue(prop != null, "InventoryDragController must have the public IsDragging property.");
 
             var installerProp = typeof(InventoryInstaller).GetProperty("IsDraggingItem", BindingFlags.Public | BindingFlags.Instance);
-            AssertTrue(installerProp != null, "InventoryInstaller deve possuir a propriedade pública IsDraggingItem.");
+            AssertTrue(installerProp != null, "InventoryInstaller must have the public IsDraggingItem property.");
         }
 
         private static void Test_PlayerCameraController_PropertiesExistAndAreValid()
         {
             var propJustLocked = typeof(PlayerCameraController).GetProperty("JustLockedCursorThisFrame", BindingFlags.Public | BindingFlags.Instance);
-            AssertTrue(propJustLocked != null, "PlayerCameraController deve possuir JustLockedCursorThisFrame.");
+            AssertTrue(propJustLocked != null, "PlayerCameraController must have JustLockedCursorThisFrame.");
 
             var methodIsAnyMenuOpen = typeof(PlayerCameraController).GetMethod("IsAnyMenuOpen", BindingFlags.Public | BindingFlags.Static);
-            AssertTrue(methodIsAnyMenuOpen != null, "PlayerCameraController deve possuir o método estático IsAnyMenuOpen.");
+            AssertTrue(methodIsAnyMenuOpen != null, "PlayerCameraController must have the static IsAnyMenuOpen method.");
         }
 
         private static void Test_WhenMenuHidden_CursorDisappearsAndLocks()
@@ -199,11 +199,11 @@ namespace Duskborn.Editor
                 PlayerCameraController.LocalInstance = camera;
                 var menu = goMenu.AddComponent<InGameMenuController>();
                 menu.OpenMenu();
-                AssertTrue(menu.IsOpen && camera.IsRotationLocked, "Menu aberto deve bloquear rotação.");
+                AssertTrue(menu.IsOpen && camera.IsRotationLocked, "An open menu must block rotation.");
                 EditModeTestSupport.AssertCursorRequested(camera, false);
 
                 menu.CloseMenu();
-                AssertFalse(menu.IsOpen || camera.IsRotationLocked, "Menu fechado deve liberar rotação.");
+                AssertFalse(menu.IsOpen || camera.IsRotationLocked, "A closed menu must release rotation.");
                 EditModeTestSupport.AssertCursorRequested(camera, true);
             }
             finally
@@ -221,11 +221,11 @@ namespace Duskborn.Editor
             {
                 var cam = goCam.AddComponent<PlayerCameraController>();
                 cam.SetRotationLocked(true);
-                AssertTrue(cam.IsRotationLocked, "Câmera deve bloquear rotação.");
+                AssertTrue(cam.IsRotationLocked, "The camera must block rotation.");
                 EditModeTestSupport.AssertCursorRequested(cam, false);
 
                 cam.SetRotationLocked(false);
-                AssertFalse(cam.IsRotationLocked, "Câmera deve liberar rotação.");
+                AssertFalse(cam.IsRotationLocked, "The camera must release rotation.");
                 EditModeTestSupport.AssertCursorRequested(cam, true);
             }
             finally

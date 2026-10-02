@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: material_bone
   m_EditorClassIdentifier: Assembly-CSharp::InventorySystem.Data.MaterialDefinition
   id: material_bone
-  displayName: Osso
-  description: Osso
+  displayName: "Bone"
+  description: "Bone"
   icon: {fileID: 0}
   dropPrefab: {fileID: 0}
   rarity: 1

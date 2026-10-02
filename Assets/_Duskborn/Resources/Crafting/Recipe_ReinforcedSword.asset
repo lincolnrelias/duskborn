@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_ReinforcedSword
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_ReinforcedSword
-  recipeName: "Espada Refor\xE7ada"
-  description: "Espada Refor\xE7ada"
-  category: Armas
+  recipeName: "Reinforced Sword"
+  description: "Reinforced Sword"
+  category: "Weapons"
   tier: 4
   requiredStation: 3
   isAlwaysDiscovered: 0

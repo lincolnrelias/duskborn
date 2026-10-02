@@ -48,7 +48,7 @@ namespace Duskborn.UI.Building
             rotation.color = new Color(.76f, .81f, .86f);
             BuildingUIElements.Anchors(rotation.rectTransform, new Vector2(.7f, .18f), new Vector2(.96f, .42f), Vector2.zero, Vector2.zero);
             var controls = BuildingUIElements.Label("Controls", root.transform, 13, TextAnchor.MiddleCenter);
-            controls.text = "CLIQUE  confirmar     •     SCROLL / R  girar     •     ESC / B  cancelar";
+            controls.text = "CLICK  confirm     •     SCROLL / R  rotate     •     ESC / B  cancel";
             controls.color = BuildingUIElements.Muted;
             BuildingUIElements.Anchors(controls.rectTransform, new Vector2(.05f, .01f), new Vector2(.95f, .2f), Vector2.zero, Vector2.zero);
             root.SetActive(false);
@@ -63,12 +63,12 @@ namespace Duskborn.UI.Building
             placeholder.text = Initials(model.Definition.displayName);
             title.text = model.Definition.displayName;
             bool valid = string.IsNullOrEmpty(invalidReason);
-            state.text = pending ? "◌  CONFIRMANDO..." : valid ? "✓  LOCAL VÁLIDO" : "!  LOCAL INVÁLIDO";
+            state.text = pending ? "◌  CONFIRMANDO..." : valid ? "✓  VALID LOCATION" : "!  INVALID LOCATION";
             state.color = pending ? BuildingUIElements.Accent : valid ? BuildingUIElements.Positive : BuildingUIElements.Negative;
-            reason.text = pending ? "Validando a construção no servidor." : valid ? "Clique para construir aqui." : invalidReason;
+            reason.text = pending ? "Validating the building on the server." : valid ? "Click to build here." : invalidReason;
             reason.color = valid && !pending ? BuildingUIElements.Positive : pending ? BuildingUIElements.Accent : BuildingUIElements.Negative;
             costs.text = string.Join("  •  ", model.Costs.Select(cost => cost.DisplayName + " " + cost.Owned + "/" + cost.Required));
-            rotation.text = "ROTAÇÃO  " + Mathf.RoundToInt(yaw) + "°";
+            rotation.text = "ROTATION  " + Mathf.RoundToInt(yaw) + "°";
         }
 
         internal void Hide() => root.SetActive(false);

@@ -40,18 +40,18 @@ namespace Duskborn.Editor
                 camera.targetTexture = target;
                 WriteCapture(camera, target, texture, "building-ui-catalog.png");
 
-                manager.BeginForgeStation("FORJA", () => { });
+                manager.BeginForgeStation("FORGE", () => { });
                 manager.AddForgeProcessor(() => null, () => null, () => null,
-                    () => "Iron  32/2", () => "Wood  15/1", () => "Barra de Ferro  ×18",
-                    () => "Fundir Barra de Ferro  •  7.0s", () => .42f, () => .58f, () => false,
+                    () => "Iron  32/2", () => "Wood  15/1", () => "Iron Bar  ×18",
+                    () => "Smelt Iron Bar  •  7.0s", () => .42f, () => .58f, () => false,
                     () => { }, () => { }, () => { });
                 manager.Tick();
                 WriteCapture(camera, target, texture, "building-ui-processing.png");
 
-                manager.BeginStation("BAÚ DE MATERIAIS", () => { });
-                manager.AddStationSection("Armazenamento");
-                manager.AddStationProgress(() => "CAPACIDADE  73/200", () => .365f);
-                manager.AddStationLabel(() => "JOGADOR                                      BAÚ\nUse + para guardar e − para retirar.", 54);
+                manager.BeginStation("MATERIAL CHEST", () => { });
+                manager.AddStationSection("Storage");
+                manager.AddStationProgress(() => "CAPACITY  73/200", () => .365f);
+                manager.AddStationLabel(() => "PLAYER                                      CHEST\nUse + to store and − to withdraw.", 54);
                 manager.AddStorageRow("Wood", definitions[0].costs[0].material.Icon, () => 24, () => 51,
                     () => { }, () => { }, () => { }, () => { }, () => true, () => true);
                 manager.AddStorageRow("Stone", null, () => 9, () => 22,
@@ -168,9 +168,9 @@ namespace Duskborn.Editor
                 ui.ShowPlacement(BuildingPresentation.Create(definitions[0], inventory, null, false), null, 45, false);
                 var placement = uiOwner.transform.Find("BuildingUI/PlacementHUD");
                 Check(placement != null && !placement.GetComponent<UnityEngine.UI.Image>().raycastTarget, "placement HUD ignores clicks", ref passed);
-                ui.ShowConfirmation("TESTE", "Confirmação", "OK", () => { });
+                ui.ShowConfirmation("TEST", "Confirmation", "OK", () => { });
                 Check(uiOwner.transform.Find("BuildingUI/Confirmation").gameObject.activeSelf, "confirmation dialog", ref passed);
-                ui.BeginForgeStation("FORJA", () => { });
+                ui.BeginForgeStation("FORGE", () => { });
                 bool outputCollected = false;
                 ui.AddForgeProcessor(() => null, () => null, () => null, () => "input", () => "fuel", () => "output", () => "status",
                     () => .5f, () => .5f, () => false, () => { }, () => { }, () => outputCollected = true);

@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: weapon_reinforced_sword
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.WeaponDefinition
   id: weapon_reinforced_sword
-  displayName: "Espada Refor\xE7ada"
-  description: "L\xE2mina de a\xE7o laminado com canais de cristal arcano. Concede
-    roubo de vida consistente."
+  displayName: "Reinforced Sword"
+  description: "Laminated steel blade with arcane crystal channels. Grants consistent life steal."
   icon: {fileID: 2800000, guid: 19e8fbf349074feabb31bf863935efb7, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 0

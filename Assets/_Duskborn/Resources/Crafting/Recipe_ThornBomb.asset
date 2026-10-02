@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_ThornBomb
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_ThornBomb
-  recipeName: Bomba de Espinhos
-  description: Bomba de Espinhos
-  category: "Consum\xEDveis"
+  recipeName: "Thorn Bomb"
+  description: "Thorn Bomb"
+  category: "Consumables"
   tier: 3
   requiredStation: 2
   isAlwaysDiscovered: 0

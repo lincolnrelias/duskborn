@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_ReinforcedArmor
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_ReinforcedArmor
-  recipeName: "Armadura de A\xE7o Refor\xE7ado"
-  description: "Armadura de A\xE7o Refor\xE7ado"
-  category: Armadura
+  recipeName: "Reinforced Steel Armor"
+  description: "Reinforced Steel Armor"
+  category: "Armor"
   tier: 4
   requiredStation: 1
   isAlwaysDiscovered: 0

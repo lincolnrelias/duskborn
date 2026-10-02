@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_HunterBow
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_HunterBow
-  recipeName: "Arco do Ca\xE7ador"
-  description: "Arco do Ca\xE7ador"
-  category: Armas
+  recipeName: "Hunter's Bow"
+  description: "Hunter's Bow"
+  category: "Weapons"
   tier: 3
   isAlwaysDiscovered: 0
   outputItem: {fileID: 0}

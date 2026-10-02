@@ -1,127 +1,127 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "NovoTerrenoConfig", menuName = "Terreno Roguelike/Configuração de Terreno")]
+[CreateAssetMenu(fileName = "NewTerrainConfig", menuName = "Roguelike Terrain/Terrain Configuration")]
 public class LowPolyTerrainConfig : ScriptableObject
 {
-    [Header("Dimensões da Grid de Chunks")]
-    [Tooltip("Quantidade de chunks no eixo X (ex: 1 para 1x3, 3 para 3x3, 5 para 5x5).")]
+    [Header("Chunk Grid Dimensions")]
+    [Tooltip("Number of chunks on the X axis (e.g. 1 for 1x3, 3 for 3x3, 5 for 5x5).")]
     [Range(1, 15)] public int chunksX = 3;
 
-    [Tooltip("Quantidade de chunks no eixo Z (profundidade do mapa).")]
+    [Tooltip("Number of chunks on the Z axis (map depth).")]
     [Range(1, 15)] public int chunksZ = 3;
 
-    [Tooltip("Resolução de cada chunk em quads por lado (ex: 32 gera 32x32 quads = 2048 triângulos; 64 gera 64x64 quads = 8192 triângulos).")]
+    [Tooltip("Chunk resolution in quads per side (e.g. 32 creates 32x32 quads = 2048 triangles; 64 creates 64x64 quads = 8192 triangles).")]
     [Range(4, 128)] public int chunkSize = 32;
 
-    [Tooltip("Tamanho físico de cada quad em unidades de mundo/metros. Valores menores (ex: 0.5 a 1.0) aumentam a densidade/resolução dos detalhes geométricos.")]
+    [Tooltip("Physical quad size in world units / meters. Smaller values (e.g. 0.5 to 1.0) increase geometric detail density / resolution.")]
     [Range(0.1f, 10f)] public float cellSize = 1.0f;
 
-    [Header("Ruído Fractal (fBm) & Relevo")]
-    [Tooltip("Semente numérica determinística para geração do relevo. A mesma semente garante a reprodução idêntica do mapa em todos os clientes.")]
+    [Header("Fractal Noise (fBm) & Terrain")]
+    [Tooltip("Deterministic numeric seed for terrain generation. The same seed ensures identical map reproduction on all clients.")]
     public int seed = 4242;
 
-    [Tooltip("Escala de frequência base do ruído Perlin. Valores menores geram colinas amplas e suaves; valores maiores geram relevos densos e pontiagudos.")]
+    [Tooltip("Base Perlin noise frequency scale. Smaller values create broad, smooth hills; larger values create dense, pointed terrain.")]
     [Range(0.01f, 0.3f)] public float noiseScale = 0.07f;
 
-    [Tooltip("Número de camadas (oitavas) de ruído fractal combinadas. Mais oitavas adicionam detalhes e rugosidades mais finas.")]
+    [Tooltip("Number of combined fractal noise layers (octaves). More octaves add finer detail and roughness.")]
     [Range(1, 6)] public int octaves = 3;
 
-    [Tooltip("Persistência do relevo (0 a 1). Define o quanto a amplitude diminui a cada oitava sucessiva, controlando a força dos micro-detalhes.")]
+    [Tooltip("Terrain persistence (0 to 1). Defines how much amplitude decreases per successive octave, controlling microdetail strength.")]
     [Range(0.1f, 1f)] public float persistence = 0.5f;
 
-    [Tooltip("Lacunaridade do ruído. Multiplicador de frequência aplicado a cada nova oitava (controla a densidade dos detalhes adicionais).")]
+    [Tooltip("Noise lacunarity. Frequency multiplier applied to each new octave (controls additional detail density).")]
     [Range(1f, 4f)] public float lacunarity = 2.0f;
 
-    [Tooltip("Altura máxima vertical (em metros) que os picos mais altos do terreno podem atingir.")]
+    [Tooltip("Maximum vertical height (meters) of the highest terrain peaks.")]
     [Range(1f, 50f)] public float heightMultiplier = 12.0f;
 
     public enum MapBoundaryType
     {
-        [Tooltip("Cria uma ilha estilizada com as bordas externas caindo suavemente no oceano.")]
+        [Tooltip("Create a stylized island with outer edges falling smoothly into the ocean.")]
         Island,
-        [Tooltip("Cria um vale cercado por paredões íngremes e intransponíveis de montanha.")]
+        [Tooltip("Create a valley surrounded by steep, impassable mountain walls.")]
         ValleyWalls,
-        [Tooltip("Sem limite radial (terreno infinito contínuo).")]
+        [Tooltip("No radial limit (continuous infinite terrain).")]
         None
     }
 
-    [Header("Limites do Mapa (Boundary & World Bounds)")]
-    [Tooltip("Tipo de fechamento das bordas do mapa para impedir queda no vácuo.")]
+    [Header("Map Limits (Boundary & World Bounds)")]
+    [Tooltip("Map edge boundary type to prevent falling into the void.")]
     public MapBoundaryType boundaryType = MapBoundaryType.Island;
 
-    [Tooltip("Distância normalizada (0 a 1) do centro do mapa onde a borda começa a decair/subir (ex: 0.78).")]
+    [Tooltip("Normalized distance (0 to 1) from the map center where the edge starts falling / rising (e.g. 0.78).")]
     [Range(0.4f, 0.95f)] public float boundaryFalloffStart = 0.78f;
 
-    [Tooltip("Largura normalizada da faixa de transição da borda até atingir a queda total (ex: 0.20).")]
+    [Tooltip("Normalized edge transition width before full falloff (e.g. 0.20).")]
     [Range(0.05f, 0.5f)] public float boundaryFalloffDistance = 0.20f;
 
-    [Tooltip("Altura adicional das montanhas de borda quando boundaryType for ValleyWalls.")]
+    [Tooltip("Additional boundary mountain height when boundaryType is ValleyWalls.")]
     [Range(10f, 60f)] public float boundaryWallHeight = 28f;
 
     /// <summary>
-    /// Retorna a fração normalizada da borda protegida contra valores nulos/zero de assets antigos.
+    /// Return the normalized edge fraction guarded against null / zero values in older assets.
     /// </summary>
     public float EffectiveFalloffStartRatio => boundaryFalloffStart > 0.1f ? boundaryFalloffStart : 0.78f;
 
     /// <summary>
-    /// Retorna a largura normalizada da transição de borda protegida contra valores nulos/zero de assets antigos.
+    /// Return the normalized edge transition width guarded against null / zero values in older assets.
     /// </summary>
     public float EffectiveFalloffDistanceRatio => boundaryFalloffDistance > 0.02f ? boundaryFalloffDistance : 0.20f;
 
     /// <summary>
-    /// Retorna o raio jogável efetivo em metros antes do início do decaimento de borda.
+    /// Return the effective playable radius in meters before edge falloff starts.
     /// </summary>
     public float GetPlayableBoundaryRadius(float mapRadius)
     {
         return mapRadius * EffectiveFalloffStartRatio;
     }
 
-    [Header("Clareira Central (Sanctuary Basin)")]
-    [Tooltip("Raio ao redor de (0,0) onde o terreno é nivelado para a praça central e bancada.")]
+    [Header("Central Clearing (Sanctuary Basin)")]
+    [Tooltip("Radius around (0,0) where terrain is leveled for the central plaza and workbench.")]
     [Range(4f, 30f)] public float centralSanctuaryRadius = 14f;
 
-    [Tooltip("Força do nivelamento na clareira central (0 = sem efeito, 1 = perfeitamente plana).")]
+    [Tooltip("Central clearing leveling strength (0 = no effect, 1 = perfectly flat).")]
     [Range(0f, 1f)] public float centralSanctuaryFlattenStrength = 0.85f;
 
-    [Tooltip("Deslocamento de altura da clareira central acima do nível da água.")]
+    [Tooltip("Central clearing height offset above water level.")]
     public float centralSanctuaryOffsetAboveWater = 1.8f;
 
-    [Header("Efeito Platô / Patamares de Combate (Terracing)")]
-    [Tooltip("Altura de cada patamar/degrau para combate (ex: 1.6m cria terraços bem delineados; 0 = contínuo).")]
+    [Header("Plateaus / Combat Terraces (Terracing)")]
+    [Tooltip("Height of each combat terrace / step (e.g. 1.6m creates distinct terraces; 0 = continuous).")]
     [Range(0f, 10f)] public float terraceStep = 1.6f;
 
-    [Tooltip("Suavidade das rampas entre patamares de combate (0 = degraus retos verticais, 1 = rampas contínuas).")]
+    [Tooltip("Ramp smoothness between combat terraces (0 = vertical steps, 1 = continuous ramps).")]
     [Range(0.1f, 1.0f)] public float terraceRampSmoothness = 0.45f;
 
-    [Header("Biomas por Altura & Inclinação")]
-    [Tooltip("Cota de altura (em metros) do nível da água.")]
+    [Header("Biomes by Height & Slope")]
+    [Tooltip("Water level elevation (meters).")]
     public float waterLevel = 2.0f;
 
-    [Tooltip("Cor aplicada aos vértices do terreno situados abaixo do nível da água.")]
+    [Tooltip("Color applied to terrain vertices below water level.")]
     public Color waterColor = new Color(0.12f, 0.38f, 0.72f);
 
-    [Tooltip("Cor da praia/areia imediatamente acima da água.")]
+    [Tooltip("Beach / sand color immediately above water.")]
     public Color sandColor = new Color(0.88f, 0.80f, 0.58f);
 
-    [Tooltip("Cor da grama verdejante das planícies e clareiras.")]
+    [Tooltip("Lush grass color for plains and clearings.")]
     public Color grassColor = new Color(0.32f, 0.68f, 0.26f);
 
-    [Tooltip("Cor da grama densa e escura de vales e bosques.")]
+    [Tooltip("Dense, dark grass color for valleys and groves.")]
     public Color deepGrassColor = new Color(0.20f, 0.48f, 0.22f);
 
-    [Tooltip("Cor das escarpas rochosas e encostas íngremes.")]
+    [Tooltip("Rocky cliff and steep slope color.")]
     public Color cliffColor = new Color(0.38f, 0.36f, 0.40f);
 
-    [Tooltip("Cor da rocha dos platôs elevados.")]
+    [Tooltip("Rock color on elevated plateaus.")]
     public Color rockColor = new Color(0.52f, 0.50f, 0.52f);
 
-    [Tooltip("Cor da neve nos cumes e picos mais elevados.")]
+    [Tooltip("Snow color at the highest summits and peaks.")]
     public Color snowColor = new Color(0.95f, 0.96f, 0.99f);
 
-    [Tooltip("Ângulo limite de inclinação da face em graus. Faces mais íngremes viram escarpas/rocha.")]
+    [Tooltip("Face slope angle threshold in degrees. Steeper faces become cliffs / rock.")]
     [Range(15f, 85f)] public float steepSlopeThreshold = 38.0f;
 
-    [Header("Shading Estilizado & Oclusão")]
-    [Tooltip("Intensidade de sombreamento de oclusão de cavidades e fendas entre facetas.")]
+    [Header("Stylized Shading & Occlusion")]
+    [Tooltip("Occlusion shading intensity for cavities and gaps between facets.")]
     [Range(0f, 0.8f)] public float facetAOIntensity = 0.25f;
 }

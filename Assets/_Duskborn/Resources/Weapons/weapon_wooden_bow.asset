@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: weapon_wooden_bow
   m_EditorClassIdentifier: 
   id: weapon_wooden_bow
-  displayName: Arco de Madeira
-  description: Arco de treino. Dispara flechas fisicas; municao ilimitada nesta versao
-    de teste.
+  displayName: "Wooden Bow"
+  description: "Training bow. Fires physical arrows; unlimited ammunition in this test version."
   icon: {fileID: 2800000, guid: c56b55f8622d5db41a014ddd812b7caa, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 0

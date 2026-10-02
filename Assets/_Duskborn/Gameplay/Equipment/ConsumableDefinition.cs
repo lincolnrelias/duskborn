@@ -15,13 +15,13 @@ namespace Duskborn.Gameplay.Equipment
     [CreateAssetMenu(fileName = "Consumable", menuName = "Duskborn/Equipment/Consumable Definition")]
     public class ConsumableDefinition : ItemDefinitionBase
     {
-        [Header("Efeito Alquímico / Consumível")]
+        [Header("Alchemical / Consumable Effect")]
         [SerializeField] private ConsumableEffectType effectType = ConsumableEffectType.InstantHeal;
         [SerializeField] private float effectValue = 60f;
-        [Tooltip("Duração do buff em segundos. 0 para efeito instantâneo.")]
+        [Tooltip("Buff duration in seconds. 0 for an instant effect.")]
         [SerializeField] private float duration = 0f;
         [SerializeField] private int maxStack = 10;
-        [SerializeField, TextArea] private string effectDescription = "Restaura 60 pontos de vida.";
+        [SerializeField, TextArea] private string effectDescription = "Restores 60 health points.";
 
         public ConsumableEffectType EffectType => effectType;
         public float EffectValue => effectValue;

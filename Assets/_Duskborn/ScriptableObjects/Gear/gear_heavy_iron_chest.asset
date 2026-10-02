@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: gear_heavy_iron_chest
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.GearDefinition
   id: gear_heavy_iron_chest
-  displayName: Placa Pesada de Ferro
-  description: Placa Pesada de Ferro
+  displayName: "Heavy Iron Plate"
+  description: "Heavy Iron Plate"
   icon: {fileID: 2800000, guid: e95144db6e6546b399d4c2e115ddc41a, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 0

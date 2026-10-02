@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Build_workbench
   m_EditorClassIdentifier:
   id: workbench
-  displayName: Bancada de trabalho
-  description: Ferramentas, equipamento leve e preparação de materiais.
-  category: Estações
+  displayName: "Workbench"
+  description: "Tools, light equipment, and material preparation."
+  category: "Stations"
   prefab: {fileID: 606149192729443004, guid: 742b066457a8d5d42bc4af38623d17c3, type: 3}
   icon: {fileID: 0}
   station: 0

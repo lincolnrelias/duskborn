@@ -62,25 +62,25 @@ Shader "Duskborn/VFX/DiabloGroundFlare"
 
             half4 frag(Varyings input) : SV_Target
             {
-                // 1. Distância radial ao centro do disco (0 no centro, 1 na borda)
+                // 1. Radial distance from the disc center (0 at the center, 1 at the edge).
                 float2 centerOffset = input.uv - float2(0.5, 0.5);
                 float dist = length(centerOffset) * 2.0;
 
                 if (dist >= 1.0)
                     return half4(0, 0, 0, 0);
 
-                // 2. Núcleo de impacto central (hotspot brilhante no ponto de contato)
+                // 2. Central impact core (bright hotspot at the contact point).
                 float hotspot = exp(-dist * dist * 6.5) * _HotspotIntensity;
 
-                // 3. Poça difusa de luz ao redor
+                // 3. Diffuse pool of surrounding light.
                 float diffuseGlow = pow(saturate(1.0 - dist), 2.2) * 0.45;
 
-                // 4. Ondulação concêntrica sutil pulsante
+                // 4. Subtle pulsating concentric ripple.
                 float ripple = sin((dist * 7.0 - _Time.y * _PulseSpeed) * 6.2831853) * 0.08 * (1.0 - dist);
 
                 float combinedIntensity = (hotspot + diffuseGlow + ripple) * input.color.a;
 
-                // Centro ligeiramente mais branco / quente
+                // Slightly whiter / warmer center.
                 float whiteCenter = pow(saturate(1.0 - dist * 2.0), 3.0) * 0.6;
                 half3 finalColor = lerp(input.color.rgb, half3(1.0, 1.0, 1.0), whiteCenter);
 

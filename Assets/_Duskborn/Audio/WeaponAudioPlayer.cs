@@ -25,7 +25,7 @@ namespace Duskborn.Audio
             else
             {
                 audioSource.playOnAwake = false;
-                audioSource.spatialBlend = 1f; // 3D espacial para multiplayer
+                audioSource.spatialBlend = 1f; // Spatial 3D audio for multiplayer.
                 audioSource.minDistance = 2f;
                 audioSource.maxDistance = 35f;
             }

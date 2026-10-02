@@ -8,22 +8,22 @@ using Duskborn.Core;
 namespace Duskborn.Gameplay.Crafting
 {
     /// <summary>
-    /// Componente de bancada de trabalho no Duskborn.
-    /// Permite que jogadores interajam para abrir a interface de fabricação (Crafting UI)
-    /// e forjem ferramentas e equipamentos primordiais como Machado de Pedra e Picareta de Pedra.
+    /// Workbench component in Duskborn.
+    /// Allows players to interact to open the crafting interface (Crafting UI)
+    /// and forge basic tools and equipment such as Stone Axe and Stone Pickaxe.
     /// </summary>
     public class Workbench : NetworkBehaviour
     {
-        [Header("Tipo de Estação")]
-        [SerializeField] private CraftingStationType stationType = CraftingStationType.Bancada;
-        [SerializeField] private string stationDisplayName = "Bancada de Trabalho";
+        [Header("Station Type")]
+        [SerializeField] private CraftingStationType stationType = CraftingStationType.Workbench;
+        [SerializeField] private string stationDisplayName = "Workbench";
 
         [Header("Outline & Visuals")]
         [SerializeField] private string outlineLayerName = "GreenOutline";
         [SerializeField] private Renderer[] outlineRenderers;
 
-        [Header("Receitas")]
-        [Tooltip("Lista de receitas disponibilizadas nesta bancada. Se vazio, carrega as receitas padrões.")]
+        [Header("Recipes")]
+        [Tooltip("Recipes available at this workbench. Loads default recipes when empty.")]
         [SerializeField] private CraftingRecipe[] recipes;
 
         private uint _outlineMask;
@@ -35,7 +35,7 @@ namespace Duskborn.Gameplay.Crafting
         public event Action OnClientInteracted;
 
         public CraftingStationType StationType => stationType;
-        public string StationDisplayName => !string.IsNullOrEmpty(stationDisplayName) ? stationDisplayName : "Bancada";
+        public string StationDisplayName => !string.IsNullOrEmpty(stationDisplayName) ? stationDisplayName : "Workbench";
         public IReadOnlyList<CraftingRecipe> Recipes => recipes;
 
         public void Configure(CraftingStationType type, string label)

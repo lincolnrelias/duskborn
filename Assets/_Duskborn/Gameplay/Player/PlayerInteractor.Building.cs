@@ -58,17 +58,17 @@ namespace Duskborn.Gameplay.Player
             // waiting for its transaction callback.
             if (pendingBuilding != null)
             {
-                BuildingResultRpc(Owner, "Outra construção ainda está sendo confirmada.", "", "");
+                BuildingResultRpc(Owner, "Another building is still awaiting confirmation.", "", "");
                 return;
             }
             if (json == null || json.Length > 4096)
             {
-                BuildingResultRpc(Owner, "Pedido inválido.", "", "");
+                BuildingResultRpc(Owner, "Invalid request.", "", "");
                 return;
             }
             BuildingCommand command;
             try { command = JsonUtility.FromJson<BuildingCommand>(json); }
-            catch { BuildingResultRpc(Owner, "Pedido inválido.", "", ""); return; }
+            catch { BuildingResultRpc(Owner, "Invalid request.", "", ""); return; }
             var world = BuildingWorld.Ensure();
             var reason = world.Validate(command, this, out var costs);
             if (reason != null) { BuildingResultRpc(Owner, reason, "", ""); return; }
@@ -95,7 +95,7 @@ namespace Duskborn.Gameplay.Player
             if (command.action == "load")
             {
                 var r = BuildingWorld.Recipe(command.recipe);
-                unlocked = r != null && (discovery == null || discovery.IsDiscovered(r) || r.RequiredStation == CraftingStationType.Forja);
+                unlocked = r != null && (discovery == null || discovery.IsDiscovered(r) || r.RequiredStation == CraftingStationType.Forge);
             }
             bool paid = unlocked && GetComponent<ResourceInventory>().TrySpendBatch(Decode(costJson));
             CompleteBuildingRpc(token, paid);
@@ -105,7 +105,7 @@ namespace Duskborn.Gameplay.Player
             if (pendingBuilding == null || token != pendingToken) return;
             var command = pendingBuilding; var cost = pendingCost;
             pendingBuilding = null; pendingCost = null; pendingToken = null;
-            if (!paid) { BuildingResultRpc(Owner, "Materiais insuficientes ou construção/receita bloqueada.", "", token); return; }
+            if (!paid) { BuildingResultRpc(Owner, "Insufficient materials or building / recipe locked.", "", token); return; }
             var world = BuildingWorld.Ensure();
             var reason = world.Validate(command, this, out _);
             if (reason != null) { BuildingResultRpc(Owner, reason, Encode(cost), token); return; }
@@ -114,7 +114,7 @@ namespace Duskborn.Gameplay.Player
             catch (Exception exception)
             {
                 Debug.LogException(exception);
-                BuildingResultRpc(Owner, "Falha ao construir; materiais devolvidos.", Encode(cost), token);
+                BuildingResultRpc(Owner, "Construction failed; materials refunded.", Encode(cost), token);
                 return;
             }
             BuildingResultRpc(Owner, "", Encode(credits), token);

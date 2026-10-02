@@ -9,9 +9,9 @@ using UnityEditor;
 namespace Duskborn.Core
 {
     /// <summary>
-    /// Bootstrapper visual automático e defensivo.
-    /// Garante que o pipeline de renderização (Post-Processing na câmera, Global Volume com SampleSceneProfile,
-    /// e Neblina inicial) esteja ativo e configurado tanto no Editor quanto no PlayMode sem congelamentos.
+    /// Automatic defensive visual bootstrapper.
+    /// Ensures the rendering pipeline (camera post-processing, Global Volume with SampleSceneProfile,
+    /// and initial fog) is active and configured in both the Editor and Play Mode without freezes.
     /// </summary>
     public static class EnvironmentVisualBootstrapper
     {
@@ -60,7 +60,7 @@ namespace Duskborn.Core
                 if (camData != null)
                 {
                     camData.renderPostProcessing = true;
-                    camData.volumeLayerMask = ~0; // Enxerga todas as camadas de Volume
+                    camData.volumeLayerMask = ~0; // Include all Volume layers.
                 }
             }
         }
@@ -117,7 +117,7 @@ namespace Duskborn.Core
                 }
                 else
                 {
-                    // Fallback procedural de perfil URP para garantir efeitos sempre visíveis
+                    // Procedural URP profile fallback to keep effects visible.
                     var runtimeProfile = ScriptableObject.CreateInstance<VolumeProfile>();
                     runtimeProfile.name = "SampleSceneProfile_Procedural";
 
@@ -149,7 +149,7 @@ namespace Duskborn.Core
 
         public static void EnsureDayNightFog()
         {
-            // Ativa neblina inicial
+            // Enable initial fog.
             RenderSettings.fog = true;
             RenderSettings.fogMode = FogMode.ExponentialSquared;
             if (RenderSettings.fogDensity <= 0.0001f)

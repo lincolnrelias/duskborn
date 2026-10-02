@@ -12,9 +12,9 @@ using UnityEngine.Playables;
 namespace Duskborn.Editor
 {
     /// <summary>
-    /// Utilitário de Editor para visualização, ajuste de empunhadura/socket e teste de animações
-    /// de armas e equipamentos no avatar do jogador.
-    /// Utiliza o prefab real do jogador (Player 1.prefab) e renderiza em ambiente isolado via PreviewRenderUtility.
+    /// Editor utility for previewing, adjusting grips / sockets, and testing animations
+    /// for weapons and equipment on the player avatar.
+    /// Uses the actual player prefab (Player 1.prefab) and renders in an isolated environment through PreviewRenderUtility.
     /// </summary>
     public sealed partial class ItemFittingStudioWindow : EditorWindow
     {
@@ -22,38 +22,38 @@ namespace Duskborn.Editor
         private const string FallbackCharacterPath = "Assets/_Duskborn/Art/Models/modelTextures/char.fbx";
         private const string ProfilesDirectory = "Assets/_Duskborn/ScriptableObjects/Equipment/Profiles";
 
-        // Referências principais
+        // Main references.
         [SerializeField] private WeaponDefinition selectedWeapon;
         [SerializeField] private ItemAttachmentProfile attachmentProfile;
         [SerializeField] private GameObject customCharacterPrefab;
 
-        // Estado do Preview
+        // Preview state.
         private PreviewRenderUtility _preview;
         private GameObject _characterInstance;
         private Animator _animator;
         private GameObject _weaponInstance;
 
-        // PlayableGraph para amostragem fiel de animações Humanoid
+        // PlayableGraph for accurate Humanoid animation sampling.
         private PlayableGraph _playableGraph;
         private AnimationPlayableOutput _playableOutput;
         private AnimationClipPlayable _clipPlayable;
 
-        // Câmera do Preview
+        // Preview camera.
         private Vector3 _camTarget = new Vector3(0f, 1.0f, 0f);
-        private float _camYaw = 160f; // Visto de frente
+        private float _camYaw = 160f; // Front view.
         private float _camPitch = 10f;
         private float _camDistance = 2.2f;
         private bool _darkBackground;
         private float _lightIntensity = 1.4f;
 
-        // Transform atual sendo editado
+        // Current transform being edited
         private HumanBodyBones _targetBone = HumanBodyBones.RightHand;
         private Vector3 _positionOffset = Vector3.zero;
         private Vector3 _rotationOffset = Vector3.zero;
         private Vector3 _scaleOffset = Vector3.one;
         private bool _uniformScale = true;
 
-        // Animação & Timeline
+        // Animation & Timeline.
         private struct ClipOption
         {
             public string Label;
@@ -74,7 +74,7 @@ namespace Duskborn.Editor
         // UI Scroll
         private Vector2 _sidebarScroll;
 
-        // Clipboard temporário
+        // Temporary clipboard.
         private static Vector3 s_ClipPos;
         private static Vector3 s_ClipRot;
         private static Vector3 s_ClipScale = Vector3.one;
@@ -83,14 +83,14 @@ namespace Duskborn.Editor
         [MenuItem("Tools/Duskborn/Item Fitting Studio", priority = 102)]
         public static void Open()
         {
-            var window = GetWindow<ItemFittingStudioWindow>("Ajuste de Itens");
+            var window = GetWindow<ItemFittingStudioWindow>("Item Fitting");
             window.minSize = new Vector2(750, 480);
             window.Show();
         }
 
         public static void OpenWithWeapon(WeaponDefinition weapon)
         {
-            var window = GetWindow<ItemFittingStudioWindow>("Ajuste de Itens");
+            var window = GetWindow<ItemFittingStudioWindow>("Item Fitting");
             window.minSize = new Vector2(750, 480);
             bool isNewWeapon = window.selectedWeapon != weapon;
             window.selectedWeapon = weapon;
@@ -311,7 +311,7 @@ namespace Duskborn.Editor
             _preview.camera.clearFlags = CameraClearFlags.SolidColor;
             _preview.camera.cullingMask = ~0;
 
-            // Carrega o modelo oficial do jogador (Player 1.prefab) ou fallback
+            // Load the official player model (Player 1.prefab) or a fallback.
             GameObject charPrefab = customCharacterPrefab;
             if (charPrefab == null)
             {
@@ -327,7 +327,7 @@ namespace Duskborn.Editor
                 _characterInstance = Instantiate(charPrefab);
                 _characterInstance.hideFlags = HideFlags.HideAndDontSave;
 
-                // Desativa scripts de gameplay/rede para não interferirem no preview
+                // Disable gameplay / networking scripts to avoid interference with the preview.
                 foreach (var mb in _characterInstance.GetComponentsInChildren<MonoBehaviour>(true))
                 {
                     mb.enabled = false;
@@ -460,7 +460,7 @@ namespace Duskborn.Editor
                     }
                 }
 
-                // Coleta animações das ações da arma (combos / variações)
+                // Collect weapon action animations (combos / variations).
                 if (selectedWeapon.Actions != null)
                 {
                     for (int a = 0; a < selectedWeapon.Actions.Length; a++)
@@ -476,7 +476,7 @@ namespace Duskborn.Editor
                                 var entry = action.Entries[e];
                                 if (entry?.Clip != null)
                                 {
-                                    string actionType = a == 0 ? "Ataque LMB" : (a == 1 ? "Ataque RMB" : $"Ação {a}");
+                                    string actionType = a == 0 ? "LMB Attack" : (a == 1 ? "RMB Attack" : $"Action {a}");
                                     string comboLabel = action.ComboChain ? $"Combo #{e + 1}" : $"Variante #{e + 1}";
                                     _availableClips.Add(new ClipOption
                                     {
@@ -490,7 +490,7 @@ namespace Duskborn.Editor
                     }
                 }
 
-                // Coleta animações das habilidades (Skills Q, E, R)
+                // Collect skill animations (Skills Q, E, R).
                 if (selectedWeapon.Skills != null)
                 {
                     for (int s = 0; s < selectedWeapon.Skills.Length; s++)
@@ -509,7 +509,7 @@ namespace Duskborn.Editor
                                     string skillName = string.IsNullOrEmpty(skill.name) ? $"Skill {s + 1}" : skill.name;
                                     _availableClips.Add(new ClipOption
                                     {
-                                        Label = $"Habilidade [{skillName}] ({entry.Clip.name})",
+                                        Label = $"Ability [{skillName}] ({entry.Clip.name})",
                                         Clip = entry.Clip,
                                         Events = entry.Events
                                     });
@@ -561,10 +561,10 @@ namespace Duskborn.Editor
             _weaponInstance.hideFlags = HideFlags.HideAndDontSave;
             _weaponInstance.SetActive(true);
 
-            // Garante que a camada seja renderizada pela câmera do preview
+            // Ensure the preview camera renders the layer.
             SetLayerRecursively(_weaponInstance, _characterInstance != null ? _characterInstance.layer : 0);
 
-            // Desativa scripts que possam interferir no preview (rede, combate, som)
+            // Disable scripts that might interfere with the preview (networking, combat, sound).
             foreach (var mb in _weaponInstance.GetComponentsInChildren<MonoBehaviour>(true))
             {
                 mb.enabled = false;
@@ -580,7 +580,7 @@ namespace Duskborn.Editor
             var rb = _weaponInstance.GetComponent<Rigidbody>();
             if (rb != null) DestroyImmediate(rb);
 
-            // Garante que todos os Renderers do modelo estejam ativos e habilitados
+            // Ensure all model Renderers are active and enabled.
             foreach (var r in _weaponInstance.GetComponentsInChildren<Renderer>(true))
             {
                 r.gameObject.SetActive(true);
@@ -651,7 +651,7 @@ namespace Duskborn.Editor
             // 1. Viewport 3D
             DrawPreviewArea(previewRect);
 
-            // 2. Barra lateral de controles com scroll independente
+            // 2. Control sidebar with independent scrolling.
             GUILayout.BeginArea(sidebarRect);
             _sidebarScroll = EditorGUILayout.BeginScrollView(_sidebarScroll);
             DrawSidebar();
@@ -695,21 +695,21 @@ namespace Duskborn.Editor
                 GUI.DrawTexture(rect, result, ScaleMode.StretchToFill, false);
             }
 
-            // Toolbar superior sobre o preview
+            // Upper toolbar above the preview
             Rect toolbarRect = new Rect(rect.x + 8f, rect.y + 8f, rect.width - 16f, 24f);
             GUILayout.BeginArea(toolbarRect);
             EditorGUILayout.BeginHorizontal();
 
-            if (GUILayout.Button("Focar Arma", EditorStyles.miniButton, GUILayout.Width(75)))
+            if (GUILayout.Button("Focus Weapon", EditorStyles.miniButton, GUILayout.Width(75)))
             {
                 FocusOnWeapon();
             }
-            if (GUILayout.Button("Focar Corpo", EditorStyles.miniButton, GUILayout.Width(75)))
+            if (GUILayout.Button("Focus Body", EditorStyles.miniButton, GUILayout.Width(75)))
             {
                 _camTarget = new Vector3(0f, 1.0f, 0f);
                 _camDistance = 2.2f;
             }
-            if (GUILayout.Button("Reset Visão", EditorStyles.miniButton, GUILayout.Width(75)))
+            if (GUILayout.Button("Reset View", EditorStyles.miniButton, GUILayout.Width(75)))
             {
                 _camYaw = 160f;
                 _camPitch = 10f;
@@ -722,14 +722,14 @@ namespace Duskborn.Editor
             GUILayout.Label("Luz:", EditorStyles.miniLabel, GUILayout.Width(28));
             _lightIntensity = GUILayout.HorizontalSlider(_lightIntensity, 0.5f, 3.0f, GUILayout.Width(70));
 
-            _darkBackground = GUILayout.Toggle(_darkBackground, "Fundo Escuro", EditorStyles.miniButton, GUILayout.Width(85));
+            _darkBackground = GUILayout.Toggle(_darkBackground, "Dark Background", EditorStyles.miniButton, GUILayout.Width(85));
 
             EditorGUILayout.EndHorizontal();
             GUILayout.EndArea();
 
-            // Legenda no canto inferior esquerdo
+            // Lower-left corner legend.
             Rect hintRect = new Rect(rect.x + 8f, rect.y + rect.height - 22f, rect.width - 16f, 18f);
-            GUI.Label(hintRect, "MMB: Orbitar | Shift+MMB / Shift+Clique: Mover Visão | Ctrl+MMB / Scroll: Zoom | F / .: Focar", EditorStyles.miniLabel);
+            GUI.Label(hintRect, "MMB: Orbit | Shift+MMB / Shift+Click: Pan | Ctrl+MMB / Scroll: Zoom | F / .: Focus", EditorStyles.miniLabel);
         }
 
         private void FocusOnWeapon()
@@ -890,11 +890,11 @@ namespace Duskborn.Editor
 
         private void DrawItemSelectionSection()
         {
-            EditorGUILayout.LabelField("1. Item & Perfil de Empunhadura", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("1. Item & Grip Profile", EditorStyles.boldLabel);
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
 
             EditorGUI.BeginChangeCheck();
-            var newWeapon = (WeaponDefinition)EditorGUILayout.ObjectField("Arma / Item", selectedWeapon, typeof(WeaponDefinition), false);
+            var newWeapon = (WeaponDefinition)EditorGUILayout.ObjectField("Weapon / Item", selectedWeapon, typeof(WeaponDefinition), false);
             if (EditorGUI.EndChangeCheck())
             {
                 selectedWeapon = newWeapon;
@@ -904,13 +904,13 @@ namespace Duskborn.Editor
             }
 
             EditorGUI.BeginChangeCheck();
-            var newProfile = (ItemAttachmentProfile)EditorGUILayout.ObjectField("Perfil de Ajuste", attachmentProfile, typeof(ItemAttachmentProfile), false);
+            var newProfile = (ItemAttachmentProfile)EditorGUILayout.ObjectField("Fitting Profile", attachmentProfile, typeof(ItemAttachmentProfile), false);
             if (EditorGUI.EndChangeCheck())
             {
                 attachmentProfile = newProfile;
                 if (selectedWeapon != null && selectedWeapon.AttachmentProfile != attachmentProfile)
                 {
-                    Undo.RecordObject(selectedWeapon, "Vincular Perfil de Ajuste");
+                    Undo.RecordObject(selectedWeapon, "Link Fitting Profile");
                     selectedWeapon.SetAttachmentProfile(attachmentProfile);
                     EditorUtility.SetDirty(selectedWeapon);
                 }
@@ -929,14 +929,14 @@ namespace Duskborn.Editor
             {
                 if (selectedWeapon.Prefab == null)
                 {
-                    EditorGUILayout.HelpBox("⚠ O ScriptableObject desta arma NÃO possui um Prefab 3D atribuído no campo 'Prefab'. Por isso ela não pode ser exibida.", MessageType.Error);
+                    EditorGUILayout.HelpBox("⚠ This weapon's ScriptableObject has NO 3D prefab assigned in the 'Prefab' field, so it cannot be displayed.", MessageType.Error);
                 }
                 else
                 {
                     var renderers = selectedWeapon.Prefab.GetComponentsInChildren<Renderer>(true);
                     if (renderers == null || renderers.Length == 0)
                     {
-                        EditorGUILayout.HelpBox("⚠ O Prefab vinculado não contém nenhum componente Renderer visível.", MessageType.Warning);
+                        EditorGUILayout.HelpBox("⚠ The linked prefab contains no visible Renderer component.", MessageType.Warning);
                     }
                 }
 
@@ -944,13 +944,13 @@ namespace Duskborn.Editor
                 {
                     if (selectedWeapon.AttachmentProfile == attachmentProfile)
                     {
-                        EditorGUILayout.HelpBox($"✓ Perfil vinculado a '{selectedWeapon.DisplayName}'", MessageType.Info);
+                        EditorGUILayout.HelpBox($"✓ Profile linked to '{selectedWeapon.DisplayName}'", MessageType.Info);
                     }
                     else
                     {
-                        string currentLinked = selectedWeapon.AttachmentProfile != null ? selectedWeapon.AttachmentProfile.name : "Nenhum";
-                        EditorGUILayout.HelpBox($"⚠ Este perfil NÃO está vinculado a '{selectedWeapon.DisplayName}' (atual: {currentLinked}).\nClique para vincular e salvar.", MessageType.Warning);
-                        if (GUILayout.Button("🔗 Vincular este Perfil à Arma Selecionada", GUILayout.Height(24)))
+                        string currentLinked = selectedWeapon.AttachmentProfile != null ? selectedWeapon.AttachmentProfile.name : "None";
+                        EditorGUILayout.HelpBox($"⚠ This profile is NOT linked to '{selectedWeapon.DisplayName}' (current: {currentLinked}).\nClick to link and save.", MessageType.Warning);
+                        if (GUILayout.Button("🔗 Link This Profile to the Selected Weapon", GUILayout.Height(24)))
                         {
                             LinkCurrentProfileToWeapon();
                         }
@@ -958,15 +958,15 @@ namespace Duskborn.Editor
                 }
                 else
                 {
-                    EditorGUILayout.HelpBox("Esta arma não possui um perfil de acoplamento atribuído.", MessageType.Warning);
-                    if (GUILayout.Button("Criar Novo Perfil para esta Arma", GUILayout.Height(24)))
+                    EditorGUILayout.HelpBox("This weapon has no attachment profile assigned.", MessageType.Warning);
+                    if (GUILayout.Button("Create New Profile for This Weapon", GUILayout.Height(24)))
                     {
                         CreateProfileForSelectedWeapon();
                     }
                 }
 
                 GUILayout.Space(2);
-                if (GUILayout.Button("🎮 Colocar no 1º Slot Inicial (Testar em Jogo)", EditorStyles.miniButton))
+                if (GUILayout.Button("🎮 Place in First Starting Slot (Test In Game)", EditorStyles.miniButton))
                 {
                     SetAsStartingWeapon();
                 }
@@ -979,13 +979,13 @@ namespace Duskborn.Editor
         {
             if (selectedWeapon == null || attachmentProfile == null) return;
 
-            Undo.RecordObject(selectedWeapon, "Vincular Perfil à Arma");
+            Undo.RecordObject(selectedWeapon, "Link Profile to Weapon");
             selectedWeapon.SetAttachmentProfile(attachmentProfile);
             EditorUtility.SetDirty(selectedWeapon);
             AssetDatabase.SaveAssets();
             SaveWindowState();
 
-            ShowNotification(new GUIContent($"✓ Perfil vinculado a '{selectedWeapon.DisplayName}'!"));
+            ShowNotification(new GUIContent($"✓ Profile linked to '{selectedWeapon.DisplayName}'!"));
         }
 
         private void SetAsStartingWeapon()
@@ -1007,12 +1007,12 @@ namespace Duskborn.Editor
                         so.ApplyModifiedProperties();
                         EditorUtility.SetDirty(db);
                         AssetDatabase.SaveAssets();
-                        ShowNotification(new GUIContent($"✓ '{selectedWeapon.DisplayName}' no 1º slot inicial!"));
+                        ShowNotification(new GUIContent($"✓ '{selectedWeapon.DisplayName}' in the first starting slot!"));
                         return;
                     }
                 }
             }
-            ShowNotification(new GUIContent("Não foi possível atualizar o banco inicial."));
+            ShowNotification(new GUIContent("Could not update the initial database."));
         }
 
         private void CreateProfileForSelectedWeapon()
@@ -1032,24 +1032,24 @@ namespace Duskborn.Editor
             newProfile.SetOffsets(_positionOffset, _rotationOffset, _scaleOffset, _targetBone);
 
             AssetDatabase.CreateAsset(newProfile, profilePath);
-            Undo.RecordObject(selectedWeapon, "Atribuir Perfil Criado");
+            Undo.RecordObject(selectedWeapon, "Assign Created Profile");
             selectedWeapon.SetAttachmentProfile(newProfile);
             EditorUtility.SetDirty(selectedWeapon);
             AssetDatabase.SaveAssets();
 
             attachmentProfile = newProfile;
             SaveWindowState();
-            ShowNotification(new GUIContent($"Perfil criado: {Path.GetFileName(profilePath)}"));
+            ShowNotification(new GUIContent($"Profile created: {Path.GetFileName(profilePath)}"));
         }
 
         private void DrawTransformEditingSection()
         {
-            EditorGUILayout.LabelField("2. Ajuste do Socket e Transform", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("2. Socket and Transform Adjustment", EditorStyles.boldLabel);
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
 
-            // Osso Alvo
+            // Target bone.
             EditorGUI.BeginChangeCheck();
-            _targetBone = (HumanBodyBones)EditorGUILayout.EnumPopup("Osso Alvo (Socket)", _targetBone);
+            _targetBone = (HumanBodyBones)EditorGUILayout.EnumPopup("Target Bone (Socket)", _targetBone);
             if (EditorGUI.EndChangeCheck())
             {
                 SpawnWeaponModel();
@@ -1058,10 +1058,10 @@ namespace Duskborn.Editor
             GUILayout.Space(6);
             EditorGUI.BeginChangeCheck();
 
-            // Posição
-            _positionOffset = EditorGUILayout.Vector3Field("Posição (Local)", _positionOffset);
+            // Position.
+            _positionOffset = EditorGUILayout.Vector3Field("Position (Local)", _positionOffset);
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.PrefixLabel("Passo Pos (+/-)");
+            EditorGUILayout.PrefixLabel("Position Step (+/-)");
             if (GUILayout.Button("X-", EditorStyles.miniButton)) _positionOffset.x -= 0.02f;
             if (GUILayout.Button("X+", EditorStyles.miniButton)) _positionOffset.x += 0.02f;
             if (GUILayout.Button("Y-", EditorStyles.miniButton)) _positionOffset.y -= 0.02f;
@@ -1072,10 +1072,10 @@ namespace Duskborn.Editor
 
             GUILayout.Space(6);
 
-            // Rotação
-            _rotationOffset = EditorGUILayout.Vector3Field("Rotação Euler", _rotationOffset);
+            // Rotation.
+            _rotationOffset = EditorGUILayout.Vector3Field("Euler Rotation", _rotationOffset);
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.PrefixLabel("Girar (+45°)");
+            EditorGUILayout.PrefixLabel("Rotate (+45°)");
             if (GUILayout.Button("X+45", EditorStyles.miniButton)) _rotationOffset.x = (_rotationOffset.x + 45f) % 360f;
             if (GUILayout.Button("Y+45", EditorStyles.miniButton)) _rotationOffset.y = (_rotationOffset.y + 45f) % 360f;
             if (GUILayout.Button("Z+45", EditorStyles.miniButton)) _rotationOffset.z = (_rotationOffset.z + 45f) % 360f;
@@ -1084,10 +1084,10 @@ namespace Duskborn.Editor
 
             GUILayout.Space(6);
 
-            // Escala
-            _scaleOffset = EditorGUILayout.Vector3Field("Escala", _scaleOffset);
+            // Scale
+            _scaleOffset = EditorGUILayout.Vector3Field("Scale", _scaleOffset);
             EditorGUILayout.BeginHorizontal();
-            _uniformScale = EditorGUILayout.ToggleLeft("Uniforme", _uniformScale, GUILayout.Width(75));
+            _uniformScale = EditorGUILayout.ToggleLeft("Uniform", _uniformScale, GUILayout.Width(75));
             if (_uniformScale)
             {
                 float uScale = EditorGUILayout.FloatField(_scaleOffset.x);
@@ -1096,7 +1096,7 @@ namespace Duskborn.Editor
                     _scaleOffset = Vector3.one * Mathf.Max(0.001f, uScale);
                 }
             }
-            if (selectedWeapon?.Prefab != null && GUILayout.Button("Escala do Prefab", EditorStyles.miniButton, GUILayout.Width(110)))
+            if (selectedWeapon?.Prefab != null && GUILayout.Button("Prefab Scale", EditorStyles.miniButton, GUILayout.Width(110)))
             {
                 _scaleOffset = selectedWeapon.Prefab.transform.localScale;
                 ApplyCurrentTransformToWeapon();
@@ -1110,9 +1110,9 @@ namespace Duskborn.Editor
 
             GUILayout.Space(8);
 
-            // Botões de ação do Transform
+            // Transform action buttons.
             EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button("Copiar", EditorStyles.miniButtonLeft))
+            if (GUILayout.Button("Copy", EditorStyles.miniButtonLeft))
             {
                 s_ClipPos = _positionOffset;
                 s_ClipRot = _rotationOffset;
@@ -1121,7 +1121,7 @@ namespace Duskborn.Editor
                 ShowNotification(new GUIContent("Transform copiado!"));
             }
             GUI.enabled = s_HasClipboard;
-            if (GUILayout.Button("Colar", EditorStyles.miniButtonMid))
+            if (GUILayout.Button("Paste", EditorStyles.miniButtonMid))
             {
                 _positionOffset = s_ClipPos;
                 _rotationOffset = s_ClipRot;
@@ -1139,16 +1139,16 @@ namespace Duskborn.Editor
 
             GUILayout.Space(6);
 
-            // Botões Salvar / Reverter
+            // Save / Revert buttons.
             EditorGUILayout.BeginHorizontal();
             GUI.enabled = attachmentProfile != null;
             GUI.backgroundColor = new Color(0.35f, 0.85f, 0.45f);
-            if (GUILayout.Button("💾 Salvar no Perfil", GUILayout.Height(28)))
+            if (GUILayout.Button("💾 Save to Profile", GUILayout.Height(28)))
             {
                 SaveOffsetsToProfile();
             }
             GUI.backgroundColor = Color.white;
-            if (GUILayout.Button("Reverter", GUILayout.Height(28), GUILayout.Width(80)))
+            if (GUILayout.Button("Revert", GUILayout.Height(28), GUILayout.Width(80)))
             {
                 RevertOffsetsFromProfile();
             }
@@ -1162,7 +1162,7 @@ namespace Duskborn.Editor
         {
             if (attachmentProfile == null) return;
 
-            Undo.RecordObject(attachmentProfile, "Salvar Ajuste do Item");
+            Undo.RecordObject(attachmentProfile, "Save Item Fitting");
             attachmentProfile.SetOffsets(_positionOffset, _rotationOffset, _scaleOffset, _targetBone);
             EditorUtility.SetDirty(attachmentProfile);
 
@@ -1170,7 +1170,7 @@ namespace Duskborn.Editor
             {
                 if (selectedWeapon.AttachmentProfile != attachmentProfile)
                 {
-                    Undo.RecordObject(selectedWeapon, "Vincular Perfil à Arma");
+                    Undo.RecordObject(selectedWeapon, "Link Profile to Weapon");
                     selectedWeapon.SetAttachmentProfile(attachmentProfile);
                 }
                 EditorUtility.SetDirty(selectedWeapon);
@@ -1179,8 +1179,8 @@ namespace Duskborn.Editor
             AssetDatabase.SaveAssets();
             SaveWindowState();
 
-            string weaponMsg = selectedWeapon != null ? $" e vinculado a '{selectedWeapon.DisplayName}'" : "";
-            ShowNotification(new GUIContent($"✓ Salvo no Perfil{weaponMsg}!"));
+            string weaponMsg = selectedWeapon != null ? $" and linked to '{selectedWeapon.DisplayName}'" : "";
+            ShowNotification(new GUIContent($"✓ Saved to Profile{weaponMsg}!"));
         }
 
         private void RevertOffsetsFromProfile()
@@ -1192,24 +1192,24 @@ namespace Duskborn.Editor
             _scaleOffset = attachmentProfile.Scale;
             SpawnWeaponModel();
             SaveWindowState();
-            ShowNotification(new GUIContent("Valores restaurados do perfil."));
+            ShowNotification(new GUIContent("Values restored from the profile."));
         }
 
         private void DrawAnimationSection()
         {
-            EditorGUILayout.LabelField("3. Teste de Animações & Impacto", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("3. Animation & Impact Testing", EditorStyles.boldLabel);
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
 
-            // Seletor de clipe
+            // Clip selector.
             string[] clipLabels = new string[_availableClips.Count + 1];
             for (int i = 0; i < _availableClips.Count; i++)
             {
                 clipLabels[i] = _availableClips[i].Label;
             }
-            clipLabels[_availableClips.Count] = "Animação Personalizada (Custom Clip)";
+            clipLabels[_availableClips.Count] = "Custom Animation Clip";
 
             EditorGUI.BeginChangeCheck();
-            _selectedClipIndex = EditorGUILayout.Popup("Animação", _selectedClipIndex, clipLabels);
+            _selectedClipIndex = EditorGUILayout.Popup("Animation", _selectedClipIndex, clipLabels);
             if (EditorGUI.EndChangeCheck())
             {
                 _currentTime = 0f;
@@ -1221,7 +1221,7 @@ namespace Duskborn.Editor
             if (_selectedClipIndex == _availableClips.Count)
             {
                 EditorGUI.BeginChangeCheck();
-                _customClip = (AnimationClip)EditorGUILayout.ObjectField("Clipe Customizado", _customClip, typeof(AnimationClip), false);
+                _customClip = (AnimationClip)EditorGUILayout.ObjectField("Custom Clip", _customClip, typeof(AnimationClip), false);
                 if (EditorGUI.EndChangeCheck())
                 {
                     _currentTime = 0f;
@@ -1236,14 +1236,14 @@ namespace Duskborn.Editor
 
             GUILayout.Space(6);
 
-            // Linha 1: Botões de Playback
+            // Row 1: playback buttons.
             EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button(_isPlaying ? "⏸ Pausar" : "▶ Reproduzir", GUILayout.Height(24)))
+            if (GUILayout.Button(_isPlaying ? "⏸ Pause" : "▶ Reproduzir", GUILayout.Height(24)))
             {
                 _isPlaying = !_isPlaying;
             }
 
-            if (GUILayout.Button("⏮ Início", EditorStyles.miniButton, GUILayout.Height(24), GUILayout.Width(60)))
+            if (GUILayout.Button("⏮ Start", EditorStyles.miniButton, GUILayout.Height(24), GUILayout.Width(60)))
             {
                 _currentTime = 0f;
                 _normalizedTime = 0f;
@@ -1255,12 +1255,12 @@ namespace Duskborn.Editor
 
             GUILayout.Space(4);
 
-            // Linha 2: Controle de Velocidade isolado
-            _playbackSpeed = EditorGUILayout.Slider("Velocidade", _playbackSpeed, 0.1f, 2.0f);
+            // Row 2: independent speed control.
+            _playbackSpeed = EditorGUILayout.Slider("Speed", _playbackSpeed, 0.1f, 2.0f);
 
             GUILayout.Space(4);
 
-            // Linha 3: Scrubber da Timeline
+            // Row 3: timeline scrubber.
             EditorGUI.BeginChangeCheck();
             _normalizedTime = EditorGUILayout.Slider("Timeline (0-1)", _normalizedTime, 0f, 1f);
             if (EditorGUI.EndChangeCheck())
@@ -1270,22 +1270,22 @@ namespace Duskborn.Editor
                 Repaint();
             }
 
-            EditorGUILayout.LabelField($"Tempo: {_currentTime:F2}s / {clipLength:F2}s ({_normalizedTime * 100:F0}%)", EditorStyles.centeredGreyMiniLabel);
+            EditorGUILayout.LabelField($"Time: {_currentTime:F2}s / {clipLength:F2}s ({_normalizedTime * 100:F0}%)", EditorStyles.centeredGreyMiniLabel);
 
-            // Linha 4: Momentos de Impacto
+            // Row 4: impact moments.
             if (_selectedClipIndex < _availableClips.Count)
             {
                 var events = _availableClips[_selectedClipIndex].Events;
                 if (events != null && events.Length > 0)
                 {
                     GUILayout.Space(4);
-                    EditorGUILayout.LabelField("Momentos de Impacto (Hit Events):", EditorStyles.miniBoldLabel);
+                    EditorGUILayout.LabelField("Impact Moments (Hit Events):", EditorStyles.miniBoldLabel);
 
                     EditorGUILayout.BeginHorizontal();
                     for (int i = 0; i < events.Length; i++)
                     {
                         var evt = events[i];
-                        string btnLabel = $"Impacto #{i + 1} ({(int)(evt.NormalizedTime * 100)}%)";
+                        string btnLabel = $"Impact #{i + 1} ({(int)(evt.NormalizedTime * 100)}%)";
                         if (GUILayout.Button(btnLabel, EditorStyles.miniButton, GUILayout.Height(20)))
                         {
                             _isPlaying = false;
@@ -1304,11 +1304,11 @@ namespace Duskborn.Editor
 
         private void DrawAvatarSection()
         {
-            EditorGUILayout.LabelField("4. Modelo do Personagem (Preview)", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("4. Character Model (Preview)", EditorStyles.boldLabel);
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
 
             EditorGUI.BeginChangeCheck();
-            customCharacterPrefab = (GameObject)EditorGUILayout.ObjectField("Modelo Base", customCharacterPrefab, typeof(GameObject), false);
+            customCharacterPrefab = (GameObject)EditorGUILayout.ObjectField("Base Model", customCharacterPrefab, typeof(GameObject), false);
             if (EditorGUI.EndChangeCheck())
             {
                 InitPreview();
@@ -1317,7 +1317,7 @@ namespace Duskborn.Editor
 
             if (customCharacterPrefab != null)
             {
-                if (GUILayout.Button("Restaurar Jogador Padrão (Player 1)", EditorStyles.miniButton))
+                if (GUILayout.Button("Restore Default Player (Player 1)", EditorStyles.miniButton))
                 {
                     customCharacterPrefab = null;
                     InitPreview();

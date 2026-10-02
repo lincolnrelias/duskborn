@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: material_leather
   m_EditorClassIdentifier: Assembly-CSharp::InventorySystem.Data.MaterialDefinition
   id: material_leather
-  displayName: Couro
-  description: Couro
+  displayName: "Leather"
+  description: "Leather"
   icon: {fileID: 0}
   dropPrefab: {fileID: 2943510941128590080, guid: 2273c6666db4c534092f088f899f8e1f, type: 3}
   rarity: 0

@@ -1,41 +1,41 @@
 namespace Duskborn.Gameplay.Crafting
 {
     /// <summary>
-    /// Nível de qualidade de um item fabricado.
-    /// Modifica os atributos base e pode adicionar propriedades/quirks especiais.
+    /// Quality level of a crafted item.
+    /// Modifies base attributes and can add special properties / quirks.
     /// </summary>
     public enum CraftedItemQuality
     {
-        /// <summary>Qualidade comum: atributos padrão 1.0x.</summary>
-        Padrao = 0,
+        /// <summary>Standard quality: default attributes at 1.0x.</summary>
+        Standard = 0,
 
-        /// <summary>Qualidade refinada: +15% aos atributos positivos.</summary>
-        Refinado = 1,
+        /// <summary>Refined quality: +15% to positive attributes.</summary>
+        Refined = 1,
 
-        /// <summary>Obra-prima: +30% aos atributos positivos e acabamento perfeito.</summary>
-        ObraPrima = 2,
+        /// <summary>Masterwork: +30% to positive attributes and a perfect finish.</summary>
+        Masterwork = 2,
 
-        /// <summary>Instável / Amaldiçoado: +50% ao atributo primário, mas intensifica as penalidades.</summary>
-        Instavel = 3
+        /// <summary>Unstable / Cursed: +50% to the primary attribute, but stronger penalties.</summary>
+        Unstable = 3
     }
 
     public static class CraftedQualityExtensions
     {
         public static string GetDisplayName(this CraftedItemQuality quality) => quality switch
         {
-            CraftedItemQuality.Padrao    => "Padrão",
-            CraftedItemQuality.Refinado  => "Refinado",
-            CraftedItemQuality.ObraPrima => "Obra-Prima",
-            CraftedItemQuality.Instavel  => "Instável",
+            CraftedItemQuality.Standard    => "Standard",
+            CraftedItemQuality.Refined  => "Refined",
+            CraftedItemQuality.Masterwork => "Masterwork",
+            CraftedItemQuality.Unstable  => "Unstable",
             _                            => quality.ToString()
         };
 
         public static string GetColorHex(this CraftedItemQuality quality) => quality switch
         {
-            CraftedItemQuality.Padrao    => "#94a3b8",
-            CraftedItemQuality.Refinado  => "#38bdf8",
-            CraftedItemQuality.ObraPrima => "#facc15",
-            CraftedItemQuality.Instavel  => "#e879f9",
+            CraftedItemQuality.Standard    => "#94a3b8",
+            CraftedItemQuality.Refined  => "#38bdf8",
+            CraftedItemQuality.Masterwork => "#facc15",
+            CraftedItemQuality.Unstable  => "#e879f9",
             _                            => "#ffffff"
         };
     }

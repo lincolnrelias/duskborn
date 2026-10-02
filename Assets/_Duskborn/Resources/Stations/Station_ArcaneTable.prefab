@@ -158,7 +158,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 8058475873678479222}
   _networkObjectCache: {fileID: 8058475873678479222}
   stationType: 3
-  stationDisplayName: Mesa Arcana
+  stationDisplayName: Arcane Table
   outlineLayerName: GreenOutline
   outlineRenderers:
   - {fileID: 9160041592661196685}

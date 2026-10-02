@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: weapon_heavy_waraxe
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.WeaponDefinition
   id: weapon_heavy_waraxe
-  displayName: Machado de Guerra Pesado
-  description: "Machado de guerra colossal. Dano maci\xE7o e devastador contra \xE1rvores
-    e humanoides, por\xE9m lento de manusear."
+  displayName: "Heavy War Axe"
+  description: "Colossal war axe. Massive, devastating damage against trees and humanoids, but slow to wield."
   icon: {fileID: 2800000, guid: b9465f9cd2ba42dcba92c44f71370238, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 0

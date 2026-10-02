@@ -1,7 +1,7 @@
 namespace Duskborn.Audio
 {
     /// <summary>
-    /// Tipos de superfície para física de impacto e áudio de passos no Duskborn.
+    /// Surface types for impact physics and footstep audio in Duskborn.
     /// </summary>
     public enum SurfaceType
     {

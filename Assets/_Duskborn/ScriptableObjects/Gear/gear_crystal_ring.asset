@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: gear_crystal_ring
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.GearDefinition
   id: gear_crystal_ring
-  displayName: Anel de Cristal Puro
-  description: Anel de Cristal Puro
+  displayName: "Pure Crystal Ring"
+  description: "Pure Crystal Ring"
   icon: {fileID: 2800000, guid: 20425cad68e8411085072edc7ffe75bc, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 0

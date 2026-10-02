@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_ArcaneStaff
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_ArcaneStaff
-  recipeName: Cajado Arcano
-  description: Cajado Arcano
-  category: Armas
+  recipeName: "Arcane Staff"
+  description: "Arcane Staff"
+  category: "Weapons"
   tier: 3
   isAlwaysDiscovered: 0
   outputItem: {fileID: 0}

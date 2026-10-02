@@ -7,9 +7,9 @@ using UnityEngine;
 namespace Duskborn.Gameplay.Crafting
 {
     /// <summary>
-    /// Rastreia quais receitas o jogador já descobriu durante a run.
-    /// Receitas T1 são sempre descobertas. Demais receitas são desbloqueadas
-    /// automaticamente quando o jogador obtém pela primeira vez um material-chave.
+    /// Tracks recipes the player has discovered during the run.
+    /// T1 recipes are always discovered. Other recipes unlock
+    /// automatically when the player first obtains a key material.
     /// </summary>
     public class RecipeDiscoveryTracker : MonoBehaviour
     {
@@ -34,19 +34,19 @@ namespace Duskborn.Gameplay.Crafting
             if (_resources != null)
                 _resources.ResourceChanged += OnResourceChanged;
 
-            // Carrega todas as receitas disponíveis
+            // Load all available recipes.
             _allRecipes = Resources.LoadAll<CraftingRecipe>("Crafting");
 
-            // Descobre todas as receitas T1 (sempre disponíveis) e receitas marcadas como isAlwaysDiscovered
+            // Discover all T1 recipes (always available) and recipes marked isAlwaysDiscovered.
             foreach (var recipe in _allRecipes)
             {
                 if (recipe == null) continue;
-                if (recipe.Tier == CraftingTier.Primitivo || recipe.IsAlwaysDiscovered)
+                if (recipe.Tier == CraftingTier.Primitive || recipe.IsAlwaysDiscovered)
                     _discoveredIds.Add(recipe.RecipeId);
             }
 
             if (_resources != null) foreach (var entry in _resources.Counts) OnResourceChanged(entry.Key, entry.Value);
-            DuskLog.Log(LogChannel.Inventory, $"RecipeDiscoveryTracker: {_discoveredIds.Count} receitas iniciais descobertas.");
+            DuskLog.Log(LogChannel.Inventory, $"RecipeDiscoveryTracker: {_discoveredIds.Count} starting recipes discovered.");
         }
 
         private void OnDestroy()
@@ -56,18 +56,18 @@ namespace Duskborn.Gameplay.Crafting
         }
 
         /// <summary>
-        /// Verifica se uma receita já foi descoberta pelo jogador.
+        /// Check whether the player has already discovered a recipe.
         /// </summary>
         public bool IsDiscovered(CraftingRecipe recipe)
         {
             if (recipe == null) return false;
-            if (recipe.Tier == CraftingTier.Primitivo || recipe.IsAlwaysDiscovered) return true;
+            if (recipe.Tier == CraftingTier.Primitive || recipe.IsAlwaysDiscovered) return true;
             return _discoveredIds.Contains(recipe.RecipeId);
         }
 
         /// <summary>
-        /// Verifica se uma receita usa pelo menos um material conhecido
-        /// (para mostrar como silhueta/dica na UI).
+        /// Check whether a recipe uses at least one known material
+        /// (to show as a silhouette / hint in the UI).
         /// </summary>
         public bool HasPartialKnowledge(CraftingRecipe recipe)
         {
@@ -81,30 +81,30 @@ namespace Duskborn.Gameplay.Crafting
         }
 
         /// <summary>
-        /// Força a descoberta de uma receita específica (ex: drops de scroll, eventos).
+        /// Force discovery of a specific recipe (e.g. scroll drops, events).
         /// </summary>
         public void ForceDiscover(CraftingRecipe recipe)
         {
             if (recipe == null) return;
             if (_discoveredIds.Add(recipe.RecipeId))
             {
-                DuskLog.Log(LogChannel.Inventory, $"Receita descoberta: {recipe.RecipeName}");
+                DuskLog.Log(LogChannel.Inventory, $"Recipe discovered: {recipe.RecipeName}");
                 OnRecipeDiscovered?.Invoke(recipe);
             }
         }
 
         private void OnResourceChanged(string resourceId, int newTotal)
         {
-            if (newTotal <= 0 || !_knownMaterials.Add(resourceId)) return; // Já conhecido
+            if (newTotal <= 0 || !_knownMaterials.Add(resourceId)) return; // Already known.
 
-            // Verifica todas as receitas para ver se alguma nova pode ser descoberta
+            // Check all recipes for any newly discoverable recipe.
             if (_allRecipes == null) return;
             foreach (var recipe in _allRecipes)
             {
                 if (recipe == null) continue;
                 if (_discoveredIds.Contains(recipe.RecipeId)) continue;
 
-                // Receita é descoberta quando o jogador obtém qualquer um dos seus ingredientes ou combustíveis
+                // A recipe is discovered when the player obtains any of its ingredients or fuels.
                 bool discovered = false;
                 foreach (var ing in recipe.Ingredients)
                 {
@@ -128,7 +128,7 @@ namespace Duskborn.Gameplay.Crafting
                 if (discovered)
                 {
                     _discoveredIds.Add(recipe.RecipeId);
-                    DuskLog.Log(LogChannel.Inventory, $"Nova receita descoberta: {recipe.RecipeName} (via {resourceId})");
+                    DuskLog.Log(LogChannel.Inventory, $"New recipe discovered: {recipe.RecipeName} (via {resourceId})");
                     OnRecipeDiscovered?.Invoke(recipe);
                 }
             }

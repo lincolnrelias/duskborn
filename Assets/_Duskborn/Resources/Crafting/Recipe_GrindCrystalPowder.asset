@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_GrindCrystalPowder
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_GrindCrystalPowder
-  recipeName: "Moer P\xF3 de Cristal"
-  description: "Moer P\xF3 de Cristal"
-  category: Materiais
+  recipeName: "Grind Crystal Powder"
+  description: "Grind Crystal Powder"
+  category: "Materials"
   tier: 4
   requiredStation: 2
   isAlwaysDiscovered: 0

@@ -5,32 +5,32 @@ using UnityEngine.SceneManagement;
 namespace Duskborn.UI
 {
     /// <summary>
-    /// Controlador da cena de Menu Principal em estética Medieval Fantasy Low-Poly ("Portal do Crepúsculo").
-    /// Apresenta brasão heráldico dourado, botões de laje de pedra com bordas de ouro e runas reativas,
-    /// brasas místicas flutuantes, pergaminho iluminado com guia de controles/sabedoria e painel de opções.
-    /// Funciona 100% via OnGUI com texturas geradas dinamicamente, sem dependência de prefabs ou Canvas.
+    /// Main Menu scene controller with a Medieval Fantasy Low-Poly aesthetic ("Twilight Portal").
+    /// Features a golden heraldic crest, stone slab buttons with gold borders and reactive runes,
+    /// floating mystical embers, an illuminated controls / wisdom scroll, and an options panel.
+    /// Works entirely through OnGUI with dynamically generated textures, independent of prefabs or Canvas.
     /// </summary>
     public class MainMenuController : MonoBehaviour
     {
-        [Header("Cena Alvo")]
-        [Tooltip("Nome da cena do jogo a ser carregada ao clicar em Iniciar Expedição.")]
+        [Header("Target Scene")]
+        [Tooltip("Game scene name loaded when clicking Start Expedition.")]
         public string targetGameScene = "SampleScene";
 
-        [Header("Áudio")]
-        [Tooltip("Trilha sonora temática do Menu Principal.")]
+        [Header("Audio")]
+        [Tooltip("Main Menu theme music.")]
         public AudioClip menuMusic;
-        [Tooltip("Efeito sonoro ao clicar em botões.")]
+        [Tooltip("Sound effect when clicking buttons.")]
         public AudioClip clickSfx;
-        [Tooltip("Efeito sonoro ao abrir pergaminho/modal.")]
+        [Tooltip("Sound effect when opening a scroll / modal.")]
         public AudioClip modalOpenSfx;
 
-        // Estado dos Modais
+        // Modal state.
         private bool _showLoreModal = false;
         private bool _showSettingsModal = false;
         private float _masterVolume = 1.0f;
         private bool _isFullScreen = true;
 
-        // Partículas atmosféricas de brasas do crepúsculo
+        // Atmospheric twilight ember particles.
         private struct DuskEmber
         {
             public float xRatio;
@@ -41,7 +41,7 @@ namespace Duskborn.UI
         }
         private DuskEmber[] _embers;
 
-        // Texturas procedurais Medieval Fantasy
+        // Procedural Medieval Fantasy textures
         private Texture2D _slateTexture;
         private Texture2D _ironFrameTexture;
         private Texture2D _goldTrimTexture;
@@ -52,7 +52,7 @@ namespace Duskborn.UI
         private Texture2D _parchmentInnerTex;
         private Texture2D _emberTexture;
 
-        // Estilos GUI
+        // GUI Styles
         private GUIStyle _titleStyle;
         private GUIStyle _subTitleStyle;
         private GUIStyle _mottoStyle;
@@ -157,7 +157,7 @@ namespace Duskborn.UI
 
         private void Update()
         {
-            // Movimentação das brasas
+            // Ember movement.
             if (_embers != null)
             {
                 for (int i = 0; i < _embers.Length; i++)
@@ -202,7 +202,7 @@ namespace Duskborn.UI
 
         public void LoadGame()
         {
-            Debug.Log($"[MainMenuController] Iniciando jornada na cena: {targetGameScene}");
+            Debug.Log($"[MainMenuController] Starting journey in scene: {targetGameScene}");
             LoadedFromMainMenu = true;
             SceneManager.LoadScene(targetGameScene);
         }
@@ -221,16 +221,16 @@ namespace Duskborn.UI
 
             GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(scale, scale, 1f));
 
-            // 1. Fundo de Ardósia Gótica Profunda
+            // 1. Deep Gothic Slate Background.
             GUI.DrawTexture(new Rect(0, 0, virtualW, virtualH), _slateTexture, ScaleMode.StretchToFill);
 
-            // 2. Brasas Místicas Flutuantes
+            // 2. Floating Mystical Embers.
             DrawEmbers(virtualW, virtualH);
 
-            // 3. Moldura de Ferro Forjado e Frisos de Ouro
+            // 3. Wrought Iron Frame and Gold Trim.
             DrawMedievalScreenBorders(virtualW, virtualH);
 
-            // Se algum modal estiver aberto, desenha o modal sobreposto
+            // If a modal is open, draw it as an overlay.
             if (_showLoreModal)
             {
                 DrawLoreModal(virtualW, virtualH);
@@ -245,44 +245,44 @@ namespace Duskborn.UI
                 return;
             }
 
-            // 4. Brasão & Título Heráldico
+            // 4. Heraldic Crest & Title.
             float centerY = virtualH * 0.28f;
             GUI.Label(new Rect(0, centerY - 80, virtualW, 55), "⚔   D U S K B O R N   ⚔", _titleStyle);
-            GUI.Label(new Rect(0, centerY - 20, virtualW, 25), "✦ ROGUELIKE CO-OP SURVIVAL · ERA DOS ERMOS ✦", _subTitleStyle);
+            GUI.Label(new Rect(0, centerY - 20, virtualW, 25), "✦ ROGUELIKE CO-OP SURVIVAL · AGE OF THE WILDS ✦", _subTitleStyle);
 
             DrawRunicDivider((virtualW - 480f) * 0.5f, centerY + 12f, 480f);
-            GUI.Label(new Rect(0, centerY + 24f, virtualW, 22), "\"Onde o aço e as runas decidem o destino dos homens.\"", _mottoStyle);
+            GUI.Label(new Rect(0, centerY + 24f, virtualW, 22), "\"Where steel and runes decide the fate of humankind.\"", _mottoStyle);
 
-            // 5. Botões de Laje de Pedra e Ouro
+            // 5. Stone and Gold Slab Buttons.
             float btnW = Mathf.Min(virtualW * 0.40f, 340f);
             float btnH = 50f;
             float btnX = (virtualW - btnW) * 0.5f;
             float startY = centerY + 75f;
             float spacing = 62f;
 
-            // Botão 1: Iniciar Expedição
-            if (DrawStoneButton(new Rect(btnX, startY, btnW, btnH), "⚔   INICIAR EXPEDIÇÃO", true))
+            // Button 1: Start Expedition.
+            if (DrawStoneButton(new Rect(btnX, startY, btnW, btnH), "⚔   START EXPEDITION", true))
             {
                 PlayButtonSound();
                 LoadGame();
             }
 
-            // Botão 2: Pergaminho de Saber
-            if (DrawStoneButton(new Rect(btnX, startY + spacing, btnW, btnH), "📜   PERGAMINHO DE SABER", false))
+            // Button 2: Knowledge Scroll.
+            if (DrawStoneButton(new Rect(btnX, startY + spacing, btnW, btnH), "📜   KNOWLEDGE SCROLL", false))
             {
                 PlayModalSound();
                 _showLoreModal = true;
             }
 
-            // Botão 3: Configurações do Reino
-            if (DrawStoneButton(new Rect(btnX, startY + spacing * 2, btnW, btnH), "⚙   CONFIGURAÇÕES", false))
+            // Button 3: Realm Settings.
+            if (DrawStoneButton(new Rect(btnX, startY + spacing * 2, btnW, btnH), "⚙   SETTINGS", false))
             {
                 PlayModalSound();
                 _showSettingsModal = true;
             }
 
-            // Botão 4: Abandonar o Reino
-            if (DrawStoneButton(new Rect(btnX, startY + spacing * 3, btnW, btnH), "✕   ABANDONAR O REINO", false))
+            // Button 4: Leave the Realm.
+            if (DrawStoneButton(new Rect(btnX, startY + spacing * 3, btnW, btnH), "✕   LEAVE THE REALM", false))
             {
                 PlayButtonSound();
 #if UNITY_EDITOR
@@ -292,8 +292,8 @@ namespace Duskborn.UI
 #endif
             }
 
-            // 6. Rodapé do Reino
-            GUI.Label(new Rect(30, virtualH - 35, virtualW - 60, 22), "Duskborn v0.1-alpha · Forjado em Unity 6 · Mundo Procedural Sem Engasgos", _versionStyle);
+            // 6. Realm Footer.
+            GUI.Label(new Rect(30, virtualH - 35, virtualW - 60, 22), "Duskborn v0.1-alpha · Forged in Unity 6 · Procedural World without Stuttering", _versionStyle);
 
             GUI.matrix = origMatrix;
         }
@@ -303,10 +303,10 @@ namespace Duskborn.UI
             Vector2 mousePos = Event.current != null ? GUI.matrix.inverse.MultiplyPoint(Event.current.mousePosition) : Vector2.zero;
             bool isHover = rect.Contains(mousePos);
 
-            // Borda externa de ferro forjado
+            // Outer wrought iron border.
             GUI.DrawTexture(new Rect(rect.x - 3, rect.y - 3, rect.width + 6, rect.height + 6), _ironFrameTexture);
 
-            // Moldura de ouro (brilha mais no hover)
+            // Gold frame (brighter on hover).
             Color oldCol = GUI.color;
             if (isHover)
             {
@@ -315,14 +315,14 @@ namespace Duskborn.UI
             GUI.DrawTexture(new Rect(rect.x - 1, rect.y - 1, rect.width + 2, rect.height + 2), _goldTrimTexture);
             GUI.color = oldCol;
 
-            // Fundo da laje de pedra
+            // Stone slab background.
             Texture2D bg = isHover ? _btnHoverTex : _btnNormalTex;
             GUI.DrawTexture(rect, bg);
 
-            // Destaque chanfrado no topo da laje
+            // Beveled highlight at the slab top.
             GUI.DrawTexture(new Rect(rect.x + 2, rect.y + 2, rect.width - 4, 2), _goldTrimTexture);
 
-            // Rebites nos vértices
+            // Corner rivets.
             GUI.DrawTexture(new Rect(rect.x - 4, rect.y - 4, 5, 5), _goldTrimTexture);
             GUI.DrawTexture(new Rect(rect.x + rect.width - 1, rect.y - 4, 5, 5), _goldTrimTexture);
             GUI.DrawTexture(new Rect(rect.x - 4, rect.y + rect.height - 1, 5, 5), _goldTrimTexture);
@@ -391,33 +391,33 @@ namespace Duskborn.UI
             float modalX = (screenW - modalW) * 0.5f;
             float modalY = (screenH - modalH) * 0.5f;
 
-            // Fundo escuro com vinheta
+            // Dark background with vignette.
             GUI.DrawTexture(new Rect(0, 0, screenW, screenH), _parchmentModalTex);
 
-            // Moldura externa da placa de pergaminho
+            // Outer parchment plaque frame.
             GUI.DrawTexture(new Rect(modalX - 4, modalY - 4, modalW + 8, modalH + 8), _ironFrameTexture);
             GUI.DrawTexture(new Rect(modalX - 2, modalY - 2, modalW + 4, modalH + 4), _goldTrimTexture);
             GUI.DrawTexture(new Rect(modalX, modalY, modalW, modalH), _parchmentInnerTex);
 
-            // Título do Pergaminho
-            GUI.Label(new Rect(modalX, modalY + 20, modalW, 36), "📜  PERGAMINHO DE SABER DOS ERMOS  📜", _modalHeaderStyle);
+            // Scroll title.
+            GUI.Label(new Rect(modalX, modalY + 20, modalW, 36), "📜  KNOWLEDGE SCROLL OF THE WILDS  📜", _modalHeaderStyle);
             DrawRunicDivider(modalX + 60, modalY + 60, modalW - 120);
 
-            // Conteúdo
+            // Content.
             float contentY = modalY + 80;
             float lineH = 26;
 
-            GUI.Label(new Rect(modalX + 40, contentY, modalW - 80, 26), "❖ COMANDOS DE SOBREVIVÊNCIA & COMBATE:", _modalKeyStyle);
+            GUI.Label(new Rect(modalX + 40, contentY, modalW - 80, 26), "❖ SURVIVAL & COMBAT CONTROLS:", _modalKeyStyle);
             contentY += 32;
 
             string[,] controls = new string[,]
             {
-                { "[W, A, S, D]", "Navegar pelos vales, platôs e florestas" },
-                { "[Espaço]", "Rolamento tático e esquiva contra golpes pesados" },
-                { "[Botão Esquerdo / J]", "Golpear com a arma equipada e desferir combos" },
-                { "[E / F]", "Interagir com a Bancada, colher recursos e abrir baús" },
-                { "[Tab / I]", "Abrir a mochila e organizar o inventário de itens" },
-                { "[C]", "Exibir atributos vitais e status do guerreiro" }
+                { "[W, A, S, D]", "Navigate valleys, plateaus, and forests" },
+                { "[Space]", "Tactical rolling and dodging against heavy strikes" },
+                { "[Left Mouse Button / J]", "Strike with the equipped weapon and perform combos" },
+                { "[E / F]", "Interact with the Workbench, gather resources, and open chests" },
+                { "[Tab / I]", "Open the backpack and organize inventory items" },
+                { "[C]", "Display vital attributes and warrior status" }
             };
 
             for (int i = 0; i < controls.GetLength(0); i++)
@@ -430,18 +430,18 @@ namespace Duskborn.UI
             DrawRunicDivider(modalX + 60, contentY, modalW - 120);
             contentY += 16;
 
-            GUI.Label(new Rect(modalX + 40, contentY, modalW - 80, 26), "❖ O DESAFIO DO CREPÚSCULO:", _modalKeyStyle);
+            GUI.Label(new Rect(modalX + 40, contentY, modalW - 80, 26), "❖ THE TWILIGHT CHALLENGE:", _modalKeyStyle);
             contentY += 28;
-            string loreText = "Sob o manto da noite, as névoas ancestrais libertam bestas vorazes. Reúna madeira e ferro, proteja o Santuário Central e resista até os primeiros raios da alvorada.";
+            string loreText = "Under the cover of night, ancestral mists release ravenous beasts. Gather wood and iron, protect the Central Sanctuary, and endure until the first rays of dawn.";
             GUI.Label(new Rect(modalX + 50, contentY, modalW - 100, 50), loreText, _modalBodyStyle);
 
-            // Botão Fechar
+            // Close button.
             float closeBtnW = 220f;
             float closeBtnH = 42f;
             float closeBtnX = modalX + (modalW - closeBtnW) * 0.5f;
             float closeBtnY = modalY + modalH - closeBtnH - 20f;
 
-            if (DrawStoneButton(new Rect(closeBtnX, closeBtnY, closeBtnW, closeBtnH), "✕   FECHAR PERGAMINHO", false))
+            if (DrawStoneButton(new Rect(closeBtnX, closeBtnY, closeBtnW, closeBtnH), "✕   CLOSE SCROLL", false))
             {
                 PlayButtonSound();
                 _showLoreModal = false;
@@ -461,13 +461,13 @@ namespace Duskborn.UI
             GUI.DrawTexture(new Rect(modalX - 2, modalY - 2, modalW + 4, modalH + 4), _goldTrimTexture);
             GUI.DrawTexture(new Rect(modalX, modalY, modalW, modalH), _parchmentInnerTex);
 
-            GUI.Label(new Rect(modalX, modalY + 24, modalW, 34), "⚙   CONFIGURAÇÕES DO REINO   ⚙", _modalHeaderStyle);
+            GUI.Label(new Rect(modalX, modalY + 24, modalW, 34), "⚙   REALM SETTINGS   ⚙", _modalHeaderStyle);
             DrawRunicDivider(modalX + 50, modalY + 62, modalW - 100);
 
             float contentY = modalY + 95;
 
             // Volume Master Slider
-            GUI.Label(new Rect(modalX + 50, contentY, 180, 28), "Volume das Trombetas:", _modalKeyStyle);
+            GUI.Label(new Rect(modalX + 50, contentY, 180, 28), "Horn Volume:", _modalKeyStyle);
             float newVol = GUI.HorizontalSlider(new Rect(modalX + 240, contentY + 6, modalW - 350, 20), _masterVolume, 0f, 1f);
             GUI.Label(new Rect(modalX + modalW - 95, contentY, 60, 28), $"{Mathf.RoundToInt(newVol * 100)}%", _modalKeyStyle);
 
@@ -480,8 +480,8 @@ namespace Duskborn.UI
             contentY += 55;
 
             // Fullscreen Toggle
-            GUI.Label(new Rect(modalX + 50, contentY, 180, 28), "Tela Inteira (Imersão):", _modalKeyStyle);
-            string fsLabel = _isFullScreen ? "☑  Ativada" : "☐  Desativada";
+            GUI.Label(new Rect(modalX + 50, contentY, 180, 28), "Fullscreen (Immersion):", _modalKeyStyle);
+            string fsLabel = _isFullScreen ? "☑  Enabled" : "☐  Disabled";
             if (GUI.Button(new Rect(modalX + 240, contentY - 2, 140, 32), fsLabel, _btnSecondaryStyle))
             {
                 PlayButtonSound();
@@ -489,13 +489,13 @@ namespace Duskborn.UI
                 Duskborn.Core.GameSettings.SetFullScreen(_isFullScreen);
             }
 
-            // Botão Concluir
+            // Done button.
             float closeBtnW = 200f;
             float closeBtnH = 42f;
             float closeBtnX = modalX + (modalW - closeBtnW) * 0.5f;
             float closeBtnY = modalY + modalH - closeBtnH - 22f;
 
-            if (DrawStoneButton(new Rect(closeBtnX, closeBtnY, closeBtnW, closeBtnH), "✔   CONCLUIR", false))
+            if (DrawStoneButton(new Rect(closeBtnX, closeBtnY, closeBtnW, closeBtnH), "✔   DONE", false))
             {
                 PlayButtonSound();
                 _showSettingsModal = false;
@@ -510,7 +510,7 @@ namespace Duskborn.UI
             _ironFrameTexture = CreateSolidTexture(new Color(0.14f, 0.16f, 0.20f, 1f));
             _goldTrimTexture = CreateSolidTexture(new Color(0.85f, 0.72f, 0.35f, 0.95f));
             _btnNormalTex = CreateSolidTexture(new Color(0.12f, 0.14f, 0.18f, 0.96f));
-            _btnHoverTex = CreateSolidTexture(new Color(0.22f, 0.18f, 0.12f, 0.98f)); // Brilho de brasa/ouro
+            _btnHoverTex = CreateSolidTexture(new Color(0.22f, 0.18f, 0.12f, 0.98f)); // Ember / gold glow.
             _btnActiveTex = CreateSolidTexture(new Color(0.08f, 0.09f, 0.11f, 1f));
             _parchmentModalTex = CreateSolidTexture(new Color(0.02f, 0.02f, 0.04f, 0.75f));
             _parchmentInnerTex = CreateSolidTexture(new Color(0.10f, 0.11f, 0.15f, 0.98f));

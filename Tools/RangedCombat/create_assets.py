@@ -138,8 +138,8 @@ behaviour=asset('WoodenBowRanged',CODE+'/Equipment/RangedWeaponBehaviour.cs',f' 
 attachment=asset('WoodenBowLeftHand',CODE+'/Equipment/ItemAttachmentProfile.cs','  bone: 17\n  positionOffset: {x: 0, y: 0.025, z: 0}\n  rotationOffset: {x: 0, y: 90, z: 90}\n  scale: {x: 1, y: 1, z: 1}\n')
 clip='Assets/ThirdPartyAssets/Kevin Iglesias/Archer Animations/Animations/Combat/Archer@BowShot01.fbx'
 bow=asset('weapon_wooden_bow',CODE+'/Equipment/WeaponDefinition.cs',f'''  id: weapon_wooden_bow
-  displayName: Arco de Madeira
-  description: Arco de treino. Dispara flechas fisicas; municao ilimitada nesta versao de teste.
+  displayName: Wooden Bow
+  description: Training bow. Fires physical arrows; unlimited ammunition in this test version.
   icon: {ref('Assets/Inventory/Textures/Weapons & Tools/Bow.png',2800000,3)}
   dropPrefab: {{fileID: 0}}
   rarity: 0

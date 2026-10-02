@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: gear_shadow_cloak
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.GearDefinition
   id: gear_shadow_cloak
-  displayName: Manto das Sombras
+  displayName: "Shadow Cloak"
   description: 'MoveSpeed: +6%  CritChance: +4%'
   icon: {fileID: 2800000, guid: 3490eae927694afe985df84ddcb46563, type: 3}
   dropPrefab: {fileID: 0}

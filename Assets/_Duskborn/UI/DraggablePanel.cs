@@ -5,19 +5,19 @@ using UnityEngine.UI;
 namespace Duskborn.UI
 {
     /// <summary>
-    /// Componente que permite mover janelas e painéis de interface (como Inventário e Crafting).
-    /// Suporta arraste pelo cabeçalho (handle) ou pela moldura do painel, com clamping opcional na tela
-    /// e elevação para o topo da hierarquia visual ao clicar/arrastar.
+    /// Component allowing interface windows and panels (such as Inventory and Crafting) to move.
+    /// Supports dragging by the header handle or panel frame, with optional screen clamping
+    /// and raising to the top of the visual hierarchy on click / drag.
     /// </summary>
     public class DraggablePanel : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
-        [Tooltip("O RectTransform do painel que realmente deve se mover.")]
+        [Tooltip("The RectTransform of the panel that should actually move.")]
         [SerializeField] private RectTransform panel;
 
-        [Tooltip("Se verdadeiro, impede que a janela saia dos limites visíveis da tela.")]
+        [Tooltip("When true, prevent the window from leaving visible screen bounds.")]
         [SerializeField] private bool clampToScreen = true;
 
-        [Tooltip("Se verdadeiro, traz o painel para a frente de outras janelas ao clicar/arrastar.")]
+        [Tooltip("When true, bring the panel in front of other windows on click / drag.")]
         [SerializeField] private bool bringToFrontOnPointerDown = true;
 
         private Canvas _canvas;
@@ -69,7 +69,7 @@ namespace Duskborn.UI
 
         private void EnsureGraphicRaycaster()
         {
-            // Garante que o GameObject tenha um componente gráfico ativo para receber eventos de ponteiro
+            // Ensure the GameObject has an active graphic component to receive pointer events.
             var graphic = GetComponent<Graphic>();
             if (graphic == null)
             {
@@ -159,7 +159,7 @@ namespace Duskborn.UI
             float targetW = target.rect.width;
             float targetH = target.rect.height;
 
-            // Centro das âncoras no espaço local do pai
+            // Anchor center in parent local space.
             Vector2 anchorCenter = new Vector2(
                 Mathf.Lerp(parentRect.xMin, parentRect.xMax, (target.anchorMin.x + target.anchorMax.x) * 0.5f),
                 Mathf.Lerp(parentRect.yMin, parentRect.yMax, (target.anchorMin.y + target.anchorMax.y) * 0.5f)
@@ -172,7 +172,7 @@ namespace Duskborn.UI
             float minY = localPivotPos.y - targetH * target.pivot.y;
             float maxY = localPivotPos.y + targetH * (1f - target.pivot.y);
 
-            // Mantém a janela dentro da tela se couber
+            // Keep the window onscreen if it fits.
             if (targetW <= parentRect.width)
             {
                 if (minX < parentRect.xMin) localPivotPos.x += (parentRect.xMin - minX);

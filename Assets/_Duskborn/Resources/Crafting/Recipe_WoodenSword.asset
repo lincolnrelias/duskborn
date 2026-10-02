@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_WoodenSword
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_WoodenSword
-  recipeName: Espada de Madeira
-  description: Espada de Madeira
-  category: Armas
+  recipeName: "Wooden Sword"
+  description: "Wooden Sword"
+  category: "Weapons"
   tier: 2
   requiredStation: 0
   isAlwaysDiscovered: 1

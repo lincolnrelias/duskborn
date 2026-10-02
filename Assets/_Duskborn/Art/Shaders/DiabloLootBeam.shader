@@ -68,25 +68,25 @@ Shader "Duskborn/VFX/DiabloLootBeam"
 
             half4 frag(Varyings input) : SV_Target
             {
-                // 1. Distância lateral ao centro da coluna (0 no centro, 1 na borda)
+                // 1. Lateral distance from the column center (0 at the center, 1 at the edge).
                 float lateral = abs(input.uv.x - 0.5) * 2.0;
 
-                // 2. Queda Gaussiana lateral suave (elimina arestas geométricas rígidas)
+                // 2. Smooth lateral Gaussian falloff (eliminates hard geometric edges).
                 float lateralFalloff = exp(-3.8 * lateral * lateral);
 
-                // 3. Corrente de energia em ascensão contínua rumo ao céu (estilo plasma líquido Diablo)
+                // 3. Continuous upward energy flow toward the sky (Diablo liquid plasma style).
                 float timeVal = _Time.y * _ScrollSpeed;
                 float wave1 = sin((input.uv.y * _WaveFrequency - timeVal) * 6.2831853);
                 float wave2 = sin((input.uv.y * (_WaveFrequency * 1.8) - timeVal * 1.4) * 6.2831853) * 0.5;
                 float energyFlow = 1.0 + _WaveAmplitude * (wave1 + wave2);
 
-                // 4. Núcleo incandescente branco no centro da coluna
+                // 4. White incandescent core at the column center.
                 float coreMask = pow(saturate(1.0 - lateral * 1.6), 5.0) * _CoreIntensity;
                 half3 finalRGB = lerp(input.color.rgb, half3(1.0, 1.0, 1.0), coreMask);
 
-                // 5. Atenuação vertical:
-                // Base: fade-in rápido nos primeiros centímetros para ancoragem suave
-                // Topo: desvanecimento suave no céu atmosférico
+                // 5. Vertical attenuation:
+                // Base: quick fade-in over the first centimeters for a smooth anchor.
+                // Top: smooth fade into the atmospheric sky.
                 float baseFade = saturate(input.uv.y * 22.0);
                 float skyFade  = pow(saturate(1.0 - input.uv.y), _TopFadePower);
 

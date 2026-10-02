@@ -3,22 +3,22 @@ using UnityEngine;
 namespace Duskborn.Gameplay.Equipment
 {
     /// <summary>
-    /// Perfil reutilizável que define o osso de acoplamento (socket) e os deslocamentos
-    /// de posição, rotação e escala para itens e armas equipados no jogador.
+    /// Reusable profile defining the attachment bone (socket) and offsets
+    /// for position, rotation, and scale of items and weapons equipped on the player.
     /// </summary>
     [CreateAssetMenu(fileName = "AttachmentProfile_", menuName = "Duskborn/Equipment/Attachment Profile")]
     public class ItemAttachmentProfile : ScriptableObject
     {
-        [Tooltip("Osso humanoide onde o item será acoplado por padrão.")]
+        [Tooltip("Humanoid bone where the item attaches by default.")]
         [SerializeField] private HumanBodyBones bone = HumanBodyBones.RightHand;
 
-        [Tooltip("Deslocamento de posição local relativo ao osso/socket.")]
+        [Tooltip("Local position offset relative to the bone / socket.")]
         [SerializeField] private Vector3 positionOffset = Vector3.zero;
 
-        [Tooltip("Rotação local em ângulos de Euler relativa ao osso/socket.")]
+        [Tooltip("Local Euler rotation relative to the bone / socket.")]
         [SerializeField] private Vector3 rotationOffset = Vector3.zero;
 
-        [Tooltip("Escala local do item quando acoplado.")]
+        [Tooltip("Local item scale when attached.")]
         [SerializeField] private Vector3 scale = Vector3.one;
 
         public HumanBodyBones Bone => bone;

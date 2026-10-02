@@ -4,39 +4,39 @@ using UnityEngine;
 namespace Duskborn.Gameplay.Player
 {
     /// <summary>
-    /// Sistema de interação do jogador com a água estilizada.
-    /// Gera ondulações circulares procedurais (malha procedural 100% circular sem texturas para evitar artefatos de quadrados)
-    /// e alimenta o shader com coordenadas do jogador para espuma de contato e ondulações de esteira na superfície.
+    /// Player interaction system for stylized water.
+    /// Generates procedural circular ripples (fully circular procedural mesh without textures to avoid square artifacts)
+    /// and sends player coordinates to the shader for contact foam and surface wake ripples.
     /// </summary>
     [DisallowMultipleComponent]
     public class PlayerWaterInteraction : MonoBehaviour
     {
-        [Header("Configurações de Água")]
-        [Tooltip("Profundidade mínima de submersão para considerar que o jogador está na água (em metros).")]
+        [Header("Water Settings")]
+        [Tooltip("Minimum submersion depth to consider the player in water (meters).")]
         [SerializeField] private float minWaterDepthThreshold = 0.04f;
 
-        [Tooltip("Profundidade onde a água é considerada funda (aplica resistência física sutil).")]
+        [Tooltip("Depth at which water is considered deep (applies subtle physical resistance).")]
         [SerializeField] private float deepWaterThreshold = 0.45f;
 
-        [Tooltip("Multiplicador de velocidade ao caminhar em água funda (0.88 = 12% de resistência física).")]
+        [Tooltip("Speed multiplier when walking in deep water (0.88 = 12% physical resistance).")]
         [Range(0.6f, 1f)]
         [SerializeField] private float deepWaterSpeedMultiplier = 0.88f;
 
-        [Header("Ondulações Circulares Procedurais (Ripples)")]
-        [Tooltip("Distância percorrida na água entre cada emissão de anel de ondulação (em passos).")]
+        [Header("Procedural Circular Ripples")]
+        [Tooltip("Distance traveled in water between ripple ring emissions (in steps).")]
         [SerializeField] private float rippleStepDistance = 0.46f;
 
-        [Tooltip("Intervalo de emissão de ondulação quando parado na água.")]
+        [Tooltip("Ripple emission interval while standing still in water.")]
         [SerializeField] private float idleRippleInterval = 1.9f;
 
-        [Tooltip("Cor do anel de ondulação na água.")]
+        [Tooltip("Water ripple ring color.")]
         [SerializeField] private Color rippleColor = new Color(0.88f, 0.96f, 1.0f, 0.46f);
 
-        [Header("Áudio de Deslocamento na Água")]
-        [Tooltip("Loop contínuo de fluido e deslocamento de água ao caminhar/correr.")]
+        [Header("Water Movement Audio")]
+        [Tooltip("Continuous fluid and water displacement loop when walking / running.")]
         [SerializeField] private AudioClip wadeLoopClip;
 
-        [Tooltip("Som de impacto e dispersão ao mergulhar/entrar na água.")]
+        [Tooltip("Impact and dispersion sound when diving / entering water.")]
         [SerializeField] private AudioClip enterSplashClip;
 
         [Range(0f, 1f)] [SerializeField] private float wadeVolume = 0.70f;
@@ -59,7 +59,7 @@ namespace Duskborn.Gameplay.Player
         private AudioSource _splashAudioSource;
         private PlayerController _playerController;
 
-        // Pool de anéis de ondulação procedurais
+        // Procedural ripple ring pool.
         private readonly List<RippleInstance> _activeRipples = new List<RippleInstance>();
         private readonly Queue<RippleInstance> _ripplePool = new Queue<RippleInstance>();
         private Transform _rippleContainer;
@@ -163,7 +163,7 @@ namespace Duskborn.Gameplay.Player
         {
             if (_wadeAudioSource == null) return;
 
-            // Transição de entrada na água (splash)
+            // Water entry transition (splash).
             if (!_wasInWater && _isInWater)
             {
                 PlayEnterSplash();
@@ -176,7 +176,7 @@ namespace Duskborn.Gameplay.Player
             }
             else
             {
-                // Velocidade horizontal real do jogador
+                // Player's actual horizontal speed.
                 float speed = 0f;
                 if (_characterController != null)
                 {
@@ -198,7 +198,7 @@ namespace Duskborn.Gameplay.Player
 
                     _targetWadeVolume = Mathf.Clamp01(wadeVolume * Mathf.Lerp(0.35f, 1.0f, normalizedSpeed) * deepBonus) * masterSfx;
 
-                    // Pitch mais encorpado em água funda, e acelerado em corrida
+                    // Fuller pitch in deep water, faster pitch when running.
                     float basePitch = _isInDeepWater ? 0.90f : 1.0f;
                     _wadeAudioSource.pitch = basePitch * Mathf.Lerp(0.95f, 1.18f, normalizedSpeed);
 
@@ -214,7 +214,7 @@ namespace Duskborn.Gameplay.Player
                 }
             }
 
-            // Interpolação suave do volume para sensação orgânica de deslocamento de fluido
+            // Smooth volume interpolation for organic fluid displacement.
             _wadeAudioSource.volume = Mathf.MoveTowards(_wadeAudioSource.volume, _targetWadeVolume, Time.deltaTime * 3.5f);
 
             if (_wadeAudioSource.volume <= 0.001f && _wadeAudioSource.isPlaying)
@@ -247,7 +247,7 @@ namespace Duskborn.Gameplay.Player
 
                 if (distMoved >= rippleStepDistance)
                 {
-                    // Ondulação equilibrada de passada (0.25m -> 1.35m em 1.05s)
+                    // Balanced footstep ripple (0.25m -> 1.35m in 1.05s).
                     SpawnProceduralRipple(0.25f, 1.35f, 1.05f);
                     _lastRipplePosition = transform.position;
                 }
@@ -257,7 +257,7 @@ namespace Duskborn.Gameplay.Player
                 _idleTimer += Time.deltaTime;
                 if (_idleTimer >= idleRippleInterval)
                 {
-                    // Pulso suave em repouso
+                    // Gentle idle pulse.
                     SpawnProceduralRipple(0.20f, 0.95f, 1.4f);
                     _idleTimer = 0f;
                 }
@@ -331,11 +331,11 @@ namespace Duskborn.Gameplay.Player
                 r.elapsed += Time.deltaTime;
                 float t = Mathf.Clamp01(r.elapsed / r.duration);
 
-                // Expansão circular suave
+                // Smooth circular expansion.
                 float currentScale = Mathf.Lerp(r.startScale, r.endScale, Mathf.SmoothStep(0f, 1f, t));
                 r.transform.localScale = new Vector3(currentScale, 1f, currentScale);
 
-                // Fade out gradual de opacidade com decaimento suave
+                // Gradual opacity fade-out with smooth decay.
                 float alpha = r.baseColor.a * (1f - t) * (1f - t);
                 r.propertyBlock.SetColor(BaseColorId, new Color(r.baseColor.r, r.baseColor.g, r.baseColor.b, alpha));
                 r.renderer.SetPropertyBlock(r.propertyBlock);
@@ -360,7 +360,7 @@ namespace Duskborn.Gameplay.Player
                 }
             }
 
-            // Cria uma nova instância de anel procedural
+            // Create a new procedural ring instance.
             if (_rippleContainer == null)
             {
                 GameObject container = new GameObject("PlayerWaterRipples_Container");
@@ -417,7 +417,7 @@ namespace Duskborn.Gameplay.Player
             Color[] colors = new Color[vertCount];
             int[] tris = new int[segments * (rings - 1) * 6];
 
-            // Perfil equilibrado com crista nítida e decaimento orgânico
+            // Balanced profile with a crisp crest and organic decay.
             float[] radii = new float[] { 0.52f, 0.74f, 0.88f, 1.00f };
             float[] alphas = new float[] { 0f, 0.85f, 0.45f, 0f };
 

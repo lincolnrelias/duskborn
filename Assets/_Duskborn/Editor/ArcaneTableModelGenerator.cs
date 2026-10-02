@@ -174,11 +174,11 @@ namespace Duskborn.Editor
                     }
                     var stationTypeProp = serializedStation.FindProperty("stationType");
                     if (stationTypeProp != null)
-                        stationTypeProp.intValue = (int)CraftingStationType.MesaArcana;
+                        stationTypeProp.intValue = (int)CraftingStationType.ArcaneTable;
 
                     var displayNameProp = serializedStation.FindProperty("stationDisplayName");
                     if (displayNameProp != null)
-                        displayNameProp.stringValue = "Mesa Arcana";
+                        displayNameProp.stringValue = "Arcane Table";
 
                     serializedStation.ApplyModifiedPropertiesWithoutUndo();
                 }

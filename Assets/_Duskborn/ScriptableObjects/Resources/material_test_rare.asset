@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InventorySystem.Data.MaterialDefinition
   id: test_rare
   displayName: Cobalt (Rare)
-  description: Minério de teste raro
+  description: "Rare test ore"
   icon: {fileID: 0}
   dropPrefab: {fileID: 5752967656333843250, guid: ba3bcaa1283194641bd6f71a89595265, type: 3}
   category: common

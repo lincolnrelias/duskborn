@@ -12,10 +12,10 @@ using UnityEngine;
 namespace Duskborn.Inventory.Editor
 {
     /// <summary>
-    /// Janela utilitária de gerenciamento centralizado do inventário inicial do Duskborn.
-    /// Permite inspecionar, auditar, configurar quantidades e equipar itens de mochila,
-    /// barra de ação rápida, equipamentos vestidos e relíquias em um único painel intuitivo.
-    /// Funcionalmente semelhante ao SoundSettingsEditorWindow.
+    /// Utility window for centralized management of Duskborn's initial inventory.
+    /// Allows inspection, auditing, quantity configuration, and equipping backpack items,
+    /// action bar items, worn equipment, and relics in one intuitive panel.
+    /// Functionally similar to SoundSettingsEditorWindow.
     /// </summary>
     public class InitialInventoryEditorWindow : EditorWindow
     {
@@ -33,7 +33,7 @@ namespace Duskborn.Inventory.Editor
         private Vector2 _scrollPos;
         private int _currentTab = 0;
 
-        // Cache do Catálogo de Itens
+        // Item catalog cache.
         private List<ItemDefinitionBase> _allProjectItems = new();
         private List<ItemDefinition> _allProjectRelics = new();
         private string _catalogSearch = "";
@@ -43,22 +43,22 @@ namespace Duskborn.Inventory.Editor
 
         private static readonly string[] TabNames = new[]
         {
-            "🎒 Mochila",
-            "⚔️ Barra de Ação",
-            "🛡️ Equipamento",
-            "🔮 Relíquias",
-            "📦 Catálogo",
+            "🎒 Backpack",
+            "⚔️ Action Bar",
+            "🛡️ Equipment",
+            "🔮 Relics",
+            "📦 Catalog",
             "⚙️ Presets"
         };
 
         private static readonly string[] CatalogCategoryNames = new[]
         {
-            "Todos",
-            "Armas",
-            "Equipamento",
-            "Materiais",
-            "Consumíveis",
-            "Relíquias"
+            "All",
+            "Weapons",
+            "Equipment",
+            "Materials",
+            "Consumables",
+            "Relics"
         };
 
         private void OnEnable()
@@ -86,8 +86,8 @@ namespace Duskborn.Inventory.Editor
 
             if (_database == null || _serializedDb == null)
             {
-                EditorGUILayout.HelpBox("Nenhum InitialInventoryDatabase encontrado. Clique no botão abaixo para criar o banco central.", MessageType.Warning);
-                if (GUILayout.Button("Criar InitialInventoryDatabase Central", GUILayout.Height(35)))
+                EditorGUILayout.HelpBox("No InitialInventoryDatabase found. Click the button below to create the central database.", MessageType.Warning);
+                if (GUILayout.Button("Create Central InitialInventoryDatabase", GUILayout.Height(35)))
                 {
                     _database = InitialInventoryDatabase.CreateDefaultAsset();
                     _serializedDb = new SerializedObject(_database);
@@ -140,30 +140,30 @@ namespace Duskborn.Inventory.Editor
                 Selection.activeObject = _database;
             }
 
-            if (GUILayout.Button("📥 Puxar dos Prefabs", EditorStyles.miniButton, GUILayout.Width(130)))
+            if (GUILayout.Button("📥 Import from Prefabs", EditorStyles.miniButton, GUILayout.Width(130)))
             {
-                if (EditorUtility.DisplayDialog("Importar Itens dos Prefabs",
-                    "Deseja importar a configuração atual dos prefabs de Player e InventoryUI para este banco de dados?", "Sim", "Cancelar"))
+                if (EditorUtility.DisplayDialog("Import Items from Prefabs",
+                    "Import the current Player and InventoryUI prefab configuration into this database?", "Yes", "Cancel"))
                 {
                     SyncFromPrefabs();
                     _serializedDb.Update();
                 }
             }
 
-            if (GUILayout.Button("📤 Aplicar aos Prefabs", EditorStyles.miniButton, GUILayout.Width(130)))
+            if (GUILayout.Button("📤 Apply to Prefabs", EditorStyles.miniButton, GUILayout.Width(130)))
             {
-                if (EditorUtility.DisplayDialog("Aplicar aos Prefabs",
-                    "Deseja gravar as configurações atuais diretamente nos arquivos de prefab (InventoryUI.prefab e Player.prefab)?", "Sim", "Cancelar"))
+                if (EditorUtility.DisplayDialog("Apply to Prefabs",
+                    "Write current settings directly into prefab files (InventoryUI.prefab and Player.prefab)?", "Yes", "Cancel"))
                 {
                     _serializedDb.ApplyModifiedProperties();
                     ApplyToPrefabs();
                 }
             }
 
-            if (GUILayout.Button("🔄 Auto-Configurar", EditorStyles.miniButton, GUILayout.Width(115)))
+            if (GUILayout.Button("🔄 Auto-Configure", EditorStyles.miniButton, GUILayout.Width(115)))
             {
-                if (EditorUtility.DisplayDialog("Auto-Configurar Itens Iniciais",
-                    "Deseja preencher automaticamente o banco com o conjunto inicial padrão recomendado (Ferramentas, Recursos e Armadura Básica)?", "Sim", "Cancelar"))
+                if (EditorUtility.DisplayDialog("Auto-Configure Starting Items",
+                    "Automatically fill the database with the recommended default starting set (Tools, Resources, and Basic Armor)?", "Yes", "Cancel"))
                 {
                     _database.AutoPopulateDefaults();
                     _serializedDb.Update();
@@ -192,34 +192,34 @@ namespace Duskborn.Inventory.Editor
             int relicsCount = _database.StartingRelics != null ? _database.StartingRelics.Count : 0;
 
             EditorGUILayout.LabelField(
-                $"Mochila: {backpackCount} | Barra: {actionBarCount} | Equipamento: {gearCount} | Relíquias: {relicsCount}",
+                $"Backpack: {backpackCount} | Action Bar: {actionBarCount} | Equipment: {gearCount} | Relics: {relicsCount}",
                 EditorStyles.miniLabel);
 
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button("💾 Salvar Alterações", GUILayout.Width(150), GUILayout.Height(24)))
+            if (GUILayout.Button("💾 Save Changes", GUILayout.Width(150), GUILayout.Height(24)))
             {
                 _serializedDb.ApplyModifiedProperties();
                 EditorUtility.SetDirty(_database);
                 AssetDatabase.SaveAssets();
-                ShowNotification(new GUIContent("Configurações salvas com sucesso!"));
+                ShowNotification(new GUIContent("Settings saved successfully!"));
             }
 
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.EndVertical();
         }
 
-        // ── 0. Mochila (Backpack Items) ───────────────────────────────────────
+        // 0. Backpack Items
 
         private void DrawBackpackTab()
         {
-            DrawSectionHeader("Mochila (Backpack / Grid Principal)",
-                "Configura os itens e quantidades recebidos na bolsa/mochila do jogador ao iniciar a partida.");
+            DrawSectionHeader("Backpack / Main Grid",
+                "Configure items and quantities received in the player's backpack at session start.");
 
             var prop = _serializedDb.FindProperty("backpackItems");
             if (prop == null) return;
 
-            DrawDragAndDropBox("Arraste itens do Project aqui para adicionar à Mochila", (itemDef) =>
+            DrawDragAndDropBox("Drag items from Project here to add to the Backpack", (itemDef) =>
             {
                 AddItemToEntryList(prop, itemDef, 1);
             });
@@ -227,10 +227,10 @@ namespace Duskborn.Inventory.Editor
             EditorGUILayout.Space(4);
 
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField($"Itens na Mochila ({prop.arraySize})", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField($"Backpack Items ({prop.arraySize})", EditorStyles.boldLabel);
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button("+ Adicionar Novo Item", EditorStyles.miniButton, GUILayout.Width(150)))
+            if (GUILayout.Button("+ Add New Item", EditorStyles.miniButton, GUILayout.Width(150)))
             {
                 prop.InsertArrayElementAtIndex(prop.arraySize);
                 var elem = prop.GetArrayElementAtIndex(prop.arraySize - 1);
@@ -238,9 +238,9 @@ namespace Duskborn.Inventory.Editor
                 elem.FindPropertyRelative("quantity").intValue = 1;
             }
 
-            if (prop.arraySize > 0 && GUILayout.Button("Limpar Tudo", EditorStyles.miniButton, GUILayout.Width(90)))
+            if (prop.arraySize > 0 && GUILayout.Button("Clear All", EditorStyles.miniButton, GUILayout.Width(90)))
             {
-                if (EditorUtility.DisplayDialog("Limpar Mochila", "Deseja remover todos os itens da mochila inicial?", "Sim", "Não"))
+                if (EditorUtility.DisplayDialog("Clear Backpack", "Remove all starting backpack items?", "Yes", "No"))
                 {
                     prop.ClearArray();
                 }
@@ -256,17 +256,17 @@ namespace Duskborn.Inventory.Editor
             }
         }
 
-        // ── 1. Barra de Ação (Action Bar) ─────────────────────────────────────
+        // 1. Action Bar
 
         private void DrawActionBarTab()
         {
-            DrawSectionHeader("Barra de Ação Rápida (Hotbar / Atalhos 1 a 5)",
-                "Configura os itens e armas equipados nos atalhos rápidos da interface principal.");
+            DrawSectionHeader("Quick Action Bar (Hotbar / Shortcuts 1 to 5)",
+                "Configure items and weapons equipped in the main interface's quick shortcuts.");
 
             var prop = _serializedDb.FindProperty("actionBarItems");
             if (prop == null) return;
 
-            DrawDragAndDropBox("Arraste itens do Project aqui para adicionar à Barra de Ação", (itemDef) =>
+            DrawDragAndDropBox("Drag items from Project here to add to the Action Bar", (itemDef) =>
             {
                 AddItemToEntryList(prop, itemDef, 1);
             });
@@ -274,10 +274,10 @@ namespace Duskborn.Inventory.Editor
             EditorGUILayout.Space(4);
 
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField($"Slots da Barra de Ação ({prop.arraySize})", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField($"Action Bar Slots ({prop.arraySize})", EditorStyles.boldLabel);
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button("+ Adicionar ao Atalho", EditorStyles.miniButton, GUILayout.Width(150)))
+            if (GUILayout.Button("+ Add to Shortcut", EditorStyles.miniButton, GUILayout.Width(150)))
             {
                 prop.InsertArrayElementAtIndex(prop.arraySize);
                 var elem = prop.GetArrayElementAtIndex(prop.arraySize - 1);
@@ -285,9 +285,9 @@ namespace Duskborn.Inventory.Editor
                 elem.FindPropertyRelative("quantity").intValue = 1;
             }
 
-            if (prop.arraySize > 0 && GUILayout.Button("Limpar Barra", EditorStyles.miniButton, GUILayout.Width(90)))
+            if (prop.arraySize > 0 && GUILayout.Button("Clear Action Bar", EditorStyles.miniButton, GUILayout.Width(90)))
             {
-                if (EditorUtility.DisplayDialog("Limpar Barra", "Deseja remover todos os itens da barra inicial?", "Sim", "Não"))
+                if (EditorUtility.DisplayDialog("Clear Action Bar", "Remove all starting action bar items?", "Yes", "No"))
                 {
                     prop.ClearArray();
                 }
@@ -299,16 +299,16 @@ namespace Duskborn.Inventory.Editor
             for (int i = 0; i < prop.arraySize; i++)
             {
                 var elem = prop.GetArrayElementAtIndex(i);
-                DrawItemEntryCard(elem, i, prop, slotPrefix: $"Atalho [{i + 1}]");
+                DrawItemEntryCard(elem, i, prop, slotPrefix: $"Shortcut [{i + 1}]");
             }
         }
 
-        // ── 2. Equipamento Vestido (Equipped Gear) ────────────────────────────
+        // 2. Equipped Gear
 
         private void DrawEquipmentTab()
         {
-            DrawSectionHeader("Equipamento Vestido Inicial (Starting Gear)",
-                "Configura armaduras, anéis e adornos vestidos diretamente nos slots de equipamento do personagem.");
+            DrawSectionHeader("Starting Equipped Gear",
+                "Configure armor, rings, and accessories worn directly in character equipment slots.");
 
             var gearProp = _serializedDb.FindProperty("startingGear");
             if (gearProp == null) return;
@@ -338,7 +338,7 @@ namespace Duskborn.Inventory.Editor
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.BeginHorizontal();
 
-            // Ícone do Slot
+            // Slot icon.
             Texture2D slotIcon = LoadSlotIcon(slot);
             if (slotIcon != null)
             {
@@ -349,13 +349,13 @@ namespace Duskborn.Inventory.Editor
                 GUILayout.Box("🛡️", GUILayout.Width(34), GUILayout.Height(34));
             }
 
-            // Nome do Slot em Português
+            // English slot name.
             EditorGUILayout.BeginVertical(GUILayout.Width(130));
             EditorGUILayout.LabelField(GetSlotDisplayName(slot), EditorStyles.boldLabel);
             EditorGUILayout.LabelField($"Slot: {slot}", EditorStyles.miniLabel);
             EditorGUILayout.EndVertical();
 
-            // Campo de Seleção do Gear
+            // Gear selection field.
             GearDefinition currentGear = null;
             SerializedProperty entryProp = null;
             SerializedProperty itemProp = null;
@@ -394,7 +394,7 @@ namespace Duskborn.Inventory.Editor
                 }
             }
 
-            // Botão Limpar Slot
+            // Clear slot button.
             GUI.enabled = currentGear != null;
             if (GUILayout.Button("✖", EditorStyles.miniButton, GUILayout.Width(26), GUILayout.Height(20)))
             {
@@ -407,7 +407,7 @@ namespace Duskborn.Inventory.Editor
 
             EditorGUILayout.EndHorizontal();
 
-            // Detalhes do item equipado se presente
+            // Equipped item details, if present.
             if (currentGear != null)
             {
                 EditorGUILayout.BeginHorizontal();
@@ -423,7 +423,7 @@ namespace Duskborn.Inventory.Editor
                 if (currentGear.Slot != slot)
                 {
                     EditorGUILayout.EndHorizontal();
-                    EditorGUILayout.HelpBox($"Atenção: Este item declara o slot '{currentGear.Slot}', mas está alocado em '{slot}'.", MessageType.Warning);
+                    EditorGUILayout.HelpBox($"Warning: This item declares slot '{currentGear.Slot}', but is assigned to '{slot}'.", MessageType.Warning);
                 }
                 else
                 {
@@ -435,17 +435,17 @@ namespace Duskborn.Inventory.Editor
             EditorGUILayout.Space(2);
         }
 
-        // ── 3. Relíquias & Buffs Iniciais ─────────────────────────────────────
+        // 3. Starting Relics & Buffs
 
         private void DrawRelicsTab()
         {
-            DrawSectionHeader("Relíquias & Buffs Roguelite Iniciais",
-                "Define os talismãs e elixires de bônus passivo permanente concedidos ao jogador ao iniciar a jornada.");
+            DrawSectionHeader("Starting Roguelite Relics & Buffs",
+                "Define talismans and elixirs granting permanent passive bonuses at the start of the journey.");
 
             var relicsProp = _serializedDb.FindProperty("startingRelics");
             if (relicsProp == null) return;
 
-            DrawDragAndDropBox("Arraste itens de relíquia (ItemDefinition) aqui", (itemDef) =>
+            DrawDragAndDropBox("Drag relic items (ItemDefinition) here", (itemDef) =>
             {
                 // Handled if relic dragged
             });
@@ -453,18 +453,18 @@ namespace Duskborn.Inventory.Editor
             EditorGUILayout.Space(4);
 
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField($"Relíquias Ativas ({relicsProp.arraySize})", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField($"Active Relics ({relicsProp.arraySize})", EditorStyles.boldLabel);
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button("+ Adicionar Relíquia", EditorStyles.miniButton, GUILayout.Width(150)))
+            if (GUILayout.Button("+ Add Relic", EditorStyles.miniButton, GUILayout.Width(150)))
             {
                 relicsProp.InsertArrayElementAtIndex(relicsProp.arraySize);
                 relicsProp.GetArrayElementAtIndex(relicsProp.arraySize - 1).objectReferenceValue = null;
             }
 
-            if (relicsProp.arraySize > 0 && GUILayout.Button("Limpar Todas", EditorStyles.miniButton, GUILayout.Width(90)))
+            if (relicsProp.arraySize > 0 && GUILayout.Button("Clear All", EditorStyles.miniButton, GUILayout.Width(90)))
             {
-                if (EditorUtility.DisplayDialog("Limpar Relíquias", "Deseja remover todas as relíquias iniciais?", "Sim", "Não"))
+                if (EditorUtility.DisplayDialog("Clear Relics", "Remove all starting relics?", "Yes", "No"))
                 {
                     relicsProp.ClearArray();
                 }
@@ -513,12 +513,12 @@ namespace Duskborn.Inventory.Editor
             }
         }
 
-        // ── 4. Catálogo de Itens ──────────────────────────────────────────────
+        // 4. Item Catalog
 
         private void DrawCatalogTab()
         {
-            DrawSectionHeader("Catálogo Geral de Itens do Duskborn",
-                "Pesquise todos os itens registrados no projeto e adicione-os com um clique à Mochila, Barra de Ação ou Equipamentos.");
+            DrawSectionHeader("Duskborn General Item Catalog",
+                "Search all registered project items and add them to Backpack, Action Bar, or Equipment with one click.");
 
             EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
             _catalogSearch = EditorGUILayout.TextField(_catalogSearch, EditorStyles.toolbarSearchField, GUILayout.Width(250));
@@ -532,7 +532,7 @@ namespace Duskborn.Inventory.Editor
             _catalogCategoryFilter = GUILayout.Toolbar(_catalogCategoryFilter, CatalogCategoryNames, EditorStyles.toolbarButton);
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button("🔄 Atualizar", EditorStyles.toolbarButton, GUILayout.Width(75)))
+            if (GUILayout.Button("🔄 Refresh", EditorStyles.toolbarButton, GUILayout.Width(75)))
             {
                 RefreshCatalog();
             }
@@ -542,11 +542,11 @@ namespace Duskborn.Inventory.Editor
 
             _catalogScrollPos = EditorGUILayout.BeginScrollView(_catalogScrollPos, GUILayout.MinHeight(300));
 
-            // Desenha itens de ItemDefinitionBase
+            // Draw ItemDefinitionBase items.
             int displayedCount = 0;
             string searchLower = _catalogSearch.Trim().ToLowerInvariant();
 
-            if (_catalogCategoryFilter != 5) // Se não for categoria exclusiva de relíquias
+            if (_catalogCategoryFilter != 5) // If not the exclusive relic category.
             {
                 foreach (var item in _allProjectItems)
                 {
@@ -566,7 +566,7 @@ namespace Duskborn.Inventory.Editor
                 }
             }
 
-            // Desenha relíquias (ItemDefinition) se "Todos" ou "Relíquias"
+            // Draw relics (ItemDefinition) if "All" or "Relics" is selected.
             if (_catalogCategoryFilter == 0 || _catalogCategoryFilter == 5)
             {
                 foreach (var relic in _allProjectRelics)
@@ -586,7 +586,7 @@ namespace Duskborn.Inventory.Editor
 
             if (displayedCount == 0)
             {
-                EditorGUILayout.HelpBox("Nenhum item encontrado com os critérios de filtro pesquisados.", MessageType.Info);
+                EditorGUILayout.HelpBox("No items found matching the search filters.", MessageType.Info);
             }
 
             EditorGUILayout.EndScrollView();
@@ -615,38 +615,38 @@ namespace Duskborn.Inventory.Editor
                 $"<color={rarityHex}><b>{item.DisplayName}</b></color> <color=#888888>({itemType})</color>",
                 new GUIStyle(EditorStyles.boldLabel) { richText = true });
 
-            string desc = !string.IsNullOrEmpty(item.Description) ? item.Description.Replace("\n", " ") : "Sem descrição";
+            string desc = !string.IsNullOrEmpty(item.Description) ? item.Description.Replace("\n", " ") : "No description";
             if (desc.Length > 90) desc = desc.Substring(0, 87) + "...";
             EditorGUILayout.LabelField(desc, EditorStyles.wordWrappedMiniLabel);
             EditorGUILayout.EndVertical();
 
             GUILayout.FlexibleSpace();
 
-            // Botões de ação rápida
-            if (GUILayout.Button("+ Mochila", EditorStyles.miniButton, GUILayout.Width(75)))
+            // Quick action buttons.
+            if (GUILayout.Button("+ Backpack", EditorStyles.miniButton, GUILayout.Width(75)))
             {
                 var prop = _serializedDb.FindProperty("backpackItems");
                 AddItemToEntryList(prop, item, 1);
                 _serializedDb.ApplyModifiedProperties();
-                ShowNotification(new GUIContent($"Adicionado à Mochila: {item.DisplayName}"));
+                ShowNotification(new GUIContent($"Added to Backpack: {item.DisplayName}"));
             }
 
-            if (GUILayout.Button("+ Barra", EditorStyles.miniButton, GUILayout.Width(65)))
+            if (GUILayout.Button("+ Action Bar", EditorStyles.miniButton, GUILayout.Width(65)))
             {
                 var prop = _serializedDb.FindProperty("actionBarItems");
                 AddItemToEntryList(prop, item, 1);
                 _serializedDb.ApplyModifiedProperties();
-                ShowNotification(new GUIContent($"Adicionado à Barra: {item.DisplayName}"));
+                ShowNotification(new GUIContent($"Added to Action Bar: {item.DisplayName}"));
             }
 
             if (item is GearDefinition gear)
             {
-                if (GUILayout.Button("+ Equipar", EditorStyles.miniButton, GUILayout.Width(70)))
+                if (GUILayout.Button("+ Equip", EditorStyles.miniButton, GUILayout.Width(70)))
                 {
                     _database.SetGearForSlot(gear.Slot, gear);
                     _serializedDb.Update();
                     EditorUtility.SetDirty(_database);
-                    ShowNotification(new GUIContent($"Equipado no slot {gear.Slot}: {gear.DisplayName}"));
+                    ShowNotification(new GUIContent($"Equipped in slot {gear.Slot}: {gear.DisplayName}"));
                 }
             }
 
@@ -677,7 +677,7 @@ namespace Duskborn.Inventory.Editor
             EditorGUILayout.BeginVertical();
             string rarityHex = GetRarityColorHex(relic.Rarity);
             EditorGUILayout.LabelField(
-                $"<color={rarityHex}><b>{relic.ItemName}</b></color> <color=#888888>(Relíquia Roguelite)</color>",
+                $"<color={rarityHex}><b>{relic.ItemName}</b></color> <color=#888888>(Roguelite Relic)</color>",
                 new GUIStyle(EditorStyles.boldLabel) { richText = true });
 
             string effectText = $"{relic.EffectType} ({relic.EffectMode}): +{relic.EffectValue}";
@@ -686,13 +686,13 @@ namespace Duskborn.Inventory.Editor
 
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button("+ Relíquia", EditorStyles.miniButton, GUILayout.Width(80)))
+            if (GUILayout.Button("+ Relic", EditorStyles.miniButton, GUILayout.Width(80)))
             {
                 var prop = _serializedDb.FindProperty("startingRelics");
                 prop.InsertArrayElementAtIndex(prop.arraySize);
                 prop.GetArrayElementAtIndex(prop.arraySize - 1).objectReferenceValue = relic;
                 _serializedDb.ApplyModifiedProperties();
-                ShowNotification(new GUIContent($"Adicionada relíquia: {relic.ItemName}"));
+                ShowNotification(new GUIContent($"Added relic: {relic.ItemName}"));
             }
 
             if (GUILayout.Button("🔍", EditorStyles.miniButton, GUILayout.Width(26)))
@@ -705,59 +705,59 @@ namespace Duskborn.Inventory.Editor
             EditorGUILayout.Space(2);
         }
 
-        // ── 5. Presets & Operações Globais ────────────────────────────────────
+        // 5. Presets & Global Operations
 
         private void DrawPresetsTab()
         {
-            DrawSectionHeader("Presets & Carregamentos Rápidos",
-                "Carregue configurações pré-definidas para acelerar testes com arquétipos e diferentes estilos de jogo.");
+            DrawSectionHeader("Presets & Quick Loadouts",
+                "Load presets to speed up testing with archetypes and different play styles.");
 
-            DrawSectionBox("⚔️ Preset: Guerreiro Balanceado", () =>
+            DrawSectionBox("⚔️ Preset: Balanced Warrior", () =>
             {
-                EditorGUILayout.LabelField("Barra de Ação: Machado de Pedra, Espada de Ferro, 3x Maçã");
-                EditorGUILayout.LabelField("Mochila: 15x Madeira, 15x Pedra, 5x Barra de Ferro");
-                EditorGUILayout.LabelField("Equipamento: Capacete de Ferro, Armadura de Couro, Botas Gastas, Colar de Osso, Anel de Cobre");
+                EditorGUILayout.LabelField("Action Bar: Stone Axe, Iron Sword, 3x Apple");
+                EditorGUILayout.LabelField("Backpack: 15x Wood, 15x Stone, 5x Iron Bar");
+                EditorGUILayout.LabelField("Equipment: Iron Helmet, Leather Armor, Worn Boots, Bone Necklace, Copper Ring");
                 EditorGUILayout.Space(4);
-                if (GUILayout.Button("Aplicar Preset Guerreiro", GUILayout.Height(26)))
+                if (GUILayout.Button("Apply Warrior Preset", GUILayout.Height(26)))
                 {
                     ApplyWarriorPreset();
                 }
             });
 
             EditorGUILayout.Space(6);
-            DrawSectionBox("⛏️ Preset: Coletor / Construtor", () =>
+            DrawSectionBox("⛏️ Preset: Gatherer / Builder", () =>
             {
-                EditorGUILayout.LabelField("Barra de Ação: Machado de Pedra, Picareta de Pedra, 5x Maçã");
-                EditorGUILayout.LabelField("Mochila: 30x Madeira, 30x Pedra, 15x Fibra");
-                EditorGUILayout.LabelField("Equipamento: Armadura de Couro, Botas Gastas");
+                EditorGUILayout.LabelField("Action Bar: Stone Axe, Stone Pickaxe, 5x Apple");
+                EditorGUILayout.LabelField("Backpack: 30x Wood, 30x Stone, 15x Fiber");
+                EditorGUILayout.LabelField("Equipment: Leather Armor, Worn Boots");
                 EditorGUILayout.Space(4);
-                if (GUILayout.Button("Aplicar Preset Coletor", GUILayout.Height(26)))
+                if (GUILayout.Button("Apply Gatherer Preset", GUILayout.Height(26)))
                 {
                     ApplyGathererPreset();
                 }
             });
 
             EditorGUILayout.Space(6);
-            DrawSectionBox("🧪 Preset: Sobrevivente / Alquimista", () =>
+            DrawSectionBox("🧪 Preset: Survivor / Alchemist", () =>
             {
-                EditorGUILayout.LabelField("Barra de Ação: Machado de Pedra, 5x Maçã");
-                EditorGUILayout.LabelField("Mochila: 10x Cristal Arcano, 10x Pó de Cristal, 20x Madeira");
-                EditorGUILayout.LabelField("Equipamento: Botas de Vento, Armadura de Couro");
+                EditorGUILayout.LabelField("Action Bar: Stone Axe, 5x Apple");
+                EditorGUILayout.LabelField("Backpack: 10x Arcane Crystal, 10x Crystal Powder, 20x Wood");
+                EditorGUILayout.LabelField("Equipment: Wind Boots, Leather Armor");
                 EditorGUILayout.Space(4);
-                if (GUILayout.Button("Aplicar Preset Alquimista", GUILayout.Height(26)))
+                if (GUILayout.Button("Apply Alchemist Preset", GUILayout.Height(26)))
                 {
                     ApplyAlchemistPreset();
                 }
             });
 
             EditorGUILayout.Space(6);
-            DrawSectionBox("🗑️ Limpar Todos os Itens Iniciais", () =>
+            DrawSectionBox("🗑️ Clear All Starting Items", () =>
             {
-                EditorGUILayout.LabelField("Remove todos os itens de mochila, barra, equipamentos e relíquias para testar início limpo.");
+                EditorGUILayout.LabelField("Remove all backpack, action bar, equipment, and relic items to test an empty start.");
                 EditorGUILayout.Space(4);
-                if (GUILayout.Button("Limpar Tudo (Início Vazio)", GUILayout.Height(26)))
+                if (GUILayout.Button("Clear All (Empty Start)", GUILayout.Height(26)))
                 {
-                    if (EditorUtility.DisplayDialog("Limpar Inventário Inicial", "Tem certeza que deseja esvaziar todos os itens?", "Sim", "Cancelar"))
+                    if (EditorUtility.DisplayDialog("Clear Initial Inventory", "Are you sure you want to remove all items?", "Yes", "Cancel"))
                     {
                         _database.BackpackItems.Clear();
                         _database.ActionBarItems.Clear();
@@ -792,7 +792,7 @@ namespace Duskborn.Inventory.Editor
                 GUILayout.Box("📦", GUILayout.Width(36), GUILayout.Height(36));
             }
 
-            // Prefixo opcional
+            // Optional prefix
             if (!string.IsNullOrEmpty(slotPrefix))
             {
                 EditorGUILayout.LabelField(slotPrefix, EditorStyles.boldLabel, GUILayout.Width(80));
@@ -801,7 +801,7 @@ namespace Duskborn.Inventory.Editor
             // ObjectField
             EditorGUILayout.PropertyField(itemProp, GUIContent.none);
 
-            // Quantidade com botões rápidos [-] e [+]
+            // Quantity with quick [-] and [+] buttons.
             EditorGUILayout.LabelField("Qtd:", GUILayout.Width(30));
             if (GUILayout.Button("-", EditorStyles.miniButtonLeft, GUILayout.Width(20), GUILayout.Height(18)))
             {
@@ -813,7 +813,7 @@ namespace Duskborn.Inventory.Editor
                 qtyProp.intValue += 1;
             }
 
-            // Controles de Ordenação e Remoção
+            // Ordering and removal controls.
             GUI.enabled = index > 0;
             if (GUILayout.Button("▲", EditorStyles.miniButtonLeft, GUILayout.Width(24), GUILayout.Height(18)))
             {
@@ -845,7 +845,7 @@ namespace Duskborn.Inventory.Editor
 
             EditorGUILayout.EndHorizontal();
 
-            // Linha de Detalhes do Item
+            // Item details row.
             if (currentItem != null)
             {
                 EditorGUILayout.BeginHorizontal();
@@ -853,7 +853,7 @@ namespace Duskborn.Inventory.Editor
                 string rarityHex = GetRarityColorHex(currentItem.Rarity);
                 string itemType = GetItemTypeDisplayName(currentItem);
                 EditorGUILayout.LabelField(
-                    $"<color={rarityHex}><b>{currentItem.DisplayName}</b> ({currentItem.Rarity})</color> — Tipo: {itemType}",
+                    $"<color={rarityHex}><b>{currentItem.DisplayName}</b> ({currentItem.Rarity})</color> — Type: {itemType}",
                     new GUIStyle(EditorStyles.miniLabel) { richText = true });
                 EditorGUILayout.EndHorizontal();
             }
@@ -959,7 +959,7 @@ namespace Duskborn.Inventory.Editor
         {
             return categoryIndex switch
             {
-                0 => true, // Todos
+                0 => true, // All.
                 1 => item is WeaponDefinition,
                 2 => item is GearDefinition,
                 3 => item is MaterialDefinition,
@@ -970,29 +970,29 @@ namespace Duskborn.Inventory.Editor
 
         private static string GetItemTypeDisplayName(ItemDefinitionBase item)
         {
-            if (item is WeaponDefinition) return "Arma";
-            if (item is GearDefinition g) return $"Equipamento ({g.Slot})";
-            if (item is MaterialDefinition) return "Material / Recurso";
-            if (item is ConsumableDefinition) return "Consumível";
-            return "Item Geral";
+            if (item is WeaponDefinition) return "Weapon";
+            if (item is GearDefinition g) return $"Equipment ({g.Slot})";
+            if (item is MaterialDefinition) return "Material / Resource";
+            if (item is ConsumableDefinition) return "Consumable";
+            return "General Item";
         }
 
         private static string GetSlotDisplayName(EquipmentSlot slot)
         {
             return slot switch
             {
-                EquipmentSlot.Head => "Capacete",
-                EquipmentSlot.Neck => "Colar / Amuleto",
-                EquipmentSlot.Shoulder => "Ombreiras",
+                EquipmentSlot.Head => "Helmet",
+                EquipmentSlot.Neck => "Necklace / Amulet",
+                EquipmentSlot.Shoulder => "Shoulders",
                 EquipmentSlot.Back => "Capa",
-                EquipmentSlot.Chest => "Peitoral",
-                EquipmentSlot.Wrist => "Braçadeiras",
-                EquipmentSlot.Hands => "Luvas",
-                EquipmentSlot.Waist => "Cinto",
-                EquipmentSlot.Legs => "Calças / Perneiras",
-                EquipmentSlot.Feet => "Botas",
-                EquipmentSlot.Ring1 => "Anel 1",
-                EquipmentSlot.Ring2 => "Anel 2",
+                EquipmentSlot.Chest => "Chest",
+                EquipmentSlot.Wrist => "Bracers",
+                EquipmentSlot.Hands => "Gloves",
+                EquipmentSlot.Waist => "Belt",
+                EquipmentSlot.Legs => "Trousers / Leggings",
+                EquipmentSlot.Feet => "Boots",
+                EquipmentSlot.Ring1 => "Ring 1",
+                EquipmentSlot.Ring2 => "Ring 2",
                 _ => slot.ToString()
             };
         }
@@ -1013,7 +1013,7 @@ namespace Duskborn.Inventory.Editor
 
         private static string GetGearStatsSummary(GearDefinition gear)
         {
-            if (gear == null || gear.Bonuses == null || gear.Bonuses.Count == 0) return "Sem bônus";
+            if (gear == null || gear.Bonuses == null || gear.Bonuses.Count == 0) return "No bonuses";
             var parts = new List<string>();
             foreach (var b in gear.Bonuses)
             {
@@ -1049,7 +1049,7 @@ namespace Duskborn.Inventory.Editor
 
         private void SyncFromPrefabs()
         {
-            // 1. Puxar Mochila do InventoryUI.prefab
+            // 1. Import Backpack from InventoryUI.prefab.
             string invPath = "Assets/Inventory/Prefabs/InventoryUI.prefab";
             var invPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(invPath);
             if (invPrefab != null)
@@ -1074,7 +1074,7 @@ namespace Duskborn.Inventory.Editor
                 }
             }
 
-            // 2. Puxar Equipamentos do Player.prefab
+            // 2. Import Equipment from Player.prefab.
             string playerPath = "Assets/_Duskborn/Prefabs/Player/Player.prefab";
             var playerPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(playerPath);
             if (playerPrefab != null)
@@ -1101,14 +1101,14 @@ namespace Duskborn.Inventory.Editor
 
             EditorUtility.SetDirty(_database);
             AssetDatabase.SaveAssets();
-            ShowNotification(new GUIContent("Itens importados dos prefabs com sucesso!"));
+            ShowNotification(new GUIContent("Items imported from prefabs successfully!"));
         }
 
         private void ApplyToPrefabs()
         {
             int modifiedCount = 0;
 
-            // 1. Grava no InventoryUI.prefab
+            // 1. Write to InventoryUI.prefab.
             string invPath = "Assets/Inventory/Prefabs/InventoryUI.prefab";
             var invPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(invPath);
             if (invPrefab != null)
@@ -1138,7 +1138,7 @@ namespace Duskborn.Inventory.Editor
                 }
             }
 
-            // 2. Grava nos Player prefabs
+            // 2. Write to Player prefabs.
             string[] playerPaths = new[]
             {
                 "Assets/_Duskborn/Prefabs/Player/Player.prefab",
@@ -1175,7 +1175,7 @@ namespace Duskborn.Inventory.Editor
             }
 
             AssetDatabase.SaveAssets();
-            ShowNotification(new GUIContent($"Gravado com sucesso em {modifiedCount} prefabs!"));
+            ShowNotification(new GUIContent($"Successfully written to {modifiedCount} prefabs!"));
         }
 
         private void ApplyWarriorPreset()
@@ -1203,7 +1203,7 @@ namespace Duskborn.Inventory.Editor
 
             _serializedDb.Update();
             EditorUtility.SetDirty(_database);
-            ShowNotification(new GUIContent("Preset Guerreiro Aplicado!"));
+            ShowNotification(new GUIContent("Warrior Preset Applied!"));
         }
 
         private void ApplyGathererPreset()
@@ -1228,7 +1228,7 @@ namespace Duskborn.Inventory.Editor
 
             _serializedDb.Update();
             EditorUtility.SetDirty(_database);
-            ShowNotification(new GUIContent("Preset Coletor Aplicado!"));
+            ShowNotification(new GUIContent("Gatherer Preset Applied!"));
         }
 
         private void ApplyAlchemistPreset()
@@ -1252,7 +1252,7 @@ namespace Duskborn.Inventory.Editor
 
             _serializedDb.Update();
             EditorUtility.SetDirty(_database);
-            ShowNotification(new GUIContent("Preset Alquimista Aplicado!"));
+            ShowNotification(new GUIContent("Alchemist Preset Applied!"));
         }
 
         private void LoadAndAddActionBar(string assetPath, int qty)

@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: gear_ruby_ring
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.GearDefinition
   id: gear_ruby_ring
-  displayName: Anel de Rubi
-  description: 'Dano: +10%  Crítico: +6%'
+  displayName: "Ruby Ring"
+  description: "Damage: +10%  Critical: +6%"
   icon: {fileID: 2800000, guid: 59a1f49b92e847c2b5efc1c5e4789123, type: 3}
   dropPrefab: {fileID: 0}
   slot: 11

@@ -21,16 +21,16 @@ using InventorySystem.Core;
 namespace Duskborn.UI
 {
     /// <summary>
-    /// Gerenciador visual do Painel de Personagem (Character Section / Paperdoll) estilo WoW.
-    /// Exibe visualmente o modelo 3D do personagem com suporte a rotação por clique-e-arraste,
-    /// os 12 slots de equipamentos e arma ativa, atributos atualizados em tempo real,
-    /// e suporte completo a desequipar itens via clique direito e equipar diretamente do inventário.
+    /// WoW-style visual manager for the character panel (Character Section / Paperdoll).
+    /// Display the 3D character model with click-and-drag rotation support,
+    /// 12 equipment slots and the active weapon, attributes updated in real time,
+    /// and full support for right-click unequipping and direct inventory equipping.
     /// </summary>
     public class CharacterUIManager : MonoBehaviour
     {
         public static CharacterUIManager Instance { get; private set; }
 
-        [Header("Áudio")]
+        [Header("Audio")]
         [SerializeField] private AudioClip openSound;
         [SerializeField] private AudioClip closeSound;
         [SerializeField] private AudioClip clickSound;
@@ -43,11 +43,11 @@ namespace Duskborn.UI
         [SerializeField] private Sprite slotFrameSprite;
         [SerializeField] private Sprite charSilhouetteSprite;
 
-        // Estado do Painel
+        // Panel state.
         public bool IsOpen { get; private set; }
         public int LastClosedFrame { get; private set; } = -1;
 
-        // Referências Visuais Principais
+        // Main visual references.
         private Canvas _canvas;
         private RectTransform _characterRoot;
         public RectTransform CharacterRoot => _characterRoot;
@@ -58,7 +58,7 @@ namespace Duskborn.UI
         private TextMeshProUGUI _statusMessageText;
         private Coroutine _statusHideCoroutine;
 
-        // Visualização 3D do Personagem
+        // 3D character preview.
         private RawImage _previewRawImage;
         private Image _previewFallbackImage;
         private RenderTexture _previewRenderTexture;
@@ -72,11 +72,11 @@ namespace Duskborn.UI
         private static readonly int HashIsGrounded = Animator.StringToHash("IsGrounded");
         private static readonly int HashDead = Animator.StringToHash("Dead");
 
-        // Slots de Equipamentos
+        // Equipment slots.
         private readonly Dictionary<EquipmentSlot, CharacterSlotView> _slotViews = new();
         private CharacterSlotView _weaponSlotView;
 
-        // Painel de Atributos (Stats)
+        // Attributes panel (Stats).
         private TextMeshProUGUI _hpStatText;
         private TextMeshProUGUI _damageStatText;
         private TextMeshProUGUI _attackSpeedStatText;
@@ -86,7 +86,7 @@ namespace Duskborn.UI
         private TextMeshProUGUI _miningStatText;
         private TextMeshProUGUI _woodcuttingStatText;
 
-        // Tooltip Flutuante de Equipamento
+        // Floating equipment tooltip.
         private RectTransform _tooltipPanel;
         private TextMeshProUGUI _tooltipTitle;
         private TextMeshProUGUI _tooltipSlot;
@@ -94,7 +94,7 @@ namespace Duskborn.UI
         private TextMeshProUGUI _tooltipDescription;
         private TextMeshProUGUI _tooltipHint;
 
-        // Integração com Jogador e Inventário
+        // Player and inventory integration.
         private PlayerCombat _playerCombat;
         private PlayerEquipmentContainer _equipment;
         private PlayerStats _playerStats;
@@ -104,7 +104,7 @@ namespace Duskborn.UI
         private Vector2 _originalInventoryPos = new Vector2(0f, 25f);
         private bool _hasOriginalInventoryPos;
 
-        // Dicionário de ícones de silhuetas para slots vazios
+        // Silhouette icon dictionary for empty slots.
         private readonly Dictionary<EquipmentSlot, Sprite> _slotSilhouetteMap = new();
         private Sprite _weaponSilhouetteSprite;
 
@@ -227,7 +227,7 @@ namespace Duskborn.UI
             _weaponHandler = null;
         }
 
-        // ── Integrações e Cache do Jogador ─────────────────────────────────────
+        // Player Integrations and Cache
 
         private void TryFindIntegrations()
         {
@@ -338,7 +338,7 @@ namespace Duskborn.UI
             RefreshStats();
         }
 
-        // ── Abertura e Fechamento ─────────────────────────────────────────────
+        // ── Opening and Closing ──
 
         public void Toggle()
         {
@@ -419,21 +419,21 @@ namespace Duskborn.UI
                 {
                     if (_inventoryUI.IsOpen)
                     {
-                        // Posiciona ambos lado a lado estilo WoW (-174 / +174)
+                        // Position both side by side in WoW style (-174 / +174).
                         invRect.anchoredPosition = new Vector2(174f, _originalInventoryPos.y);
                         if (_characterRoot != null)
                             _characterRoot.anchoredPosition = new Vector2(-174f, _originalInventoryPos.y);
                     }
                     else
                     {
-                        // Centralizado quando aberto sozinho
+                        // Centered when opened alone.
                         if (_characterRoot != null)
                             _characterRoot.anchoredPosition = new Vector2(0f, _originalInventoryPos.y);
                     }
                 }
                 else
                 {
-                    // Retorna o inventário ao centro se permanecer aberto
+                    // Return inventory to the center if it remains open.
                     if (_inventoryUI.IsOpen)
                     {
                         invRect.anchoredPosition = _originalInventoryPos;
@@ -446,7 +446,7 @@ namespace Duskborn.UI
             }
         }
 
-        // ── Atualização de Dados e Slots ───────────────────────────────────────
+        // Data and Slot Updates
 
         public void Refresh()
         {
@@ -477,7 +477,7 @@ namespace Duskborn.UI
                 }
             }
 
-            // Atualiza slot de arma ativa
+            // Update active weapon slot.
             if (_weaponSlotView != null)
             {
                 var weapon = _weaponHandler != null ? _weaponHandler.ActiveWeapon : null;
@@ -551,15 +551,15 @@ namespace Duskborn.UI
 
         private void RefreshCharacterInfo()
         {
-            string className = _playerStats != null ? _playerStats.ClassName : "Guerreiro";
+            string className = _playerStats != null ? _playerStats.ClassName : "Warrior";
             if (_titleText != null)
-                _titleText.text = "PERSONAGEM";
+                _titleText.text = "CHARACTER";
 
             if (_classSubtitleText != null)
                 _classSubtitleText.text = $"{className} • Nv. 1";
         }
 
-        // ── Desequipar Slot (Clique Direito) ───────────────────────────────────
+        // ── Unequip Slot (Right Click) ──
 
         public void UnequipSlot(EquipmentSlot slot)
         {
@@ -573,7 +573,7 @@ namespace Duskborn.UI
                 var inv = _inventoryUI.Installer.Inventory;
                 if (!inv.TryAddItem(equipped, out int placedSlot))
                 {
-                    ShowStatusFeedback("Inventário cheio! Não é possível desequipar.", true);
+                    ShowStatusFeedback("Inventory full! Cannot unequip.", true);
                     PlaySound(errorSound);
                     return;
                 }
@@ -619,7 +619,7 @@ namespace Duskborn.UI
                 _statusBannerGO.SetActive(false);
         }
 
-        // ── Tooltip do Equipamento ─────────────────────────────────────────────
+        // Equipment Tooltip
 
         public void ShowTooltip(IInventoryItem item, EquipmentSlot? slot, Vector2 screenPos)
         {
@@ -629,7 +629,7 @@ namespace Duskborn.UI
                 _tooltipTitle.text = item.DisplayName;
 
             if (_tooltipSlot != null)
-                _tooltipSlot.text = slot.HasValue ? FormatSlotName(slot.Value) : "Arma";
+                _tooltipSlot.text = slot.HasValue ? FormatSlotName(slot.Value) : "Weapon";
 
             if (_tooltipStats != null)
             {
@@ -663,7 +663,7 @@ namespace Duskborn.UI
                 _tooltipDescription.text = item.Description;
 
             if (_tooltipHint != null)
-                _tooltipHint.text = "<color=#94a3b8><i>Clique direito para desequipar</i></color>";
+                _tooltipHint.text = "<color=#94a3b8><i>Right-click to unequip</i></color>";
 
             _tooltipPanel.gameObject.SetActive(true);
             _tooltipPanel.SetAsLastSibling();
@@ -693,7 +693,7 @@ namespace Duskborn.UI
             }
         }
 
-        // ── Setup do Rig de Preview 3D ─────────────────────────────────────────
+        // 3D Preview Rig Setup
 
         private void SetupPreviewRig()
         {
@@ -722,7 +722,7 @@ namespace Duskborn.UI
             };
             _previewCamera.targetTexture = _previewRenderTexture;
 
-            // Luz Principal (Key Light)
+            // Key Light
             var lightGO = new GameObject("PreviewKeyLight", typeof(Light));
             lightGO.transform.SetParent(_previewRig.transform, false);
             lightGO.transform.localPosition = new Vector3(1.5f, 2.5f, -1.5f);
@@ -732,7 +732,7 @@ namespace Duskborn.UI
             light.intensity = 1.4f;
             light.color = new Color(1f, 0.97f, 0.92f, 1f);
 
-            // Luz de Borda (Rim Light)
+            // Rim light.
             var rimLightGO = new GameObject("PreviewRimLight", typeof(Light));
             rimLightGO.transform.SetParent(_previewRig.transform, false);
             rimLightGO.transform.localPosition = new Vector3(-1.8f, 1.5f, 1.5f);
@@ -742,7 +742,7 @@ namespace Duskborn.UI
             rimLight.intensity = 0.9f;
             rimLight.color = new Color(0.6f, 0.75f, 1f, 1f);
 
-            // Luz Pontual de Preenchimento (Point Fill Light)
+            // Point fill light.
             var pointLightGO = new GameObject("PreviewFillPointLight", typeof(Light));
             pointLightGO.transform.SetParent(_previewRig.transform, false);
             pointLightGO.transform.localPosition = new Vector3(0f, 1.2f, -1.2f);
@@ -773,10 +773,10 @@ namespace Duskborn.UI
                 _previewModel = Instantiate(sourceVisual, _previewRig.transform);
                 _previewModel.name = "PreviewCharacterModel";
 
-                // Remove scripts de gameplay, colisores e física
+                // Remove gameplay scripts, colliders, and physics.
                 StripGameplayComponents(_previewModel);
 
-                // Configura Animator
+                // Configure Animator.
                 _previewAnimator = _previewModel.GetComponentInChildren<Animator>();
                 if (_previewAnimator == null)
                     _previewAnimator = _previewModel.AddComponent<Animator>();
@@ -804,7 +804,7 @@ namespace Duskborn.UI
                 _previewAnimator.Play(0, 0, 0f);
                 _previewAnimator.Update(0f);
 
-                // Garante que os Renderers e Materiais estão ativos e visíveis
+                // Ensure Renderers and Materials are active and visible.
                 var renderers = _previewModel.GetComponentsInChildren<Renderer>(true);
                 foreach (var r in renderers)
                 {
@@ -823,7 +823,7 @@ namespace Duskborn.UI
                     }
                 }
 
-                // Enquadramento automático com base no cálculo dos Bounds
+                // Automatic framing based on Bounds calculation.
                 FramePreviewCamera();
 
                 if (_previewFallbackImage != null)
@@ -845,21 +845,21 @@ namespace Duskborn.UI
 
         private GameObject FindPlayerVisualSource()
         {
-            // 1. Tenta pegar do PlayerCombat local ativo
+            // 1. Try the active local PlayerCombat.
             if (_playerCombat != null)
             {
                 var vis = GetVisualHierarchy(_playerCombat.transform);
                 if (vis != null) return vis;
             }
 
-            // 2. Tenta qualquer PlayerCombat na cena (online ou offline)
+            // 2. Try any PlayerCombat in the scene (online or offline).
             foreach (var combat in FindObjectsByType<PlayerCombat>(FindObjectsSortMode.None))
             {
                 var vis = GetVisualHierarchy(combat.transform);
                 if (vis != null) return vis;
             }
 
-            // 3. Tenta GameObject com tag Player
+            // 3. Try a GameObject with the Player tag.
             var playerGO = GameObject.FindWithTag("Player");
             if (playerGO != null)
             {
@@ -867,7 +867,7 @@ namespace Duskborn.UI
                 if (vis != null) return vis;
             }
 
-            // 4. Tenta qualquer objeto com PlayerStats ou PlayerEquipmentContainer
+            // 4. Try any object with PlayerStats or PlayerEquipmentContainer.
             var stats = FindAnyObjectByType<PlayerStats>();
             if (stats != null)
             {
@@ -875,7 +875,7 @@ namespace Duskborn.UI
                 if (vis != null) return vis;
             }
 
-            // 5. Tenta qualquer SkinnedMeshRenderer na cena
+            // 5. Try any SkinnedMeshRenderer in the scene.
             foreach (var smr in FindObjectsByType<SkinnedMeshRenderer>(FindObjectsSortMode.None))
             {
                 if (smr.transform.root.name.Contains("Preview")) continue;
@@ -886,7 +886,7 @@ namespace Duskborn.UI
                 }
             }
 
-            // 6. Carrega de Resources/Models/char
+            // 6. Load from Resources/Models/char.
             var resModel = Resources.Load<GameObject>("Models/char");
             if (resModel != null) return resModel;
 
@@ -894,7 +894,7 @@ namespace Duskborn.UI
             if (previewPrefab != null) return previewPrefab;
 
 #if UNITY_EDITOR
-            // 7. Fallback robusto no Unity Editor
+            // 7. Robust Unity Editor fallback.
             var editorFbx = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Duskborn/Art/Models/modelTextures/char.fbx");
             if (editorFbx != null) return editorFbx;
 
@@ -1004,7 +1004,7 @@ namespace Duskborn.UI
                 bounds = new Bounds(_previewRig.transform.position + Vector3.up, new Vector3(1f, 2f, 1f));
             }
 
-            // Alinha o modelo no centro horizontal e assenta os pés no chão da rig
+            // Align the model horizontally and ground its feet on the rig floor.
             Vector3 curPos = _previewModel.transform.position;
             float rigX = _previewRig.transform.position.x;
             float rigY = _previewRig.transform.position.y;
@@ -1016,7 +1016,7 @@ namespace Duskborn.UI
 
             _previewModel.transform.position = curPos + new Vector3(shiftX, shiftY, shiftZ);
 
-            // Recalcula bounds após reposicionamento
+            // Recalculate bounds after repositioning.
             bounds = renderers[0].bounds;
             for (int i = 1; i < renderers.Length; i++)
             {
@@ -1065,7 +1065,7 @@ namespace Duskborn.UI
             }
         }
 
-        // ── Construção Dinâmica da UI (WoW-Style Proportions & Solid Backings) ──
+        // Dynamic UI Construction (WoW-Style Proportions & Solid Backings)
 
         public void EnsureUIHierarchy()
         {
@@ -1077,7 +1077,7 @@ namespace Duskborn.UI
                 if (_canvas == null) return;
             }
 
-            // 1. Moldura Principal da Janela (~2/3 da altura da tela: 336x364)
+            // 1. Main Window Frame (~2/3 of screen height: 336x364).
             var frameGO = new GameObject("CharacterFrame", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             frameGO.transform.SetParent(_canvas.transform, false);
 
@@ -1108,7 +1108,7 @@ namespace Duskborn.UI
             var frameDrag = frameGO.AddComponent<DraggablePanel>();
             frameDrag.TargetPanel = _characterRoot;
 
-            // 2. Barra de Cabeçalho com background escuro dedicado
+            // 2. Header Bar with dedicated dark background.
             var headerGO = new GameObject("HeaderBar", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             headerGO.transform.SetParent(frameGO.transform, false);
 
@@ -1126,8 +1126,8 @@ namespace Duskborn.UI
             var headerDrag = headerGO.AddComponent<DraggablePanel>();
             headerDrag.TargetPanel = _characterRoot;
 
-            // Título no Cabeçalho
-            var titleGO = CreateText("Title", headerGO.transform, "PERSONAGEM", 11f, FontStyles.Bold, new Color(0.98f, 0.82f, 0.38f, 1f), TextAlignmentOptions.Left);
+            // Header title.
+            var titleGO = CreateText("Title", headerGO.transform, "CHARACTER", 11f, FontStyles.Bold, new Color(0.98f, 0.82f, 0.38f, 1f), TextAlignmentOptions.Left);
             var titleRect = titleGO.GetComponent<RectTransform>();
             titleRect.anchorMin = new Vector2(0, 0);
             titleRect.anchorMax = new Vector2(1, 1);
@@ -1136,7 +1136,7 @@ namespace Duskborn.UI
             titleRect.sizeDelta = new Vector2(-155, 0);
             _titleText = titleGO.GetComponent<TextMeshProUGUI>();
 
-            // Container Badge da Classe / Nível
+            // Class / Level badge container.
             var classBadge = CreatePanel("ClassBadge", headerGO.transform, new Color(0.13f, 0.16f, 0.22f, 0.95f));
             classBadge.anchorMin = new Vector2(1, 0.5f);
             classBadge.anchorMax = new Vector2(1, 0.5f);
@@ -1148,14 +1148,14 @@ namespace Duskborn.UI
             badgeOutline.effectColor = new Color(0.25f, 0.30f, 0.40f, 0.8f);
             badgeOutline.effectDistance = new Vector2(1f, -1f);
 
-            var subGO = CreateText("ClassSubtitle", classBadge.transform, "Guerreiro • Nv. 1", 8.5f, FontStyles.Bold, new Color(0.58f, 0.78f, 1f, 1f), TextAlignmentOptions.Center);
+            var subGO = CreateText("ClassSubtitle", classBadge.transform, "Warrior • Lv. 1", 8.5f, FontStyles.Bold, new Color(0.58f, 0.78f, 1f, 1f), TextAlignmentOptions.Center);
             var subRect = subGO.GetComponent<RectTransform>();
             subRect.anchorMin = Vector2.zero;
             subRect.anchorMax = Vector2.one;
             subRect.sizeDelta = Vector2.zero;
             _classSubtitleText = subGO.GetComponent<TextMeshProUGUI>();
 
-            // Botão Fechar (X)
+            // Close button (X).
             var closeBtnGO = CreateButton("CloseButton", headerGO.transform, "X", new Vector2(18, 18), new Color(0.7f, 0.2f, 0.2f, 1f));
             var closeRect = closeBtnGO.GetComponent<RectTransform>();
             closeRect.anchorMin = new Vector2(1, 0.5f);
@@ -1164,7 +1164,7 @@ namespace Duskborn.UI
             closeRect.anchoredPosition = new Vector2(-6, 0);
             closeBtnGO.GetComponent<Button>().onClick.AddListener(Close);
 
-            // Divisória do Cabeçalho
+            // Header divider.
             var headerDiv = CreatePanel("HeaderDivider", frameGO.transform, new Color(0.24f, 0.28f, 0.36f, 0.8f));
             headerDiv.anchorMin = new Vector2(0, 1);
             headerDiv.anchorMax = new Vector2(1, 1);
@@ -1172,7 +1172,7 @@ namespace Duskborn.UI
             headerDiv.sizeDelta = new Vector2(-16, 1.5f);
             headerDiv.anchoredPosition = new Vector2(0, -28);
 
-            // 3. Coluna Esquerda: 6 Slots de Equipamento com container escuro dedicado
+            // 3. Left Column: 6 Equipment Slots with dedicated dark container.
             var leftCol = CreatePanel("LeftSlotsColumn", frameGO.transform, new Color(0.06f, 0.07f, 0.10f, 0.88f));
             leftCol.anchorMin = new Vector2(0, 1);
             leftCol.anchorMax = new Vector2(0, 1);
@@ -1200,7 +1200,7 @@ namespace Duskborn.UI
                 _slotViews[slot] = slotView;
             }
 
-            // 4. Coluna Direita: 6 Slots de Equipamento com container escuro dedicado
+            // 4. Right Column: 6 Equipment Slots with dedicated dark container.
             var rightCol = CreatePanel("RightSlotsColumn", frameGO.transform, new Color(0.06f, 0.07f, 0.10f, 0.88f));
             rightCol.anchorMin = new Vector2(1, 1);
             rightCol.anchorMax = new Vector2(1, 1);
@@ -1228,7 +1228,7 @@ namespace Duskborn.UI
                 _slotViews[slot] = slotView;
             }
 
-            // 5. Centro: Painel Paperdoll do Personagem (Preview 3D + Pedestal Integrado)
+            // 5. Center: Character Paperdoll Panel (3D Preview + Integrated Pedestal).
             var centerBox = CreatePanel("CenterPreviewBox", frameGO.transform, new Color(0.04f, 0.05f, 0.07f, 0.98f));
             centerBox.anchorMin = new Vector2(0.5f, 1);
             centerBox.anchorMax = new Vector2(0.5f, 1);
@@ -1240,7 +1240,7 @@ namespace Duskborn.UI
             viewportOutline.effectColor = new Color(0.22f, 0.26f, 0.34f, 0.8f);
             viewportOutline.effectDistance = new Vector2(1.5f, -1.5f);
 
-            // RawImage para renderizar o RenderTexture da Câmera 3D
+            // RawImage to display the 3D camera's RenderTexture.
             var rawImageGO = new GameObject("Character3DRawImage", typeof(RectTransform), typeof(RawImage));
             rawImageGO.transform.SetParent(centerBox.transform, false);
             var rawRect = rawImageGO.GetComponent<RectTransform>();
@@ -1255,7 +1255,7 @@ namespace Duskborn.UI
             var dragRotator = rawImageGO.AddComponent<CharacterPreviewRotator>();
             dragRotator.Manager = this;
 
-            // Fallback 2D: Imagem de silhueta (caso a câmera 3D ainda não esteja ativa)
+            // 2D fallback: silhouette image (if the 3D camera is not yet active).
             var fallbackGO = new GameObject("FallbackSilhouette", typeof(RectTransform), typeof(Image));
             fallbackGO.transform.SetParent(rawImageGO.transform, false);
             var fbRect = fallbackGO.GetComponent<RectTransform>();
@@ -1268,7 +1268,7 @@ namespace Duskborn.UI
             _previewFallbackImage.preserveAspect = true;
             _previewFallbackImage.gameObject.SetActive(false);
 
-            // Pedestal de Arma Integrado (Rodapé do Painel Paperdoll)
+            // Integrated Weapon Pedestal (Paperdoll Panel Footer).
             var weaponShelf = CreatePanel("WeaponShelf", centerBox.transform, new Color(0.07f, 0.08f, 0.11f, 0.96f));
             weaponShelf.anchorMin = new Vector2(0, 0);
             weaponShelf.anchorMax = new Vector2(1, 0);
@@ -1283,7 +1283,7 @@ namespace Duskborn.UI
             shelfDiv.sizeDelta = new Vector2(0, 1.5f);
             shelfDiv.anchoredPosition = Vector2.zero;
 
-            // Slot de Arma Ativa dentro do pedestal
+            // Active Weapon Slot inside the pedestal.
             var weaponSlotGO = CreateSlotView(null, weaponShelf.transform, new Vector2(0, 20), 30f);
             var weaponSlotRect = weaponSlotGO.GetComponent<RectTransform>();
             weaponSlotRect.anchorMin = new Vector2(0.5f, 0);
@@ -1291,8 +1291,8 @@ namespace Duskborn.UI
             weaponSlotRect.pivot = new Vector2(0.5f, 0.5f);
             _weaponSlotView = weaponSlotGO;
 
-            // Rótulo da Arma dentro do pedestal
-            var weaponLabelGO = CreateText("WeaponLabel", weaponShelf.transform, "ARMA ATIVA", 7.5f, FontStyles.Bold, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Center);
+            // Weapon label inside the pedestal.
+            var weaponLabelGO = CreateText("WeaponLabel", weaponShelf.transform, "ACTIVE WEAPON", 7.5f, FontStyles.Bold, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Center);
             var wLabelRect = weaponLabelGO.GetComponent<RectTransform>();
             wLabelRect.anchorMin = new Vector2(0.5f, 0);
             wLabelRect.anchorMax = new Vector2(0.5f, 0);
@@ -1300,7 +1300,7 @@ namespace Duskborn.UI
             wLabelRect.anchoredPosition = new Vector2(0, 3);
             wLabelRect.sizeDelta = new Vector2(80, 11);
 
-            // 6. Painel Inferior de Estatísticas (Stats Sheet)
+            // 6. Lower Statistics Panel (Stats Sheet).
             var statsBox = CreatePanel("StatsPanel", frameGO.transform, new Color(0.06f, 0.07f, 0.10f, 0.95f));
             statsBox.anchorMin = new Vector2(0.5f, 1);
             statsBox.anchorMax = new Vector2(0.5f, 1);
@@ -1312,7 +1312,7 @@ namespace Duskborn.UI
             statsOutline.effectColor = new Color(0.22f, 0.26f, 0.34f, 0.8f);
             statsOutline.effectDistance = new Vector2(1f, -1f);
 
-            // Cabeçalho da Seção de Atributos
+            // Attributes section header.
             var attrHeader = CreatePanel("AttrHeader", statsBox.transform, new Color(0.10f, 0.12f, 0.16f, 0.9f));
             attrHeader.anchorMin = new Vector2(0, 1);
             attrHeader.anchorMax = new Vector2(1, 1);
@@ -1320,30 +1320,30 @@ namespace Duskborn.UI
             attrHeader.sizeDelta = new Vector2(0, 16);
             attrHeader.anchoredPosition = Vector2.zero;
 
-            var attrTitle = CreateText("AttrTitle", attrHeader.transform, "ATRIBUTOS DO PERSONAGEM", 8f, FontStyles.Bold, new Color(0.98f, 0.82f, 0.38f, 1f), TextAlignmentOptions.Left);
+            var attrTitle = CreateText("AttrTitle", attrHeader.transform, "CHARACTER ATTRIBUTES", 8f, FontStyles.Bold, new Color(0.98f, 0.82f, 0.38f, 1f), TextAlignmentOptions.Left);
             var aTitleRect = attrTitle.GetComponent<RectTransform>();
             aTitleRect.anchorMin = Vector2.zero;
             aTitleRect.anchorMax = Vector2.one;
             aTitleRect.offsetMin = new Vector2(8, 0);
             aTitleRect.offsetMax = new Vector2(-8, 0);
 
-            // 8 Cards de Atributos: 2 Colunas x 4 Linhas com cartões escuros individuais
+            // 8 Attribute Cards: 2 Columns x 4 Rows with individual dark cards.
             float cardW = 150f;
             float cardH = 19f;
 
-            // Coluna 1 (Esquerda: x = 6)
-            _hpStatText = CreateStatCard("Vida", statsBox.transform, new Vector2(6, -19), cardW, cardH);
-            _damageStatText = CreateStatCard("Dano", statsBox.transform, new Vector2(6, -41), cardW, cardH);
-            _attackSpeedStatText = CreateStatCard("Vel. Ataque", statsBox.transform, new Vector2(6, -63), cardW, cardH);
-            _miningStatText = CreateStatCard("Mineração", statsBox.transform, new Vector2(6, -85), cardW, cardH);
+            // Column 1 (Left: x = 6).
+            _hpStatText = CreateStatCard("Health", statsBox.transform, new Vector2(6, -19), cardW, cardH);
+            _damageStatText = CreateStatCard("Damage", statsBox.transform, new Vector2(6, -41), cardW, cardH);
+            _attackSpeedStatText = CreateStatCard("Attack Speed", statsBox.transform, new Vector2(6, -63), cardW, cardH);
+            _miningStatText = CreateStatCard("Mining", statsBox.transform, new Vector2(6, -85), cardW, cardH);
 
-            // Coluna 2 (Direita: x = 164)
-            _moveSpeedStatText = CreateStatCard("Velocidade", statsBox.transform, new Vector2(164, -19), cardW, cardH);
-            _critStatText = CreateStatCard("Crítico", statsBox.transform, new Vector2(164, -41), cardW, cardH);
-            _defenseStatText = CreateStatCard("Redução Dano", statsBox.transform, new Vector2(164, -63), cardW, cardH);
-            _woodcuttingStatText = CreateStatCard("Madeira", statsBox.transform, new Vector2(164, -85), cardW, cardH);
+            // Column 2 (Right: x = 164).
+            _moveSpeedStatText = CreateStatCard("Speed", statsBox.transform, new Vector2(164, -19), cardW, cardH);
+            _critStatText = CreateStatCard("Critical", statsBox.transform, new Vector2(164, -41), cardW, cardH);
+            _defenseStatText = CreateStatCard("Damage Reduction", statsBox.transform, new Vector2(164, -63), cardW, cardH);
+            _woodcuttingStatText = CreateStatCard("Wood", statsBox.transform, new Vector2(164, -85), cardW, cardH);
 
-            // Toast Banner de Status
+            // Status toast banner.
             var bannerGO = new GameObject("StatusBanner", typeof(RectTransform), typeof(Image), typeof(Outline));
             bannerGO.transform.SetParent(frameGO.transform, false);
             var bRect = bannerGO.GetComponent<RectTransform>();
@@ -1370,7 +1370,7 @@ namespace Duskborn.UI
             _statusMessageText = statusGO.GetComponent<TextMeshProUGUI>();
             _statusBannerGO.SetActive(false);
 
-            // 7. Tooltip Flutuante de Equipamento
+            // 7. Floating Equipment Tooltip.
             CreateEquipmentTooltipUI(frameGO.transform);
 
             frameGO.SetActive(false);
@@ -1397,7 +1397,7 @@ namespace Duskborn.UI
             outline.effectColor = new Color(0.18f, 0.22f, 0.28f, 0.9f);
             outline.effectDistance = new Vector2(1f, -1f);
 
-            // Ícone da Silhueta (Slot Vazio)
+            // Silhouette icon (empty slot).
             var silGO = new GameObject("Silhouette", typeof(RectTransform), typeof(Image));
             silGO.transform.SetParent(go.transform, false);
             var silRect = silGO.GetComponent<RectTransform>();
@@ -1409,7 +1409,7 @@ namespace Duskborn.UI
             silImg.color = new Color(1f, 1f, 1f, 0.35f);
             silImg.raycastTarget = false;
 
-            // Ícone do Item (Equipado)
+            // Item icon (equipped).
             var itemGO = new GameObject("ItemIcon", typeof(RectTransform), typeof(Image));
             itemGO.transform.SetParent(go.transform, false);
             var itemRect = itemGO.GetComponent<RectTransform>();
@@ -1520,7 +1520,7 @@ namespace Duskborn.UI
             dRect.sizeDelta = new Vector2(-20, 22);
             _tooltipDescription = descGO.GetComponent<TextMeshProUGUI>();
 
-            var hintGO = CreateText("TooltipHint", tooltipGO.transform, "Clique direito para desequipar", 8f, FontStyles.Normal, new Color(0.48f, 0.54f, 0.62f, 1f), TextAlignmentOptions.Left);
+            var hintGO = CreateText("TooltipHint", tooltipGO.transform, "Right-click to unequip", 8f, FontStyles.Normal, new Color(0.48f, 0.54f, 0.62f, 1f), TextAlignmentOptions.Left);
             var hRect = hintGO.GetComponent<RectTransform>();
             hRect.anchorMin = new Vector2(0, 0);
             hRect.anchorMax = new Vector2(1, 0);
@@ -1532,7 +1532,7 @@ namespace Duskborn.UI
             tooltipGO.SetActive(false);
         }
 
-        // ── Auxiliares de Criação de UI ────────────────────────────────────────
+        // UI Creation Helpers
 
         private static RectTransform CreatePanel(string name, Transform parent, Color color)
         {
@@ -1582,7 +1582,7 @@ namespace Duskborn.UI
             return go;
         }
 
-        // ── Carregamento de Recursos e Áudio ──────────────────────────────────
+        // Resource and Audio Loading
 
         private void LoadSprites()
         {
@@ -1664,38 +1664,38 @@ namespace Duskborn.UI
 
         public static string FormatSlotName(EquipmentSlot slot) => slot switch
         {
-            EquipmentSlot.Head => "Cabeça",
-            EquipmentSlot.Neck => "Colar",
+            EquipmentSlot.Head => "Head",
+            EquipmentSlot.Neck => "Paste",
             EquipmentSlot.Shoulder => "Ombros",
             EquipmentSlot.Back => "Costas",
             EquipmentSlot.Chest => "Torso",
-            EquipmentSlot.Wrist => "Braçadeiras",
-            EquipmentSlot.Hands => "Luvas",
-            EquipmentSlot.Waist => "Cinto",
+            EquipmentSlot.Wrist => "Bracers",
+            EquipmentSlot.Hands => "Gloves",
+            EquipmentSlot.Waist => "Belt",
             EquipmentSlot.Legs => "Pernas",
-            EquipmentSlot.Feet => "Botas",
-            EquipmentSlot.Ring1 => "Anel 1",
-            EquipmentSlot.Ring2 => "Anel 2",
+            EquipmentSlot.Feet => "Boots",
+            EquipmentSlot.Ring1 => "Ring 1",
+            EquipmentSlot.Ring2 => "Ring 2",
             _ => slot.ToString()
         };
 
         public static string FormatStatType(StatType stat) => stat switch
         {
-            StatType.HP => "Vida Máxima",
-            StatType.Damage => "Dano",
-            StatType.MoveSpeed => "Vel. Movimento",
-            StatType.AttackSpeed => "Vel. Ataque",
-            StatType.CritChance => "Chance de Crítico",
-            StatType.DamageReduction => "Redução de Dano",
-            StatType.MiningResourceBonus => "Bônus Mineração",
-            StatType.WoodcuttingResourceBonus => "Bônus Madeira",
+            StatType.HP => "Maximum Health",
+            StatType.Damage => "Damage",
+            StatType.MoveSpeed => "Movement Speed",
+            StatType.AttackSpeed => "Attack Speed",
+            StatType.CritChance => "Critical Chance",
+            StatType.DamageReduction => "Damage Reduction",
+            StatType.MiningResourceBonus => "Mining Bonus",
+            StatType.WoodcuttingResourceBonus => "Woodcutting Bonus",
             _ => stat.ToString()
         };
     }
 
     /// <summary>
-    /// Componente de interação para cada slot de equipamento no painel de personagem.
-    /// Gerencia hover (tooltip), clique direito (desequipar) e estados vazios/equipados.
+    /// Interaction component for each equipment slot in the character panel.
+    /// Manage hover tooltips, right-click unequipping, and empty/equipped states.
     /// </summary>
     public class CharacterSlotView : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
     {
@@ -1751,7 +1751,7 @@ namespace Duskborn.UI
 
             if (_outline != null)
             {
-                _outline.effectColor = new Color(0.96f, 0.72f, 0.22f, 0.9f); // Dourado
+                _outline.effectColor = new Color(0.96f, 0.72f, 0.22f, 0.9f); // Gold
             }
         }
 
@@ -1769,7 +1769,7 @@ namespace Duskborn.UI
 
             if (_outline != null)
             {
-                _outline.effectColor = new Color(0.98f, 0.42f, 0.22f, 0.9f); // Laranja/Fogo
+                _outline.effectColor = new Color(0.98f, 0.42f, 0.22f, 0.9f); // Orange / Fire.
             }
         }
 
@@ -1812,7 +1812,7 @@ namespace Duskborn.UI
     }
 
     /// <summary>
-    /// Componente de rotação 3D por arraste do mouse sobre a área de pré-visualização.
+    /// 3D rotation component using mouse drag over the preview area.
     /// </summary>
     public class CharacterPreviewRotator : MonoBehaviour, IDragHandler, IBeginDragHandler
     {

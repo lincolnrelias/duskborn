@@ -16,7 +16,7 @@ namespace Duskborn.Editor
             serializedObject.ApplyModifiedProperties();
 
             EditorGUILayout.Space(8);
-            if (GUILayout.Button("Abrir no Estúdio de Ajuste de Itens", GUILayout.Height(28)))
+            if (GUILayout.Button("Open in Item Fitting Studio", GUILayout.Height(28)))
             {
                 ItemFittingStudioWindow.OpenWithWeapon((WeaponDefinition)target);
             }

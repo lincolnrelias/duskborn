@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: material_hollow_heart
   m_EditorClassIdentifier: Assembly-CSharp::InventorySystem.Data.MaterialDefinition
   id: material_hollow_heart
-  displayName: Coração Oco
-  description: Coração do Guardião Oco. Necessário para construir a Mesa Arcana.
+  displayName: "Hollow Heart"
+  description: "Heart of the Hollow Warden. Required to build the Arcane Table."
   icon: {fileID: 0}
   dropPrefab: {fileID: 5752967656333843250, guid: e14a27b82f1640a4ba12891ec5418a01, type: 3}
   rarity: 3

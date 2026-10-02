@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_ThornbarkPlate
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_ThornbarkPlate
-  recipeName: "Coura\xE7a do Espinheiro"
-  description: "Coura\xE7a do Espinheiro"
-  category: Armadura
+  recipeName: "Thornheart Cuirass"
+  description: "Thornheart Cuirass"
+  category: "Armor"
   tier: 4
   requiredStation: 3
   isAlwaysDiscovered: 0

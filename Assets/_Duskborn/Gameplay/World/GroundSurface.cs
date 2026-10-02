@@ -4,14 +4,14 @@ using Duskborn.Audio;
 namespace Duskborn.Gameplay.World
 {
     /// <summary>
-    /// Componente anexável a qualquer GameObject ou colisor para definir explicitamente o tipo
-    /// de superfície para detecção de passos e efeitos de impacto.
+    /// Component attachable to any GameObject or collider to explicitly define the surface type
+    /// for footstep detection and impact effects.
     /// </summary>
     [DisallowMultipleComponent]
     public class GroundSurface : MonoBehaviour
     {
-        [Header("Tipo de Superfície")]
-        [Tooltip("Superfície física deste colisor para sons de passos.")]
+        [Header("Surface Type")]
+        [Tooltip("This collider's physical surface for footstep sounds.")]
         [SerializeField] private SurfaceType surfaceType = SurfaceType.Grass;
 
         public SurfaceType SurfaceType

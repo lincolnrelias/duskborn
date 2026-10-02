@@ -7,13 +7,13 @@ using Duskborn.Gameplay.Player;
 namespace Duskborn.Core
 {
     /// <summary>
-    /// Gerenciador centralizado de preferências e configurações persistidas do Duskborn.
-    /// Gerencia volume (Master, Música, SFX, Ambiente, UI), exibição (Tela Cheia) e controles (Sensibilidade, Inversão).
-    /// Inicializa e aplica automaticamente as opções antes de qualquer cena ser carregada.
+    /// Central manager for persistent Duskborn preferences and settings.
+    /// Manages volume (Master, Music, SFX, Ambient, UI), display (Fullscreen), and controls (Sensitivity, Inversion).
+    /// Automatically initializes and applies options before any scene loads.
     /// </summary>
     public static class GameSettings
     {
-        // Chaves persistidas canônicas no PlayerPrefs
+        // Canonical persisted PlayerPrefs keys.
         public const string KeyMasterVol    = "Duskborn_MasterVol";
         public const string KeyMusicVol     = "Duskborn_MusicVol";
         public const string KeySfxVol       = "Duskborn_SfxVol";
@@ -23,10 +23,10 @@ namespace Duskborn.Core
         public const string KeySensitivity  = "Duskborn_MouseSensitivity";
         public const string KeyInvertPitch  = "Duskborn_InvertPitch";
 
-        // Chave legado para retrocompatibilidade
+        // Legacy key for backward compatibility.
         private const string LegacyKeyMasterVol = "Duskborn_MasterVolume";
 
-        // Valores correntes em memória
+        // Current in-memory values.
         public static float MasterVolume { get; private set; } = 1.0f;
         public static float MusicVolume { get; private set; } = 0.75f;
         public static float SfxVolume { get; private set; } = 0.90f;
@@ -52,7 +52,7 @@ namespace Duskborn.Core
         }
 
         /// <summary>
-        /// Carrega todas as opções salvas do PlayerPrefs ou restaura os valores padrão.
+        /// Load all saved PlayerPrefs options or restore defaults.
         /// </summary>
         public static void LoadAll()
         {
@@ -140,7 +140,7 @@ namespace Duskborn.Core
         }
 
         /// <summary>
-        /// Aplica todas as configurações carregadas no subsistema de Áudio, Tela e Câmera.
+        /// Apply all loaded settings to the audio, display, and camera subsystems.
         /// </summary>
         public static void ApplyAll()
         {

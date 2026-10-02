@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_BoneBlade
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_BoneBlade
-  recipeName: "L\xE2mina de Osso"
-  description: "L\xE2mina de Osso"
-  category: Armas
+  recipeName: "Bone Blade"
+  description: "Bone Blade"
+  category: "Weapons"
   tier: 3
   requiredStation: 3
   isAlwaysDiscovered: 0

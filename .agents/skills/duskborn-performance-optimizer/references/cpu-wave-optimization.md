@@ -1,15 +1,15 @@
-# Otimização de CPU e Hordas de Inimigos
+# CPU and Enemy Horde Optimization
 
-Nas Noites 5, 6 e 7 do Duskborn, dezenas ou centenas de inimigos convergem simultaneamente para os jogadores. Sem otimização cuidadosa, o loop principal de atualização consome os ciclos da CPU, gerando quedas bruscas de taxa de quadros (framerate drops).
+On Duskborn nights 5, 6, and 7, dozens or hundreds of enemies converge on players simultaneously. Without careful optimization, the main update loop consumes CPU cycles and causes sharp framerate drops.
 
 ---
 
-## 1. Escalonamento de Busca de Alvos (Staggered Target Acquisition)
+## 1. Staggered Target Acquisition
 
-Calcular `PlayerRegistry.FindNearest(transform.position)` dentro do `Update()` a cada quadro resulta em complexidade $O(E \times P \times \text{FPS})$.
+Calling `PlayerRegistry.FindNearest(transform.position)` in `Update()` every frame results in complexity $O(E \times P \times \text{FPS})$.
 
-### Padrão Recomendado:
-Adicione um intervalo com jitter temporal (para evitar picos no mesmo frame):
+### Recommended Pattern:
+Add a temporally jittered interval to avoid spikes in the same frame:
 
 ```csharp
 private float _targetScanTimer;
@@ -30,11 +30,11 @@ protected virtual void Update()
 
 ---
 
-## 2. Controle de Frequência do NavMeshAgent
+## 2. NavMeshAgent Update Frequency
 
-Chamar `Agent.SetDestination(target.position)` a cada quadro força o recálculo frequente de caminhos pelo sistema de navegação da Unity:
+Calling `Agent.SetDestination(target.position)` every frame forces frequent path recalculation by Unity's navigation system:
 
-- Verifique a distância em relação ao destino anterior antes de chamar `SetDestination`:
+- Check distance from the previous destination before calling `SetDestination`:
   ```csharp
   if (Vector3.SqrMagnitude(CurrentTarget.position - _lastDest) > 1.5f * 1.5f)
   {
@@ -42,22 +42,22 @@ Chamar `Agent.SetDestination(target.position)` a cada quadro força o recálculo
       Agent.SetDestination(_lastDest);
   }
   ```
-- Para distâncias curtas ou inimigos já em alcance de ataque (`attackRange`), pause a navegação com `Agent.ResetPath()` ou `Agent.isStopped = true`.
+- At short distances or when enemies are already within `attackRange`, pause navigation using `Agent.ResetPath()` or `Agent.isStopped = true`.
 
 ---
 
-## 3. Desativação e LOD de Animação e Física
+## 3. Animation and Physics Deactivation / LOD
 
-- **Ragdolls**: Inimigos com `EnemyRagdoll` devem manter `isKinematic = true` em todos os rigidbodies e colliders desativados enquanto vivos. O modo ragdoll só deve ser ativado no momento exato do impacto fatal e desativado após o repouso.
+- **Ragdolls**: Enemies with `EnemyRagdoll` must keep all rigidbodies at `isKinematic = true` and colliders disabled while alive. Activate ragdoll mode only at the fatal impact and disable it after settling.
 - **Animator Culling**:
-  - Configure `CullingMode = CullUpdateTransforms` no `Animator` dos inimigos para poupar processamento quando o monstro estiver fora da visão da câmera.
-- **Calculo de Velocidade Local**:
-  - Em vez de realizar `transform.InverseTransformDirection` e atualizações vetoriais a cada quadro para inimigos distantes, calcule apenas com base na magnitude linear da velocidade ou use LOD de tick.
+  - Set enemy `Animator` to `CullingMode = CullUpdateTransforms` to save processing while the monster is outside the camera view.
+- **Local Speed Calculation**:
+  - Instead of `transform.InverseTransformDirection` and vector updates every frame for distant enemies, calculate only from linear speed magnitude or use tick LOD.
 
 ---
 
-## 4. Otimização de Chamadas de Rede (FishNet RPCs)
+## 4. Network Call Optimization (FishNet RPCs)
 
-Evite disparar `[ObserversRpc]` individuais para pequenos efeitos sonoros e visuais a cada golpe em hordas:
-- Agrupe eventos de dano em lote se o volume for extremo.
-- Restrinja o alcance de transmissão de RPCs de efeitos secundários através de observadores por distância (FishNet Grid / Proximity Conditionals).
+Avoid individual `[ObserversRpc]` calls for small sound and visual effects on every horde hit:
+- Batch damage events if volume is extreme.
+- Restrict secondary-effect RPC transmission range using distance-based observers (FishNet Grid / Proximity Conditionals).

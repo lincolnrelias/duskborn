@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_BoneAmulet
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_BoneAmulet
-  recipeName: Amuleto de Garras
-  description: Amuleto de Garras
-  category: "Acess\xF3rios"
+  recipeName: "Claw Amulet"
+  description: "Claw Amulet"
+  category: "Accessories"
   tier: 4
   requiredStation: 3
   isAlwaysDiscovered: 0

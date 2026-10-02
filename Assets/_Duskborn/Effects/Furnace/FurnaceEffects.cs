@@ -5,16 +5,16 @@ using UnityEngine.Rendering.Universal;
 
 namespace Duskborn.Effects
 {
-    /// <summary>Apresentação local do efeito da fornalha. O estado de processamento permanece no PlacedBuilding.</summary>
+    /// <summary>Local furnace effect presentation. Processing state remains in PlacedBuilding.</summary>
     [SelectionBase]
     public sealed class FurnaceEffects : MonoBehaviour
     {
-        [Header("Materiais & Âncoras")]
+        [Header("Materials & Anchors")]
         public Material fireMaterial, smokeMaterial, coalMaterial;
         public Transform fireAnchor, smokeAnchor;
         public bool fitAnchorsToModel = true;
 
-        [Header("Fogo")]
+        [Header("Fire")]
         [Range(3, 9)] public int flameCount = 5;
         [Range(0.4f, 2.5f)] public float flameScale = 1f;
         [Range(0.4f, 2.5f)] public float flameHeight = 1f;
@@ -22,7 +22,7 @@ namespace Duskborn.Effects
         public Color flameTint = new Color(1, .62f, .18f);
         [Range(0f, 3f)] public float coalIntensity = 1f;
 
-        [Header("Fumaça")]
+        [Header("Smoke")]
         [Range(0, 80)] public float smokeDensity = 14f;
         [Range(10, 250)] public int maxSmokeParticles = 100;
         [Range(0.1f, 1.2f)] public float smokeSize = 0.32f;
@@ -32,7 +32,7 @@ namespace Duskborn.Effects
         public Color smokeTint = new Color(.43f, .40f, .36f, .35f);
         [Min(0)] public float smokeDelay = .3f;
 
-        [Header("Transições e Iluminação")]
+        [Header("Transitions and Lighting")]
         [Range(0, 3)] public float intensity = 1f;
         [Min(.01f)] public float startupSeconds = .6f, cooldownSeconds = 1.5f;
         [Range(0, 2)] public float lightIntensity = .7f;

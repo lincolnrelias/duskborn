@@ -11,22 +11,22 @@ using Duskborn.Gameplay.Player;
 namespace Duskborn.UI
 {
     /// <summary>
-    /// Menu de pausa e opções in-game em estética Medieval Fantasy Low-Poly ("Pausa da Expedição").
-    /// Apresenta molduras de ferro forjado, frisos de ouro envelhecido, botões de laje de pedra com brilho de brasa,
-    /// brasas místicas flutuantes, modais de configurações completas de áudio/gráficos/controles e pergaminho de saber.
-    /// Funciona 100% via OnGUI com texturas procedurais sem dependência de prefabs ou Canvas.
+    /// In-game pause and options menu with a Medieval Fantasy Low-Poly aesthetic ("Expedition Pause").
+    /// Features wrought iron frames, aged gold trim, stone slab buttons with ember glow,
+    /// floating mystical embers, full audio / graphics / controls settings modals, and a knowledge scroll.
+    /// Works entirely through OnGUI with procedural textures, independent of prefabs or Canvas.
     /// </summary>
     public class InGameMenuController : MonoBehaviour
     {
         public static InGameMenuController Instance { get; private set; }
 
-        [Header("Áudio e Efeitos")]
-        [Tooltip("Efeito sonoro ao clicar em botões.")]
+        [Header("Audio and Effects")]
+        [Tooltip("Sound effect when clicking buttons.")]
         public AudioClip clickSfx;
-        [Tooltip("Efeito sonoro ao abrir pergaminho/modal.")]
+        [Tooltip("Sound effect when opening a scroll / modal.")]
         public AudioClip modalOpenSfx;
 
-        // Estado do Menu
+        // Menu state.
         public bool IsOpen { get; private set; } = false;
 
         private bool _showSettingsModal = false;
@@ -34,7 +34,7 @@ namespace Duskborn.UI
         private bool _showConfirmMainMenu = false;
         private bool _showConfirmQuit = false;
 
-        // Valores de Configuração em Edição
+        // Settings values being edited.
         private float _masterVolume;
         private float _musicVolume;
         private float _sfxVolume;
@@ -44,7 +44,7 @@ namespace Duskborn.UI
         private float _mouseSensitivity;
         private bool  _invertPitch;
 
-        // Brasas místicas do crepúsculo
+        // Mystical twilight embers.
         private struct DuskEmber
         {
             public float xRatio;
@@ -55,7 +55,7 @@ namespace Duskborn.UI
         }
         private DuskEmber[] _embers;
 
-        // Texturas procedurais geradas dinamicamente
+        // Procedural textures generated dynamically
         private Texture2D _backdropTexture;
         private Texture2D _slateTexture;
         private Texture2D _ironFrameTexture;
@@ -71,7 +71,7 @@ namespace Duskborn.UI
         private Texture2D _sliderTroughTex;
         private Texture2D _sliderFillTex;
 
-        // Estilos GUI
+        // GUI Styles
         private GUIStyle _titleStyle;
         private GUIStyle _subTitleStyle;
         private GUIStyle _statusStyle;
@@ -215,10 +215,10 @@ namespace Duskborn.UI
 
         private void Update()
         {
-            // Não opera na cena de menu principal
+            // Does not operate in the main menu scene.
             if (SceneManager.GetActiveScene().name == "MainMenu") return;
 
-            // Animação das brasas com unscaledDeltaTime (funciona mesmo com Time.timeScale = 0)
+            // Animate embers with unscaledDeltaTime (works even with Time.timeScale = 0).
             if (IsOpen && _embers != null)
             {
                 for (int i = 0; i < _embers.Length; i++)
@@ -232,13 +232,13 @@ namespace Duskborn.UI
                 }
             }
 
-            // Se estiver em pausa e outro jogador ingressar na sessão, descongela o tempo real imediatamente
+            // If paused and another player joins, immediately unfreeze real time.
             if (IsOpen && Time.timeScale == 0f && !CanPauseGame())
             {
                 Time.timeScale = 1f;
             }
 
-            // Captura da tecla Escape
+            // Capture the Escape key.
             if (IsEscapePressed())
             {
                 HandleEscapeKey();
@@ -256,7 +256,7 @@ namespace Duskborn.UI
 
         private void HandleEscapeKey()
         {
-            // 1. Se o próprio menu de pausa estiver aberto: fecha submodais ou fecha o menu de pausa
+            // 1. If the pause menu itself is open: close submodals or close the pause menu.
             if (IsOpen)
             {
                 if (_showConfirmMainMenu)
@@ -286,11 +286,11 @@ namespace Duskborn.UI
                 return;
             }
 
-            // 2. Se algum outro menu estiver aberto (ou acabou de ser fechado neste mesmo frame pelo ESC):
-            // Fecha o menu em questão e NÃO abre o menu de pausa!
+            // 2. If another menu is open (or just closed in this frame through ESC):
+            // Close that menu and do NOT open the pause menu!
             bool closedOtherMenu = false;
 
-            // Bancada de Trabalho / Crafting
+            // Workbench / Crafting.
             var crafting = CraftingUIManager.Instance ?? FindAnyObjectByType<CraftingUIManager>();
             if (crafting != null && (crafting.IsOpen || crafting.LastClosedFrame == Time.frameCount))
             {
@@ -301,7 +301,7 @@ namespace Duskborn.UI
                 closedOtherMenu = true;
             }
 
-            // Mochila / Inventário
+            // Backpack / Inventory.
             var inv = InventoryUIManager.Instance ?? FindAnyObjectByType<InventoryUIManager>();
             if (inv != null && (inv.IsOpen || inv.LastClosedFrame == Time.frameCount))
             {
@@ -312,7 +312,7 @@ namespace Duskborn.UI
                 closedOtherMenu = true;
             }
 
-            // Painel de Personagem
+            // Character panel.
             var charUI = CharacterUIManager.Instance ?? FindAnyObjectByType<CharacterUIManager>();
             if (charUI != null && (charUI.IsOpen || charUI.LastClosedFrame == Time.frameCount))
             {
@@ -323,7 +323,7 @@ namespace Duskborn.UI
                 closedOtherMenu = true;
             }
 
-            // Ficha de Atributos do HUD
+            // HUD attributes sheet.
             var hud = GameHUD.Instance ?? FindAnyObjectByType<GameHUD>();
             if (hud != null && hud.ShowStats)
             {
@@ -336,7 +336,7 @@ namespace Duskborn.UI
                 return;
             }
 
-            // 3. Nenhum outro menu aberto: agora sim abre o menu de pausa da expedição!
+            // 3. No other menu open: open the expedition pause menu now!
             OpenMenu();
         }
 
@@ -392,20 +392,20 @@ namespace Duskborn.UI
         }
 
         /// <summary>
-        /// Verifica se o jogador está completamente sozinho na partida para permitir pausar o Time.timeScale.
-        /// Em partidas multiplayer (como cliente conectado ou host com múltiplos jogadores), o tempo nunca é congelado.
+        /// Check whether the player is completely alone in the session to permit pausing Time.timeScale.
+        /// In multiplayer sessions (connected client or host with multiple players), time never freezes.
         /// </summary>
         public bool CanPauseGame()
         {
-            // Se FishNet não existir ou não estiver ativo, é single-player offline no Editor/local
+            // If FishNet is absent or inactive, this is offline single-player in the Editor / locally.
             if (FishNet.InstanceFinder.NetworkManager == null) return true;
             if (!FishNet.InstanceFinder.IsServerStarted && !FishNet.InstanceFinder.IsClientStarted) return true;
 
-            // Se for um cliente conectado a um servidor remoto, não pode pausar a sessão
+            // A client connected to a remote server cannot pause the session.
             if (FishNet.InstanceFinder.IsClientStarted && !FishNet.InstanceFinder.IsServerStarted)
                 return false;
 
-            // Se for o Host (Server), só pode pausar se estiver estritamente sozinho
+            // A Host (Server) can pause only when completely alone.
             if (FishNet.InstanceFinder.IsServerStarted)
             {
                 if (FishNet.InstanceFinder.ServerManager != null && FishNet.InstanceFinder.ServerManager.Clients.Count > 1)
@@ -436,16 +436,16 @@ namespace Duskborn.UI
 
             GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(scale, scale, 1f));
 
-            // 1. Escurecimento do mundo 3D com ardósia semitransparente
+            // 1. Darken the 3D world with semitransparent slate.
             GUI.DrawTexture(new Rect(0, 0, virtualW, virtualH), _backdropTexture, ScaleMode.StretchToFill);
 
-            // 2. Brasas flutuantes
+            // 2. Floating embers
             DrawEmbers(virtualW, virtualH);
 
-            // 3. Moldura medieval de tela
+            // 3. Medieval screen frame.
             DrawMedievalScreenBorders(virtualW, virtualH);
 
-            // 4. Se algum modal estiver ativo, desenha sobreposto
+            // 4. If a modal is active, draw it as an overlay.
             if (_showConfirmMainMenu)
             {
                 DrawConfirmMainMenuModal(virtualW, virtualH);
@@ -477,77 +477,77 @@ namespace Duskborn.UI
             float plaqueX = (screenW - plaqueW) * 0.5f;
             float plaqueY = (screenH - plaqueH) * 0.5f;
 
-            // Fundo de laje de ardósia com moldura de ferro e ouro
+            // Slate slab background with iron and gold frame.
             GUI.DrawTexture(new Rect(plaqueX - 5, plaqueY - 5, plaqueW + 10, plaqueH + 10), _ironFrameTexture);
             GUI.DrawTexture(new Rect(plaqueX - 2, plaqueY - 2, plaqueW + 4, plaqueH + 4), _goldTrimTexture);
             GUI.DrawTexture(new Rect(plaqueX, plaqueY, plaqueW, plaqueH), _slateTexture);
 
             DrawCornerRivets(plaqueX, plaqueY, plaqueW, plaqueH);
 
-            // Cabeçalho Heráldico
-            GUI.Label(new Rect(plaqueX, plaqueY + 22, plaqueW, 36), "⚔   EXPEDIÇÃO EM PAUSA   ⚔", _titleStyle);
-            string subText = CanPauseGame() ? "O Crepúsculo aguarda suas ordens (Pausado)" : "O Crepúsculo não espera ninguém (Multiplayer em tempo real)";
+            // Heraldic header.
+            GUI.Label(new Rect(plaqueX, plaqueY + 22, plaqueW, 36), "⚔   EXPEDITION PAUSED   ⚔", _titleStyle);
+            string subText = CanPauseGame() ? "The Twilight awaits your orders (Paused)" : "The Twilight waits for no one (Real-time Multiplayer)";
             GUI.Label(new Rect(plaqueX, plaqueY + 56, plaqueW, 20), subText, _subTitleStyle);
 
             DrawRunicDivider(plaqueX + 35, plaqueY + 84, plaqueW - 70);
 
-            // Status da Expedição
+            // Expedition status.
             DrawExpeditionStatus(plaqueX + 25, plaqueY + 98, plaqueW - 50);
 
             DrawRunicDivider(plaqueX + 35, plaqueY + 168, plaqueW - 70);
 
-            // Botões de Ação
+            // Action buttons.
             float btnW = plaqueW - 80;
             float btnH = 46f;
             float btnX = plaqueX + 40;
             float startY = plaqueY + 186;
             float spacing = 54f;
 
-            // 1. Continuar Expedição
-            if (DrawStoneButton(new Rect(btnX, startY, btnW, btnH), "▶   CONTINUAR EXPEDIÇÃO", true, false))
+            // 1. Continue Expedition.
+            if (DrawStoneButton(new Rect(btnX, startY, btnW, btnH), "▶   CONTINUE EXPEDITION", true, false))
             {
                 CloseMenu();
             }
 
-            // 2. Configurações
-            if (DrawStoneButton(new Rect(btnX, startY + spacing, btnW, btnH), "⚙   CONFIGURAÇÕES", false, false))
+            // 2. Settings.
+            if (DrawStoneButton(new Rect(btnX, startY + spacing, btnW, btnH), "⚙   SETTINGS", false, false))
             {
                 PlayModalSound();
                 _showSettingsModal = true;
             }
 
-            // 3. Sabedoria & Controles
-            if (DrawStoneButton(new Rect(btnX, startY + spacing * 2, btnW, btnH), "📜   SABEDORIA & CONTROLES", false, false))
+            // 3. Lore and Controls
+            if (DrawStoneButton(new Rect(btnX, startY + spacing * 2, btnW, btnH), "📜   LORE AND CONTROLS", false, false))
             {
                 PlayModalSound();
                 _showLoreModal = true;
             }
 
-            // 4. Retornar ao Menu Principal
-            if (DrawStoneButton(new Rect(btnX, startY + spacing * 3, btnW, btnH), "🏰   MENU PRINCIPAL", false, false))
+            // 4. Return to Main Menu.
+            if (DrawStoneButton(new Rect(btnX, startY + spacing * 3, btnW, btnH), "🏰   MAIN MENU", false, false))
             {
                 PlayClickSound();
                 _showConfirmMainMenu = true;
             }
 
-            // 5. Abandonar o Reino (Sair do Jogo)
-            if (DrawStoneButton(new Rect(btnX, startY + spacing * 4, btnW, btnH), "✕   ABANDONAR O REINO", false, true))
+            // 5. Leave the Realm (Quit Game).
+            if (DrawStoneButton(new Rect(btnX, startY + spacing * 4, btnW, btnH), "✕   LEAVE THE REALM", false, true))
             {
                 PlayClickSound();
                 _showConfirmQuit = true;
             }
 
-            // Rodapé da laje
+            // Slab footer.
             string escTip = CanPauseGame()
-                ? "Pressione [ESC] para retornar ao combate (Jogo Pausado)"
-                : "Pressione [ESC] para retornar ao combate (Multiplayer Ativo · Tempo Real)";
+                ? "Press [ESC] to return to combat (Game Paused)"
+                : "Press [ESC] to return to combat (Multiplayer Active · Real Time)";
             GUI.Label(new Rect(plaqueX, plaqueY + plaqueH - 24, plaqueW, 20), escTip, _statusStyle);
         }
 
         private void DrawExpeditionStatus(float x, float y, float w)
         {
             var cycle = Duskborn.Core.DayNightCycle.Instance;
-            string phaseName = cycle != null ? cycle.PeriodDisplayName : "Crepúsculo Ancestral";
+            string phaseName = cycle != null ? cycle.PeriodDisplayName : "Ancestral Twilight";
             string clock = cycle != null ? cycle.ClockTimeString : "12:00";
             int night = cycle != null ? cycle.CurrentNight : 1;
 
@@ -559,11 +559,11 @@ namespace Duskborn.UI
                 ? Duskborn.Gameplay.Loot.GoldManager.Instance.Gold 
                 : 0;
 
-            GUI.Label(new Rect(x, y, w, 20), $"✦ Período: <color=#fcd34d>{phaseName} [{clock}]</color>  ·  Noite: <color=#93c5fd>{night}</color>", _statusStyle);
-            GUI.Label(new Rect(x, y + 22, w, 20), $"✦ Semente do Relevo: <color=#a7f3d0>{terrainSeed}</color>  ·  Ouro Acumulado: <color=#fef08a>{gold} Moedas</color>", _statusStyle);
+            GUI.Label(new Rect(x, y, w, 20), $"✦ Period: <color=#fcd34d>{phaseName} [{clock}]</color>  ·  Night: <color=#93c5fd>{night}</color>", _statusStyle);
+            GUI.Label(new Rect(x, y + 22, w, 20), $"✦ Terrain Seed: <color=#a7f3d0>{terrainSeed}</color>  ·  Collected Gold: <color=#fef08a>{gold} Coins</color>", _statusStyle);
         }
 
-        // ── Modais Sobrepostos ────────────────────────────────────────────────
+        // ── Overlay Modals ──
 
         private void DrawSettingsModal(float screenW, float screenH)
         {
@@ -578,7 +578,7 @@ namespace Duskborn.UI
 
             DrawCornerRivets(modalX, modalY, modalW, modalH);
 
-            GUI.Label(new Rect(modalX, modalY + 20, modalW, 32), "⚙   CONFIGURAÇÕES DO REINO   ⚙", _modalHeaderStyle);
+            GUI.Label(new Rect(modalX, modalY + 20, modalW, 32), "⚙   REALM SETTINGS   ⚙", _modalHeaderStyle);
             DrawRunicDivider(modalX + 40, modalY + 54, modalW - 80);
 
             float cy = modalY + 70;
@@ -586,35 +586,35 @@ namespace Duskborn.UI
             float sliderW = modalW - labelW - 130f;
             float sliderX = modalX + labelW + 30f;
 
-            // Seção de Áudio
-            GUI.Label(new Rect(modalX + 35, cy, modalW - 70, 22), "✦ SUBSISTEMA DE ÁUDIO & TROMBETAS", _modalSectionStyle);
+            // Audio section.
+            GUI.Label(new Rect(modalX + 35, cy, modalW - 70, 22), "✦ AUDIO & HORNS SUBSYSTEM", _modalSectionStyle);
             cy += 28;
 
-            DrawAudioSlider("Volume Geral (Master):", ref _masterVolume, modalX + 40, cy, labelW, sliderX, sliderW, v => GameSettings.SetMasterVolume(v));
+            DrawAudioSlider("Master Volume:", ref _masterVolume, modalX + 40, cy, labelW, sliderX, sliderW, v => GameSettings.SetMasterVolume(v));
             cy += 34;
 
-            DrawAudioSlider("Música & Hinos:", ref _musicVolume, modalX + 40, cy, labelW, sliderX, sliderW, v => GameSettings.SetMusicVolume(v));
+            DrawAudioSlider("Music & Hymns:", ref _musicVolume, modalX + 40, cy, labelW, sliderX, sliderW, v => GameSettings.SetMusicVolume(v));
             cy += 34;
 
-            DrawAudioSlider("Efeitos de Batalha (SFX):", ref _sfxVolume, modalX + 40, cy, labelW, sliderX, sliderW, v => GameSettings.SetSfxVolume(v));
+            DrawAudioSlider("Battle Effects (SFX):", ref _sfxVolume, modalX + 40, cy, labelW, sliderX, sliderW, v => GameSettings.SetSfxVolume(v));
             cy += 34;
 
-            DrawAudioSlider("Atmosfera & Ermos:", ref _ambienceVolume, modalX + 40, cy, labelW, sliderX, sliderW, v => GameSettings.SetAmbienceVolume(v));
+            DrawAudioSlider("Atmosphere and Wilderness:", ref _ambienceVolume, modalX + 40, cy, labelW, sliderX, sliderW, v => GameSettings.SetAmbienceVolume(v));
             cy += 34;
 
-            DrawAudioSlider("Interface & Runas:", ref _uiVolume, modalX + 40, cy, labelW, sliderX, sliderW, v => GameSettings.SetUiVolume(v));
+            DrawAudioSlider("Interface and Runes:", ref _uiVolume, modalX + 40, cy, labelW, sliderX, sliderW, v => GameSettings.SetUiVolume(v));
             cy += 44;
 
             DrawRunicDivider(modalX + 40, cy, modalW - 80);
             cy += 14;
 
-            // Seção de Vídeo & Câmera
-            GUI.Label(new Rect(modalX + 35, cy, modalW - 70, 22), "✦ EXIBIÇÃO & CONTROLE DO OLHAR", _modalSectionStyle);
+            // Video & camera section.
+            GUI.Label(new Rect(modalX + 35, cy, modalW - 70, 22), "✦ DISPLAY & LOOK CONTROLS", _modalSectionStyle);
             cy += 28;
 
-            // Tela Inteira
-            GUI.Label(new Rect(modalX + 40, cy, labelW, 26), "Tela Inteira (Imersão):", _modalKeyStyle);
-            string fsText = _isFullScreen ? "☑   ATIVADA" : "☐   DESATIVADA";
+            // Fullscreen.
+            GUI.Label(new Rect(modalX + 40, cy, labelW, 26), "Fullscreen (Immersion):", _modalKeyStyle);
+            string fsText = _isFullScreen ? "☑   ENABLED" : "☐   DISABLED";
             if (GUI.Button(new Rect(sliderX, cy - 2, 160, 30), fsText, _btnSecondaryStyle))
             {
                 PlayClickSound();
@@ -623,8 +623,8 @@ namespace Duskborn.UI
             }
             cy += 36;
 
-            // Sensibilidade do Mouse
-            GUI.Label(new Rect(modalX + 40, cy, labelW, 26), "Sensibilidade do Olhar:", _modalKeyStyle);
+            // Mouse sensitivity.
+            GUI.Label(new Rect(modalX + 40, cy, labelW, 26), "Look Sensitivity:", _modalKeyStyle);
             float newSens = GUI.HorizontalSlider(new Rect(sliderX, cy + 6, sliderW, 18), _mouseSensitivity, 0.03f, 0.45f);
             GUI.Label(new Rect(sliderX + sliderW + 15, cy, 60, 26), $"{newSens:F2}x", _modalValStyle);
             if (Math.Abs(newSens - _mouseSensitivity) > 0.005f)
@@ -634,8 +634,8 @@ namespace Duskborn.UI
             }
             cy += 34;
 
-            // Inverter Eixo Y
-            GUI.Label(new Rect(modalX + 40, cy, labelW, 26), "Inverter Eixo Vertical (Pitch):", _modalKeyStyle);
+            // Invert Y Axis
+            GUI.Label(new Rect(modalX + 40, cy, labelW, 26), "Invert Vertical Axis (Pitch):", _modalKeyStyle);
             string invText = _invertPitch ? "☑   INVERTIDO" : "☐   NORMAL";
             if (GUI.Button(new Rect(sliderX, cy - 2, 160, 30), invText, _btnSecondaryStyle))
             {
@@ -644,13 +644,13 @@ namespace Duskborn.UI
                 GameSettings.SetInvertPitch(_invertPitch);
             }
 
-            // Botão Concluir
+            // Done button.
             float closeBtnW = 200f;
             float closeBtnH = 44f;
             float closeBtnX = modalX + (modalW - closeBtnW) * 0.5f;
             float closeBtnY = modalY + modalH - closeBtnH - 20f;
 
-            if (DrawStoneButton(new Rect(closeBtnX, closeBtnY, closeBtnW, closeBtnH), "✔   CONCLUIR", true, false))
+            if (DrawStoneButton(new Rect(closeBtnX, closeBtnY, closeBtnW, closeBtnH), "✔   DONE", true, false))
             {
                 PlayClickSound();
                 GameSettings.Save();
@@ -684,7 +684,7 @@ namespace Duskborn.UI
 
             DrawCornerRivets(modalX, modalY, modalW, modalH);
 
-            GUI.Label(new Rect(modalX, modalY + 18, modalW, 32), "📜   ENSINAMENTOS & CONTROLES DO REINO   📜", _modalHeaderStyle);
+            GUI.Label(new Rect(modalX, modalY + 18, modalW, 32), "📜   REALM TEACHINGS & CONTROLS   📜", _modalHeaderStyle);
             DrawRunicDivider(modalX + 40, modalY + 52, modalW - 80);
 
             float colW = (modalW - 90) * 0.5f;
@@ -692,40 +692,40 @@ namespace Duskborn.UI
             float col2X = col1X + colW + 10;
             float startY = modalY + 68;
 
-            // Coluna 1: Controles de Combate e Movimento
-            GUI.Label(new Rect(col1X, startY, colW, 22), "✦ COMBATE & MOBILIDADE", _modalSectionStyle);
-            DrawControlRow(col1X, startY + 28, colW, "W, A, S, D", "Marcha e movimentação tática");
-            DrawControlRow(col1X, startY + 62, colW, "Shift (Segurar)", "Disparada em corrida rápida");
-            DrawControlRow(col1X, startY + 96, colW, "Espaço", "Esquiva ágil com invulnerabilidade (I-Frames)");
-            DrawControlRow(col1X, startY + 130, colW, "Botão Esquerdo (LMB)", "Ataque veloz com a arma empunhada");
-            DrawControlRow(col1X, startY + 164, colW, "Botão Direito (RMB)", "Golpe circular pesado (Cleave)");
-            DrawControlRow(col1X, startY + 198, colW, "Q", "Habilidade rúnica especial da arma");
+            // Column 1: Combat and Movement Controls.
+            GUI.Label(new Rect(col1X, startY, colW, 22), "✦ COMBAT AND MOBILITY", _modalSectionStyle);
+            DrawControlRow(col1X, startY + 28, colW, "W, A, S, D", "Walking and tactical movement");
+            DrawControlRow(col1X, startY + 62, colW, "Shift (Segurar)", "Fast sprinting");
+            DrawControlRow(col1X, startY + 96, colW, "Space", "Agile dodge with invulnerability (I-Frames)");
+            DrawControlRow(col1X, startY + 130, colW, "Left Mouse Button (LMB)", "Fast attack with the wielded weapon");
+            DrawControlRow(col1X, startY + 164, colW, "Right Mouse Button (RMB)", "Heavy circular strike (Cleave)");
+            DrawControlRow(col1X, startY + 198, colW, "Q", "Special runic weapon ability");
 
-            // Coluna 2: Interface e Gestão
-            GUI.Label(new Rect(col2X, startY, colW, 22), "✦ GESTÃO & SOBREVIVÊNCIA", _modalSectionStyle);
-            DrawControlRow(col2X, startY + 28, colW, "I  /  Tab", "Abre a mochila de suprimentos e inventário");
-            DrawControlRow(col2X, startY + 62, colW, "1 a 8", "Atalhos rápidos da barra de ação");
-            DrawControlRow(col2X, startY + 96, colW, "C", "Exibe a ficha de atributos e status vital");
-            DrawControlRow(col2X, startY + 130, colW, "Esc", "Pausa a expedição e abre este santuário");
-            DrawControlRow(col2X, startY + 164, colW, "Fogueiras & Luz", "Afastam sombras e dissipam névoas vorazes");
-            DrawControlRow(col2X, startY + 198, colW, "Bancada Rúnica", "Forja ferramentas superiores com ferro e carvalho");
+            // Column 2: Interface and Management.
+            GUI.Label(new Rect(col2X, startY, colW, 22), "✦ MANAGEMENT & SURVIVAL", _modalSectionStyle);
+            DrawControlRow(col2X, startY + 28, colW, "I  /  Tab", "Open the supply backpack and inventory");
+            DrawControlRow(col2X, startY + 62, colW, "1 a 8", "Quick action bar shortcuts");
+            DrawControlRow(col2X, startY + 96, colW, "C", "Display attributes and vital status");
+            DrawControlRow(col2X, startY + 130, colW, "Esc", "Pause the expedition and open this sanctuary");
+            DrawControlRow(col2X, startY + 164, colW, "Campfires and Light", "Repel shadows and disperse ravenous mists");
+            DrawControlRow(col2X, startY + 198, colW, "Runic Workbench", "Forge superior tools with iron and oak");
 
             DrawRunicDivider(modalX + 40, modalY + 316, modalW - 80);
 
-            // Doutrina do Crepúsculo
-            GUI.Label(new Rect(modalX + 40, modalY + 332, modalW - 80, 22), "✦ SABEDORIA ANCESTRAL DO CREPÚSCULO", _modalSectionStyle);
-            string wisdom = "Durante as horas douradas da alvorada e dia, extraia madeira nobre, pedregulhos e minério das jazidas. " +
-                            "Quando as trombetas da noite ecoarem pelo relevo, as abominações despertarão das sombras. " +
-                            "Proteja o Santuário a qualquer custo e utilize as clareiras para quebrar a investida das hordas.";
+            // Twilight doctrine.
+            GUI.Label(new Rect(modalX + 40, modalY + 332, modalW - 80, 22), "✦ ANCESTRAL TWILIGHT WISDOM", _modalSectionStyle);
+            string wisdom = "During the golden hours of dawn and daylight, gather fine wood, stones, and ore from deposits. " +
+                            "When the night horns echo across the terrain, abominations awaken from the shadows. " +
+                            "Protect the Sanctuary at any cost and use clearings to break the hordes' charge.";
             GUI.Label(new Rect(modalX + 40, modalY + 360, modalW - 80, 70), wisdom, _modalBodyStyle);
 
-            // Botão Entendido
+            // Understood button.
             float closeBtnW = 200f;
             float closeBtnH = 44f;
             float closeBtnX = modalX + (modalW - closeBtnW) * 0.5f;
             float closeBtnY = modalY + modalH - closeBtnH - 20f;
 
-            if (DrawStoneButton(new Rect(closeBtnX, closeBtnY, closeBtnW, closeBtnH), "✔   ENTENDIDO", true, false))
+            if (DrawStoneButton(new Rect(closeBtnX, closeBtnY, closeBtnW, closeBtnH), "✔   UNDERSTOOD", true, false))
             {
                 PlayClickSound();
                 _showLoreModal = false;
@@ -751,26 +751,26 @@ namespace Duskborn.UI
 
             DrawCornerRivets(modalX, modalY, modalW, modalH);
 
-            GUI.Label(new Rect(modalX, modalY + 22, modalW, 28), "🏰   RETORNAR AO PORTAL DO CREPÚSCULO?   🏰", _modalHeaderStyle);
+            GUI.Label(new Rect(modalX, modalY + 22, modalW, 28), "🏰   RETURN TO THE TWILIGHT PORTAL?   🏰", _modalHeaderStyle);
             DrawRunicDivider(modalX + 30, modalY + 54, modalW - 60);
 
-            string warn = "A expedição atual será interrompida e o reino será descarregado. " +
-                          "Deseja realmente voltar ao Menu Principal?";
+            string warn = "The current expedition will end and the realm will unload. " +
+                          "Are you sure you want to return to the Main Menu?";
             GUI.Label(new Rect(modalX + 35, modalY + 70, modalW - 70, 50), warn, _modalBodyStyle);
 
             float btnW = 180f;
             float btnH = 42f;
             float btnY = modalY + modalH - btnH - 22f;
 
-            // Confirmar retorno
-            if (DrawStoneButton(new Rect(modalX + 45, btnY, btnW, btnH), "✔   SIM, RETORNAR", false, true))
+            // Confirm return.
+            if (DrawStoneButton(new Rect(modalX + 45, btnY, btnW, btnH), "✔   YES, RETURN", false, true))
             {
                 PlayClickSound();
                 ReturnToMainMenu();
             }
 
-            // Cancelar
-            if (DrawStoneButton(new Rect(modalX + modalW - btnW - 45, btnY, btnW, btnH), "✕   CANCELAR", true, false))
+            // Cancel.
+            if (DrawStoneButton(new Rect(modalX + modalW - btnW - 45, btnY, btnW, btnH), "✕   CANCEL", true, false))
             {
                 PlayClickSound();
                 _showConfirmMainMenu = false;
@@ -790,25 +790,25 @@ namespace Duskborn.UI
 
             DrawCornerRivets(modalX, modalY, modalW, modalH);
 
-            GUI.Label(new Rect(modalX, modalY + 22, modalW, 28), "✕   ABANDONAR O REINO?   ✕", _modalHeaderStyle);
+            GUI.Label(new Rect(modalX, modalY + 22, modalW, 28), "✕   LEAVE THE REALM?   ✕", _modalHeaderStyle);
             DrawRunicDivider(modalX + 30, modalY + 54, modalW - 60);
 
-            string warn = "Deseja encerrar o jogo Duskborn e retornar à sua área de trabalho?";
+            string warn = "Quit Duskborn and return to your desktop?";
             GUI.Label(new Rect(modalX + 35, modalY + 70, modalW - 70, 40), warn, _modalBodyStyle);
 
             float btnW = 180f;
             float btnH = 42f;
             float btnY = modalY + modalH - btnH - 22f;
 
-            // Confirmar saída
-            if (DrawStoneButton(new Rect(modalX + 45, btnY, btnW, btnH), "✔   SIM, SAIR", false, true))
+            // Confirm exit.
+            if (DrawStoneButton(new Rect(modalX + 45, btnY, btnW, btnH), "✔   YES, QUIT", false, true))
             {
                 PlayClickSound();
                 QuitGame();
             }
 
-            // Cancelar
-            if (DrawStoneButton(new Rect(modalX + modalW - btnW - 45, btnY, btnW, btnH), "✕   CANCELAR", true, false))
+            // Cancel.
+            if (DrawStoneButton(new Rect(modalX + modalW - btnW - 45, btnY, btnW, btnH), "✕   CANCEL", true, false))
             {
                 PlayClickSound();
                 _showConfirmQuit = false;
@@ -820,7 +820,7 @@ namespace Duskborn.UI
             Time.timeScale = 1f;
             IsOpen = false;
 
-            // Desconecta FishNet com segurança se estiver conectado
+            // Safely disconnect FishNet if connected.
             if (FishNet.InstanceFinder.NetworkManager != null)
             {
                 try
@@ -830,7 +830,7 @@ namespace Duskborn.UI
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogWarning($"[InGameMenuController] Aviso ao encerrar rede: {ex.Message}");
+                    Debug.LogWarning($"[InGameMenuController] Warning while shutting down networking: {ex.Message}");
                 }
             }
 
@@ -850,17 +850,17 @@ namespace Duskborn.UI
 #endif
         }
 
-        // ── Primitivas Gráficas Medievais ─────────────────────────────────────
+        // Medieval Graphics Primitives
 
         private bool DrawStoneButton(Rect rect, string text, bool isPrimary, bool isDanger)
         {
             Vector2 mousePos = Event.current != null ? GUI.matrix.inverse.MultiplyPoint(Event.current.mousePosition) : Vector2.zero;
             bool isHover = rect.Contains(mousePos);
 
-            // Borda externa de ferro forjado
+            // Outer wrought iron border.
             GUI.DrawTexture(new Rect(rect.x - 3, rect.y - 3, rect.width + 6, rect.height + 6), _ironFrameTexture);
 
-            // Moldura dourada ou rubi
+            // Gold or ruby frame.
             Color oldCol = GUI.color;
             if (isDanger)
             {
@@ -873,7 +873,7 @@ namespace Duskborn.UI
             GUI.DrawTexture(new Rect(rect.x - 1, rect.y - 1, rect.width + 2, rect.height + 2), _goldTrimTexture);
             GUI.color = oldCol;
 
-            // Textura da laje de pedra
+            // Stone slab texture.
             Texture2D fillTex;
             if (isDanger)
                 fillTex = isHover ? _btnDangerHoverTex : _btnDangerNormalTex;
@@ -882,7 +882,7 @@ namespace Duskborn.UI
 
             GUI.DrawTexture(rect, fillTex);
 
-            // Estilo do texto
+            // Text style.
             GUIStyle btnStyle;
             if (isDanger)
                 btnStyle = _btnDangerStyle;

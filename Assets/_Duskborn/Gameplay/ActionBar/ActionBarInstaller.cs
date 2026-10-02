@@ -17,7 +17,7 @@ namespace Duskborn.Gameplay.ActionBar
         [SerializeField] private InventoryGridLayoutController gridController;
         [SerializeField] private Image                         dragIcon;
 
-        [Header("Layout Settings (Consistência com Inventário)")]
+        [Header("Layout Settings (Inventory Consistency)")]
         [SerializeField] private Vector2                       slotCellSize = new(55f, 55f);
         [SerializeField] private Vector2                       slotSpacing = new(4f, 4f);
         [SerializeField] private float                         bottomOffset = 15f;
@@ -72,7 +72,7 @@ namespace Duskborn.Gameplay.ActionBar
 
             gridController.ApplyLayout();
 
-            // Re-assegura dimensões exatas de célula após ApplyLayout do gridController
+            // Ensure exact cell dimensions again after gridController.ApplyLayout.
             var glg = gridController.GetComponent<GridLayoutGroup>();
             if (glg != null)
             {
@@ -246,7 +246,7 @@ namespace Duskborn.Gameplay.ActionBar
 
             if (actionBarRoot != null)
             {
-                // Âncora inferior central (Bottom-Center)
+                // Bottom-center anchor.
                 actionBarRoot.anchorMin = new Vector2(0.5f, 0f);
                 actionBarRoot.anchorMax = new Vector2(0.5f, 0f);
                 actionBarRoot.pivot = new Vector2(0.5f, 0f);
@@ -275,7 +275,7 @@ namespace Duskborn.Gameplay.ActionBar
                 actionBarRoot.sizeDelta = new Vector2(totalW, totalH);
                 actionBarRoot.anchoredPosition = new Vector2(0f, bottomOffset);
 
-                // Normaliza a escala e rotação de todos os slots filhos para evitar distorções
+                // Normalize all child slot scales and rotations to avoid distortion.
                 for (int i = 0; i < actionBarRoot.childCount; i++)
                 {
                     var child = actionBarRoot.GetChild(i) as RectTransform;

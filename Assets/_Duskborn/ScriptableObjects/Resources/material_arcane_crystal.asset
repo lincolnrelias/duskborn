@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: material_arcane_crystal
   m_EditorClassIdentifier: Assembly-CSharp::InventorySystem.Data.MaterialDefinition
   id: material_arcane_crystal
-  displayName: Cristal Arcano
-  description: Cristal Arcano
+  displayName: "Arcane Crystal"
+  description: "Arcane Crystal"
   icon: {fileID: 0}
   dropPrefab: {fileID: 0}
   rarity: 2

@@ -7,8 +7,8 @@ using UnityEngine;
 namespace Duskborn.Audio.Editor
 {
     /// <summary>
-    /// Utilitário de reprodução de áudio diretamente no Unity Editor sem necessidade de entrar no Play Mode.
-    /// Utiliza reflexão sobre UnityEditor.AudioUtil, compatível com Unity 6 e versões modernas.
+    /// Audio playback utility for the Unity Editor without entering Play Mode.
+    /// Uses reflection on UnityEditor.AudioUtil, compatible with Unity 6 and modern versions.
     /// </summary>
     public static class AudioPreviewUtility
     {
@@ -30,17 +30,17 @@ namespace Duskborn.Audio.Editor
 
                 if (_audioUtilType != null)
                 {
-                    // Busca variações de assinatura de PlayPreviewClip / PlayClip
+                    // Find PlayPreviewClip / PlayClip signature variants.
                     _playPreviewMethod = _audioUtilType.GetMethod("PlayPreviewClip", BindingFlags.Static | BindingFlags.Public, null, new[] { typeof(AudioClip), typeof(int), typeof(bool) }, null)
                                       ?? _audioUtilType.GetMethod("PlayClip", BindingFlags.Static | BindingFlags.Public, null, new[] { typeof(AudioClip), typeof(int), typeof(bool) }, null)
                                       ?? _audioUtilType.GetMethod("PlayPreviewClip", BindingFlags.Static | BindingFlags.Public)
                                       ?? _audioUtilType.GetMethod("PlayClip", BindingFlags.Static | BindingFlags.Public);
 
-                    // Busca variações de StopAllPreviewClips / StopAllClips
+                    // Find StopAllPreviewClips / StopAllClips signature variants.
                     _stopAllPreviewMethod = _audioUtilType.GetMethod("StopAllPreviewClips", BindingFlags.Static | BindingFlags.Public)
                                          ?? _audioUtilType.GetMethod("StopAllClips", BindingFlags.Static | BindingFlags.Public);
 
-                    // Busca variações de IsPreviewClipPlaying / IsClipPlaying
+                    // Find IsPreviewClipPlaying / IsClipPlaying signature variants.
                     _isPlayingMethod = _audioUtilType.GetMethod("IsPreviewClipPlaying", BindingFlags.Static | BindingFlags.Public)
                                     ?? _audioUtilType.GetMethod("IsClipPlaying", BindingFlags.Static | BindingFlags.Public, null, new[] { typeof(AudioClip) }, null)
                                     ?? _audioUtilType.GetMethod("IsClipPlaying", BindingFlags.Static | BindingFlags.Public);
@@ -48,7 +48,7 @@ namespace Duskborn.Audio.Editor
             }
             catch (Exception ex)
             {
-                Debug.LogWarning($"[AudioPreviewUtility] Falha ao inicializar AudioUtil via reflexão: {ex.Message}");
+                Debug.LogWarning($"[AudioPreviewUtility] Failed to initialize AudioUtil through reflection: {ex.Message}");
             }
         }
 
@@ -73,7 +73,7 @@ namespace Duskborn.Audio.Editor
             }
             else
             {
-                // Fallback via AudioSource temporário
+                // Fallback using a temporary AudioSource.
                 PlayClipViaTempSource(clip);
             }
         }

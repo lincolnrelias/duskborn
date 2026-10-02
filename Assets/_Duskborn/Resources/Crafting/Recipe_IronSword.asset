@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_IronSword
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_IronSword
-  recipeName: Espada de Ferro
-  description: Espada de Ferro
-  category: Armas
+  recipeName: "Iron Sword"
+  description: "Iron Sword"
+  category: "Weapons"
   tier: 3
   requiredStation: 1
   isAlwaysDiscovered: 0

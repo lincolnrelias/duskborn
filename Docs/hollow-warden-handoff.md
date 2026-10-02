@@ -194,7 +194,7 @@ This revision supersedes the earlier wave replacement, immediate dawn and pendin
 - The existing midnight hold preserves 45% of the night clock. Killing the boss releases
   that hold immediately; the remaining night finishes naturally. It never calls EndNight.
 - Death grants the existing 75 gold once and drops one guaranteed epic `material_hollow_heart`
-  (Coração Oco). The Arcane Table requires one heart in addition to its existing materials.
+  (Hollow Heart). The Arcane Table requires one heart in addition to its existing materials.
   The definition lives under Resources/Bosses/Items and is registered on clients and in
   inventory UI. It reuses the registered stone pickup mesh with epic loot effects.
 - HollowWardenFeedback uses existing AudioDatabase references: wood preparation/eruption,

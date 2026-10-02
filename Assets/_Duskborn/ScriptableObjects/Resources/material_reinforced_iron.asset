@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: material_reinforced_iron
   m_EditorClassIdentifier: Assembly-CSharp::InventorySystem.Data.MaterialDefinition
   id: material_reinforced_iron
-  displayName: "Ferro Refor\xE7ado"
-  description: "Ferro Refor\xE7ado"
+  displayName: "Reinforced Iron"
+  description: "Reinforced Iron"
   icon: {fileID: 2800000, guid: fffd210215ff4e709f34de4681cd02d4, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 1

@@ -24,7 +24,7 @@ namespace Duskborn.Editor
 
             AssetDatabase.Refresh();
 
-            // 1. Gera e salva as Malhas .asset
+            // 1. Generate and save .asset meshes.
             Mesh grassMesh = FoliageMeshUtility.CreateGrassTuftMesh(bladeCount: 5, height: 0.95f, baseWidth: 0.16f);
             AssetDatabase.CreateAsset(grassMesh, $"{meshFolder}/Mesh_GrassTuft.asset");
 
@@ -58,7 +58,7 @@ namespace Duskborn.Editor
             Mesh treeCanopyMesh = FoliageMeshUtility.CreateTreeCanopyMesh(radius: 2.2f, height: 3.5f);
             AssetDatabase.CreateAsset(treeCanopyMesh, $"{meshFolder}/Mesh_TreeCanopy.asset");
 
-            // Novas Malhas: Ervas Daninhas Silvestres
+            // New Meshes: Wild Weeds
             Mesh wildWeedMesh = FoliageMeshUtility.CreateWildWeedTuftMesh(leafCount: 6, radius: 0.48f, height: 0.42f);
             AssetDatabase.CreateAsset(wildWeedMesh, $"{meshFolder}/Mesh_WildWeedTuft.asset");
 
@@ -71,11 +71,11 @@ namespace Duskborn.Editor
             Mesh cloverMesh = FoliageMeshUtility.CreateCloverPatchMesh(cloverCount: 7, radius: 0.38f);
             AssetDatabase.CreateAsset(cloverMesh, $"{meshFolder}/Mesh_CloverPatch.asset");
 
-            // Novas Malhas: Margem Aquática
+            // New Meshes: Water Margin.
             Mesh cattailBedMesh = FoliageMeshUtility.CreateWaterCattailBedMesh(reedCount: 10, cattailCount: 3, radius: 0.65f, height: 1.55f);
             AssetDatabase.CreateAsset(cattailBedMesh, $"{meshFolder}/Mesh_WaterCattailBed.asset");
 
-            // Novas Malhas: Pequenas Pedras e Seixos
+            // New Meshes: Small Rocks and Pebbles
             Mesh singlePebbleMesh = FoliageMeshUtility.CreateLittlePebbleMesh(radius: 0.18f, height: 0.12f);
             AssetDatabase.CreateAsset(singlePebbleMesh, $"{meshFolder}/Mesh_LittlePebble.asset");
 
@@ -88,13 +88,13 @@ namespace Duskborn.Editor
             Mesh screeRockMesh = FoliageMeshUtility.CreateScreeRockMesh(size: 0.26f);
             AssetDatabase.CreateAsset(screeRockMesh, $"{meshFolder}/Mesh_ScreeRock.asset");
 
-            // Carrega Materiais
+            // Load materials.
             Material grassMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Duskborn/Art/Materials/M_Foliage_Grass.mat");
             Material bushMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Duskborn/Art/Materials/M_Foliage_Bush.mat");
             Material treeCanopyMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Duskborn/Art/Materials/M_Foliage_TreeCanopy.mat");
             Material woodMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Duskborn/Art/Models/Wood.mat");
 
-            // 2. Prefabs: Tufos de Grama e Ervas Daninhas
+            // 2. Prefabs: Grass and Weed Tufts.
             SaveFoliagePrefab(grassMesh, grassMat, "Prefab_GrassTuft", prefabFolder);
             SaveFoliagePrefab(carpetMesh, grassMat, "Prefab_DenseCarpetGrass", prefabFolder);
             SaveFoliagePrefab(lushMesh, grassMat, "Prefab_LushGrassClump", prefabFolder);
@@ -107,22 +107,22 @@ namespace Duskborn.Editor
             SaveFoliagePrefab(cloverMesh, grassMat, "Prefab_CloverPatch", prefabFolder);
             SaveFoliagePrefab(cattailBedMesh, grassMat, "Prefab_WaterCattailBed", prefabFolder);
 
-            // 3. Prefabs: Pequenas Pedras e Seixos
+            // 3. Prefabs: Small Rocks and Pebbles
             SaveFoliagePrefab(singlePebbleMesh, grassMat, "Prefab_LittlePebble", prefabFolder);
             SaveFoliagePrefab(pebbleClusterMesh, grassMat, "Prefab_PebbleCluster", prefabFolder);
             SaveFoliagePrefab(riverStoneMesh, grassMat, "Prefab_RiverStone", prefabFolder);
             SaveFoliagePrefab(screeRockMesh, grassMat, "Prefab_ScreeRock", prefabFolder);
 
-            // 4. Prefabs: Arbustos
+            // 4. Prefabs: Shrubs
             SaveFoliagePrefab(bushMesh, bushMat, "Prefab_StylizedBush", prefabFolder);
             SaveFoliagePrefab(floweringBushMesh, bushMat, "Prefab_FloweringBush", prefabFolder);
             SaveFoliagePrefab(fernMesh, bushMat, "Prefab_FernBush", prefabFolder);
             SaveFoliagePrefab(groundShrubMesh, bushMat, "Prefab_GroundShrub", prefabFolder);
 
-            // 4. Prefab: Árvore Estilizada (Tronco + Copa com Shader de Folhagem)
+            // 4. Prefab: Stylized Tree (Trunk + Canopy with Foliage Shader).
             GameObject treeGO = new GameObject("Prefab_StylizedTree");
             
-            // Tronco (Cilindro low-poly ou cubo esticado)
+            // Trunk (low-poly cylinder or stretched cube).
             GameObject trunkGO = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             trunkGO.name = "Trunk";
             trunkGO.transform.parent = treeGO.transform;
@@ -132,7 +132,7 @@ namespace Duskborn.Editor
             if (woodMat != null) mrTrunk.sharedMaterial = woodMat;
             Object.DestroyImmediate(trunkGO.GetComponent<Collider>());
 
-            // Copa Estilizada
+            // Stylized Canopy
             GameObject canopyGO = new GameObject("Canopy");
             canopyGO.transform.parent = treeGO.transform;
             canopyGO.transform.localPosition = new Vector3(0f, 2.4f, 0f);
@@ -143,7 +143,7 @@ namespace Duskborn.Editor
             mrCanopy.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
             mrCanopy.receiveShadows = true;
 
-            // Collider no tronco
+            // Trunk collider.
             var col = treeGO.AddComponent<CapsuleCollider>();
             col.center = new Vector3(0f, 1.35f, 0f);
             col.radius = 0.35f;
@@ -156,7 +156,7 @@ namespace Duskborn.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
-            Debug.Log($"[FoliageAssetCreator] Folhagem criada com sucesso!\nMeshes em: {meshFolder}\nPrefabs em: {prefabFolder}");
+            Debug.Log($"[FoliageAssetCreator] Foliage created successfully!\nMeshes at: {meshFolder}\nPrefabs at: {prefabFolder}");
         }
 
         private static void SaveFoliagePrefab(Mesh mesh, Material material, string prefabName, string folder)

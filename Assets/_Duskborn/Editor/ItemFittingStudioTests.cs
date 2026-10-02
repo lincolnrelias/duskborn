@@ -9,12 +9,12 @@ using UnityEngine;
 namespace Duskborn.Editor
 {
     /// <summary>
-    /// Testes automatizados para o sistema de perfis de acoplamento (ItemAttachmentProfile)
-    /// e integração com WeaponDefinition e WeaponItem.
+    /// Automated tests for the attachment profile system (ItemAttachmentProfile)
+    /// and integration with WeaponDefinition and WeaponItem.
     /// </summary>
     public static class ItemFittingStudioTests
     {
-        [MenuItem("Duskborn/Tests/Executar Testes de Ajuste de Itens", false, 115)]
+        [MenuItem("Duskborn/Tests/Run Item Fitting Tests", false, 115)]
         public static void RunAllTests()
         {
             int passed = 0;
@@ -30,7 +30,7 @@ namespace Duskborn.Editor
             RunTest(Test_ProjectilePreview_CustomSpawnOffsets, ref passed, ref total);
             RunTest(Test_ProjectilePreview_ReadsCurrentSpawnSettings, ref passed, ref total);
 
-            Debug.Log($"<color=#55FF55><b>[ItemFittingStudioTests] {passed}/{total} testes passaram com sucesso!</b></color>");
+            Debug.Log($"<color=#55FF55><b>[ItemFittingStudioTests] {passed}/{total} tests passed!</b></color>");
         }
 
         private static void RunTest(Action testMethod, ref int passed, ref int total)
@@ -43,7 +43,7 @@ namespace Duskborn.Editor
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[ItemFittingStudioTests] FALHA em {testMethod.Method.Name}: {ex.Message}\n{ex.StackTrace}");
+                Debug.LogError($"[ItemFittingStudioTests] FAILURE in {testMethod.Method.Name}: {ex.Message}\n{ex.StackTrace}");
             }
         }
 
@@ -58,13 +58,13 @@ namespace Duskborn.Editor
             profile.SetOffsets(testPos, testRot, testScale, testBone);
 
             if (profile.Bone != testBone)
-                throw new Exception($"Bone esperado: {testBone}, obtido: {profile.Bone}");
+                throw new Exception($"Expected bone: {testBone}, actual: {profile.Bone}");
             if (profile.PositionOffset != testPos)
-                throw new Exception($"PositionOffset esperado: {testPos}, obtido: {profile.PositionOffset}");
+                throw new Exception($"Expected PositionOffset: {testPos}, actual: {profile.PositionOffset}");
             if (profile.RotationOffset != testRot)
-                throw new Exception($"RotationOffset esperado: {testRot}, obtido: {profile.RotationOffset}");
+                throw new Exception($"Expected RotationOffset: {testRot}, actual: {profile.RotationOffset}");
             if (profile.Scale != testScale)
-                throw new Exception($"Scale esperado: {testScale}, obtido: {profile.Scale}");
+                throw new Exception($"Expected scale: {testScale}, actual: {profile.Scale}");
 
             var dummyObj = new GameObject("DummyTestWeapon");
             try
@@ -72,11 +72,11 @@ namespace Duskborn.Editor
                 profile.ApplyToTransform(dummyObj.transform);
 
                 if (Vector3.Distance(dummyObj.transform.localPosition, testPos) > 0.001f)
-                    throw new Exception("Falha ao aplicar localPosition.");
+                    throw new Exception("Failed to apply localPosition.");
                 if (Quaternion.Angle(dummyObj.transform.localRotation, Quaternion.Euler(testRot)) > 0.01f)
-                    throw new Exception("Falha ao aplicar localRotation.");
+                    throw new Exception("Failed to apply localRotation.");
                 if (Vector3.Distance(dummyObj.transform.localScale, testScale) > 0.001f)
-                    throw new Exception("Falha ao aplicar localScale.");
+                    throw new Exception("Failed to apply localScale.");
             }
             finally
             {
@@ -94,7 +94,7 @@ namespace Duskborn.Editor
             {
                 weaponDef.SetAttachmentProfile(profile);
                 if (weaponDef.AttachmentProfile != profile)
-                    throw new Exception("AttachmentProfile não foi atribuído corretamente no WeaponDefinition.");
+                    throw new Exception("AttachmentProfile was not correctly assigned to WeaponDefinition.");
             }
             finally
             {
@@ -120,9 +120,9 @@ namespace Duskborn.Editor
                 var runtimeItem = weaponDef.CreateRuntimeItem() as WeaponItem;
 
                 if (runtimeItem == null)
-                    throw new Exception("CreateRuntimeItem() não retornou um WeaponItem.");
+                    throw new Exception("CreateRuntimeItem() did not return a WeaponItem.");
                 if (runtimeItem.AttachmentProfile != profile)
-                    throw new Exception("WeaponItem em tempo de execução não contém a referência do AttachmentProfile.");
+                    throw new Exception("Runtime WeaponItem does not contain the AttachmentProfile reference.");
             }
             finally
             {
@@ -158,36 +158,36 @@ namespace Duskborn.Editor
 
             string json = JsonUtility.ToJson(originalState);
             if (string.IsNullOrEmpty(json))
-                throw new Exception("Falha ao serializar WindowSavedState para JSON.");
+                throw new Exception("Failed to serialize WindowSavedState to JSON.");
 
             var restoredState = JsonUtility.FromJson<ItemFittingStudioWindow.WindowSavedState>(json);
             if (restoredState == null)
-                throw new Exception("Falha ao desserializar WindowSavedState do JSON.");
+                throw new Exception("Failed to deserialize WindowSavedState from JSON.");
 
             if (restoredState.weaponGuid != originalState.weaponGuid)
-                throw new Exception("weaponGuid não corresponde.");
+                throw new Exception("weaponGuid does not match.");
             if (restoredState.profileGuid != originalState.profileGuid)
-                throw new Exception("profileGuid não corresponde.");
+                throw new Exception("profileGuid does not match.");
             if (Vector3.Distance(restoredState.camTarget, originalState.camTarget) > 0.001f)
-                throw new Exception("camTarget não corresponde.");
+                throw new Exception("camTarget does not match.");
             if (Mathf.Abs(restoredState.camYaw - originalState.camYaw) > 0.001f)
-                throw new Exception("camYaw não corresponde.");
+                throw new Exception("camYaw does not match.");
             if (restoredState.targetBone != originalState.targetBone)
-                throw new Exception("targetBone não corresponde.");
+                throw new Exception("targetBone does not match.");
             if (Vector3.Distance(restoredState.positionOffset, originalState.positionOffset) > 0.001f)
-                throw new Exception("positionOffset não corresponde.");
+                throw new Exception("positionOffset does not match.");
             if (Vector3.Distance(restoredState.rotationOffset, originalState.rotationOffset) > 0.001f)
-                throw new Exception("rotationOffset não corresponde.");
+                throw new Exception("rotationOffset does not match.");
             if (Vector3.Distance(restoredState.scaleOffset, originalState.scaleOffset) > 0.001f)
-                throw new Exception("scaleOffset não corresponde.");
+                throw new Exception("scaleOffset does not match.");
             if (restoredState.darkBackground != originalState.darkBackground)
-                throw new Exception("darkBackground não corresponde.");
+                throw new Exception("darkBackground does not match.");
             if (restoredState.selectedClipIndex != originalState.selectedClipIndex)
-                throw new Exception("selectedClipIndex não corresponde.");
+                throw new Exception("selectedClipIndex does not match.");
             if (Mathf.Abs(restoredState.playbackSpeed - originalState.playbackSpeed) > 0.001f)
-                throw new Exception("playbackSpeed não corresponde.");
+                throw new Exception("playbackSpeed does not match.");
             if (Mathf.Abs(restoredState.currentTime - originalState.currentTime) > 0.001f)
-                throw new Exception("currentTime não corresponde.");
+                throw new Exception("currentTime does not match.");
         }
 
         private static void Test_ProjectilePreview_BallisticsAndLifetime()
@@ -355,7 +355,7 @@ namespace Duskborn.Editor
         {
             string[] guids = AssetDatabase.FindAssets("t:WeaponDefinition");
             if (guids.Length == 0)
-                throw new Exception("Nenhum WeaponDefinition encontrado no projeto.");
+                throw new Exception("No WeaponDefinition found in the project.");
 
             foreach (string guid in guids)
             {
@@ -364,14 +364,14 @@ namespace Duskborn.Editor
                 if (weapon == null) continue;
 
                 if (weapon.Prefab == null)
-                    throw new Exception($"WeaponDefinition em '{path}' não possui Prefab associado.");
+                    throw new Exception($"WeaponDefinition at '{path}' has no associated prefab.");
 
                 var renderers = weapon.Prefab.GetComponentsInChildren<Renderer>(true);
                 if (renderers.Length == 0)
-                    throw new Exception($"Prefab da arma '{weapon.name}' em '{path}' não possui nenhum componente Renderer.");
+                    throw new Exception($"Weapon prefab '{weapon.name}' at '{path}' has no Renderer component.");
 
                 if (weapon.Prefab.transform.localScale == Vector3.zero)
-                    throw new Exception($"Prefab da arma '{weapon.name}' tem escala local zerada.");
+                    throw new Exception($"Weapon prefab '{weapon.name}' has zero local scale.");
             }
         }
     }

@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: gear_heavy_boots
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.GearDefinition
   id: gear_heavy_boots
-  displayName: "Botas de A\xE7o Pesado"
-  description: "Botas de A\xE7o Pesado"
+  displayName: "Heavy Steel Boots"
+  description: "Heavy Steel Boots"
   icon: {fileID: 2800000, guid: a813a09b64aa4205a54b517d85d98e1c, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 0

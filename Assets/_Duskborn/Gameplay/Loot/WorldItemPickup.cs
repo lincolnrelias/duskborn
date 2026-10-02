@@ -85,7 +85,7 @@ namespace Duskborn.Gameplay.Loot
         private float GetLingerDuration()
         {
             int seed = NetworkObject != null ? (int)NetworkObject.ObjectId : gameObject.GetInstanceID();
-            float jitter = (seed & 7) * 0.05f; // 0.00 a 0.35s de variação para cascata orgânica
+            float jitter = (seed & 7) * 0.05f; // 0.00 to 0.35s variation for an organic cascade.
             return lingerDuration + jitter;
         }
 
@@ -106,7 +106,7 @@ namespace Duskborn.Gameplay.Loot
 
             if (targetPlayer != null && CanFlyToPlayer(rarity))
             {
-                // Permite que os itens scatterem e pousem com física livre pelo dobro do tempo antes de voarem
+                // Allow items to scatter and land with free physics for twice as long before flying.
                 CancelInvoke(nameof(SetCollectible));
                 Invoke(nameof(SetCollectible), GetLingerDuration());
             }
@@ -141,7 +141,7 @@ namespace Duskborn.Gameplay.Loot
             float linger = GetLingerDuration();
             float elapsed = Time.time - _spawnTime;
 
-            // Permanece em física livre saltando e assentando no chão pelo período de linger
+            // Remain in free physics, bouncing and settling on the ground during the linger period.
             if (elapsed < linger) return;
 
             if (!_isFlying)
@@ -202,7 +202,7 @@ namespace Duskborn.Gameplay.Loot
 
             if (clip != null)
             {
-                DuskLog.Log(LogChannel.Loot, $"PlayDropSound: Tocando som de drop [{clip.name}] para tier {dropRarity} (vol={volume:F2}) em {position}");
+                DuskLog.Log(LogChannel.Loot, $"PlayDropSound: Playing drop sound [{clip.name}] for tier {dropRarity} (vol={volume:F2}) at {position}");
                 if (Duskborn.Audio.AudioManager.Instance != null)
                     Duskborn.Audio.AudioManager.Instance.PlayAtPoint(clip, position, volume, 6f, 60f, 0.03f, 0.35f);
                 else
@@ -210,7 +210,7 @@ namespace Duskborn.Gameplay.Loot
             }
             else
             {
-                DuskLog.Warn(LogChannel.Loot, $"RpcPlayDropSound: clipe de áudio para tier {dropRarity} não foi encontrado.");
+                DuskLog.Warn(LogChannel.Loot, $"RpcPlayDropSound: audio clip for tier {dropRarity} was not found.");
             }
         }
 

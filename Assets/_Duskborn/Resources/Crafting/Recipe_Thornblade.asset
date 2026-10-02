@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_Thornblade
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_Thornblade
-  recipeName: "L\xE2mina do Espinheiro"
-  description: "L\xE2mina do Espinheiro"
-  category: Armas
+  recipeName: "Thornheart Blade"
+  description: "Thornheart Blade"
+  category: "Weapons"
   tier: 4
   requiredStation: 3
   isAlwaysDiscovered: 0

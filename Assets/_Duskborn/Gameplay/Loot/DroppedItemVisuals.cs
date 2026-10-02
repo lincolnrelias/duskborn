@@ -4,22 +4,22 @@ using UnityEngine;
 namespace Duskborn.Gameplay.Loot
 {
     /// <summary>
-    /// Efeito visual completo estilo Diablo para itens caídos no chão:
-    /// - Camada 1: Ponto de contato no solo com hotspot brilhante, ondulações concêntricas e pool difuso.
-    /// - Camada 2: Coluna de plasma vertical em ascensão contínua (UV shader animado, núcleo incandescente branco, queda Gaussiana).
-    /// - Camada 3: Motes/centelhas que sobem pelo feixe em direção aos céus (Raro, Épico, Lendário).
-    /// - Camada 4: Flash/spike inicial no impacto que assenta na coluna estável.
-    /// - Camada 5: Luz pontual suave ("dim light") com pulsação orgânica.
-    /// - Camada 6: Shader de outline e onda gradiente animada sobre a malha do item (Incomum e superior).
+    /// Complete Diablo-style visual effect for items dropped on the ground:
+    /// - Layer 1: ground contact point with a bright hotspot, concentric ripples, and a diffuse pool.
+    /// - Layer 2: continuously rising vertical plasma column (animated shader UVs, white incandescent core, Gaussian falloff).
+    /// - Layer 3: motes / sparks rising along the beam toward the sky (Rare, Epic, Legendary).
+    /// - Layer 4: initial impact flash / spike settling into a stable column.
+    /// - Layer 5: soft point light ("dim light") with organic pulsing.
+    /// - Layer 6: outline and animated gradient wave shader on the item mesh (Uncommon and above).
     /// 
-    /// IMPORTANTE: Todo o conjunto visual é isolado em um GameObject raiz de mundo independente (_vfxRoot)
-    /// com escala fixa (1, 1, 1), tornando-o 100% imune a prefabs com escalas arbitrárias
-    /// como ferro (20x20x20) e madeira (15x30x30).
+    /// IMPORTANT: All visuals are isolated in an independent world root GameObject (_vfxRoot)
+    /// with fixed scale (1, 1, 1), making them fully immune to arbitrarily scaled prefabs
+    /// such as iron (20x20x20) and wood (15x30x30).
     /// </summary>
     [DisallowMultipleComponent]
     public class DroppedItemVisuals : MonoBehaviour
     {
-        [Header("Configuração de Tier")]
+        [Header("Tier Configuration")]
         [SerializeField] private ItemRarity currentRarity = ItemRarity.Common;
 
         private GameObject      _vfxRoot;
@@ -49,13 +49,13 @@ namespace Duskborn.Gameplay.Loot
         private float _spawnTime;
         private bool  _isSetup;
 
-        // Ancoragem ao terreno
+        // Terrain anchoring.
         private Vector3 _groundNormal = Vector3.up;
         private Vector3 _groundPoint;
         private bool    _hasGroundHit;
         private float   _nextGroundCheckTime;
 
-        // Shaders e materiais URP compartilhados
+        // Shared URP shaders and materials.
         private static Shader   _beamShader;
         private static Shader   _groundFlareShader;
         private static Material _sharedBeamMaterial;
@@ -106,7 +106,7 @@ namespace Duskborn.Gameplay.Loot
         {
             if (_vfxRoot == null)
             {
-                // Raiz global isolada em world space com escala (1,1,1) garantida
+                // Isolated global root in world space with guaranteed scale (1,1,1).
                 _vfxRoot = new GameObject($"LootVFX_{name}_{++_vfxCounter}");
                 _vfxRoot.transform.SetParent(null, false);
                 _vfxRoot.transform.position = transform.position;
@@ -124,7 +124,7 @@ namespace Duskborn.Gameplay.Loot
 
             Color tierColor = ItemTierHelper.GetColor(rarity);
 
-            // 1. Itens Brancos (Comum): NENHUM efeito visual
+            // 1. White items (Common): NO visual effect.
             if (rarity == ItemRarity.Common)
             {
                 CleanupLight();
@@ -143,7 +143,7 @@ namespace Duskborn.Gameplay.Loot
                 return;
             }
 
-            // 2. Itens Verdes e Azuis (Incomum e Raro): Apenas o shader com outline e gradiente de onda animada (sem feixe/raio pro céu)
+            // 2. Green and blue items (Uncommon and Rare): only the outline and animated wave gradient shader (no sky beam).
             if (rarity == ItemRarity.Uncommon || rarity == ItemRarity.Rare)
             {
                 CleanupLight();
@@ -162,9 +162,9 @@ namespace Duskborn.Gameplay.Loot
                 return;
             }
 
-            // 3. Épico e acima (Épico, Lendário, Amaldiçoado):
-            // Mantêm o feixe vertical que vai aos céus, halo no chão, luz pontual, partículas
-            // e TAMBÉM recebem o shader de outline + onda em suas respectivas cores!
+            // 3. Epic and above (Epic, Legendary, Cursed):
+            // Retain the skyward vertical beam, ground halo, point light, and particles,
+            // and ALSO receive the outline + wave shader in their respective colors!
             EnsureVfxRoot();
             if (_vfxRoot != null) _vfxRoot.SetActive(true);
             EnsureSharedMaterials();
@@ -394,7 +394,7 @@ namespace Duskborn.Gameplay.Loot
 
             Color col = new Color(tierColor.r, tierColor.g, tierColor.b, alpha);
 
-            // 3 planos verticais cruzados a 60° (cilindro estelar de 6 pontas com volume 360°)
+            // 3 vertical planes crossed at 60° (six-point star cylinder with 360° volume).
             float[] angles = new float[] { 0f, 60f, 120f };
             int planeCount = angles.Length;
 
@@ -412,7 +412,7 @@ namespace Duskborn.Gameplay.Loot
                 // Base
                 vertices[vBase + 0] = -dir * w;
                 vertices[vBase + 1] =  dir * w;
-                // Topo (afilado suavemente em direção aos céus)
+                // Top (tapers smoothly toward the sky).
                 vertices[vBase + 2] = -dir * (w * 0.70f) + Vector3.up * h;
                 vertices[vBase + 3] =  dir * (w * 0.70f) + Vector3.up * h;
 
@@ -427,7 +427,7 @@ namespace Duskborn.Gameplay.Loot
                 uvs[vBase + 3] = new Vector2(1f, 1f);
 
                 int tBase = i * 12;
-                // Face frontal
+                // Front face
                 tris[tBase + 0] = vBase + 0;
                 tris[tBase + 1] = vBase + 2;
                 tris[tBase + 2] = vBase + 1;
@@ -436,7 +436,7 @@ namespace Duskborn.Gameplay.Loot
                 tris[tBase + 4] = vBase + 2;
                 tris[tBase + 5] = vBase + 3;
 
-                // Face traseira
+                // Back face
                 tris[tBase + 6] = vBase + 1;
                 tris[tBase + 7] = vBase + 2;
                 tris[tBase + 8] = vBase + 0;
@@ -634,12 +634,12 @@ namespace Duskborn.Gameplay.Loot
 
             Vector3 visualCenter = GetVisualCenter();
 
-            // Raiz global isolada sincronizada com o centro geométrico do item
+            // Isolated global root synchronized with the item's geometric center.
             _vfxRoot.transform.position = visualCenter;
             _vfxRoot.transform.rotation = Quaternion.identity;
             _vfxRoot.transform.localScale = Vector3.one;
 
-            // Efeito de impacto inicial (flash/spike que assenta suavemente)
+            // Initial impact effect (flash / spike that settles smoothly).
             float elapsedSinceDrop = time - _spawnTime;
             float dropSpike = 1f;
             if (elapsedSinceDrop < 0.40f)
@@ -654,8 +654,8 @@ namespace Duskborn.Gameplay.Loot
                 _nextGroundCheckTime = time + 0.15f;
             }
 
-            // O FEIXE SEMPRE PARTE RIGOROSAMENTE DO CENTRO VISUAL DO OBJETO PARA O CÉU (Vector3.up),
-            // perfeitamente alinhado em X, Y e Z com o centro do modelo 3D.
+            // THE BEAM ALWAYS EXTENDS FROM THE OBJECT'S VISUAL CENTER TOWARD THE SKY (Vector3.up),
+            // perfectly aligned in X, Y, and Z with the 3D model center.
             if (_beamTransform != null)
             {
                 _beamTransform.position = visualCenter;
@@ -665,7 +665,7 @@ namespace Duskborn.Gameplay.Loot
                 _beamTransform.localScale = new Vector3(beamPulse, 1f, beamPulse);
             }
 
-            // O HALO REPOUSA PLANO NO TERRENO diretamente abaixo do centro do objeto
+            // THE HALO RESTS FLAT ON THE TERRAIN directly beneath the object center.
             if (_haloTransform != null)
             {
                 Vector3 haloPos = _hasGroundHit
@@ -679,7 +679,7 @@ namespace Duskborn.Gameplay.Loot
                 _haloTransform.localScale = new Vector3(haloPulse, 1f, haloPulse);
             }
 
-            // Luz suave ("dim light") posicionada no centro do objeto
+            // Soft light ("dim light") positioned at the object center.
             if (_pointLight != null)
             {
                 _pointLight.transform.position = visualCenter;
@@ -690,13 +690,13 @@ namespace Duskborn.Gameplay.Loot
 
         private void UpdateIdleHover(float time)
         {
-            // Apenas itens de raridade Épica ou superior (Épico, Lendário) ficam flutuando no ar.
+            // Only Epic or higher rarity items (Epic, Legendary) float in the air.
             if (!ItemTierHelper.ShouldFloatInAir(currentRarity))
             {
                 return;
             }
 
-            // Épicos e Lendários que ficam no ar giram continuamente ao longo do tempo enquanto suspensos
+            // Airborne Epic and Legendary items rotate continuously while suspended.
             transform.Rotate(Vector3.up, 38f * Time.deltaTime, Space.World);
 
             float hoverHeight = ItemTierHelper.GetHoverHeight(currentRarity);
@@ -709,8 +709,8 @@ namespace Duskborn.Gameplay.Loot
             {
                 if (_rb != null)
                 {
-                    // Transiciona suavemente quando desce até a altura de flutuação,
-                    // quando a velocidade cai próximo a zero ou após um tempo limite
+                    // Transition smoothly when descending to hover height,
+                    // when speed approaches zero, or after a timeout.
                     bool reachedHoverHeight = _hasGroundHit && transform.position.y <= (targetHoverY + 0.15f) && _rb.linearVelocity.y <= 0.2f;
                     bool isSlow = _rb.linearVelocity.sqrMagnitude < 0.04f;
                     bool timeout = (time - _spawnTime) > 1.2f;
@@ -734,7 +734,7 @@ namespace Duskborn.Gameplay.Loot
 
             if (_isSettled)
             {
-                // Levitação suave senoidal no ar ancorada à altura do solo
+                // Smooth sinusoidal levitation anchored to ground height.
                 float bobY = Mathf.Sin((time + _pulseOffset) * 2.2f) * 0.04f;
                 Vector3 desiredPos = new Vector3(_settledPosition.x, targetHoverY + bobY, _settledPosition.z);
                 transform.position = Vector3.MoveTowards(transform.position, desiredPos, 3.0f * Time.deltaTime);

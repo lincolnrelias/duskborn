@@ -50,305 +50,305 @@ public static class CraftingAssetGenerator
         EnsureDirectory(WorldPropsPath);
 
         // ═════════════════════════════════════════════════════════════════════
-        // 1. MATERIAIS COMPLETOS
+        // 1. COMPLETE MATERIALS
         // ═════════════════════════════════════════════════════════════════════
-        // T1 - Matérias-primas básicas
-        var matWood = LoadOrCreateMaterial("material_wood", "Madeira", "raw", 0);
-        var matStone = LoadOrCreateMaterial("material_stone", "Pedra", "raw", 0);
-        var matFiber = LoadOrCreateMaterial("material_fiber", "Fibra", "raw", 0);
+        // T1 - Basic raw materials.
+        var matWood = LoadOrCreateMaterial("material_wood", "Wood", "raw", 0);
+        var matStone = LoadOrCreateMaterial("material_stone", "Stone", "raw", 0);
+        var matFiber = LoadOrCreateMaterial("material_fiber", "Fiber", "raw", 0);
 
-        // T2 - Recursos intermediários e drops de combate
-        var matIronOre = LoadOrCreateMaterial("material_iron", "Minério de Ferro", "raw", 1);
-        var matLeather = LoadOrCreateMaterial("material_leather", "Couro Cru", "combat_drop", 1);
-        var matBone = LoadOrCreateMaterial("material_bone", "Osso Ancestral", "combat_drop", 1);
+        // T2 - Intermediate resources and combat drops.
+        var matIronOre = LoadOrCreateMaterial("material_iron", "Iron Ore", "raw", 1);
+        var matLeather = LoadOrCreateMaterial("material_leather", "Raw Leather", "combat_drop", 1);
+        var matBone = LoadOrCreateMaterial("material_bone", "Ancestral Bone", "combat_drop", 1);
         var matSap = LoadOrCreateMaterial("material_sap", "Seiva Pegajosa", "organic", 1);
-        var matIronBar = LoadOrCreateMaterial("material_iron_bar", "Barra de Ferro", "refined", 1);
-        var matTannedLeather = LoadOrCreateMaterial("material_tanned_leather", "Couro Curtido", "refined", 1);
+        var matIronBar = LoadOrCreateMaterial("material_iron_bar", "Iron Bar", "refined", 1);
+        var matTannedLeather = LoadOrCreateMaterial("material_tanned_leather", "Tanned Leather", "refined", 1);
 
-        // T3 - Recursos avançados e raros
-        var matArcaneCrystal = LoadOrCreateMaterial("material_arcane_crystal", "Cristal Arcano", "rare", 2);
-        var matSteelPlate = LoadOrCreateMaterial("material_steel_plate", "Placa de Aço Reforçado", "component", 2);
-        var matCrystalPowder = LoadOrCreateMaterial("material_crystal_powder", "Pó de Cristal Purificado", "refined", 2);
+        // T3 - Advanced and rare resources.
+        var matArcaneCrystal = LoadOrCreateMaterial("material_arcane_crystal", "Arcane Crystal", "rare", 2);
+        var matSteelPlate = LoadOrCreateMaterial("material_steel_plate", "Reinforced Steel Plate", "component", 2);
+        var matCrystalPowder = LoadOrCreateMaterial("material_crystal_powder", "Purified Crystal Powder", "refined", 2);
 
-        // T4 - Relíquia de Chefe
-        var matThornbarkCore = LoadOrCreateMaterial("material_thornbark_core", "Núcleo do Espinheiro", "boss", 4);
+        // T4 - Boss relic.
+        var matThornbarkCore = LoadOrCreateMaterial("material_thornbark_core", "Thornheart Core", "boss", 4);
 
         // ═════════════════════════════════════════════════════════════════════
-        // 2. CONSUMÍVEIS & UTILITÁRIOS (Caldeirão Alquímico)
+        // 2. CONSUMABLES & UTILITIES (Alchemical Cauldron)
         // ═════════════════════════════════════════════════════════════════════
         var potionIcon = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Inventory/Textures/Items/Potion.png");
 
-        var conVitalityTonic = CreateConsumable("consumable_vitality_tonic", "Tônico de Vitalidade",
-            "Restaura instantaneamente 70 pontos de vida.",
+        var conVitalityTonic = CreateConsumable("consumable_vitality_tonic", "Vitality Tonic",
+            "Instantly restores 70 health points.",
             potionIcon, ConsumableEffectType.InstantHeal, 70f, 0f, 5,
-            "Restaura +70 HP instantaneamente.");
+            "Instantly restores +70 HP.");
 
-        var conSwiftnessElixir = CreateConsumable("consumable_swiftness_elixir", "Elixir da Rapina",
-            "Acelera a circulação garantindo +30% de velocidade de movimento por 20 segundos.",
+        var conSwiftnessElixir = CreateConsumable("consumable_swiftness_elixir", "Predator's Elixir",
+            "Accelerates circulation, granting +30% movement speed for 20 seconds.",
             potionIcon, ConsumableEffectType.SpeedBuff, 0.30f, 20f, 5,
-            "+30% Velocidade de Movimento por 20s.");
+            "+30% Movement Speed for 20s.");
 
-        var conFireOil = CreateConsumable("consumable_fire_oil", "Óleo Flamejante",
-            "Infunde a arma com essência ardente, aumentando o dano geral em +25% por 40 segundos.",
+        var conFireOil = CreateConsumable("consumable_fire_oil", "Flaming Oil",
+            "Infuses the weapon with burning essence, increasing overall damage by +25% for 40 seconds.",
             potionIcon, ConsumableEffectType.DamageBuff, 0.25f, 40f, 3,
-            "+25% Dano de Ataque por 40s.");
+            "+25% Attack Damage for 40s.");
 
-        var conThornBomb = CreateConsumable("consumable_thorn_bomb", "Bomba de Espinhos",
-            "Bomba alquímica de estilhaços. Aumenta a reflexão de espinhos em +35% por 30 segundos.",
+        var conThornBomb = CreateConsumable("consumable_thorn_bomb", "Thorn Bomb",
+            "Alchemical shrapnel bomb. Increases reflected thorns damage by +35% for 30 seconds.",
             potionIcon, ConsumableEffectType.ThornsBuff, 0.35f, 30f, 3,
-            "+35% Dano de Espinhos refletido por 30s.");
+            "+35% Reflected Thorns Damage for 30s.");
 
         // ═════════════════════════════════════════════════════════════════════
-        // 3. EQUIPAMENTOS COM TRADE-OFFS E QUIRKS
+        // 3. EQUIPMENT WITH TRADE-OFFS AND QUIRKS
         // ═════════════════════════════════════════════════════════════════════
-        // T1 - Primitivo (Bancada)
-        var gearFiberChest = CreateGear("gear_fiber_chest", "Armadura de Fibra", 4, new[] { (StatType.HP, 0.10f) });
-        var gearFiberHelm = CreateGear("gear_fiber_helm", "Elmo de Fibra", 0, new[] { (StatType.HP, 0.05f) });
-        var gearFiberLegs = CreateGear("gear_fiber_legs", "Calças de Fibra", 8, new[] { (StatType.HP, 0.05f) });
-        var gearFiberBoots = CreateGear("gear_fiber_boots", "Botas de Fibra", 9, new[] { (StatType.MoveSpeed, 0.05f) });
+        // T1 - Primitive (Workbench).
+        var gearFiberChest = CreateGear("gear_fiber_chest", "Fiber Armor", 4, new[] { (StatType.HP, 0.10f) });
+        var gearFiberHelm = CreateGear("gear_fiber_helm", "Fiber Helm", 0, new[] { (StatType.HP, 0.05f) });
+        var gearFiberLegs = CreateGear("gear_fiber_legs", "Fiber Trousers", 8, new[] { (StatType.HP, 0.05f) });
+        var gearFiberBoots = CreateGear("gear_fiber_boots", "Fiber Boots", 9, new[] { (StatType.MoveSpeed, 0.05f) });
 
-        // T2 - Especialização: Placas Pesadas (Forja) vs Couro de Caçador (Bancada)
-        // Placa Pesada de Ferro: Grande proteção, mas penalidade de velocidade
-        var gearHeavyIronChest = CreateGear("gear_heavy_iron_chest", "Placa Pesada de Ferro", 4,
+        // T2 - Specialization: Heavy Plate (Forge) vs Hunter Leather (Workbench).
+        // Heavy Iron Plate: great protection, but a speed penalty.
+        var gearHeavyIronChest = CreateGear("gear_heavy_iron_chest", "Heavy Iron Plate", 4,
             new[] { (StatType.HP, 0.35f), (StatType.DamageReduction, 0.15f), (StatType.MoveSpeed, -0.10f) });
-        var gearHeavyIronHelm = CreateGear("gear_heavy_iron_helm", "Elmo de Ferro Batido", 0,
+        var gearHeavyIronHelm = CreateGear("gear_heavy_iron_helm", "Hammered Iron Helm", 0,
             new[] { (StatType.HP, 0.15f), (StatType.DamageReduction, 0.08f) });
-        var gearHeavyBoots = CreateGear("gear_heavy_boots", "Botas de Aço Pesado", 9,
+        var gearHeavyBoots = CreateGear("gear_heavy_boots", "Heavy Steel Boots", 9,
             new[] { (StatType.DamageReduction, 0.08f), (StatType.MoveSpeed, -0.05f) });
 
-        // Couro de Caçador: Alta mobilidade e agilidade, mas vulnerabilidade a dano
-        var gearHunterLeatherChest = CreateGear("gear_hunter_leather_chest", "Gibão do Caçador", 4,
+        // Hunter Leather: high mobility and agility, but vulnerable to damage.
+        var gearHunterLeatherChest = CreateGear("gear_hunter_leather_chest", "Hunter's Jerkin", 4,
             new[] { (StatType.MoveSpeed, 0.15f), (StatType.AttackSpeed, 0.10f), (StatType.CritChance, 0.08f), (StatType.DamageReduction, -0.05f) });
 
-        // T3 - Reforçado (Forja) & Arcano (Mesa Arcana)
-        var gearReinforcedChest = CreateGear("gear_reinforced_chest", "Armadura de Aço Reforçado", 4,
+        // T3 - Reinforced (Forge) & Arcane (Arcane Table).
+        var gearReinforcedChest = CreateGear("gear_reinforced_chest", "Reinforced Steel Armor", 4,
             new[] { (StatType.HP, 0.45f), (StatType.DamageReduction, 0.20f), (StatType.MoveSpeed, -0.08f) });
 
-        // Veste Arcana: Potência ofensiva máxima, fragilidade defensiva
-        var gearArcaneRobe = CreateGear("gear_arcane_robe", "Veste de Seda Arcana", 4,
+        // Arcane Robe: maximum offensive power, defensive fragility.
+        var gearArcaneRobe = CreateGear("gear_arcane_robe", "Arcane Silk Robe", 4,
             new[] { (StatType.Damage, 0.25f), (StatType.CritChance, 0.15f), (StatType.DamageReduction, -0.08f) });
 
-        var gearWindBoots = CreateGear("gear_wind_boots", "Botas do Vendaval", 9,
+        var gearWindBoots = CreateGear("gear_wind_boots", "Gale Boots", 9,
             new[] { (StatType.MoveSpeed, 0.25f), (StatType.AttackSpeed, 0.10f), (StatType.HP, -0.10f) });
 
-        var gearCrystalRing = CreateGear("gear_crystal_ring", "Anel de Cristal Puro", 10,
+        var gearCrystalRing = CreateGear("gear_crystal_ring", "Pure Crystal Ring", 10,
             new[] { (StatType.CritChance, 0.15f), (StatType.Damage, 0.10f) });
 
-        var gearBoneAmulet = CreateGear("gear_bone_amulet", "Amuleto de Garras", 1,
+        var gearBoneAmulet = CreateGear("gear_bone_amulet", "Claw Amulet", 1,
             new[] { (StatType.AttackSpeed, 0.20f), (StatType.MoveSpeed, 0.10f) });
 
-        // T4 - Relíquia do Espinheiro (Mesa Arcana)
-        var gearThornbarkPlate = CreateGear("gear_thornbark_plate", "Couraça do Espinheiro", 4,
+        // T4 - Thornheart Relic (Arcane Table).
+        var gearThornbarkPlate = CreateGear("gear_thornbark_plate", "Thornheart Cuirass", 4,
             new[] { (StatType.HP, 0.50f), (StatType.DamageReduction, 0.25f), (StatType.ThornsDamage, 0.25f), (StatType.MoveSpeed, -0.12f) });
 
         // ═════════════════════════════════════════════════════════════════════
-        // 4. ARMAS FABRICÁVEIS COM COMPORTAMENTO & GATING
+        // 4. CRAFTABLE WEAPONS WITH BEHAVIOR & GATING
         // ═════════════════════════════════════════════════════════════════════
         var templateAxe = AssetDatabase.LoadAssetAtPath<WeaponDefinition>("Assets/_Duskborn/ScriptableObjects/Weapons/Stone Axe/stone_axe.asset");
         var templatePickaxe = AssetDatabase.LoadAssetAtPath<WeaponDefinition>("Assets/_Duskborn/ScriptableObjects/Weapons/Stone Pickaxe/stone_pickaxe.asset");
         var swordPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/ThirdPartyAssets/Kevin Iglesias/Melee Warrior Animations/Prefabs/Weapons/2HGreatsword.prefab");
 
         // T1
-        var wpnWoodenSword = CreateWeapon("weapon_wooden_sword", "Espada de Madeira",
-            "Espada leve de treino entalhada em madeira maciça.",
+        var wpnWoodenSword = CreateWeapon("weapon_wooden_sword", "Wooden Sword",
+            "Light training sword carved from solid wood.",
             templateAxe, swordPrefab,
             new[] { (StatType.Damage, 0.10f), (StatType.AttackSpeed, 0.15f) },
             null);
 
-        // T2 - Ferramentas de Ferro e Armas Forjadas
-        var wpnIronAxe = CreateWeapon("weapon_iron_axe", "Machado de Ferro",
-            "Machado forjado em ferro. Corta árvores com extrema facilidade (+400%) e golpeia humanoides.",
+        // T2 - Iron Tools and Forged Weapons.
+        var wpnIronAxe = CreateWeapon("weapon_iron_axe", "Iron Axe",
+            "Iron-forged axe. Cuts trees with extreme ease (+400%) and strikes humanoids.",
             templateAxe, null,
             new[] { (StatType.Damage, 0.25f), (StatType.AttackSpeed, 0.10f), (StatType.WoodcuttingResourceBonus, 0.35f) },
             new[] { (TargetType.Tree, 4.0f), (TargetType.Humanoid, 1.0f) });
 
-        var wpnIronPickaxe = CreateWeapon("weapon_iron_pickaxe", "Picareta de Ferro",
-            "Picareta de ferro temperado. Capaz de perfurar veios de ferro e estilhaçar cristais arcanos (+400%).",
+        var wpnIronPickaxe = CreateWeapon("weapon_iron_pickaxe", "Iron Pickaxe",
+            "Tempered iron pickaxe. Pierces iron veins and shatters arcane crystals (+400%).",
             templatePickaxe, null,
             new[] { (StatType.Damage, 0.20f), (StatType.GatheringSpeed, 0.25f), (StatType.MiningResourceBonus, 0.35f) },
             new[] { (TargetType.MiningNode, 4.0f) });
 
-        var wpnIronSword = CreateWeapon("weapon_iron_sword", "Espada de Ferro",
-            "Espada de ferro forjada na brasa. Dano sólido e balanceado.",
+        var wpnIronSword = CreateWeapon("weapon_iron_sword", "Iron Sword",
+            "Fire-forged iron sword. Solid, balanced damage.",
             templateAxe, swordPrefab,
             new[] { (StatType.Damage, 0.35f), (StatType.CritChance, 0.10f) },
             null);
 
-        // Lâmina de Osso: Leve, veloz e focada em críticos
-        var wpnBoneBlade = CreateWeapon("weapon_bone_blade", "Lâmina de Osso",
-            "Lâmina serrilhada esculpida a partir de fêmures bestiais. Ataques rápidos e críticos frequentes.",
+        // Bone Blade: light, fast, and focused on critical hits.
+        var wpnBoneBlade = CreateWeapon("weapon_bone_blade", "Bone Blade",
+            "Serrated blade carved from bestial femurs. Fast attacks and frequent critical hits.",
             templateAxe, swordPrefab,
             new[] { (StatType.Damage, 0.25f), (StatType.AttackSpeed, 0.25f), (StatType.CritChance, 0.20f) },
             null);
 
-        // T3 - Machado Pesado (Trade-off: Dano brutal, mas lento)
-        var wpnHeavyWaraxe = CreateWeapon("weapon_heavy_waraxe", "Machado de Guerra Pesado",
-            "Machado de guerra colossal. Dano maciço e devastador contra árvores e humanoides, porém lento de manusear.",
+        // T3 - Heavy Axe (Trade-off: brutal damage, but slow).
+        var wpnHeavyWaraxe = CreateWeapon("weapon_heavy_waraxe", "Heavy War Axe",
+            "Colossal war axe. Massive, devastating damage against trees and humanoids, but slow to wield.",
             templateAxe, null,
             new[] { (StatType.Damage, 0.55f), (StatType.AttackSpeed, -0.20f), (StatType.WoodcuttingResourceBonus, 0.50f) },
             new[] { (TargetType.Tree, 5.0f), (TargetType.Humanoid, 2.0f) });
 
-        // Lâmina Sedenta: Berserker (Dano e Roubo de Vida, penalidade em HP máximo)
-        var wpnBloodBlade = CreateWeapon("weapon_blood_blade", "Lâmina Sedenta de Sangue",
-            "Arma ritualística forjada com ossos e pó de cristal. Rouba vida a cada golpe, porém drena a vitalidade máxima do usuário.",
+        // Bloodthirsty Blade: Berserker (damage and life steal, maximum HP penalty).
+        var wpnBloodBlade = CreateWeapon("weapon_blood_blade", "Bloodthirsty Blade",
+            "Ritual weapon forged from bones and crystal powder. Steals life with each strike, but drains the user's maximum vitality.",
             templateAxe, swordPrefab,
             new[] { (StatType.Damage, 0.40f), (StatType.Lifesteal, 0.15f), (StatType.HP, -0.15f) },
             null);
 
-        var wpnReinforcedSword = CreateWeapon("weapon_reinforced_sword", "Espada Reforçada",
-            "Lâmina de aço laminado com canais de cristal arcano. Concede roubo de vida consistente.",
+        var wpnReinforcedSword = CreateWeapon("weapon_reinforced_sword", "Reinforced Sword",
+            "Laminated steel blade with arcane crystal channels. Grants consistent life steal.",
             templateAxe, swordPrefab,
             new[] { (StatType.Damage, 0.50f), (StatType.CritChance, 0.15f), (StatType.Lifesteal, 0.10f) },
             null);
 
-        // T4 - Lâmina do Espinheiro
-        var wpnThornblade = CreateWeapon("weapon_thornblade", "Lâmina do Espinheiro",
-            "Arma viva infundida com o poder corrupto do Espinheiro. Golpes brutais e regeneração vampírica massiva.",
+        // T4 - Thornheart Blade.
+        var wpnThornblade = CreateWeapon("weapon_thornblade", "Thornheart Blade",
+            "Living weapon infused with Thornheart's corrupt power. Brutal strikes and massive vampiric regeneration.",
             templateAxe, swordPrefab,
             new[] { (StatType.Damage, 0.75f), (StatType.CritChance, 0.20f), (StatType.Lifesteal, 0.20f) },
             null);
 
         // ═════════════════════════════════════════════════════════════════════
-        // 5. RECEITAS COM PROGRESSÃO, ESTAÇÃO DEDICADA E DESCOBERTA
+        // 5. RECIPES WITH PROGRESSION, DEDICATED STATIONS, AND DISCOVERY
         // ═════════════════════════════════════════════════════════════════════
-        // Estação: BANCADA DE TRABALHO (T1 & Refino Básico)
-        CreateOrUpdateRecipe("Recipe_StoneAxe", "Machado de Pedra", "Ferramentas",
-            CraftingTier.Primitivo, CraftingStationType.Bancada, true, templateAxe,
+        // Station: WORKBENCH (T1 & Basic Refining).
+        CreateOrUpdateRecipe("Recipe_StoneAxe", "Stone Axe", "Tools",
+            CraftingTier.Primitive, CraftingStationType.Workbench, true, templateAxe,
             new[] { (matWood, 5), (matStone, 5) });
 
-        CreateOrUpdateRecipe("Recipe_StonePickaxe", "Picareta de Pedra", "Ferramentas",
-            CraftingTier.Primitivo, CraftingStationType.Bancada, true, templatePickaxe,
+        CreateOrUpdateRecipe("Recipe_StonePickaxe", "Stone Pickaxe", "Tools",
+            CraftingTier.Primitive, CraftingStationType.Workbench, true, templatePickaxe,
             new[] { (matWood, 5), (matStone, 5) });
 
-        CreateOrUpdateRecipe("Recipe_WoodenSword", "Espada de Madeira", "Armas",
-            CraftingTier.Primitivo, CraftingStationType.Bancada, true, wpnWoodenSword,
+        CreateOrUpdateRecipe("Recipe_WoodenSword", "Wooden Sword", "Weapons",
+            CraftingTier.Primitive, CraftingStationType.Workbench, true, wpnWoodenSword,
             new[] { (matWood, 8), (matFiber, 3) });
 
-        CreateOrUpdateRecipe("Recipe_FiberChest", "Armadura de Fibra", "Armadura",
-            CraftingTier.Primitivo, CraftingStationType.Bancada, true, gearFiberChest,
+        CreateOrUpdateRecipe("Recipe_FiberChest", "Fiber Armor", "Armor",
+            CraftingTier.Primitive, CraftingStationType.Workbench, true, gearFiberChest,
             new[] { (matFiber, 10), (matWood, 5) });
 
-        CreateOrUpdateRecipe("Recipe_FiberHelm", "Elmo de Fibra", "Armadura",
-            CraftingTier.Primitivo, CraftingStationType.Bancada, true, gearFiberHelm,
+        CreateOrUpdateRecipe("Recipe_FiberHelm", "Fiber Helm", "Armor",
+            CraftingTier.Primitive, CraftingStationType.Workbench, true, gearFiberHelm,
             new[] { (matFiber, 6), (matWood, 3) });
 
-        CreateOrUpdateRecipe("Recipe_FiberLegs", "Calças de Fibra", "Armadura",
-            CraftingTier.Primitivo, CraftingStationType.Bancada, true, gearFiberLegs,
+        CreateOrUpdateRecipe("Recipe_FiberLegs", "Fiber Trousers", "Armor",
+            CraftingTier.Primitive, CraftingStationType.Workbench, true, gearFiberLegs,
             new[] { (matFiber, 8), (matWood, 4) });
 
-        CreateOrUpdateRecipe("Recipe_FiberBoots", "Botas de Fibra", "Armadura",
-            CraftingTier.Primitivo, CraftingStationType.Bancada, true, gearFiberBoots,
+        CreateOrUpdateRecipe("Recipe_FiberBoots", "Fiber Boots", "Armor",
+            CraftingTier.Primitive, CraftingStationType.Workbench, true, gearFiberBoots,
             new[] { (matFiber, 5), (matWood, 3) });
 
-        CreateOrUpdateRecipe("Recipe_TannedLeather", "Couro Curtido", "Materiais",
-            CraftingTier.Ferro, CraftingStationType.Bancada, false, matTannedLeather,
+        CreateOrUpdateRecipe("Recipe_TannedLeather", "Tanned Leather", "Materials",
+            CraftingTier.Iron, CraftingStationType.Workbench, false, matTannedLeather,
             new[] { (matLeather, 2), (matFiber, 2) });
 
-        CreateOrUpdateRecipe("Recipe_HunterLeatherChest", "Gibão do Caçador", "Armadura",
-            CraftingTier.Ferro, CraftingStationType.Bancada, false, gearHunterLeatherChest,
+        CreateOrUpdateRecipe("Recipe_HunterLeatherChest", "Hunter's Jerkin", "Armor",
+            CraftingTier.Iron, CraftingStationType.Workbench, false, gearHunterLeatherChest,
             new[] { (matTannedLeather, 8), (matFiber, 4) });
 
-        // Estação: FORJA DE FUNDIÇÃO (Metalurgia, Placas Pesadas, Armas de Ferro)
-        CreateOrUpdateRecipe("Recipe_SmeltIronBar", "Fundir Barra de Ferro", "Materiais",
-            CraftingTier.Ferro, CraftingStationType.Forja, false, matIronBar,
+        // Station: SMELTING FORGE (Metallurgy, Heavy Plate, Iron Weapons).
+        CreateOrUpdateRecipe("Recipe_SmeltIronBar", "Smelt Iron Bar", "Materials",
+            CraftingTier.Iron, CraftingStationType.Forge, false, matIronBar,
             new[] { (matIronOre, 2) }, new[] { (matWood, 1) });
 
-        CreateOrUpdateRecipe("Recipe_SteelPlate", "Forjar Placa de Aço", "Materiais",
-            CraftingTier.Reforcado, CraftingStationType.Forja, false, matSteelPlate,
+        CreateOrUpdateRecipe("Recipe_SteelPlate", "Forge Steel Plate", "Materials",
+            CraftingTier.Reinforced, CraftingStationType.Forge, false, matSteelPlate,
             new[] { (matIronBar, 2), (matStone, 1), (matBone, 1) }, new[] { (matWood, 1) });
 
-        CreateOrUpdateRecipe("Recipe_IronAxe", "Machado de Ferro", "Ferramentas",
-            CraftingTier.Ferro, CraftingStationType.Forja, false, wpnIronAxe,
+        CreateOrUpdateRecipe("Recipe_IronAxe", "Iron Axe", "Tools",
+            CraftingTier.Iron, CraftingStationType.Forge, false, wpnIronAxe,
             new[] { (matIronBar, 3), (matWood, 3) });
 
-        CreateOrUpdateRecipe("Recipe_IronPickaxe", "Picareta de Ferro", "Ferramentas",
-            CraftingTier.Ferro, CraftingStationType.Forja, false, wpnIronPickaxe,
+        CreateOrUpdateRecipe("Recipe_IronPickaxe", "Iron Pickaxe", "Tools",
+            CraftingTier.Iron, CraftingStationType.Forge, false, wpnIronPickaxe,
             new[] { (matIronBar, 3), (matWood, 3) });
 
-        CreateOrUpdateRecipe("Recipe_IronSword", "Espada de Ferro", "Armas",
-            CraftingTier.Ferro, CraftingStationType.Forja, false, wpnIronSword,
+        CreateOrUpdateRecipe("Recipe_IronSword", "Iron Sword", "Weapons",
+            CraftingTier.Iron, CraftingStationType.Forge, false, wpnIronSword,
             new[] { (matIronBar, 4), (matWood, 2), (matLeather, 2) });
 
-        CreateOrUpdateRecipe("Recipe_HeavyIronChest", "Placa Pesada de Ferro", "Armadura",
-            CraftingTier.Ferro, CraftingStationType.Forja, false, gearHeavyIronChest,
+        CreateOrUpdateRecipe("Recipe_HeavyIronChest", "Heavy Iron Plate", "Armor",
+            CraftingTier.Iron, CraftingStationType.Forge, false, gearHeavyIronChest,
             new[] { (matIronBar, 6), (matLeather, 3) });
 
-        CreateOrUpdateRecipe("Recipe_HeavyIronHelm", "Elmo de Ferro Batido", "Armadura",
-            CraftingTier.Ferro, CraftingStationType.Forja, false, gearHeavyIronHelm,
+        CreateOrUpdateRecipe("Recipe_HeavyIronHelm", "Hammered Iron Helm", "Armor",
+            CraftingTier.Iron, CraftingStationType.Forge, false, gearHeavyIronHelm,
             new[] { (matIronBar, 4), (matLeather, 2) });
 
-        CreateOrUpdateRecipe("Recipe_HeavyBoots", "Botas de Aço Pesado", "Armadura",
-            CraftingTier.Ferro, CraftingStationType.Forja, false, gearHeavyBoots,
+        CreateOrUpdateRecipe("Recipe_HeavyBoots", "Heavy Steel Boots", "Armor",
+            CraftingTier.Iron, CraftingStationType.Forge, false, gearHeavyBoots,
             new[] { (matIronBar, 3), (matLeather, 2) });
 
-        CreateOrUpdateRecipe("Recipe_HeavyWaraxe", "Machado de Guerra Pesado", "Armas",
-            CraftingTier.Reforcado, CraftingStationType.Forja, false, wpnHeavyWaraxe,
+        CreateOrUpdateRecipe("Recipe_HeavyWaraxe", "Heavy War Axe", "Weapons",
+            CraftingTier.Reinforced, CraftingStationType.Forge, false, wpnHeavyWaraxe,
             new[] { (matSteelPlate, 3), (matWood, 4) });
 
-        CreateOrUpdateRecipe("Recipe_ReinforcedArmor", "Armadura de Aço Reforçado", "Armadura",
-            CraftingTier.Reforcado, CraftingStationType.Forja, false, gearReinforcedChest,
+        CreateOrUpdateRecipe("Recipe_ReinforcedArmor", "Reinforced Steel Armor", "Armor",
+            CraftingTier.Reinforced, CraftingStationType.Forge, false, gearReinforcedChest,
             new[] { (matSteelPlate, 4), (matTannedLeather, 3) });
 
-        // Estação: CALDEIRÃO ALQUÍMICO (Tônicos, Elixires, Bombas, Refino de Cristal)
-        CreateOrUpdateRecipe("Recipe_VitalityTonic", "Tônico de Vitalidade", "Consumíveis",
-            CraftingTier.Ferro, CraftingStationType.Caldeirao, false, conVitalityTonic,
+        // Station: ALCHEMICAL CAULDRON (Tonics, Elixirs, Bombs, Crystal Refining).
+        CreateOrUpdateRecipe("Recipe_VitalityTonic", "Vitality Tonic", "Consumables",
+            CraftingTier.Iron, CraftingStationType.Cauldron, false, conVitalityTonic,
             new[] { (matFiber, 3), (matSap, 2), (matWood, 1) });
 
-        CreateOrUpdateRecipe("Recipe_SwiftnessElixir", "Elixir da Rapina", "Consumíveis",
-            CraftingTier.Ferro, CraftingStationType.Caldeirao, false, conSwiftnessElixir,
+        CreateOrUpdateRecipe("Recipe_SwiftnessElixir", "Predator's Elixir", "Consumables",
+            CraftingTier.Iron, CraftingStationType.Cauldron, false, conSwiftnessElixir,
             new[] { (matFiber, 2), (matBone, 2), (matSap, 1) });
 
-        CreateOrUpdateRecipe("Recipe_FireOil", "Óleo Flamejante", "Consumíveis",
-            CraftingTier.Ferro, CraftingStationType.Caldeirao, false, conFireOil,
+        CreateOrUpdateRecipe("Recipe_FireOil", "Flaming Oil", "Consumables",
+            CraftingTier.Iron, CraftingStationType.Cauldron, false, conFireOil,
             new[] { (matSap, 3), (matStone, 2), (matWood, 1) });
 
-        CreateOrUpdateRecipe("Recipe_ThornBomb", "Bomba de Espinhos", "Consumíveis",
-            CraftingTier.Ferro, CraftingStationType.Caldeirao, false, conThornBomb,
+        CreateOrUpdateRecipe("Recipe_ThornBomb", "Thorn Bomb", "Consumables",
+            CraftingTier.Iron, CraftingStationType.Cauldron, false, conThornBomb,
             new[] { (matBone, 4), (matStone, 3), (matSap, 2) });
 
-        CreateOrUpdateRecipe("Recipe_GrindCrystalPowder", "Moer Pó de Cristal", "Materiais",
-            CraftingTier.Reforcado, CraftingStationType.Caldeirao, false, matCrystalPowder,
+        CreateOrUpdateRecipe("Recipe_GrindCrystalPowder", "Grind Crystal Powder", "Materials",
+            CraftingTier.Reinforced, CraftingStationType.Cauldron, false, matCrystalPowder,
             new[] { (matArcaneCrystal, 1) });
 
-        // Estação: MESA ARCANA (Joalheria, Roupas Arcanas, Relíquias do Espinheiro)
-        CreateOrUpdateRecipe("Recipe_BoneBlade", "Lâmina de Osso", "Armas",
-            CraftingTier.Ferro, CraftingStationType.MesaArcana, false, wpnBoneBlade,
+        // Station: ARCANE TABLE (Jewelry, Arcane Clothing, Thornheart Relics).
+        CreateOrUpdateRecipe("Recipe_BoneBlade", "Bone Blade", "Weapons",
+            CraftingTier.Iron, CraftingStationType.ArcaneTable, false, wpnBoneBlade,
             new[] { (matBone, 6), (matLeather, 3), (matIronBar, 1) });
 
-        CreateOrUpdateRecipe("Recipe_ArcaneRobe", "Veste de Seda Arcana", "Armadura",
-            CraftingTier.Reforcado, CraftingStationType.MesaArcana, false, gearArcaneRobe,
+        CreateOrUpdateRecipe("Recipe_ArcaneRobe", "Arcane Silk Robe", "Armor",
+            CraftingTier.Reinforced, CraftingStationType.ArcaneTable, false, gearArcaneRobe,
             new[] { (matCrystalPowder, 3), (matTannedLeather, 4) });
 
-        CreateOrUpdateRecipe("Recipe_CrystalRing", "Anel de Cristal Puro", "Acessórios",
-            CraftingTier.Reforcado, CraftingStationType.MesaArcana, false, gearCrystalRing,
+        CreateOrUpdateRecipe("Recipe_CrystalRing", "Pure Crystal Ring", "Accessories",
+            CraftingTier.Reinforced, CraftingStationType.ArcaneTable, false, gearCrystalRing,
             new[] { (matArcaneCrystal, 2), (matIronBar, 2) });
 
-        CreateOrUpdateRecipe("Recipe_BoneAmulet", "Amuleto de Garras", "Acessórios",
-            CraftingTier.Reforcado, CraftingStationType.MesaArcana, false, gearBoneAmulet,
+        CreateOrUpdateRecipe("Recipe_BoneAmulet", "Claw Amulet", "Accessories",
+            CraftingTier.Reinforced, CraftingStationType.ArcaneTable, false, gearBoneAmulet,
             new[] { (matBone, 4), (matArcaneCrystal, 1) });
 
-        CreateOrUpdateRecipe("Recipe_WindBoots", "Botas do Vendaval", "Armadura",
-            CraftingTier.Reforcado, CraftingStationType.MesaArcana, false, gearWindBoots,
+        CreateOrUpdateRecipe("Recipe_WindBoots", "Gale Boots", "Armor",
+            CraftingTier.Reinforced, CraftingStationType.ArcaneTable, false, gearWindBoots,
             new[] { (matCrystalPowder, 2), (matTannedLeather, 3) });
 
-        CreateOrUpdateRecipe("Recipe_BloodBlade", "Lâmina Sedenta de Sangue", "Armas",
-            CraftingTier.Reforcado, CraftingStationType.MesaArcana, false, wpnBloodBlade,
+        CreateOrUpdateRecipe("Recipe_BloodBlade", "Bloodthirsty Blade", "Weapons",
+            CraftingTier.Reinforced, CraftingStationType.ArcaneTable, false, wpnBloodBlade,
             new[] { (matBone, 5), (matArcaneCrystal, 2), (matLeather, 2) });
 
-        CreateOrUpdateRecipe("Recipe_ReinforcedSword", "Espada Reforçada", "Armas",
-            CraftingTier.Reforcado, CraftingStationType.MesaArcana, false, wpnReinforcedSword,
+        CreateOrUpdateRecipe("Recipe_ReinforcedSword", "Reinforced Sword", "Weapons",
+            CraftingTier.Reinforced, CraftingStationType.ArcaneTable, false, wpnReinforcedSword,
             new[] { (matSteelPlate, 3), (matArcaneCrystal, 2), (matLeather, 2) });
 
-        CreateOrUpdateRecipe("Recipe_Thornblade", "Lâmina do Espinheiro", "Armas",
-            CraftingTier.Espinheiro, CraftingStationType.MesaArcana, false, wpnThornblade,
+        CreateOrUpdateRecipe("Recipe_Thornblade", "Thornheart Blade", "Weapons",
+            CraftingTier.Thornheart, CraftingStationType.ArcaneTable, false, wpnThornblade,
             new[] { (matThornbarkCore, 2), (matSteelPlate, 4), (matArcaneCrystal, 3) });
 
-        CreateOrUpdateRecipe("Recipe_ThornbarkPlate", "Couraça do Espinheiro", "Armadura",
-            CraftingTier.Espinheiro, CraftingStationType.MesaArcana, false, gearThornbarkPlate,
+        CreateOrUpdateRecipe("Recipe_ThornbarkPlate", "Thornheart Cuirass", "Armor",
+            CraftingTier.Thornheart, CraftingStationType.ArcaneTable, false, gearThornbarkPlate,
             new[] { (matThornbarkCore, 3), (matSteelPlate, 5), (matTannedLeather, 4) });
 
         // ═════════════════════════════════════════════════════════════════════
-        // 6. TABELAS DE LOOT & INTEGRATION
+        // 6. LOOT TABLES & INTEGRATION
         // ═════════════════════════════════════════════════════════════════════
         UpdateSwarmerLootTable(matLeather, matSap);
         CreateDropTable(EnemiesLootPath + "brute_loot_table.asset",
@@ -357,7 +357,7 @@ public static class CraftingAssetGenerator
             new[] { (matBone as ItemDefinitionBase, 0.90f, 0.10f, 2, 5), (matArcaneCrystal as ItemDefinitionBase, 0.30f, 0.15f, 1, 2) }, 15, 35);
 
         // ═════════════════════════════════════════════════════════════════════
-        // 7. PROP ARCANO & GATING DE RECURSOS NO MUNDO
+        // 7. ARCANE PROP & WORLD RESOURCE GATING
         // ═════════════════════════════════════════════════════════════════════
         CreateCrystalProp();
 

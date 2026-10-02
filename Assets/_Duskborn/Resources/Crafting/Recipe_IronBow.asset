@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_IronBow
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_IronBow
-  recipeName: Arco de Ferro
-  description: Arco de Ferro
-  category: Armas
+  recipeName: "Iron Bow"
+  description: "Iron Bow"
+  category: "Weapons"
   tier: 2
   isAlwaysDiscovered: 0
   outputItem: {fileID: 0}

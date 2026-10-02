@@ -10,38 +10,38 @@ namespace Duskborn.Gameplay.Crafting
     [Serializable]
     public struct CraftingIngredient
     {
-        [Tooltip("Definição do recurso/material consumido.")]
+        [Tooltip("Definition of the consumed resource / material.")]
         public MaterialDefinition material;
 
-        [Tooltip("Quantidade requerida deste material.")]
+        [Tooltip("Required amount of this material.")]
         [Min(1)]
         public int amount;
     }
 
     /// <summary>
-    /// ScriptableObject que define uma receita de fabricação no Duskborn.
-    /// Especifica os recursos requeridos (madeira, pedra, etc.) e o item resultante (arma, armadura, ferramenta).
+    /// ScriptableObject defining a crafting recipe in Duskborn.
+    /// Specifies required resources (wood, stone, etc.) and the resulting item (weapon, armor, tool).
     /// </summary>
     [CreateAssetMenu(fileName = "CraftingRecipe", menuName = "Duskborn/Crafting/Recipe")]
     public class CraftingRecipe : ScriptableObject
     {
-        [Header("Identificação da Receita")]
+        [Header("Recipe Identification")]
         [SerializeField] private string recipeId;
         [SerializeField] private string recipeName;
         [SerializeField, TextArea] private string description;
-        [SerializeField] private string category = "Ferramentas";
-        [SerializeField] private CraftingTier tier = CraftingTier.Primitivo;
-        [SerializeField] private CraftingStationType requiredStation = CraftingStationType.Bancada;
+        [SerializeField] private string category = "Tools";
+        [SerializeField] private CraftingTier tier = CraftingTier.Primitive;
+        [SerializeField] private CraftingStationType requiredStation = CraftingStationType.Workbench;
         [SerializeField] private bool isAlwaysDiscovered = false;
 
-        [Header("Resultado")]
+        [Header("Output")]
         [SerializeField] private ItemDefinitionBase outputItem;
         [SerializeField, Min(1)] private int outputAmount = 1;
 
-        [Header("Ingredientes Necessários")]
+        [Header("Required Ingredients")]
         [SerializeField] private List<CraftingIngredient> ingredients = new();
 
-        [Header("Combustível de Processamento")]
+        [Header("Processing Fuel")]
         [SerializeField] private List<CraftingIngredient> fuelIngredients = new();
 
         public string RecipeId => string.IsNullOrEmpty(recipeId) ? (outputItem != null ? outputItem.Id : name) : recipeId;
@@ -61,12 +61,12 @@ namespace Duskborn.Gameplay.Crafting
         public Texture2D Icon => outputItem != null ? outputItem.Icon : null;
 
         /// <summary>
-        /// Verifica se o inventário de recursos do jogador possui todos os ingredientes necessários.
+        /// Check whether the player's resource inventory has all required ingredients.
         /// </summary>
         public bool CanCraft(ResourceInventory resources) => Building.MaterialCosts.CanPay(resources, ingredients, fuelIngredients);
         public bool TrySpendIngredients(ResourceInventory resources) => Building.MaterialCosts.Spend(resources, ingredients, fuelIngredients);
         /// <summary>
-        /// Instancia o item em tempo de execução para colocação no inventário ou action bar.
+        /// Instantiate the runtime item for placement in inventory or the action bar.
         /// </summary>
         public IInventoryItem CreateOutputItem()
         {

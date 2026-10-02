@@ -1,6 +1,6 @@
 # Ranged combat foundation
 
-The starter action bar now includes **Arco de Madeira**. The existing **Arco Simples**
+The starter action bar now includes **Wooden Bow**. The existing **Simple Bow**
 recipe also produces it. Select the bow and use LMB while the gameplay cursor is
 locked. This first test weapon has unlimited arrows and no secondary action.
 

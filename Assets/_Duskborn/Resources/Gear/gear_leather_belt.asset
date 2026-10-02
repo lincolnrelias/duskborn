@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: gear_leather_belt
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.GearDefinition
   id: gear_leather_belt
-  displayName: Cinto de Couro
+  displayName: "Leather Belt"
   description: 'HP: +6%  Woodcutting: +10%'
   icon: {fileID: 2800000, guid: 6601e6b66b58590498b3416eadc6e7ce, type: 3}
   dropPrefab: {fileID: 0}

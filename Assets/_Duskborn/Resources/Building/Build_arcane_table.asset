@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Build_arcane_table
   m_EditorClassIdentifier:
   id: arcane_table
-  displayName: Mesa arcana
-  description: Purificação de cristais e fabricação de relíquias.
-  category: Estações
+  displayName: "Arcane Table"
+  description: "Crystal purification and relic crafting."
+  category: "Stations"
   prefab: {fileID: 606149192729443004, guid: 9c75cb20e7ec4c54b526869d824ad674, type: 3}
   icon: {fileID: 0}
   station: 3

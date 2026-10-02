@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Recipe_FireOil
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_FireOil
-  recipeName: "\xD3leo Flamejante"
-  description: "\xD3leo Flamejante"
-  category: "Consum\xEDveis"
+  recipeName: "Flaming Oil"
+  description: "Flaming Oil"
+  category: "Consumables"
   tier: 3
   requiredStation: 2
   isAlwaysDiscovered: 0

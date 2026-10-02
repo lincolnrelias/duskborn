@@ -73,5 +73,27 @@ namespace Duskborn.Gameplay.Crafting
             if (outputItem == null) return null;
             return outputItem.CreateRuntimeItem();
         }
+
+        // Immediate equipment/consumable crafting. Stations and discovery are checked
+        // by the caller; processing and material outputs use their existing paths.
+        public bool TryCraftItem(ResourceInventory resources, IInventory inventory)
+        {
+            if (resources == null || inventory == null || outputItem == null ||
+                outputItem is MaterialDefinition || processingSeconds > 0f) return false;
+            var item = CreateOutputItem();
+            if (item == null || !Building.MaterialCosts.Aggregate(ingredients, fuelIngredients, out var costs))
+                return false;
+
+            bool canPlace = false;
+            foreach (var slot in inventory.GetSlots())
+                if (slot.IsEmpty && inventory.CanPlaceAt(slot.Index, item)) { canPlace = true; break; }
+            if (!canPlace || !resources.TrySpendBatch(costs)) return false;
+
+            // Resource callbacks may fill the available slot. Honor the final add
+            // result and refund the exact costs captured before those callbacks.
+            if (inventory.TryAddItem(item, out _)) return true;
+            foreach (var cost in costs) resources.Add(cost.Key, cost.Value);
+            return false;
+        }
     }
 }

@@ -68,12 +68,20 @@ namespace Duskborn.Gameplay.Enemies
             for (int i = _active.Count - 1; i >= 0; i--)
             {
                 var e = _active[i];
+                if (e != null) e.OnDied -= HandleEnemyDied;
                 if (e != null && e.IsSpawned)
                 {
-                    e.OnDied -= HandleEnemyDied;
                     InstanceFinder.ServerManager.Despawn(e.NetworkObject, DespawnType.Pool);
                 }
             }
+            _active.Clear();
+        }
+
+        private void OnDestroy()
+        {
+            // FishNet owns the objects. Release only this pool's listeners.
+            foreach (var enemy in _active)
+                if (enemy != null) enemy.OnDied -= HandleEnemyDied;
             _active.Clear();
         }
 

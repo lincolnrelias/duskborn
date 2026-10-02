@@ -476,6 +476,8 @@ MonoBehaviour:
   _disableBoneCollidersWhileAlive: 0
   _restorePoseOnReset: 0
   _ignoreSelfCollisions: 0
+  _disableInterpolationWhileAlive: 0
+  _detachOnDeath: []
 --- !u!1 &8476000493214907407
 GameObject:
   m_ObjectHideFlags: 0

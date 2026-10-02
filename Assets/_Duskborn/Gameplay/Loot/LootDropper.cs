@@ -28,8 +28,8 @@ namespace Duskborn.Gameplay.Loot
         }
 
         // OnEnable/OnDisable instead of Start/OnDestroy so pooled enemies correctly
-        // resubscribe after SetActive(false) → SetActive(true). EnemyBase.ResetEnemy()
-        // nulls OnDied, so re-subscribing on re-enable is required.
+        // resubscribe after SetActive(false) → SetActive(true). ResetEnemy preserves
+        // subscriptions established by FishNet activating the pooled object.
         private void OnEnable()
         {
             if (_enemy != null) _enemy.OnDied    += OnEnemyDied;

@@ -25,6 +25,7 @@ public class TerrainChunk : MonoBehaviour
     private int activeSeed;
     private MeshFilter meshFilter;
     private MeshCollider meshCollider;
+    private Mesh runtimeMesh;
 
     private void Awake()
     {
@@ -59,6 +60,19 @@ public class TerrainChunk : MonoBehaviour
 
         meshFilter.sharedMesh = mesh;
         meshCollider.sharedMesh = mesh;
+
+        // Both generation paths pass BuildMesh output here. Own only runtime
+        // assignments; leave meshes authored in scenes or generated in edit mode.
+        if (Application.isPlaying && runtimeMesh != mesh)
+        {
+            if (runtimeMesh != null) Destroy(runtimeMesh);
+            runtimeMesh = mesh;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (runtimeMesh != null) Destroy(runtimeMesh);
     }
 
     public Mesh BuildMesh()

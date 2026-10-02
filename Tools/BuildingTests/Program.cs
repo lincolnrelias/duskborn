@@ -107,9 +107,9 @@ namespace UnityEngine
 {
     public class Object { public string name; }
     public class ScriptableObject : Object {}
-    public class MonoBehaviour : Object { public Transform transform = new(); }
+    public class MonoBehaviour : Object { public Transform transform = new(); public GameObject gameObject = new(); public T GetComponent<T>() where T : class => null; }
     public class Transform { public Vector3 localScale = new(1,1,1); public void SetPositionAndRotation(Vector3 p, Quaternion q) {} public Vector3 InverseTransformPoint(Vector3 p)=>p; public Vector3 TransformPoint(Vector3 p)=>p; public T[] GetComponentsInChildren<T>(bool includeInactive)=>Array.Empty<T>(); }
-    public class GameObject : Object { public Transform transform = new(); }
+    public class GameObject : Object { public Transform transform = new(); public T AddComponent<T>() where T : new() => new T(); }
     public class Mesh { public Bounds bounds; }
     public class MeshFilter { public Mesh sharedMesh; public Transform transform = new(); }
     public class SkinnedMeshRenderer { public Transform transform = new(); public Bounds localBounds; }
@@ -132,9 +132,17 @@ namespace InventorySystem.Core { public interface IInventoryItem {} }
 namespace Duskborn.Effects { public class FurnaceEffects {} }
 namespace InventorySystem.Data
 {
-    public class ItemDefinitionBase { public string Id, DisplayName, Description; public UnityEngine.Texture2D Icon; public InventorySystem.Core.IInventoryItem CreateRuntimeItem()=>null; }
+    public class ItemDefinitionBase { public string Id, DisplayName, Description; public UnityEngine.Texture2D Icon; public Func<InventorySystem.Core.IInventoryItem> Factory; public InventorySystem.Core.IInventoryItem CreateRuntimeItem()=>Factory?.Invoke(); }
     public class MaterialDefinition : ItemDefinitionBase {}
 }
 namespace Duskborn.Gameplay.Crafting { public class RecipeDiscoveryTracker { public bool IsDiscovered(CraftingRecipe r)=>true; } }
 namespace Duskborn.Gameplay.Building { public static class BuildingWorld { public static Dictionary<string,CraftingRecipe> Recipes = new(); public static CraftingRecipe Recipe(string id) => Recipes.TryGetValue(id,out var r)?r:null; } }
-
+namespace Duskborn.Inventory
+{
+    public class InitialInventoryDatabase
+    {
+        public static InitialInventoryDatabase Instance;
+        public List<Entry> BackpackItems;
+        public class Entry { public InventorySystem.Data.ItemDefinitionBase Item; public int Quantity; }
+    }
+}

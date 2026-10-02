@@ -10,6 +10,7 @@ try {
     $argsList = @('-target:exe', '-nostdlib+', '-langversion:latest', ('-out:"'+$output+'/CoreTests.dll"'))
     $argsList += Get-ChildItem $runtime.FullName -Filter '*.dll' | Where-Object { try { [Reflection.AssemblyName]::GetAssemblyName($_.FullName) | Out-Null; $true } catch { $false } } | ForEach-Object { '-r:"'+$_.FullName+'"' }
     $argsList += @('Tools/BuildingTests/Program.cs', 'Assets/_Duskborn/Gameplay/Loot/ResourceInventory.cs', 'Assets/_Duskborn/Gameplay/Building/BuildableDefinition.cs', 'Assets/_Duskborn/Gameplay/Building/PlacedBuilding.cs', 'Assets/_Duskborn/Gameplay/Crafting/CraftingRecipe.cs', 'Assets/_Duskborn/Gameplay/Crafting/CraftingTier.cs', 'Assets/_Duskborn/Gameplay/Crafting/CraftingStationType.cs')
+    $argsList += @('Assets/Inventory/Scripts/Inventory/Core/IInventoryApi.cs', 'Assets/Inventory/Scripts/Inventory/Core/InventoryService.cs', 'Assets/Inventory/Scripts/Inventory/Core/InventoryGrid.cs', 'Assets/Inventory/Scripts/Inventory/Core/InventorySlot.cs', 'Assets/Inventory/Scripts/Inventory/Core/InventoryEvents.cs', 'Assets/Inventory/Scripts/Inventory/Core/InventoryExtensibility.cs')
     $argsList | Set-Content $argsFile
     & "$UnityData/NetCoreRuntime/dotnet.exe" "$UnityData/DotNetSdkRoslyn/csc.dll" "@$argsFile"
     if ($LASTEXITCODE -ne 0) { throw 'Compilation failed' }

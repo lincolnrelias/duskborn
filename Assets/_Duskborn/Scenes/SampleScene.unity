@@ -183,7 +183,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: SceneId
-      value: 2629693436
+      value: 3598581722
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: WasActiveDuringEdit
@@ -306,7 +306,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2002914817134659099, guid: 1964db849fc5f9e4da3f95cb2eaeb0d1, type: 3}
       propertyPath: SceneId
-      value: 347996155
+      value: 897576953
       objectReference: {fileID: 0}
     - target: {fileID: 2002914817134659099, guid: 1964db849fc5f9e4da3f95cb2eaeb0d1, type: 3}
       propertyPath: WasActiveDuringEdit
@@ -627,7 +627,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: SceneId
-      value: 2004873210
+      value: 4139778012
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: WasActiveDuringEdit
@@ -1095,7 +1095,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: SceneId
-      value: 377487326
+      value: 1602224089
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: WasActiveDuringEdit
@@ -4675,7 +4675,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: SceneId
-      value: 1052766173
+      value: 494792701
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: WasActiveDuringEdit
@@ -4931,7 +4931,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2002914817134659099, guid: 1964db849fc5f9e4da3f95cb2eaeb0d1, type: 3}
       propertyPath: SceneId
-      value: 3208507385
+      value: 2671636477
       objectReference: {fileID: 0}
     - target: {fileID: 2002914817134659099, guid: 1964db849fc5f9e4da3f95cb2eaeb0d1, type: 3}
       propertyPath: WasActiveDuringEdit
@@ -6151,6 +6151,11 @@ MonoBehaviour:
   enemyRegistry: {fileID: 11400000, guid: 19b76f4723c752c4f8fba7ab29fa94ae, type: 2}
   nightDefinitions:
   - {fileID: 11400000, guid: 5b64b9a97fa181e48926ed30769e79a6, type: 2}
+  - {fileID: 11400000, guid: 7120a34705f88de4ca3b0a055fb809ff, type: 2}
+  - {fileID: 11400000, guid: 38751f58fc9f18b4087ba8d9e7a791ec, type: 2}
+  - {fileID: 11400000, guid: 40ad1c79990cd2944bce72d15ee15d20, type: 2}
+  - {fileID: 11400000, guid: 81393a581c4e6f141baff77473ab2f8f, type: 2}
+  - {fileID: 11400000, guid: f9f8ac6a163f9f740ac857e881895bb6, type: 2}
   spawnCenter: {fileID: 547467081}
   spawnRadiusMin: 30
   spawnRadiusMax: 50
@@ -6340,7 +6345,7 @@ MonoBehaviour:
   <PrefabId>k__BackingField: 65535
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 0
-  SceneId: 2533228504
+  SceneId: 2004877304
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
     Rotation: {x: 0, y: 0, z: 0, w: 0}
@@ -7544,7 +7549,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2002914817134659099, guid: 1964db849fc5f9e4da3f95cb2eaeb0d1, type: 3}
       propertyPath: SceneId
-      value: 4097834968
+      value: 3028283388
       objectReference: {fileID: 0}
     - target: {fileID: 2002914817134659099, guid: 1964db849fc5f9e4da3f95cb2eaeb0d1, type: 3}
       propertyPath: WasActiveDuringEdit

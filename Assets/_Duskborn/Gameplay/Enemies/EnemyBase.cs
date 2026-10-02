@@ -503,7 +503,8 @@ namespace Duskborn.Gameplay.Enemies
 
         public virtual void ResetEnemy(Vector3 position)
         {
-            OnDied              = null;
+            // FishNet enables pooled objects before this reset. Keep listeners that
+            // component OnEnable callbacks have just registered (including loot).
             CurrentTarget       = null;
             _currentTargetStats = null;
             _lastAttacker       = null;

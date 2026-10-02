@@ -52,7 +52,8 @@ namespace Duskborn.Gameplay.Combat
             float end = duration > 0f ? Time.time + duration : float.PositiveInfinity;
             for (int bit = 0; bit < 32; bit++)
                 if (((int)effect & (1 << bit)) != 0)
-                    _endTimes[bit] = Mathf.Max(_endTimes[bit], end);
+                    _endTimes[bit] = (_activeMask.Value & (1 << bit)) != 0
+                        ? Mathf.Max(_endTimes[bit], end) : end;
 
             _activeMask.Value |= (int)effect;
             DuskLog.Log(LogChannel.Combat, $"{name}: +{effect} ({(duration > 0f ? $"{duration:F2}s" : "until removed")}).");
@@ -61,6 +62,8 @@ namespace Duskborn.Gameplay.Combat
         public void ServerRemove(StatusEffect effect)
         {
             if (!IsServerStarted || effect == StatusEffect.None) return;
+            for (int bit = 0; bit < 32; bit++)
+                if (((int)effect & (1 << bit)) != 0) _endTimes[bit] = 0f;
             _activeMask.Value &= ~(int)effect;
         }
 

@@ -44,8 +44,9 @@ namespace Duskborn.Gameplay.Loot
         public void Add(string resourceId, int amount)
         {
             if (string.IsNullOrEmpty(resourceId) || amount <= 0) return;
+            int updated = checked(GetCount(resourceId) + amount);
+            _counts[resourceId] = updated;
             Revision++;
-            _counts[resourceId] = checked(GetCount(resourceId) + amount);
             Notify(resourceId);
         }
         public void Add(MaterialDefinition def, int amount) { if (def != null) Add(def.Id, amount); }

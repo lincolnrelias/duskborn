@@ -482,42 +482,37 @@ namespace Duskborn.UI
                 return;
             }
 
-            // Spend resources.
-            if (!_selectedRecipe.TrySpendIngredients(_playerResources))
+            // Resource callbacks can change UI selection; finish the selected recipe.
+            var selectedRecipe = _selectedRecipe;
+            if (selectedRecipe.OutputItem is InventorySystem.Data.MaterialDefinition material)
             {
-                ShowStatusFeedback("Error consuming resources.", true);
-                PlaySound(errorSound);
-                return;
-            }
-
-            if (_selectedRecipe.OutputItem is InventorySystem.Data.MaterialDefinition material)
-            {
-                _playerResources.Add(material.Id, _selectedRecipe.OutputAmount);
+                if (!selectedRecipe.TrySpendIngredients(_playerResources))
+                {
+                    ShowStatusFeedback("Error consuming resources.", true);
+                    PlaySound(errorSound);
+                    return;
+                }
+                _playerResources.Add(material.Id, selectedRecipe.OutputAmount);
                 RefreshRecipeListStates(); RefreshDetailsView();
                 ShowStatusFeedback("Material crafted!", false);
                 return;
             }
-            // Create and register the item.
-            var outputItem = _selectedRecipe.CreateOutputItem();
-            if (outputItem != null)
+            // Register before ItemAdded notifies the inventory presenter.
+            if (selectedRecipe.OutputItem != null && selectedRecipe.OutputItem.Icon != null)
             {
-                // Register icons so they display correctly in inventory and the action bar.
-                if (_selectedRecipe.OutputItem != null && _selectedRecipe.OutputItem.Icon != null)
-                {
-                    _inventoryInstaller?.RegisterIcon(_selectedRecipe.OutputItem.Id, _selectedRecipe.OutputItem.Icon);
-                    _actionBarInstaller?.RegisterIcon(_selectedRecipe.OutputItem.Id, _selectedRecipe.OutputItem.Icon);
-                }
-
-                // Insert into the player's inventory.
-                if (_inventoryInstaller != null && _inventoryInstaller.Inventory != null)
-                {
-                    _inventoryInstaller.Inventory.TryAddItem(outputItem, out _);
-                }
+                _inventoryInstaller?.RegisterIcon(selectedRecipe.OutputItem.Id, selectedRecipe.OutputItem.Icon);
+                _actionBarInstaller?.RegisterIcon(selectedRecipe.OutputItem.Id, selectedRecipe.OutputItem.Icon);
             }
-
+            if (!selectedRecipe.TryCraftItem(_playerResources, _inventoryInstaller?.Inventory))
+            {
+                ShowStatusFeedback("Crafting failed. Ingredients retained.", true);
+                PlaySound(errorSound);
+                RefreshRecipeListStates(); RefreshDetailsView();
+                return;
+            }
             PlaySound(craftSound);
-            ShowStatusFeedback($"<b>{_selectedRecipe.RecipeName}</b> crafted successfully!", false);
-            DuskLog.Log(LogChannel.Inventory, $"Crafted '{_selectedRecipe.RecipeName}' at Workbench.");
+            ShowStatusFeedback($"<b>{selectedRecipe.RecipeName}</b> crafted successfully!", false);
+            DuskLog.Log(LogChannel.Inventory, $"Crafted '{selectedRecipe.RecipeName}' at Workbench.");
 
             RefreshRecipeListStates();
             RefreshDetailsView();
@@ -525,7 +520,7 @@ namespace Duskborn.UI
 
         private bool HasFreeInventorySlot()
         {
-            if (_inventoryInstaller?.Inventory == null) return true;
+            if (_inventoryInstaller?.Inventory == null) return false;
             foreach (var slot in _inventoryInstaller.Inventory.GetSlots())
             {
                 if (slot.IsEmpty) return true;

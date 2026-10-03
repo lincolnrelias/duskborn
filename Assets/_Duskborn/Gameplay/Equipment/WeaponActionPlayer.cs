@@ -283,7 +283,16 @@ namespace Duskborn.Gameplay.Equipment
                 _clipPlayable.SetSpeed(0);
             }
             _bowPoseAnchor?.SetFacing(_authoredBow != null);
-            _layerMixer.ConnectInput(1, _anchorBowPose ? _bowPoseAnchor.ConnectClip(actionPose) : actionPose, 0, 0f);
+            if (!reuseMovement)
+                _layerMixer.ConnectInput(1, _anchorBowPose ? _bowPoseAnchor.ConnectClip(actionPose) : actionPose, 0, 0f);
+            else
+            {
+                // The retained pose tap is still connected to this same playback.
+                // RestartDraw blends inside it; never dip into generic locomotion.
+                _blendWeight = 1f;
+                _layerMixer.SetInputWeight(1, 1f);
+                _bowPoseAnchor?.SetWeight(_anchorBowPose && stabilizeBowPose ? 1f : 0f);
+            }
 
             DuskLog.Log(LogChannel.ActionBar,
                 $"Weapon action [{actionIndex}] '{clip.name}' on '{weapon.DisplayName}'.");
@@ -352,41 +361,57 @@ namespace Duskborn.Gameplay.Equipment
         private void StopCurrentAction()
         {
             if (!_isPlaying) return;
-            bool retainMovement = _authoredBow != null && !_cancelling && _activeCtx?.Combat?.IsAiming == true;
+            FinishCurrentAction(_authoredBow != null && _activeData.PreserveLocomotion &&
+                !_cancelling && _activeCtx?.Combat?.IsAiming == true);
+        }
+
+        private void FinishCurrentAction(bool retainMovement)
+        {
             _isPlaying        = false;
             _rangedAimAction  = false;
             _shotRequested    = false;
-            _blendWeight      = 0f;
+            _blendWeight      = retainMovement ? 1f : 0f;
             _activeSkill      = null;
             _skillFired       = false;
 
             // Window for the next click to continue the chain starts when this action ends.
             if (_activeData != null && _activeData.ComboChain)
                 _comboExpiry = Time.time + _activeData.ComboResetTime;
-            animator.applyRootMotion = _originalRootMotion;
+            animator.applyRootMotion = retainMovement ? false : _originalRootMotion;
             _playerController?.SetInputEnabled(true);
-            _layerMixer.SetInputWeight(1, 0f);
-            if (_layerMixer.GetInput(1).IsValid()) _layerMixer.DisconnectInput(1);
-            _bowPoseAnchor?.DisconnectClip();
-            _anchorBowPose = false;
-            _bowPoseAnchor?.SetFacing(false);
             if (retainMovement)
             {
                 _retainedBowMovement = _authoredBow;
+                _layerMixer.SetInputWeight(1, 1f);
                 SetAimLocomotionWeight();
             }
             else
             {
+                DisconnectActionPose();
                 ResetAimLocomotion();
                 _authoredBow?.Dispose();
             }
             _authoredBow = null;
             if (_clipPlayable.IsValid()) _clipPlayable.Destroy();
             _clipPlayable = default;
-            if (_ownsActiveClip) Destroy(_activeClip);
+            if (_ownsActiveClip)
+            {
+                if (Application.isPlaying) Destroy(_activeClip);
+                else DestroyImmediate(_activeClip);
+            }
             _ownsActiveClip = false;
-            _layerMixer.SetLayerMaskFromAvatarMask(1, ResolveMask(true, _equippedActionMask));
+            if (!retainMovement)
+                _layerMixer.SetLayerMaskFromAvatarMask(1, ResolveMask(true, _equippedActionMask));
             if (!_cancelling) OnActionComplete?.Invoke();
+        }
+
+        private void DisconnectActionPose()
+        {
+            _layerMixer.SetInputWeight(1, 0f);
+            if (_layerMixer.GetInput(1).IsValid()) _layerMixer.DisconnectInput(1);
+            _bowPoseAnchor?.DisconnectClip();
+            _anchorBowPose = false;
+            _bowPoseAnchor?.SetFacing(false);
         }
 
         private void ResetAimLocomotion()
@@ -411,6 +436,7 @@ namespace Duskborn.Gameplay.Equipment
         private void ClearRetainedBowMovement()
         {
             if (_retainedBowMovement == null) return;
+            DisconnectActionPose();
             ResetAimLocomotion();
             _retainedBowMovement.Dispose();
             _retainedBowMovement = null;
@@ -541,6 +567,10 @@ namespace Duskborn.Gameplay.Equipment
 
             if (_authoredBow != null)
             {
+                // Fade only the initial entry into aim. Release and redraw keep
+                // continuous upper-body ownership while their poses crossfade.
+                _blendWeight = _authoredBow.HasPreviousPose ? 1f :
+                    Mathf.Clamp01((float)_authoredBow.Clock.ActionTime / BlendInTime);
                 SetAimLocomotionWeight();
                 // Jump locomotion still needs the same bounded upper-body bow
                 // correction. Ground contact only selects the lower-body gait.

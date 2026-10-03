@@ -25,6 +25,10 @@ namespace Duskborn.Gameplay.Equipment
         private static readonly int[] OctantInputs = {1,6,4,8,2,7,3,5};
         private float phase;
         private double idleTime;
+        private int redrawSource = -1;
+        private float redrawElapsed;
+        public const float RedrawBlendDuration = .12f;
+        public bool HasPreviousPose { get; private set; }
         public BowAnimationSet Set { get; }
         public float MovementPhase => phase;
         public int MovementClipCount => moves.Length;
@@ -32,8 +36,14 @@ namespace Duskborn.Gameplay.Equipment
         public string ClipName => clones[Math.Min((int)Clock.Phase, 2)].name;
         public void RestartDraw()
         {
+            // Keep the outgoing release sample while the next load fades in.
+            // Changing clip times/weights outright creates a one-frame pose jump.
+            redrawSource = Math.Min((int)Clock.Phase, 2);
+            if (redrawSource == 0) redrawSource = -1;
+            redrawElapsed = 0f;
+            HasPreviousPose = true;
             Clock.RestartDraw();
-            for(int i=0;i<3;i++) Pose.SetInputWeight(i,i==0?1:0);
+            for(int i=0;i<3;i++) Pose.SetInputWeight(i,i==(redrawSource >= 0 ? redrawSource : 0)?1:0);
             poses[0].SetTime(0);
         }
         public AuthoredBowPlayback(PlayableGraph graph, BowAnimationSet set, float movementPhase = 0f)
@@ -61,7 +71,18 @@ namespace Duskborn.Gameplay.Equipment
         {
             Clock.Advance(dt*Mathf.Max(0,speed));
             int stage=Math.Min((int)Clock.Phase,2);
-            for(int i=0;i<3;i++) Pose.SetInputWeight(i,i==stage?1:0);
+            float incomingWeight = 1f;
+            if (redrawSource >= 0)
+            {
+                redrawElapsed += Mathf.Max(0, dt) * Mathf.Max(0, speed);
+                incomingWeight = Mathf.SmoothStep(0, 1, Mathf.Clamp01(redrawElapsed / RedrawBlendDuration));
+                if (redrawElapsed >= RedrawBlendDuration || stage == redrawSource)
+                {
+                    redrawSource = -1;
+                    incomingWeight = 1f;
+                }
+            }
+            for(int i=0;i<3;i++) Pose.SetInputWeight(i,i==stage?incomingWeight:i==redrawSource?1-incomingWeight:0);
             double time=Clock.Time;
             if(stage==1) time%=clones[1].length;
             poses[stage].SetTime(time);

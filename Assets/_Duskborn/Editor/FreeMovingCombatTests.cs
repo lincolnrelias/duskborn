@@ -21,6 +21,7 @@ namespace Duskborn.Editor
         public static void RunAllTests()
         {
             TestMovementSpace();
+            TestBowRedrawContinuity();
             var definition = AssetDatabase.LoadAssetAtPath<WeaponDefinition>(
                 "Assets/_Duskborn/ScriptableObjects/Weapons/weapon_blood_blade.asset");
             Check(definition != null && definition.Actions[0].Entries.Length > 0, "Melee test clips missing.");
@@ -124,6 +125,88 @@ namespace Duskborn.Editor
                 "Zero movement speed must not produce invalid animation parameters.");
         }
 
+        private static readonly HumanBodyBones[] BowContinuityBones =
+        {
+            HumanBodyBones.Hips, HumanBodyBones.Spine, HumanBodyBones.LeftHand,
+            HumanBodyBones.RightHand, HumanBodyBones.LeftFoot, HumanBodyBones.RightFoot
+        };
+
+        private static void TestBowRedrawContinuity()
+        {
+            var definition = Resources.Load<WeaponDefinition>("Weapons/weapon_wooden_bow");
+            var weapon = (WeaponItem)definition.CreateRuntimeItem();
+            using (var rig = new Rig())
+            {
+                rig.Player.SetEquippedWeapon(weapon);
+                rig.Player.PlayAction(0, weapon, null, true);
+                foreach (var direction in new[] { Vector2.zero, Vector2.left, new Vector2(1, -1).normalized })
+                {
+                    var playback = rig.BowPlayback;
+                    playback.Advance((float)playback.Clock.LoadDuration + .1f, 1, direction);
+                    rig.Player.RequestAimedShot();
+                    playback.Advance((float)playback.Clock.ReleaseDuration + .1f, 1, direction);
+                    Check(playback.Clock.Phase == AuthoredBowClock.Stage.Complete, "Bow release did not complete.");
+                    rig.Step(37f, direction, 1, 0);
+                    var beforeCompletion = CaptureBowPose(rig);
+                    rig.FinishBowWithAimHeld();
+                    rig.Evaluate(0);
+                    Check(!rig.Player.IsPlaying && rig.HasFullActionPose,
+                        "Bow completion dropped the upper-body layer during the redraw gap.");
+                    CompareBowPose(beforeCompletion, rig, "completion");
+                    for (int frame = 0; frame < 3; frame++)
+                    {
+                        playback.Advance(1f / 60, 1, direction);
+                        rig.Evaluate(0);
+                        Check(rig.HasFullActionPose, "A recovery gap frame fell back to generic locomotion.");
+                    }
+                    var beforeRedraw = CaptureBowPose(rig);
+                    float phase = playback.MovementPhase;
+                    rig.Player.PlayAction(0, weapon, null, true);
+                    Check(ReferenceEquals(playback, rig.BowPlayback), "Redraw recreated the movement/pose branch.");
+                    Check(rig.HasFullActionPose && Mathf.Abs(playback.MovementPhase - phase) < .00001f,
+                        "Redraw reset the upper-body weight or stride phase.");
+                    rig.Evaluate(0);
+                    CompareBowPose(beforeRedraw, rig, "redraw start");
+                    playback.Advance(AuthoredBowPlayback.RedrawBlendDuration * .5f, 1, direction);
+                    Check(playback.Pose.GetInputWeight(0) > 0 && playback.Pose.GetInputWeight(2) > 0,
+                        "Redraw must blend outgoing Release with incoming Load.");
+                    Check(Mathf.Abs(playback.Pose.GetInputWeight(0) + playback.Pose.GetInputWeight(2) - 1) < .00001f,
+                        "Redraw pose weights lost full ownership.");
+                    playback.Advance(AuthoredBowPlayback.RedrawBlendDuration, 1, direction);
+                    Check(playback.Pose.GetInputWeight(0) == 1 && playback.Pose.GetInputWeight(2) == 0,
+                        "Redraw did not finish its bounded crossfade.");
+                }
+                // Aim release, dodge, death and weapon switches share this cleanup.
+                rig.Player.CancelAction();
+                Check(!rig.HasFullActionPose && rig.BowPlayback == null, "Cancellation retained an active bow pose.");
+                rig.Evaluate(0);
+            }
+            Debug.Log("[BowRedrawContinuity] Stationary, strafe and diagonal release/gap/redraw poses and cancellation passed.");
+        }
+
+        private static (Vector3 position, Quaternion rotation)[] CaptureBowPose(Rig rig)
+        {
+            var result = new (Vector3, Quaternion)[BowContinuityBones.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                var bone = rig.Bone(BowContinuityBones[i]);
+                result[i] = (bone.position, bone.rotation);
+            }
+            return result;
+        }
+
+        private static void CompareBowPose((Vector3 position, Quaternion rotation)[] previous, Rig rig, string boundary)
+        {
+            for (int i = 0; i < previous.Length; i++)
+            {
+                var bone = rig.Bone(BowContinuityBones[i]);
+                float distance = Vector3.Distance(previous[i].position, bone.position);
+                float angle = Quaternion.Angle(previous[i].rotation, bone.rotation);
+                Check(distance < .001f && angle < .25f,
+                    $"Bow snapped at {boundary}: {BowContinuityBones[i]}, distance={distance}, angle={angle}.");
+            }
+        }
+
         private static void CompareLegs(Rig baseline, Rig combat)
         {
             foreach (var bone in new[] { HumanBodyBones.Hips, HumanBodyBones.LeftUpperLeg,
@@ -144,6 +227,10 @@ namespace Duskborn.Editor
             public WeaponActionPlayer Player { get; private set; }
             public Animator Animator { get; private set; }
             public string Case { get; private set; }
+            public bool HasFullActionPose => layers.GetInput(1).IsValid() && layers.GetInputWeight(1) == 1;
+            public AuthoredBowPlayback BowPlayback =>
+                (AuthoredBowPlayback)typeof(WeaponActionPlayer).GetField("_authoredBow", PrivateInstance).GetValue(Player) ??
+                (AuthoredBowPlayback)typeof(WeaponActionPlayer).GetField("_retainedBowMovement", PrivateInstance).GetValue(Player);
 
             public Rig()
             {
@@ -178,7 +265,20 @@ namespace Duskborn.Editor
                 layers.SetInputWeight(1, weight);
                 var action = (AnimationClipPlayable)typeof(WeaponActionPlayer).GetField("_clipPlayable", PrivateInstance).GetValue(Player);
                 if (action.IsValid()) { action.SetSpeed(0); action.SetTime(time); }
-                graph.Evaluate(1f / 60f);
+                Evaluate(1f / 60f);
+            }
+
+            public void Evaluate(float dt)
+            {
+                graph.Evaluate(dt);
+                var anchor = (BowPoseAnchor)typeof(WeaponActionPlayer).GetField("_bowPoseAnchor", PrivateInstance).GetValue(Player);
+                if (BowPlayback != null) anchor?.SetWeight(1);
+                anchor?.ApplyPose();
+            }
+
+            public void FinishBowWithAimHeld()
+            {
+                typeof(WeaponActionPlayer).GetMethod("FinishCurrentAction", PrivateInstance).Invoke(Player, new object[] { true });
             }
 
             public void Dispose()

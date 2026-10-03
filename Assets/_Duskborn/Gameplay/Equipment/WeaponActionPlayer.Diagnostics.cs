@@ -63,30 +63,33 @@ namespace Duskborn.Gameplay.Equipment
         };
 
         public AvatarMask DiagnosticMask => ResolveMask(
-            !_isPlaying || _activeData == null || _activeData.PreserveLocomotion,
-            _isPlaying ? (_activeWeapon != null ? _activeWeapon.ActionMask : _equippedActionMask) : _equippedActionMask);
+            (!_isPlaying && _retainedBowMovement == null) || _activeData == null || _activeData.PreserveLocomotion,
+            (_isPlaying || _retainedBowMovement != null) && _activeData != null
+                ? _activeData.ResolveMask(_activeWeapon != null ? _activeWeapon.ActionMask : _equippedActionMask)
+                : _equippedActionMask);
 
         private void CaptureAnimationDiagnostics()
         {
             if (AnimationDiagnosticSample == null || animator == null ||
                 !_graph.IsValid() || !_controllerPlayable.IsValid()) return;
+            var bowPlayback = _authoredBow ?? _retainedBowMovement;
             var sample = new AnimationDiagnosticFrame
             {
                 frame = Time.frameCount, time = Time.unscaledTime, deltaTime = Time.unscaledDeltaTime,
                 weapon = _activeWeapon != null ? _activeWeapon.DisplayName : "",
-                actionClip = _authoredBow != null ? _authoredBow.ClipName : _isPlaying && _activeClip != null ? _activeClip.name : "",
+                actionClip = bowPlayback != null ? bowPlayback.ClipName : _isPlaying && _activeClip != null ? _activeClip.name : "",
                 mask = DiagnosticMask != null ? DiagnosticMask.name : "",
                 // A disconnected mixer slot can retain a weight; it contributes no pose.
-                actionConnected = _isPlaying && _layerMixer.GetInput(1).IsValid(),
-                actionWeight = _isPlaying && _layerMixer.GetInput(1).IsValid() ? _layerMixer.GetInputWeight(1) : 0f,
-                actionTime = _isPlaying ? (float)ActionTime : 0f,
+                actionConnected = (_isPlaying || _retainedBowMovement != null) && _layerMixer.GetInput(1).IsValid(),
+                actionWeight = (_isPlaying || _retainedBowMovement != null) && _layerMixer.GetInput(1).IsValid() ? _layerMixer.GetInputWeight(1) : 0f,
+                actionTime = bowPlayback != null ? (float)bowPlayback.Clock.ActionTime : _isPlaying ? (float)ActionTime : 0f,
                 shotRequested = _shotRequested,
                 actionSpeed = _authoredBow != null ? (_authoredBow.Clock.Phase == AuthoredBowClock.Stage.Hold ? 0f : _activeData.BaseSpeed * _runtimeSpeedMultiplier) : _isPlaying && _clipPlayable.IsValid() ? (float)_clipPlayable.GetSpeed() : 0f,
                 releaseTime = _bowReleaseTime, aimPitch = _aimPitch,
                 aiming = IsRangedAimAction, rootMotion = animator.applyRootMotion,
                 preserveLocomotion = !_isPlaying || _activeData == null || _activeData.PreserveLocomotion,
                 humanoid = animator.isHuman,
-                phase = _authoredBow != null ? _authoredBow.Clock.Phase.ToString() : !_isPlaying ? "Locomotion" : !_rangedAimAction ? "Action" :
+                phase = _retainedBowMovement != null ? "BetweenShots" : _authoredBow != null ? _authoredBow.Clock.Phase.ToString() : !_isPlaying ? "Locomotion" : !_rangedAimAction ? "Action" :
                     !_shotRequested ? (_clipPlayable.GetSpeed() == 0 ? "Hold" : "Draw") : "ReleaseRequested"
             };
             var cc = GetComponent<CharacterController>();

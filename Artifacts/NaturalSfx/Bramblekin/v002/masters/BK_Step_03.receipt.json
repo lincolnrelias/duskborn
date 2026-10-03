@@ -1,0 +1,22 @@
+{
+  "cue": "BK_Step_03",
+  "sources": [
+    {
+      "file": "footstep_grass_002.ogg",
+      "sha256": "73a520139f5be716a403bfe9c80e0e94d1e61d8e9de04a354b336392164b53dc"
+    }
+  ],
+  "filter_graph": "[0:a]volume=-7dB,afade=t=in:d=0.002[out]",
+  "output_sha256": "6fb62e299bc04a8dff994e4396d88652e2c40a9b65d966752fbe0e60fe474a3d",
+  "inspection": {
+    "duration": 0.6895625,
+    "sample_rate": 48000,
+    "channels": 1,
+    "peak_dbfs": -8.059556343205477,
+    "rms_dbfs": -36.4760094513954,
+    "clipped_samples": 0,
+    "onset_seconds": 0.0,
+    "tail_silence_seconds": 0.5505
+  },
+  "format": "48 kHz mono PCM 24-bit WAV"
+}

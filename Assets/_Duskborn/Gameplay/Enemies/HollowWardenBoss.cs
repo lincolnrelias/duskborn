@@ -120,6 +120,11 @@ namespace Duskborn.Gameplay.Enemies
         {
             // Do not run EnemyBase.Update: its normal AI and melee would compete with the boss clock.
             if (!IsServerStarted || !IsSpawned) return;
+            if (IsAlive && TickIdleWhenNoPlayers())
+            {
+                _moving.Value = Agent != null && Agent.isActiveAndEnabled && Agent.isOnNavMesh && Agent.velocity.sqrMagnitude > .04f;
+                return;
+            }
             if (IsAlive)
             {
                 _clock.ObserveHealth(CurrentHP / Mathf.Max(1, MaxHP));

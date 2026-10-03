@@ -1,0 +1,71 @@
+{
+  "parts": [
+    {
+      "part": "Body",
+      "non_manifold_edges": 0,
+      "vertices": 116,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "minimum_z": 0.3500000238418579
+    },
+    {
+      "part": "Head",
+      "non_manifold_edges": 0,
+      "vertices": 592,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "minimum_z": 0.9099999666213989
+    },
+    {
+      "part": "Arm.L",
+      "non_manifold_edges": 0,
+      "vertices": 86,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "minimum_z": 0.3850000500679016
+    },
+    {
+      "part": "Leg.L",
+      "non_manifold_edges": 0,
+      "vertices": 96,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "minimum_z": 0.0
+    },
+    {
+      "part": "Arm.R",
+      "non_manifold_edges": 0,
+      "vertices": 147,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "minimum_z": 0.3799999952316284
+    },
+    {
+      "part": "Leg.R",
+      "non_manifold_edges": 0,
+      "vertices": 96,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "minimum_z": 0.0
+    }
+  ],
+  "missing_images": []
+}

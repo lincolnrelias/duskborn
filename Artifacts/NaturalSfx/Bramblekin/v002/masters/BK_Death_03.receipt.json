@@ -1,0 +1,22 @@
+{
+  "cue": "BK_Death_03",
+  "sources": [
+    {
+      "file": "goblin-12.wav",
+      "sha256": "c3d06902ba01331e29aeb886a6c34746e5c5e49a3a8a632893dd5f560958f12a"
+    }
+  ],
+  "filter_graph": "[0:a]atrim=start=0.0034583333333333332:end=0.6734375,asetpts=PTS-STARTPTS,highpass=f=90,lowpass=f=9000,volume=-7.704358757886776dB,afade=t=in:d=0.002,afade=t=out:st=0.6639791666666667:d=0.006[out]",
+  "output_sha256": "0abc375fb907f3e5334a92cd0f7221127db7eb06d1e1e4756effe029c00a2077",
+  "inspection": {
+    "duration": 0.6699791666666667,
+    "sample_rate": 48000,
+    "channels": 1,
+    "peak_dbfs": -9.6918231352513,
+    "rms_dbfs": -22.12882365204587,
+    "clipped_samples": 0,
+    "onset_seconds": 0.0064375,
+    "tail_silence_seconds": 0.002875
+  },
+  "format": "48 kHz mono PCM 24-bit WAV"
+}

@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Position = 0)]
-    [ValidateSet('help', 'compile', 'validate', 'test', 'test-warden', 'build-windows', 'build-warden', 'build-briarback', 'build-thornwing', 'build-ironroot', 'test-ironroot', 'clear-terrain', 'all')]
+    [ValidateSet('help', 'compile', 'validate', 'test', 'test-warden', 'build-windows', 'build-warden', 'build-briarback', 'build-bramblekin', 'build-thornwing', 'build-ironroot', 'test-ironroot', 'clear-terrain', 'all')]
     [string]$Command = 'help',
 
     [string]$UnityPath,
@@ -26,6 +26,7 @@ Unity CLI workflow
   .\Tools\unity.ps1 build-windows
   .\Tools\unity.ps1 build-warden
   .\Tools\unity.ps1 build-briarback
+  .\Tools\unity.ps1 build-bramblekin
   .\Tools\unity.ps1 build-thornwing
   .\Tools\unity.ps1 build-ironroot
   .\Tools\unity.ps1 test-ironroot
@@ -140,6 +141,12 @@ if ($Command -eq 'help') {
 $script:resolvedUnityPath = Resolve-UnityExecutable
 
 switch ($Command) {
+    'build-bramblekin' {
+        Invoke-UnityTask -Name 'build-bramblekin' `
+            -TaskArguments @('-quit', '-executeMethod', 'Duskborn.Editor.DuskbornCli.BuildBramblekin') `
+            -SuccessMarker '[DuskbornCli] Bramblekin build succeeded.' `
+            -ExpectedOutput (Join-Path $projectRoot 'Assets/_Duskborn/Prefabs/Enemies/Bramblekin.prefab')
+    }
     'build-thornwing' {
         Invoke-UnityTask -Name 'build-thornwing' `
             -TaskArguments @('-quit', '-executeMethod', 'Duskborn.Editor.DuskbornCli.BuildThornwing') `

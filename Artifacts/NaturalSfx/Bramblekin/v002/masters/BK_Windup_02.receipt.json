@@ -1,0 +1,22 @@
+{
+  "cue": "BK_Windup_02",
+  "sources": [
+    {
+      "file": "goblin-2.wav",
+      "sha256": "ba8632a3ef48ef38c64d5fc6cade3b85285176186f2e55fb06288cc4024ac238"
+    }
+  ],
+  "filter_graph": "[0:a]atrim=start=0.004708333333333333:end=0.25,asetpts=PTS-STARTPTS,highpass=f=90,lowpass=f=9000,volume=-9.481484345261858dB,afade=t=in:d=0.002,afade=t=out:st=0.23929166666666665:d=0.006[out]",
+  "output_sha256": "7f99f923186848960a3649fe3e9c4e1d7b89e058eb23fdede2d476f7ccee6c29",
+  "inspection": {
+    "duration": 0.24529166666666666,
+    "sample_rate": 48000,
+    "channels": 1,
+    "peak_dbfs": -9.275841705933987,
+    "rms_dbfs": -24.054189857633908,
+    "clipped_samples": 0,
+    "onset_seconds": 0.007270833333333333,
+    "tail_silence_seconds": 0.004875
+  },
+  "format": "48 kHz mono PCM 24-bit WAV"
+}

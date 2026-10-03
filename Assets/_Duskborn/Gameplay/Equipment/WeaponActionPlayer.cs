@@ -127,6 +127,12 @@ namespace Duskborn.Gameplay.Equipment
 
         private WeaponAudioPlayer _audioPlayer;
 
+        private void Awake()
+        {
+            if (animator == null) animator = GetComponentInChildren<Animator>(true);
+            Duskborn.Gameplay.Player.IronrootAppearance.EnsureAnimationEventReceiver(animator);
+        }
+
         private void Start()
         {
             _audioPlayer = GetComponent<WeaponAudioPlayer>();

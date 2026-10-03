@@ -20,6 +20,10 @@ namespace Duskborn.Editor
             int passed = 0;
             int total = 0;
 
+            RunTest(Test_AnimationReceiver_AttachesAutomatically, ref passed, ref total);
+            RunTest(Test_ActionMask_OverridesWeaponMask, ref passed, ref total);
+            RunTest(Test_TwoHandedMask_PreservesLocomotion, ref passed, ref total);
+            RunTest(Test_StudioMaskPresets_UpdateRuntimeActions, ref passed, ref total);
             RunTest(Test_AttachmentProfile_SetAndApplyOffsets, ref passed, ref total);
             RunTest(Test_WeaponDefinition_AttachmentProfileIntegration, ref passed, ref total);
             RunTest(Test_WeaponItem_CarriesAttachmentProfile, ref passed, ref total);
@@ -46,6 +50,126 @@ namespace Duskborn.Editor
                 Debug.LogError($"[ItemFittingStudioTests] FAILURE in {testMethod.Method.Name}: {ex.Message}\n{ex.StackTrace}");
             }
         }
+
+        private static void Test_AnimationReceiver_AttachesAutomatically()
+        {
+            var root = new GameObject("ReceiverTest");
+            try
+            {
+                var visual = new GameObject("IronrootVisual");
+                visual.transform.SetParent(root.transform);
+                var animator = visual.AddComponent<Animator>();
+                var receiver = Duskborn.Gameplay.Player.IronrootAppearance.EnsureAnimationEventReceiver(animator);
+                if (receiver == null || receiver.gameObject != animator.gameObject)
+                    throw new Exception("Animation callbacks must be received on the Animator object, not its parent.");
+                receiver.enabled = false;
+                if (Duskborn.Gameplay.Player.IronrootAppearance.EnsureAnimationEventReceiver(animator) != receiver || !receiver.enabled ||
+                    visual.GetComponents<IronrootAppearance>().Length != 1)
+                    throw new Exception("Automatic attachment must re-enable and reuse the existing receiver.");
+                // Native SendMessage cannot dispatch to this runtime-only behaviour
+                // in edit mode. Exercise the animation callbacks directly instead.
+                receiver.OnAttack(new AnimationEvent());
+                receiver.OnShoot(new AnimationEvent());
+                receiver.OnFinishAttack(new AnimationEvent());
+            }
+            finally { UnityEngine.Object.DestroyImmediate(root); }
+        }
+
+        private static void Test_ActionMask_OverridesWeaponMask()
+        {
+            var weaponMask = new AvatarMask();
+            var actionMask = new AvatarMask();
+            try
+            {
+                var action = new WeaponActionData();
+                if (action.ResolveMask(weaponMask) != weaponMask)
+                    throw new Exception("Actions without overrides must inherit the weapon mask.");
+                action.MaskOverride = actionMask;
+                if (action.ResolveMask(weaponMask) != actionMask || action.ResolveMask(null) != actionMask)
+                    throw new Exception("An action or skill override must take precedence over the weapon mask.");
+                action.MaskOverride = null;
+                if (action.ResolveMask(null) != null)
+                    throw new Exception("An empty action and weapon mask must allow the player default.");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(weaponMask);
+                UnityEngine.Object.DestroyImmediate(actionMask);
+            }
+        }
+
+        private static void Test_TwoHandedMask_PreservesLocomotion()
+        {
+            var mask = AssetDatabase.LoadAssetAtPath<AvatarMask>("Assets/_Duskborn/Prefabs/Player/TwoHandedWeaponMask.mask");
+            if (mask == null) throw new Exception("Missing two-handed mask preset.");
+            foreach (var part in new[] { AvatarMaskBodyPart.Body, AvatarMaskBodyPart.LeftArm,
+                AvatarMaskBodyPart.RightArm, AvatarMaskBodyPart.LeftFingers, AvatarMaskBodyPart.RightFingers })
+                if (!mask.GetHumanoidBodyPartActive(part))
+                    throw new Exception($"Two-handed attacks must include {part}.");
+            foreach (var part in new[] { AvatarMaskBodyPart.Root, AvatarMaskBodyPart.LeftLeg,
+                AvatarMaskBodyPart.RightLeg, AvatarMaskBodyPart.LeftFootIK, AvatarMaskBodyPart.RightFootIK })
+                if (mask.GetHumanoidBodyPartActive(part))
+                    throw new Exception($"Two-handed upper-body attacks must preserve locomotion for {part}.");
+        }
+
+
+        private static void Test_StudioMaskPresets_UpdateRuntimeActions()
+        {
+            var weapon = ScriptableObject.CreateInstance<WeaponDefinition>();
+            var oneHanded = ItemFittingStudioWindow.LoadCombatMaskPreset(false);
+            var twoHanded = ItemFittingStudioWindow.LoadCombatMaskPreset(true);
+            try
+            {
+                if (oneHanded == null || twoHanded == null || oneHanded == twoHanded)
+                    throw new Exception("Preset buttons must resolve two distinct mask assets.");
+                using (var data = new SerializedObject(weapon))
+                {
+                    data.Update();
+                    var actions = data.FindProperty("actions");
+                    actions.arraySize = 1;
+                    var action = actions.GetArrayElementAtIndex(0);
+                    var mask = action.FindPropertyRelative("MaskOverride");
+                    var preserve = action.FindPropertyRelative("PreserveLocomotion");
+                    preserve.boolValue = false;
+                    ItemFittingStudioWindow.AssignCombatMask(mask, preserve, twoHanded, false);
+                    data.ApplyModifiedProperties();
+                    var runtime = (WeaponItem)weapon.CreateRuntimeItem();
+                    if (!runtime.Actions[0].PreserveLocomotion || runtime.Actions[0].ResolveMask(runtime.ActionMask) != twoHanded)
+                        throw new Exception("2H must exit full-body mode and affect the next runtime action.");
+
+                    data.Update();
+                    action = data.FindProperty("actions").GetArrayElementAtIndex(0);
+                    mask = action.FindPropertyRelative("MaskOverride");
+                    preserve = action.FindPropertyRelative("PreserveLocomotion");
+                    ItemFittingStudioWindow.AssignCombatMask(mask, preserve, oneHanded, false);
+                    data.ApplyModifiedProperties();
+                    runtime = (WeaponItem)weapon.CreateRuntimeItem();
+                    if (runtime.Actions[0].ResolveMask(runtime.ActionMask) != oneHanded)
+                        throw new Exception("Switching from 2H to 1H must replace the action mask.");
+
+                    data.Update();
+                    action = data.FindProperty("actions").GetArrayElementAtIndex(0);
+                    ItemFittingStudioWindow.AssignCombatMask(data.FindProperty("actionMask"), null, twoHanded, false);
+                    ItemFittingStudioWindow.AssignActionToWeaponMask(action);
+                    data.ApplyModifiedProperties();
+                    runtime = (WeaponItem)weapon.CreateRuntimeItem();
+                    if (!runtime.Actions[0].PreserveLocomotion || runtime.Actions[0].MaskOverride != null ||
+                        runtime.Actions[0].ResolveMask(runtime.ActionMask) != twoHanded)
+                        throw new Exception("A weapon preset must clear the current action override and restore mask inheritance.");
+
+                    data.Update();
+                    action = data.FindProperty("actions").GetArrayElementAtIndex(0);
+                    ItemFittingStudioWindow.AssignCombatMask(action.FindPropertyRelative("MaskOverride"),
+                        action.FindPropertyRelative("PreserveLocomotion"), null, true);
+                    data.ApplyModifiedProperties();
+                    runtime = (WeaponItem)weapon.CreateRuntimeItem();
+                    if (runtime.Actions[0].PreserveLocomotion || runtime.Actions[0].MaskOverride != null)
+                        throw new Exception("Full Body must bypass the partial mask on subsequent playback.");
+                }
+            }
+            finally { UnityEngine.Object.DestroyImmediate(weapon); }
+        }
+
 
         private static void Test_AttachmentProfile_SetAndApplyOffsets()
         {

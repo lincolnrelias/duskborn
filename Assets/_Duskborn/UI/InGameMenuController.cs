@@ -218,6 +218,14 @@ namespace Duskborn.UI
             // Does not operate in the main menu scene.
             if (SceneManager.GetActiveScene().name == "MainMenu") return;
 
+            var player = LocalPlayerContext.Stats;
+            if (player != null && !player.IsAlive)
+            {
+                IsOpen = false;
+                Time.timeScale = 1f;
+                return;
+            }
+
             // Animate embers with unscaledDeltaTime (works even with Time.timeScale = 0).
             if (IsOpen && _embers != null)
             {
@@ -815,10 +823,10 @@ namespace Duskborn.UI
             }
         }
 
-        private void ReturnToMainMenu()
+        public static void ReturnToMainMenu()
         {
             Time.timeScale = 1f;
-            IsOpen = false;
+            if (Instance != null) Instance.IsOpen = false;
 
             // Safely disconnect FishNet if connected.
             if (FishNet.InstanceFinder.NetworkManager != null)

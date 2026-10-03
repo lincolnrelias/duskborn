@@ -23,6 +23,7 @@ namespace Duskborn.Gameplay.Loot
 
         private DroppedItemVisuals _visuals;
 
+        public string ResourceId => _resourceId.Value;
         public bool          IsCollectible => _collectible.Value;
         public ItemRarity    Rarity        => _rarity.Value;
         public NetworkObject TargetPlayer  => _targetPlayer.Value;
@@ -49,20 +50,31 @@ namespace Duskborn.Gameplay.Loot
                 _visuals = gameObject.AddComponent<DroppedItemVisuals>();
 
             _rarity.OnChange += OnRarityChanged;
+            _resourceId.OnChange += OnResourceIdChanged;
         }
 
         private void OnDestroy()
         {
             _rarity.OnChange -= OnRarityChanged;
+            _resourceId.OnChange -= OnResourceIdChanged;
         }
 
         public override void OnStartClient()
         {
             base.OnStartClient();
+            RefreshRunestoneVisual();
             if (_visuals != null)
                 _visuals.Setup(_rarity.Value);
         }
 
+        private void OnResourceIdChanged(string previous, string next, bool asServer) => RefreshRunestoneVisual();
+        private void RefreshRunestoneVisual()
+        {
+            if (!Duskborn.Gameplay.Enchanting.RuneCatalog.TryParse(ResourceId, out var rune)) return;
+            var visual = GetComponent<Duskborn.Effects.RunestonePickupVisual>();
+            if (visual == null) visual = gameObject.AddComponent<Duskborn.Effects.RunestonePickupVisual>();
+            visual.Configure(rune);
+        }
         private void OnRarityChanged(ItemRarity prev, ItemRarity next, bool asServer)
         {
             if (_visuals != null)
@@ -76,17 +88,23 @@ namespace Duskborn.Gameplay.Loot
                 Invoke(nameof(SetCollectible), 1f);
         }
 
-        [SerializeField] private float lingerDuration = 2.6f;
+        public const float DefaultLingerDuration = 2.6f;
+
+        [SerializeField] private float lingerDuration = DefaultLingerDuration;
 
         private void SetCollectible() => _collectible.Value = true;
 
         public static bool CanFlyToPlayer(ItemRarity rarity) => rarity <= ItemRarity.Rare;
 
-        private float GetLingerDuration()
+        public static float GetFlightSpeed(float flightDuration) => Mathf.Lerp(8.0f, 26.0f, flightDuration * 2.2f);
+
+        private float GetLingerDuration() => GetLingerDuration(NetworkObject, lingerDuration);
+
+        public static float GetLingerDuration(NetworkObject pickup, float duration = DefaultLingerDuration)
         {
-            int seed = NetworkObject != null ? (int)NetworkObject.ObjectId : gameObject.GetInstanceID();
+            int seed = pickup != null ? (int)pickup.ObjectId : 0;
             float jitter = (seed & 7) * 0.05f; // 0.00 to 0.35s variation for an organic cascade.
-            return lingerDuration + jitter;
+            return duration + jitter;
         }
 
         public void ServerInitialize(string resourceId, int amount, ItemRarity rarity = ItemRarity.Common, NetworkObject targetPlayer = null)
@@ -159,7 +177,7 @@ namespace Duskborn.Gameplay.Loot
 
             Vector3 targetPos = targetNob.transform.position + Vector3.up * 0.85f;
             float flightDuration = elapsed - linger;
-            float currentSpeed = Mathf.Lerp(8.0f, 26.0f, flightDuration * 2.2f);
+            float currentSpeed = GetFlightSpeed(flightDuration);
 
             transform.position = Vector3.MoveTowards(transform.position, targetPos, currentSpeed * Time.deltaTime);
 

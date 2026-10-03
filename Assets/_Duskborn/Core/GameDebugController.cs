@@ -6,7 +6,7 @@ namespace Duskborn.Core
     /// <summary>
     /// Editor/testing shortcuts. Remove or strip from shipping build.
     /// F1 — skip day (force night to start immediately)
-    /// F2 — force end current night (all enemies despawn, next day begins)
+    /// F2 — force end current night (next day begins, surviving mobs remain)
     /// F3 — deal 25 damage to all players (test death / game-over)
     /// F4 — print active spawn timeline to console
     /// </summary>

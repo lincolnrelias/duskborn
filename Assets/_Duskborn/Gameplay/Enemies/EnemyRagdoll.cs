@@ -9,6 +9,8 @@ namespace Duskborn.Gameplay.Enemies
         [SerializeField] private Animator _animator;
 
         [SerializeField] private float _impulseScale = 5f;
+        [SerializeField, Range(0f, 1f)] private float _wholeBodyImpulseFraction;
+        [SerializeField] private bool _applyImpulseAtHitPoint;
         [SerializeField] private float _settleDuration = 2.5f;
         [SerializeField] private bool _disableBoneCollidersWhileAlive;
         [SerializeField] private bool _restorePoseOnReset;
@@ -23,6 +25,7 @@ namespace Duskborn.Gameplay.Enemies
         private Vector3[] _restPositions;
         private Quaternion[] _restRotations;
         private Transform[] _restParents;
+        private bool _deathImpulseApplied;
         public bool IsRagdoll { get; private set; }
 
         private static readonly Dictionary<float, WaitForSeconds> WaitCache = new();
@@ -128,6 +131,7 @@ namespace Duskborn.Gameplay.Enemies
         public void DisableRagdoll()
         {
             EnsureInitialized();
+            _deathImpulseApplied = false;
             IsRagdoll = false;
             if (_freezeCoroutine != null)
             {
@@ -162,6 +166,7 @@ namespace Duskborn.Gameplay.Enemies
         public void ApplyImpulse(Vector3 hitPoint, Vector3 direction)
         {
             EnsureInitialized();
+            if (_deathImpulseApplied) return;
             // The death RPC can arrive before the HP callback on a remote observer.
             if (!IsRagdoll) EnableRagdoll();
             Rigidbody nearest  = null;
@@ -169,11 +174,23 @@ namespace Duskborn.Gameplay.Enemies
             foreach (var rb in _bones)
             {
                 if (rb == null) continue;
-                float d = (rb.position - hitPoint).sqrMagnitude;
+                var collider = rb.GetComponent<Collider>();
+                Vector3 contact = collider != null && collider.enabled ? collider.ClosestPoint(hitPoint) : rb.worldCenterOfMass;
+                float d = (contact - hitPoint).sqrMagnitude;
                 if (d < bestDist) { bestDist = d; nearest = rb; }
             }
-            if (nearest != null && !nearest.isKinematic)
-                nearest.AddForce(direction * _impulseScale, ForceMode.Impulse);
+            if (nearest == null || nearest.isKinematic || direction.sqrMagnitude < .000001f) return;
+            _deathImpulseApplied = true;
+            Vector3 impulse = direction * _impulseScale;
+            float totalMass = 0;
+            foreach (var body in _bones) if (body != null && !body.isKinematic) totalMass += body.mass;
+            if (_wholeBodyImpulseFraction > 0 && totalMass > 0)
+                foreach (var body in _bones)
+                    if (body != null && !body.isKinematic)
+                        body.AddForce(impulse * (_wholeBodyImpulseFraction * body.mass / totalMass), ForceMode.Impulse);
+            Vector3 localImpulse = impulse * (1 - _wholeBodyImpulseFraction);
+            if (_applyImpulseAtHitPoint) nearest.AddForceAtPosition(localImpulse, hitPoint, ForceMode.Impulse);
+            else nearest.AddForce(localImpulse, ForceMode.Impulse);
         }
 
         public bool TryGetLimbAttachment(Vector3 hitPoint, Vector3 direction, out Transform limbTransform, out Vector3 embedPoint)

@@ -1,0 +1,26 @@
+{
+  "cue": "BK_Hit_02",
+  "sources": [
+    {
+      "file": "impactWood_medium_001.ogg",
+      "sha256": "15271dbe8e2872dbb0ff1aeb7b12b2d2b92b7c1951c88532b9ab9158c36dfc73"
+    },
+    {
+      "file": "impactPunch_medium_001.ogg",
+      "sha256": "e71d23abcc3f10d9d6bc9615b2a431fff70b12333a5fcdd9964457564ace4349"
+    }
+  ],
+  "filter_graph": "[0:a]volume=-6dB[w];[1:a]volume=-11dB,adelay=7:all=1[b];[w][b]amix=inputs=2:normalize=0,atrim=duration=0.30,afade=t=out:st=0.26:d=0.04[out]",
+  "output_sha256": "af4c69acc30a765a70dcc9b3e7f2f2e229ad3bcfe9ee48763ddd767d93046bb5",
+  "inspection": {
+    "duration": 0.3,
+    "sample_rate": 48000,
+    "channels": 1,
+    "peak_dbfs": -7.04929766851576,
+    "rms_dbfs": -24.434691389079227,
+    "clipped_samples": 0,
+    "onset_seconds": 2.0833333333333333e-05,
+    "tail_silence_seconds": 0.07189583333333334
+  },
+  "format": "48 kHz mono PCM 24-bit WAV"
+}

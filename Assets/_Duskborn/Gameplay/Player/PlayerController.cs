@@ -54,7 +54,7 @@ namespace Duskborn.Gameplay.Player
         public bool  IsMoving    => _moveInput.sqrMagnitude > 0.01f;
         public float CameraYaw   => _camController != null ? _camController.CurrentYaw : transform.eulerAngles.y;
         public bool  IsSprinting => _isSprinting && !(_combat != null && _combat.IsAiming);
-        public float PlanarSpeed => _cc != null ? new Vector2(_cc.velocity.x,_cc.velocity.z).magnitude : 0f;
+        public float PlanarSpeed => _cc != null && _cc.enabled ? new Vector2(_cc.velocity.x,_cc.velocity.z).magnitude : 0f;
 
         private void Awake()
         {
@@ -164,6 +164,7 @@ namespace Duskborn.Gameplay.Player
 
         private void Update()
         {
+            if (!_stats.IsAlive || !_cc.enabled) return;
             if (_waterInteraction != null)
             {
                 bool moving = IsOwner ? IsMoving : (_cc != null && _cc.velocity.sqrMagnitude > 0.05f);

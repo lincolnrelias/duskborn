@@ -47,6 +47,8 @@ namespace Duskborn.UI
         public int LastClosedFrame { get; private set; } = -1;
         public Workbench CurrentWorkbench { get; private set; }
 
+        private ArcaneTableUI _arcaneUI;
+        private bool _arcaneLegacy;
         private Canvas _canvas;
         private RectTransform _craftingRoot;
         public RectTransform CraftingRoot => _craftingRoot;
@@ -148,6 +150,11 @@ namespace Duskborn.UI
                 return;
             }
 
+            if (_arcaneUI != null && !_arcaneLegacy && CurrentWorkbench?.StationType == CraftingStationType.ArcaneTable)
+            {
+                if (!IsLocalPlayerNearWorkbench(4f)) Close();
+                return;
+            }
             HandleNavigationInput();
             HandleCraftingWheelInput();
 
@@ -305,10 +312,19 @@ namespace Duskborn.UI
         public void Open(Workbench workbench)
         {
             if (workbench == null) return;
+            if (IsOpen) Close();
             TryFindIntegrations();
 
             CurrentWorkbench = workbench;
             CurrentWorkbench.OpenForLocalPlayer();
+            if (workbench.StationType == CraftingStationType.ArcaneTable && !_arcaneLegacy)
+            {
+                if (_arcaneUI == null) _arcaneUI = gameObject.AddComponent<ArcaneTableUI>();
+                IsOpen = true;
+                _arcaneUI.Show();
+                PlaySound(openSound);
+                return;
+            }
 
             // Load default recipes from the database (Resources/Crafting).
             _recipes.Clear();
@@ -350,9 +366,11 @@ namespace Duskborn.UI
 
         public void Close()
         {
+            _arcaneLegacy = false;
             if (!IsOpen) return;
 
             IsOpen = false;
+            _arcaneUI?.Hide();
             LastClosedFrame = Time.frameCount;
 
             if (CurrentWorkbench != null)
@@ -386,6 +404,16 @@ namespace Duskborn.UI
                     PlayerCameraController.LocalInstance.SetCursorLocked(true);
                 }
             }
+        }
+
+        public void OpenArcaneLegacyRecipe(CraftingRecipe recipe)
+        {
+            var station = CurrentWorkbench;
+            Close();
+            _arcaneLegacy = true;
+            Open(station);
+            SelectRecipe(recipe);
+            CraftSelectedRecipe();
         }
 
         private void AdjustDualPanelPositions(bool opening)

@@ -93,6 +93,9 @@ namespace Duskborn.Gameplay.Player
         public event Action<float, float> OnHPChanged;     // (current, max) — legacy, kept for compatibility
         public event Action               OnDied;
 
+        private PlayerDeathPresentation _deathPresentation;
+        private bool _deathNotified;
+
         private void Awake()
         {
             if (classDefinition != null)
@@ -103,6 +106,7 @@ namespace Duskborn.Gameplay.Player
                 _entity.attackSpeed = classDefinition.AttackSpeed;
                 DuskLog.Log(LogChannel.PlayerClass, $"Applied: {classDefinition.ClassName}");
             }
+            _deathPresentation = gameObject.AddComponent<PlayerDeathPresentation>();
             _currentHP.Value = MaxHP;
             _currentHP.OnChange += OnCurrentHPSync;
 
@@ -113,11 +117,12 @@ namespace Duskborn.Gameplay.Player
 
         private void OnCurrentHPSync(float prev, float next, bool asServer)
         {
+            if (next <= 0f) PresentDeath();
             OnHPChanged?.Invoke(next, MaxHP);
             OnHealthChanged?.Invoke(next, MaxHP);
             if (!asServer && IsOwner && next < prev) CameraShake.ShakeTaken();
             var animator=GetComponentInChildren<Animator>();
-            if(animator!=null)
+            if(animator!=null && animator.enabled)
             {
                 animator.SetBool("Dead",next<=0);
                 var action=GetComponent<Duskborn.Gameplay.Equipment.WeaponActionPlayer>();
@@ -236,9 +241,23 @@ namespace Duskborn.Gameplay.Player
             _currentHP.Value = MaxHP;
         }
 
+        public override void OnStartClient()
+        {
+            base.OnStartClient();
+            if (!IsAlive) PresentDeath();
+        }
+
+        private void PresentDeath()
+        {
+            if (_deathNotified) return;
+            _deathNotified = true;
+            _deathPresentation.BeginDeath();
+            OnDied?.Invoke();
+        }
+
         private void HandleDeath()
         {
-            OnDied?.Invoke();
+            PresentDeath();
             if (PlayerRegistry.AliveCount == 0)
                 GameStateManager.Instance?.TriggerGameOver();
         }

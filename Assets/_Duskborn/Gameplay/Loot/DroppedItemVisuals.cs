@@ -182,6 +182,13 @@ namespace Duskborn.Gameplay.Loot
             }
         }
 
+        public void SetupGold()
+        {
+            // Keep coin physics free while applying the existing wave/outline in gold.
+            Setup(ItemRarity.Common);
+            SetupWaveOverlay(ItemRarity.Legendary);
+        }
+
         private void CleanupLight()
         {
             if (_pointLight != null)

@@ -7,7 +7,7 @@ of each day. No boss HUD or encounter logic.
 
 ## Role and provisional balance
 
-24 HP, 3 noncritical damage per spit, 4.8 m/s approach speed, 6.24 m/s short dart,
+24 HP, 3 noncritical damage per spit, 4.8 m/s approach speed, 7.68 m/s short dart,
 9 m attack range, 18 m/s straight projectile. Compared with the Swarmer's 50 HP,
 5 damage, 5 m/s and cost 6, Thornwing has less than half the HP and much lower
 effective damage frequency. Its range and movement pressure justify a provisional
@@ -21,7 +21,7 @@ the player's reach. Its root capsule extends from 0.475 m to 1.825 m, with radiu
 0.42 m, so existing ground-origin melee overlaps and player arrows can hit it.
 Visual animation never moves the damage collider.
 
-A lateral/retreat dart lasts at most 0.32 s and chooses a destination no farther
+A lateral/retreat dart lasts at most 0.4 s and chooses a destination no farther
 than 1.6 m away, once per 2.4 s. It stops during the warning and recovery. The
 0.5 s amber-eye warning tracks for its first 0.4 s, then commits its aim.
 Each valid release launches one swept-collision projectile, followed by 0.8 s
@@ -39,12 +39,23 @@ and clearance for the living capsule. Buried/stale navigation, unsupported drops
 steep surfaces and obstacles reject the dash. The agent follows the validated
 path and cancels a dash if that path becomes incomplete or stale.
 It tries both directions and shorter alternatives. Only a successful dodge uses
-the 2.4 s dodge cooldown; rejected routes retry after 0.3 s of hunting time.
+the 2.4 s dodge cooldown; rejected routes retry after 0.3 s. Dodge cooldown advances
+through shot windup/recovery. Short darts disable automatic braking and accelerate
+at 60 m/s², restoring normal movement settings when finished or interrupted.
+Ground support allows the bake to sit up to 0.35 m above terrain; terrain more
+than 0.25 m above navigation still rejects the route, along with drops and walls.
+
+Amber eyes have enabled emission at intensity 2 while hunting and brighten to 6
+during windup. Two shared-material additive wing trails last 0.28 s, emit while
+the root moves, stop on death, and clear on disable/reuse or a teleport over 3 m.
 
 Death hands motion to five rigidbodies: the head and abdomen are jointed to the
 body, while both wings detach and tumble independently. Loose wings stay owned
 by the corpse for cleanup. Living pose animation stops as soon as physics takes
-over, including when the death impulse arrives before health replication. The
+over, including when the death impulse arrives before health replication.
+A 2 N·s fatal-hit impulse distributes 80% by mass over all five bodies,
+including loose wings; the remaining 20% applies at the struck part's hit point
+to produce local rotation. The impulse is applied once per life. The
 root collider disables immediately; bone colliders contact the ground, then
 freeze after 2 s. The corpse and wings use the Swarmer's 10 s despawn lifetime,
 copied from its prefab by the builder. Reuse
@@ -55,6 +66,16 @@ Rewards: 1–2 gold and a 20% chance of one canonical sap pickup using the exist
 loot manager and registered pickup prefab.
 
 ## Assets and reproduction
+
+2026-10-03 update validation: offline runtime/Editor compilation, Unity batch
+compilation and asset validation passed. In `Temp/ThornwingBatch`, Thornwing's
+navigation, all-five-body directional death momentum, duplicate impulse rejection,
+floor contact, pooled trail cleanup and reuse tests passed. The project regression
+run passed 18 suites and failed the unrelated Bramblekin compact-footprint check.
+Evidence is saved under `Logs/UnityCli/Thornwing-20261003`; the isolated copy is removed.
+Live dash motion, eye glow/bloom, trail appearance and host/client agreement remain
+manual checks: watch repeated shots/dashes near terrain and walls, kill from both
+sides, and inspect the next pooled life for stale wings or ribbons.
 
 - Current mesh/source/preview: `Artifacts/Thornwing/v002/`; 792 triangles,
   six rigid mesh renderers, two character materials and an eight-color palette.

@@ -1,0 +1,31 @@
+{
+  "recipe": {
+    "brief": "A small scavenger pulls its leather-wrapped cudgel back; dry strap tension.",
+    "source_file": "handleSmallLeather.ogg",
+    "take": 1
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Bramblekin\\v001\\source\\handleSmallLeather.ogg",
+    "-filter_complex",
+    "[0:a]atrim=start=0:duration=0.55,asetpts=PTS-STARTPTS,volume=-9dB[a];[a]apad,atrim=duration=0.55,afade=t=in:d=0.004,afade=t=out:st=0.51:d=0.04[out]",
+    "-map",
+    "[out]"
+  ],
+  "output": {
+    "file": "candidates\\BK_Windup_01.wav",
+    "sha256": "f3f274beaf20963d6df2ec88db0843fc02b81a9abfb0661b49510f8d8188f0a7"
+  },
+  "inspection": {
+    "duration_seconds": 0.55,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -23.633458795100065,
+    "rms_dbfs": -49.25930481275641,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.051625,
+    "tail_below_minus50db_seconds": 0.3548125
+  }
+}

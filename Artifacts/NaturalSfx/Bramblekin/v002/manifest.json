@@ -1,0 +1,717 @@
+{
+  "brief": "Small woodland goblin: short squeaky effort, raspy hurt bursts, longer dying vocal releases; dry wooden club contact with soft body, sleeve swish and grass steps.",
+  "packs": [
+    {
+      "id": "artisticdude-goblins",
+      "creator": "artisticdude",
+      "source_url": "https://opengameart.org/content/goblins-sound-pack",
+      "download_url": "https://opengameart.org/sites/default/files/goblins_0.zip",
+      "archive_sha256": "480e0ff1df5eda83a32f2781b4b5bd65606e8f43e0ca52175c1a9e08e2bc7d40",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "date": "2026-10-03",
+      "source_fidelity": "Original 44.1 kHz stereo PCM 24-bit vocal performances; no pitch shift; role selection awaits listening."
+    },
+    {
+      "id": "kenney-impact-sounds",
+      "creator": "Kenney",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "kenney-rpg-audio",
+      "creator": "Kenney",
+      "source_url": "https://kenney.nl/assets/rpg-audio",
+      "license": "CC0-1.0"
+    }
+  ],
+  "sources": [
+    {
+      "file": "goblin-1.wav",
+      "sha256": "0c58f275b8fdbb7387b69190dde2b96c83a22c5b34e3eb92bf11bcfbd1b594c2",
+      "pack": "artisticdude-goblins"
+    },
+    {
+      "file": "goblin-2.wav",
+      "sha256": "ba8632a3ef48ef38c64d5fc6cade3b85285176186f2e55fb06288cc4024ac238",
+      "pack": "artisticdude-goblins"
+    },
+    {
+      "file": "goblin-5.wav",
+      "sha256": "185a73b2744c1e9caf5f91893ffbf5c3ae98627ecbc95d25ff3a1676c06b5196",
+      "pack": "artisticdude-goblins"
+    },
+    {
+      "file": "goblin-6.wav",
+      "sha256": "f4e399b61c4afeedea8ab4f7bd1b0941bf471ae41ebd9b267ffcb04cb7d4b5e3",
+      "pack": "artisticdude-goblins"
+    },
+    {
+      "file": "goblin-7.wav",
+      "sha256": "a5eb5208de6f4b0a3f7feeb3487d4bac22362fb7305ecfecfe8771eefa6aac27",
+      "pack": "artisticdude-goblins"
+    },
+    {
+      "file": "goblin-8.wav",
+      "sha256": "52ae24fff3242c48805077d5f856af8c151b81beff8fe513c8d563469184d423",
+      "pack": "artisticdude-goblins"
+    },
+    {
+      "file": "goblin-10.wav",
+      "sha256": "f4ef13d19f943a1e65380a4b65e0b5283664665b404bd37f5ea499f2a0670b9e",
+      "pack": "artisticdude-goblins"
+    },
+    {
+      "file": "goblin-11.wav",
+      "sha256": "91ab5f066d358e7425ccaa57a5ea2a036f76e6e78b221621e568d9e668e1adb0",
+      "pack": "artisticdude-goblins"
+    },
+    {
+      "file": "goblin-3.wav",
+      "sha256": "ed60560fdf9d7a7b512e69ac9a500acf4b97182088a6c22254606c4b91cf8771",
+      "pack": "artisticdude-goblins"
+    },
+    {
+      "file": "goblin-4.wav",
+      "sha256": "ae98477378c5122fc165e88de4e983329bfdaf628cce79c2a1cd4048c813ef6c",
+      "pack": "artisticdude-goblins"
+    },
+    {
+      "file": "goblin-12.wav",
+      "sha256": "c3d06902ba01331e29aeb886a6c34746e5c5e49a3a8a632893dd5f560958f12a",
+      "pack": "artisticdude-goblins"
+    },
+    {
+      "file": "goblin-15.wav",
+      "sha256": "8175fdfe2d1fbfdb29d712fd92461483f1417a9ba377ce9feefa10082811d006",
+      "pack": "artisticdude-goblins"
+    },
+    {
+      "file": "cloth1.ogg",
+      "sha256": "ddb93a3671233f95da0e0b10367f082f7eb42fa6caaddcf776410aa8833c747d",
+      "pack": "kenney-rpg-audio"
+    },
+    {
+      "file": "impactWood_medium_000.ogg",
+      "sha256": "1723a9fd25103ed41af06054814e84e65f4a772bac86ab2dc927da93d9592ff5",
+      "pack": "kenney-impact-sounds"
+    },
+    {
+      "file": "impactPunch_medium_000.ogg",
+      "sha256": "486988aa2d6440ffc4c62a0e8ccf3c23673ba84424bd4723378d451b7255eb5c",
+      "pack": "kenney-impact-sounds"
+    },
+    {
+      "file": "footstep_grass_000.ogg",
+      "sha256": "9d49497777405d78d7cf7f2888e28277f3a23192300cfd1d79d54876b20f479f",
+      "pack": "kenney-impact-sounds"
+    },
+    {
+      "file": "cloth2.ogg",
+      "sha256": "8a7451193c38bc05483aec25dd193e163a15d44cf7fff04ac7912573231b0201",
+      "pack": "kenney-rpg-audio"
+    },
+    {
+      "file": "impactWood_medium_001.ogg",
+      "sha256": "15271dbe8e2872dbb0ff1aeb7b12b2d2b92b7c1951c88532b9ab9158c36dfc73",
+      "pack": "kenney-impact-sounds"
+    },
+    {
+      "file": "impactPunch_medium_001.ogg",
+      "sha256": "e71d23abcc3f10d9d6bc9615b2a431fff70b12333a5fcdd9964457564ace4349",
+      "pack": "kenney-impact-sounds"
+    },
+    {
+      "file": "footstep_grass_001.ogg",
+      "sha256": "fb28781bd22b2eefdc14077f1adf5c94d7fe9c3a130194633b55f3e0d39d9f04",
+      "pack": "kenney-impact-sounds"
+    },
+    {
+      "file": "cloth3.ogg",
+      "sha256": "a48632d17a4f1416541d261a32a31612e01267144c407fa3ecab3ff410f0085b",
+      "pack": "kenney-rpg-audio"
+    },
+    {
+      "file": "impactWood_medium_002.ogg",
+      "sha256": "3f3f1917428b828f733a963167833c707bf88296ff158e1559c57c5cb813d799",
+      "pack": "kenney-impact-sounds"
+    },
+    {
+      "file": "impactPunch_medium_002.ogg",
+      "sha256": "6492f9ccbc8d24dcef607bb1b48790b7870961474561f7fe5601e1c73a3018ef",
+      "pack": "kenney-impact-sounds"
+    },
+    {
+      "file": "footstep_grass_002.ogg",
+      "sha256": "73a520139f5be716a403bfe9c80e0e94d1e61d8e9de04a354b336392164b53dc",
+      "pack": "kenney-impact-sounds"
+    },
+    {
+      "file": "cloth4.ogg",
+      "sha256": "e7ab9a6c4466dea874196c61f59bf1da05cfe58748f42fadd695d441a154a99b",
+      "pack": "kenney-rpg-audio"
+    },
+    {
+      "file": "impactWood_medium_003.ogg",
+      "sha256": "635c37cfcd854b187d643d450ff0397798dcc29ae94da32192b814fae6bd854c",
+      "pack": "kenney-impact-sounds"
+    },
+    {
+      "file": "impactPunch_medium_003.ogg",
+      "sha256": "2d7c719c05999e0532f4384e1018e04cd916db715140bf16dee2dff3f820e908",
+      "pack": "kenney-impact-sounds"
+    },
+    {
+      "file": "footstep_grass_003.ogg",
+      "sha256": "0546e1d8ab2def714425701a18bd34c5ee2794b12e858e5b595aabcf38a34137",
+      "pack": "kenney-impact-sounds"
+    }
+  ],
+  "takes": [
+    {
+      "cue": "BK_Windup_01",
+      "sources": [
+        {
+          "file": "goblin-1.wav",
+          "sha256": "0c58f275b8fdbb7387b69190dde2b96c83a22c5b34e3eb92bf11bcfbd1b594c2"
+        }
+      ],
+      "filter_graph": "[0:a]atrim=start=0.0045:end=0.20366666666666666,asetpts=PTS-STARTPTS,highpass=f=90,lowpass=f=9000,volume=-9.644484800756175dB,afade=t=in:d=0.002,afade=t=out:st=0.19316666666666665:d=0.006[out]",
+      "output_sha256": "c74face742ab55648bf0be8acd6382675c0f9571b7d431112431bd4573f1f3e9",
+      "inspection": {
+        "duration": 0.19916666666666666,
+        "sample_rate": 48000,
+        "channels": 1,
+        "peak_dbfs": -10.759213666691146,
+        "rms_dbfs": -24.626135179825962,
+        "clipped_samples": 0,
+        "onset_seconds": 0.0060416666666666665,
+        "tail_silence_seconds": 0.0021875
+      },
+      "format": "48 kHz mono PCM 24-bit WAV"
+    },
+    {
+      "cue": "BK_Windup_02",
+      "sources": [
+        {
+          "file": "goblin-2.wav",
+          "sha256": "ba8632a3ef48ef38c64d5fc6cade3b85285176186f2e55fb06288cc4024ac238"
+        }
+      ],
+      "filter_graph": "[0:a]atrim=start=0.004708333333333333:end=0.25,asetpts=PTS-STARTPTS,highpass=f=90,lowpass=f=9000,volume=-9.481484345261858dB,afade=t=in:d=0.002,afade=t=out:st=0.23929166666666665:d=0.006[out]",
+      "output_sha256": "7f99f923186848960a3649fe3e9c4e1d7b89e058eb23fdede2d476f7ccee6c29",
+      "inspection": {
+        "duration": 0.24529166666666666,
+        "sample_rate": 48000,
+        "channels": 1,
+        "peak_dbfs": -9.275841705933987,
+        "rms_dbfs": -24.054189857633908,
+        "clipped_samples": 0,
+        "onset_seconds": 0.007270833333333333,
+        "tail_silence_seconds": 0.004875
+      },
+      "format": "48 kHz mono PCM 24-bit WAV"
+    },
+    {
+      "cue": "BK_Windup_03",
+      "sources": [
+        {
+          "file": "goblin-5.wav",
+          "sha256": "185a73b2744c1e9caf5f91893ffbf5c3ae98627ecbc95d25ff3a1676c06b5196"
+        }
+      ],
+      "filter_graph": "[0:a]atrim=start=0.003937499999999999:end=0.2843541666666667,asetpts=PTS-STARTPTS,highpass=f=90,lowpass=f=9000,volume=-9.80207269020704dB,afade=t=in:d=0.002,afade=t=out:st=0.2744166666666667:d=0.006[out]",
+      "output_sha256": "9b32ad7e61006ae5bcec312988e6f76d4c3b73102da366e7fa3fe1a0fdcabd18",
+      "inspection": {
+        "duration": 0.28041666666666665,
+        "sample_rate": 48000,
+        "channels": 1,
+        "peak_dbfs": -9.962406102489537,
+        "rms_dbfs": -22.079517460397025,
+        "clipped_samples": 0,
+        "onset_seconds": 0.005208333333333333,
+        "tail_silence_seconds": 0.0013125
+      },
+      "format": "48 kHz mono PCM 24-bit WAV"
+    },
+    {
+      "cue": "BK_Windup_04",
+      "sources": [
+        {
+          "file": "goblin-6.wav",
+          "sha256": "f4e399b61c4afeedea8ab4f7bd1b0941bf471ae41ebd9b267ffcb04cb7d4b5e3"
+        }
+      ],
+      "filter_graph": "[0:a]atrim=start=0.004833333333333333:end=0.2448125,asetpts=PTS-STARTPTS,highpass=f=90,lowpass=f=9000,volume=-9.588218214466385dB,afade=t=in:d=0.002,afade=t=out:st=0.23397916666666665:d=0.006[out]",
+      "output_sha256": "3781e1e4a049d07738e61e81618e81132b19ea7d76f8cbebf9f054102ed55279",
+      "inspection": {
+        "duration": 0.23997916666666666,
+        "sample_rate": 48000,
+        "channels": 1,
+        "peak_dbfs": -11.753365685215648,
+        "rms_dbfs": -25.54932515477305,
+        "clipped_samples": 0,
+        "onset_seconds": 0.006854166666666666,
+        "tail_silence_seconds": 0.004458333333333333
+      },
+      "format": "48 kHz mono PCM 24-bit WAV"
+    },
+    {
+      "cue": "BK_Hurt_01",
+      "sources": [
+        {
+          "file": "goblin-7.wav",
+          "sha256": "a5eb5208de6f4b0a3f7feeb3487d4bac22362fb7305ecfecfe8771eefa6aac27"
+        }
+      ],
+      "filter_graph": "[0:a]atrim=start=0.004666666666666667:end=0.252625,asetpts=PTS-STARTPTS,highpass=f=90,lowpass=f=9000,volume=-9.382679812948897dB,afade=t=in:d=0.002,afade=t=out:st=0.2419583333333333:d=0.006[out]",
+      "output_sha256": "449e5cbf5c1cf5cc3b1730dec09086b34e02e7f2e21fb7f47604250459833227",
+      "inspection": {
+        "duration": 0.2479375,
+        "sample_rate": 48000,
+        "channels": 1,
+        "peak_dbfs": -9.333810044555557,
+        "rms_dbfs": -26.176936489988435,
+        "clipped_samples": 0,
+        "onset_seconds": 0.008354166666666666,
+        "tail_silence_seconds": 0.004833333333333334
+      },
+      "format": "48 kHz mono PCM 24-bit WAV"
+    },
+    {
+      "cue": "BK_Hurt_02",
+      "sources": [
+        {
+          "file": "goblin-8.wav",
+          "sha256": "52ae24fff3242c48805077d5f856af8c151b81beff8fe513c8d563469184d423"
+        }
+      ],
+      "filter_graph": "[0:a]atrim=start=0.0031875000000000002:end=0.18435416666666668,asetpts=PTS-STARTPTS,highpass=f=90,lowpass=f=9000,volume=-9.588117524241952dB,afade=t=in:d=0.002,afade=t=out:st=0.17516666666666666:d=0.006[out]",
+      "output_sha256": "0bf5478dd101dcfc931b0a2f53ec7975208a98707d5975c93da41c829a64634c",
+      "inspection": {
+        "duration": 0.18116666666666667,
+        "sample_rate": 48000,
+        "channels": 1,
+        "peak_dbfs": -10.539056290938245,
+        "rms_dbfs": -22.66387213897296,
+        "clipped_samples": 0,
+        "onset_seconds": 0.006833333333333334,
+        "tail_silence_seconds": 0.005416666666666667
+      },
+      "format": "48 kHz mono PCM 24-bit WAV"
+    },
+    {
+      "cue": "BK_Hurt_03",
+      "sources": [
+        {
+          "file": "goblin-10.wav",
+          "sha256": "f4ef13d19f943a1e65380a4b65e0b5283664665b404bd37f5ea499f2a0670b9e"
+        }
+      ],
+      "filter_graph": "[0:a]atrim=start=0.0039791666666666664:end=0.18333333333333332,asetpts=PTS-STARTPTS,highpass=f=90,lowpass=f=9000,volume=-8.72745058083649dB,afade=t=in:d=0.002,afade=t=out:st=0.17335416666666664:d=0.006[out]",
+      "output_sha256": "d7493b16c96277b369a20707d2e53aa3f4d6b006ed6a4b520bfb6f021d39bb98",
+      "inspection": {
+        "duration": 0.179375,
+        "sample_rate": 48000,
+        "channels": 1,
+        "peak_dbfs": -9.49908741589341,
+        "rms_dbfs": -24.682418721770425,
+        "clipped_samples": 0,
+        "onset_seconds": 0.007229166666666667,
+        "tail_silence_seconds": 0.0026875
+      },
+      "format": "48 kHz mono PCM 24-bit WAV"
+    },
+    {
+      "cue": "BK_Hurt_04",
+      "sources": [
+        {
+          "file": "goblin-11.wav",
+          "sha256": "91ab5f066d358e7425ccaa57a5ea2a036f76e6e78b221621e568d9e668e1adb0"
+        }
+      ],
+      "filter_graph": "[0:a]atrim=start=0.006604166666666667:end=0.2911458333333333,asetpts=PTS-STARTPTS,highpass=f=90,lowpass=f=9000,volume=-9.523175744185485dB,afade=t=in:d=0.002,afade=t=out:st=0.27854166666666663:d=0.006[out]",
+      "output_sha256": "e1900f13ce5b88ee142a25ebfafd3f7acf4537937321f5a82086bc6cf7c81b86",
+      "inspection": {
+        "duration": 0.2845416666666667,
+        "sample_rate": 48000,
+        "channels": 1,
+        "peak_dbfs": -10.752255415947483,
+        "rms_dbfs": -24.038115238101703,
+        "clipped_samples": 0,
+        "onset_seconds": 0.012208333333333333,
+        "tail_silence_seconds": 0.0073125
+      },
+      "format": "48 kHz mono PCM 24-bit WAV"
+    },
+    {
+      "cue": "BK_Death_01",
+      "sources": [
+        {
+          "file": "goblin-3.wav",
+          "sha256": "ed60560fdf9d7a7b512e69ac9a500acf4b97182088a6c22254606c4b91cf8771"
+        }
+      ],
+      "filter_graph": "[0:a]atrim=start=0.003125:end=0.9473958333333333,asetpts=PTS-STARTPTS,highpass=f=90,lowpass=f=9000,volume=-9.081026676433824dB,afade=t=in:d=0.002,afade=t=out:st=0.9382708333333333:d=0.006[out]",
+      "output_sha256": "3f597657e858281f8646ced58c62be12d51ff826bc3303e00abab31ea122b509",
+      "inspection": {
+        "duration": 0.9442708333333333,
+        "sample_rate": 48000,
+        "channels": 1,
+        "peak_dbfs": -10.230590291029124,
+        "rms_dbfs": -24.292475391809297,
+        "clipped_samples": 0,
+        "onset_seconds": 0.0059791666666666665,
+        "tail_silence_seconds": 0.005166666666666667
+      },
+      "format": "48 kHz mono PCM 24-bit WAV"
+    },
+    {
+      "cue": "BK_Death_02",
+      "sources": [
+        {
+          "file": "goblin-4.wav",
+          "sha256": "ae98477378c5122fc165e88de4e983329bfdaf628cce79c2a1cd4048c813ef6c"
+        }
+      ],
+      "filter_graph": "[0:a]atrim=start=0.005874999999999999:end=0.5151041666666667,asetpts=PTS-STARTPTS,highpass=f=90,lowpass=f=9000,volume=-9.654289244302008dB,afade=t=in:d=0.002,afade=t=out:st=0.5032291666666667:d=0.006[out]",
+      "output_sha256": "238b9f61c5476ef6aeb0b5fe38ef55bb53d8551b6fd2aa6d72a3853a72bd2154",
+      "inspection": {
+        "duration": 0.5092291666666666,
+        "sample_rate": 48000,
+        "channels": 1,
+        "peak_dbfs": -9.591474344143826,
+        "rms_dbfs": -20.518956580866437,
+        "clipped_samples": 0,
+        "onset_seconds": 0.00575,
+        "tail_silence_seconds": 0.0033125
+      },
+      "format": "48 kHz mono PCM 24-bit WAV"
+    },
+    {
+      "cue": "BK_Death_03",
+      "sources": [
+        {
+          "file": "goblin-12.wav",
+          "sha256": "c3d06902ba01331e29aeb886a6c34746e5c5e49a3a8a632893dd5f560958f12a"
+        }
+      ],
+      "filter_graph": "[0:a]atrim=start=0.0034583333333333332:end=0.6734375,asetpts=PTS-STARTPTS,highpass=f=90,lowpass=f=9000,volume=-7.704358757886776dB,afade=t=in:d=0.002,afade=t=out:st=0.6639791666666667:d=0.006[out]",
+      "output_sha256": "0abc375fb907f3e5334a92cd0f7221127db7eb06d1e1e4756effe029c00a2077",
+      "inspection": {
+        "duration": 0.6699791666666667,
+        "sample_rate": 48000,
+        "channels": 1,
+        "peak_dbfs": -9.6918231352513,
+        "rms_dbfs": -22.12882365204587,
+        "clipped_samples": 0,
+        "onset_seconds": 0.0064375,
+        "tail_silence_seconds": 0.002875
+      },
+      "format": "48 kHz mono PCM 24-bit WAV"
+    },
+    {
+      "cue": "BK_Death_04",
+      "sources": [
+        {
+          "file": "goblin-15.wav",
+          "sha256": "8175fdfe2d1fbfdb29d712fd92461483f1417a9ba377ce9feefa10082811d006"
+        }
+      ],
+      "filter_graph": "[0:a]atrim=start=0.004541666666666667:end=0.5145833333333333,asetpts=PTS-STARTPTS,highpass=f=90,lowpass=f=9000,volume=-9.213410367453474dB,afade=t=in:d=0.002,afade=t=out:st=0.5040416666666666:d=0.006[out]",
+      "output_sha256": "09122390f7493f02e0f138c252cba076eaa9710726b4ccb5a569e02946755552",
+      "inspection": {
+        "duration": 0.5100625,
+        "sample_rate": 48000,
+        "channels": 1,
+        "peak_dbfs": -10.232897227893854,
+        "rms_dbfs": -24.73472186737751,
+        "clipped_samples": 0,
+        "onset_seconds": 0.005354166666666667,
+        "tail_silence_seconds": 0.005208333333333333
+      },
+      "format": "48 kHz mono PCM 24-bit WAV"
+    },
+    {
+      "cue": "BK_Swing_01",
+      "sources": [
+        {
+          "file": "cloth1.ogg",
+          "sha256": "ddb93a3671233f95da0e0b10367f082f7eb42fa6caaddcf776410aa8833c747d"
+        }
+      ],
+      "filter_graph": "[0:a]atempo=1.7,atrim=duration=0.16,asetpts=PTS-STARTPTS,highpass=f=140,volume=-5dB,afade=t=in:d=0.002,afade=t=out:st=0.14:d=0.02[out]",
+      "output_sha256": "fefadb48526317dc5c84ef593db82f086a72f70e1b4aba720013d24efb89d4f2",
+      "inspection": {
+        "duration": 0.16,
+        "sample_rate": 48000,
+        "channels": 1,
+        "peak_dbfs": -11.672819893981332,
+        "rms_dbfs": -33.37256258571716,
+        "clipped_samples": 0,
+        "onset_seconds": 0.045208333333333336,
+        "tail_silence_seconds": 0.004354166666666667
+      },
+      "format": "48 kHz mono PCM 24-bit WAV"
+    },
+    {
+      "cue": "BK_Hit_01",
+      "sources": [
+        {
+          "file": "impactWood_medium_000.ogg",
+          "sha256": "1723a9fd25103ed41af06054814e84e65f4a772bac86ab2dc927da93d9592ff5"
+        },
+        {
+          "file": "impactPunch_medium_000.ogg",
+          "sha256": "486988aa2d6440ffc4c62a0e8ccf3c23673ba84424bd4723378d451b7255eb5c"
+        }
+      ],
+      "filter_graph": "[0:a]volume=-6dB[w];[1:a]volume=-11dB,adelay=7:all=1[b];[w][b]amix=inputs=2:normalize=0,atrim=duration=0.30,afade=t=out:st=0.26:d=0.04[out]",
+      "output_sha256": "4a6aa867386ef3ed8bd0e53bb82bf5f8d3c0ee0ee24e29c9ce533db6b9ae7790",
+      "inspection": {
+        "duration": 0.3,
+        "sample_rate": 48000,
+        "channels": 1,
+        "peak_dbfs": -7.02686039425773,
+        "rms_dbfs": -24.698859046058594,
+        "clipped_samples": 0,
+        "onset_seconds": 2.0833333333333333e-05,
+        "tail_silence_seconds": 0.0585
+      },
+      "format": "48 kHz mono PCM 24-bit WAV"
+    },
+    {
+      "cue": "BK_Step_01",
+      "sources": [
+        {
+          "file": "footstep_grass_000.ogg",
+          "sha256": "9d49497777405d78d7cf7f2888e28277f3a23192300cfd1d79d54876b20f479f"
+        }
+      ],
+      "filter_graph": "[0:a]volume=-7dB,afade=t=in:d=0.002[out]",
+      "output_sha256": "115f7d8ce4ceca98be8d18931250adf2d830c38fbefdaf09cca406f9c3a62208",
+      "inspection": {
+        "duration": 0.7746875,
+        "sample_rate": 48000,
+        "channels": 1,
+        "peak_dbfs": -8.057511301681346,
+        "rms_dbfs": -36.86598994559508,
+        "clipped_samples": 0,
+        "onset_seconds": 2.0833333333333333e-05,
+        "tail_silence_seconds": 0.658125
+      },
+      "format": "48 kHz mono PCM 24-bit WAV"
+    },
+    {
+      "cue": "BK_Swing_02",
+      "sources": [
+        {
+          "file": "cloth2.ogg",
+          "sha256": "8a7451193c38bc05483aec25dd193e163a15d44cf7fff04ac7912573231b0201"
+        }
+      ],
+      "filter_graph": "[0:a]atempo=1.7,atrim=duration=0.16,asetpts=PTS-STARTPTS,highpass=f=140,volume=-5dB,afade=t=in:d=0.002,afade=t=out:st=0.14:d=0.02[out]",
+      "output_sha256": "aa09181a419302967c8a0136d58cf76d49b3934407ab1df075ff73772c56a8eb",
+      "inspection": {
+        "duration": 0.16,
+        "sample_rate": 48000,
+        "channels": 1,
+        "peak_dbfs": -16.41101563950324,
+        "rms_dbfs": -36.612543627432125,
+        "clipped_samples": 0,
+        "onset_seconds": 0.030979166666666665,
+        "tail_silence_seconds": 0.004020833333333334
+      },
+      "format": "48 kHz mono PCM 24-bit WAV"
+    },
+    {
+      "cue": "BK_Hit_02",
+      "sources": [
+        {
+          "file": "impactWood_medium_001.ogg",
+          "sha256": "15271dbe8e2872dbb0ff1aeb7b12b2d2b92b7c1951c88532b9ab9158c36dfc73"
+        },
+        {
+          "file": "impactPunch_medium_001.ogg",
+          "sha256": "e71d23abcc3f10d9d6bc9615b2a431fff70b12333a5fcdd9964457564ace4349"
+        }
+      ],
+      "filter_graph": "[0:a]volume=-6dB[w];[1:a]volume=-11dB,adelay=7:all=1[b];[w][b]amix=inputs=2:normalize=0,atrim=duration=0.30,afade=t=out:st=0.26:d=0.04[out]",
+      "output_sha256": "af4c69acc30a765a70dcc9b3e7f2f2e229ad3bcfe9ee48763ddd767d93046bb5",
+      "inspection": {
+        "duration": 0.3,
+        "sample_rate": 48000,
+        "channels": 1,
+        "peak_dbfs": -7.04929766851576,
+        "rms_dbfs": -24.434691389079227,
+        "clipped_samples": 0,
+        "onset_seconds": 2.0833333333333333e-05,
+        "tail_silence_seconds": 0.07189583333333334
+      },
+      "format": "48 kHz mono PCM 24-bit WAV"
+    },
+    {
+      "cue": "BK_Step_02",
+      "sources": [
+        {
+          "file": "footstep_grass_001.ogg",
+          "sha256": "fb28781bd22b2eefdc14077f1adf5c94d7fe9c3a130194633b55f3e0d39d9f04"
+        }
+      ],
+      "filter_graph": "[0:a]volume=-7dB,afade=t=in:d=0.002[out]",
+      "output_sha256": "a8fe39fd2b6cd2ed393e23aceee097fc559dd208da5e892639c981479ef4713a",
+      "inspection": {
+        "duration": 0.6707083333333334,
+        "sample_rate": 48000,
+        "channels": 1,
+        "peak_dbfs": -8.13215610050182,
+        "rms_dbfs": -35.81204969919095,
+        "clipped_samples": 0,
+        "onset_seconds": 0.0,
+        "tail_silence_seconds": 0.5356041666666667
+      },
+      "format": "48 kHz mono PCM 24-bit WAV"
+    },
+    {
+      "cue": "BK_Swing_03",
+      "sources": [
+        {
+          "file": "cloth3.ogg",
+          "sha256": "a48632d17a4f1416541d261a32a31612e01267144c407fa3ecab3ff410f0085b"
+        }
+      ],
+      "filter_graph": "[0:a]atempo=1.7,atrim=duration=0.16,asetpts=PTS-STARTPTS,highpass=f=140,volume=-5dB,afade=t=in:d=0.002,afade=t=out:st=0.14:d=0.02[out]",
+      "output_sha256": "39d29d0eac63818d72cf0dc4a19c0c0713560f16ebd37c13c9fa44974103cd46",
+      "inspection": {
+        "duration": 0.16,
+        "sample_rate": 48000,
+        "channels": 1,
+        "peak_dbfs": -20.866513846691323,
+        "rms_dbfs": -36.35236870263938,
+        "clipped_samples": 0,
+        "onset_seconds": 0.014395833333333333,
+        "tail_silence_seconds": 0.014729166666666666
+      },
+      "format": "48 kHz mono PCM 24-bit WAV"
+    },
+    {
+      "cue": "BK_Hit_03",
+      "sources": [
+        {
+          "file": "impactWood_medium_002.ogg",
+          "sha256": "3f3f1917428b828f733a963167833c707bf88296ff158e1559c57c5cb813d799"
+        },
+        {
+          "file": "impactPunch_medium_002.ogg",
+          "sha256": "6492f9ccbc8d24dcef607bb1b48790b7870961474561f7fe5601e1c73a3018ef"
+        }
+      ],
+      "filter_graph": "[0:a]volume=-6dB[w];[1:a]volume=-11dB,adelay=7:all=1[b];[w][b]amix=inputs=2:normalize=0,atrim=duration=0.30,afade=t=out:st=0.26:d=0.04[out]",
+      "output_sha256": "05d034a6666c2d19ecd4cb62b0948cdfd70d3fd88b233775166084b7228bcf40",
+      "inspection": {
+        "duration": 0.3,
+        "sample_rate": 48000,
+        "channels": 1,
+        "peak_dbfs": -7.062521267782679,
+        "rms_dbfs": -24.735027945000503,
+        "clipped_samples": 0,
+        "onset_seconds": 0.0,
+        "tail_silence_seconds": 0.03783333333333333
+      },
+      "format": "48 kHz mono PCM 24-bit WAV"
+    },
+    {
+      "cue": "BK_Step_03",
+      "sources": [
+        {
+          "file": "footstep_grass_002.ogg",
+          "sha256": "73a520139f5be716a403bfe9c80e0e94d1e61d8e9de04a354b336392164b53dc"
+        }
+      ],
+      "filter_graph": "[0:a]volume=-7dB,afade=t=in:d=0.002[out]",
+      "output_sha256": "6fb62e299bc04a8dff994e4396d88652e2c40a9b65d966752fbe0e60fe474a3d",
+      "inspection": {
+        "duration": 0.6895625,
+        "sample_rate": 48000,
+        "channels": 1,
+        "peak_dbfs": -8.059556343205477,
+        "rms_dbfs": -36.4760094513954,
+        "clipped_samples": 0,
+        "onset_seconds": 0.0,
+        "tail_silence_seconds": 0.5505
+      },
+      "format": "48 kHz mono PCM 24-bit WAV"
+    },
+    {
+      "cue": "BK_Swing_04",
+      "sources": [
+        {
+          "file": "cloth4.ogg",
+          "sha256": "e7ab9a6c4466dea874196c61f59bf1da05cfe58748f42fadd695d441a154a99b"
+        }
+      ],
+      "filter_graph": "[0:a]atempo=1.7,atrim=duration=0.16,asetpts=PTS-STARTPTS,highpass=f=140,volume=-5dB,afade=t=in:d=0.002,afade=t=out:st=0.14:d=0.02[out]",
+      "output_sha256": "e90ba036425a604f82d324bbdd29914a38b2ca66bc24d77d03c9fe072f542dd6",
+      "inspection": {
+        "duration": 0.16,
+        "sample_rate": 48000,
+        "channels": 1,
+        "peak_dbfs": -23.09089110607164,
+        "rms_dbfs": -41.70179437143535,
+        "clipped_samples": 0,
+        "onset_seconds": 0.013625,
+        "tail_silence_seconds": 0.009125
+      },
+      "format": "48 kHz mono PCM 24-bit WAV"
+    },
+    {
+      "cue": "BK_Hit_04",
+      "sources": [
+        {
+          "file": "impactWood_medium_003.ogg",
+          "sha256": "635c37cfcd854b187d643d450ff0397798dcc29ae94da32192b814fae6bd854c"
+        },
+        {
+          "file": "impactPunch_medium_003.ogg",
+          "sha256": "2d7c719c05999e0532f4384e1018e04cd916db715140bf16dee2dff3f820e908"
+        }
+      ],
+      "filter_graph": "[0:a]volume=-6dB[w];[1:a]volume=-11dB,adelay=7:all=1[b];[w][b]amix=inputs=2:normalize=0,atrim=duration=0.30,afade=t=out:st=0.26:d=0.04[out]",
+      "output_sha256": "c0f6663f110d432bfe59346d4814c70a01ab9a2bd9abaf4d0976b65aa665bd73",
+      "inspection": {
+        "duration": 0.3,
+        "sample_rate": 48000,
+        "channels": 1,
+        "peak_dbfs": -7.0385781936835485,
+        "rms_dbfs": -24.45588298362093,
+        "clipped_samples": 0,
+        "onset_seconds": 2.0833333333333333e-05,
+        "tail_silence_seconds": 0.052520833333333336
+      },
+      "format": "48 kHz mono PCM 24-bit WAV"
+    },
+    {
+      "cue": "BK_Step_04",
+      "sources": [
+        {
+          "file": "footstep_grass_003.ogg",
+          "sha256": "0546e1d8ab2def714425701a18bd34c5ee2794b12e858e5b595aabcf38a34137"
+        }
+      ],
+      "filter_graph": "[0:a]volume=-7dB,afade=t=in:d=0.002[out]",
+      "output_sha256": "859e2f5ac9bc985720505b88b82dcac09e6be090d551877c8f134389a2be9f8d",
+      "inspection": {
+        "duration": 0.6664375,
+        "sample_rate": 48000,
+        "channels": 1,
+        "peak_dbfs": -7.899280976335391,
+        "rms_dbfs": -36.44379327568188,
+        "clipped_samples": 0,
+        "onset_seconds": 0.0,
+        "tail_silence_seconds": 0.5642916666666666
+      },
+      "format": "48 kHz mono PCM 24-bit WAV"
+    }
+  ],
+  "perceptual_validation": "Not auditioned by the agent; check role selection, naturalness and in-game mix."
+}

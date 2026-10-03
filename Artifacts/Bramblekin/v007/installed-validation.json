@@ -1,0 +1,13 @@
+{
+  "reach_m": 3.3,
+  "engage_m": 1.2,
+  "navigation_stop_m": 0.8,
+  "club_length_scale": 2,
+  "club_thickness_scale": 1.45,
+  "triangles": 2096,
+  "validation": "17 focused checks; offline compile; isolated build and all passed; final follow-through tests 19/19 passed",
+  "sampled_minimum_club_height_m": 0.004583597,
+  "model_sha256": "7489e5ec999dd16c9a83aac01a6f3ff09853a8256cc57c473f5c7d2666df9399",
+  "prefab_sha256": "046e6da1a6524244466c7cae0f0b332c257e4c92d5bc4745efad0838ee4b3dc1",
+  "manual": "Live retreat distance, sidestep balance, crowd/slope clearance and multiplayer appearance remain unverified."
+}

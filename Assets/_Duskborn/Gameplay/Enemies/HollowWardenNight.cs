@@ -84,7 +84,10 @@ namespace Duskborn.Gameplay.Enemies
         {
             if (!_active || !InstanceFinder.IsServerStarted) return;
             if (GameStateManager.Instance != null && GameStateManager.Instance.CurrentState != GameState.Running)
-            { Cancel(); return; }
+            {
+                if (GameStateManager.Instance.CurrentState != GameState.GameOver) Cancel();
+                return;
+            }
             if (_defeated)
             {
                 if (Time.time >= _finishAt)

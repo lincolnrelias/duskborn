@@ -10,6 +10,7 @@ namespace Duskborn.Gameplay.Player
     public partial class PlayerCombat
     {
         private WeaponDefinition pendingRangedWeapon;
+        private Duskborn.Gameplay.Enchanting.WeaponEtching pendingRangedRune;
         private readonly RangedAttackGate rangedGate = new();
 
         [Header("Ranged Projectile Spawn")]
@@ -127,6 +128,7 @@ namespace Duskborn.Gameplay.Player
                 return;
             }
             pendingRangedWeapon = definition;
+            pendingRangedRune = RuneWeaponId == weaponId ? EquippedRune : default;
             _weaponHandler?.ShowObservedWeapon(definition);
             ShowRangedWindupRpc(weaponId, holdDraw);
         }
@@ -205,6 +207,7 @@ namespace Duskborn.Gameplay.Player
             ReleaseObservedDrawRpc();
             var definition = ((RangedWeaponBehaviour)weapon.Behaviour).projectile;
             var item = (WeaponItem)weapon.CreateRuntimeItem();
+            item.Etching = pendingRangedRune;
             bool crit = Random.value < _stats.CritChance;
             float amount = _stats.Damage * definition.damageMultiplier * (crit ? _stats.CritMultiplier : 1f);
             int shot = ProjectileFlight.NextId();
@@ -212,23 +215,25 @@ namespace Duskborn.Gameplay.Player
             GetRangedSpawn(weapon, out Vector3 origin, out Quaternion spawnRotation, direction);
             direction = spawnRotation * Vector3.forward;
 
-            ShowPlayerProjectileRpc(shot, weapon.Id, origin, direction, spawnRotation);
+            ShowPlayerProjectileRpc(shot, weapon.Id, origin, direction, spawnRotation, item.Etching.Packed);
             var ranged = (RangedWeaponBehaviour)weapon.Behaviour;
             var hand = _weaponActionPlayer != null ? _weaponActionPlayer.RangedDrawingHand : null;
             Vector3? clearanceOrigin = hand != null && rangedSpawnPoint == null && !ranged.useCustomSpawnOffset
                 ? hand.position : (Vector3?)null;
-            ProjectileFlight.Launch(shot, definition, transform, true, origin, direction, true,
+            var runeFlight = ProjectileFlight.Launch(shot, definition, transform, true, origin, direction, true,
                 (col, point, forward) => ProjectileDamage.Apply(col, point, forward, amount, crit, this, item),
                 BroadcastProjectileImpact, spawnRotation, clearanceOrigin);
+            AddProjectileRuneAura(runeFlight, item.Etching);
         }
 
         [ObserversRpc]
-        private void ShowPlayerProjectileRpc(int shot, string weaponId, Vector3 origin, Vector3 direction, Quaternion rotation)
+        private void ShowPlayerProjectileRpc(int shot, string weaponId, Vector3 origin, Vector3 direction, Quaternion rotation, int runePacked)
         {
             if (IsServerStarted) return;
             var weapon = Resources.Load<WeaponDefinition>("Weapons/" + weaponId);
             if (weapon?.Behaviour is RangedWeaponBehaviour ranged)
-                ProjectileFlight.Launch(shot, ranged.projectile, transform, true, origin, direction, false, null, null, rotation);
+                AddProjectileRuneAura(ProjectileFlight.Launch(shot, ranged.projectile, transform, true, origin, direction, false, null, null, rotation),
+                    Duskborn.Gameplay.Enchanting.WeaponEtching.Unpack(runePacked));
         }
 
         // Route impacts through each connected player's object, so arrows remain

@@ -65,7 +65,17 @@ namespace Duskborn.Editor
             palette.SetColor("_BaseColor", Color.white); palette.SetFloat("_Smoothness", .05f);
             var amber = Material("TW_Amber", "Universal Render Pipeline/Lit");
             amber.SetColor("_BaseColor", new Color(.95f, .48f, .06f)); amber.EnableKeyword("_EMISSION");
-            amber.SetColor("_EmissionColor", new Color(1, .3f, .015f) * .5f);
+            amber.SetColor("_EmissionColor", new Color(1, .3f, .015f) * 2f);
+            amber.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
+            amber.EnableKeyword("_EMISSION");
+            var flightTrail = Material("TW_FlightTrail", "Universal Render Pipeline/Particles/Unlit");
+            flightTrail.SetColor("_BaseColor", Color.white);
+            flightTrail.SetFloat("_Surface", 1); flightTrail.SetFloat("_Blend", 2);
+            flightTrail.SetFloat("_Cull", 0); flightTrail.SetFloat("_ZWrite", 0);
+            flightTrail.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            flightTrail.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.One);
+            flightTrail.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            flightTrail.SetOverrideTag("RenderType", "Transparent"); flightTrail.renderQueue = 3000;
             var trail = Material("TW_Trail", "Universal Render Pipeline/Particles/Unlit");
             trail.SetColor("_BaseColor", new Color(.68f, .85f, .24f));
             var spitRoot = new GameObject("ThornwingSpit");
@@ -120,7 +130,7 @@ namespace Duskborn.Editor
                 stats.FindProperty("creatureTypes").intValue = (int)Duskborn.Gameplay.TargetType.Beast;
                 stats.FindProperty("attackRange").floatValue = ThornwingClock.Range;
                 stats.FindProperty("playerLayer").intValue = 1 << LayerMask.NameToLayer("Player");
-                var swarmer = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Duskborn/Prefabs/Enemies/Swarmer.prefab");
+                var swarmer = AssetDatabase.LoadAssetAtPath<GameObject>(BramblekinBuilder.PrefabPath);
                 Require(swarmer != null, "Swarmer corpse lifetime reference missing.");
                 stats.FindProperty("deathDelay").floatValue = new SerializedObject(swarmer.GetComponent<EnemyBase>())
                     .FindProperty("deathDelay").floatValue;
@@ -135,6 +145,7 @@ namespace Duskborn.Editor
                 presentation.FindProperty("leftWing").objectReferenceValue = transforms.Single(t => t.name == "Wing.L");
                 presentation.FindProperty("rightWing").objectReferenceValue = transforms.Single(t => t.name == "Wing.R");
                 presentation.FindProperty("eyes").objectReferenceValue = transforms.Single(t => t.name == "Eyes").GetComponent<Renderer>();
+                presentation.FindProperty("flightTrailMaterial").objectReferenceValue = flightTrail;
                 foreach (string cue in Cues)
                 {
                     var clips = presentation.FindProperty((cue == "Spit" ? "spit" : char.ToLowerInvariant(cue[0]) + cue.Substring(1)) + "Clips");
@@ -162,7 +173,7 @@ namespace Duskborn.Editor
                 if (night == 1) def.NightNumber = 1;
                 EditorUtility.SetDirty(def);
             }
-            foreach (var asset in new Object[] { palette, amber, trail, spit, loot, pool }) EditorUtility.SetDirty(asset);
+            foreach (var asset in new Object[] { palette, amber, trail, flightTrail, spit, loot, pool }) EditorUtility.SetDirty(asset);
             AssetDatabase.SaveAssets();
             InstallSceneNightReferences();
             generator.GetMethod("GenerateFull", BindingFlags.Public | BindingFlags.Static).Invoke(null, new object[] { null, true, true });
@@ -235,7 +246,9 @@ namespace Duskborn.Editor
             }
             Body("Wing.L", .06f); Body("Wing.R", .06f);
             var ragdoll = new SerializedObject(root.AddComponent<EnemyRagdoll>());
-            ragdoll.FindProperty("_impulseScale").floatValue = .8f;
+            ragdoll.FindProperty("_impulseScale").floatValue = 2f;
+            ragdoll.FindProperty("_wholeBodyImpulseFraction").floatValue = .8f;
+            ragdoll.FindProperty("_applyImpulseAtHitPoint").boolValue = true;
             ragdoll.FindProperty("_settleDuration").floatValue = 2f;
             ragdoll.FindProperty("_disableBoneCollidersWhileAlive").boolValue = true;
             ragdoll.FindProperty("_restorePoseOnReset").boolValue = true;

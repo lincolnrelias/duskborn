@@ -1,0 +1,353 @@
+{
+  "enemy": "Bramblekin",
+  "version": "v001",
+  "sources": [
+    {
+      "file": "source\\handleSmallLeather.ogg",
+      "sha256": "ae3cbf695aa0a8b98b5a80a835be5a3ccbd5446a24db2235cd4c3cd6fc92ed96",
+      "creator": "Kenney",
+      "source_page": "https://kenney.nl/assets/rpg-audio",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Original lossy Ogg Vorbis; 48 kHz PCM export does not restore lost information."
+    },
+    {
+      "file": "source\\handleSmallLeather2.ogg",
+      "sha256": "a66f6db5918ad016c28a9f2768f127a7f39b5fa04481e5a3b4e78ebe2a1c282d",
+      "creator": "Kenney",
+      "source_page": "https://kenney.nl/assets/rpg-audio",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Original lossy Ogg Vorbis; 48 kHz PCM export does not restore lost information."
+    },
+    {
+      "file": "source\\impactWood_light_000.ogg",
+      "sha256": "eb45e35b4bed784d3f120de4afec4b0d6ac09d9e143cce8cfcb7d739e1b1f3c3",
+      "creator": "Kenney",
+      "source_page": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Original lossy Ogg Vorbis; 48 kHz PCM export does not restore lost information."
+    },
+    {
+      "file": "source\\cloth1.ogg",
+      "sha256": "ddb93a3671233f95da0e0b10367f082f7eb42fa6caaddcf776410aa8833c747d",
+      "creator": "Kenney",
+      "source_page": "https://kenney.nl/assets/rpg-audio",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Original lossy Ogg Vorbis; 48 kHz PCM export does not restore lost information."
+    },
+    {
+      "file": "source\\impactWood_light_001.ogg",
+      "sha256": "4b76bf3ccc8e60d19188f3165b778a7817786faa6887c55d9049bcbeef3b425f",
+      "creator": "Kenney",
+      "source_page": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Original lossy Ogg Vorbis; 48 kHz PCM export does not restore lost information."
+    },
+    {
+      "file": "source\\cloth2.ogg",
+      "sha256": "8a7451193c38bc05483aec25dd193e163a15d44cf7fff04ac7912573231b0201",
+      "creator": "Kenney",
+      "source_page": "https://kenney.nl/assets/rpg-audio",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Original lossy Ogg Vorbis; 48 kHz PCM export does not restore lost information."
+    },
+    {
+      "file": "source\\impactPunch_medium_000.ogg",
+      "sha256": "486988aa2d6440ffc4c62a0e8ccf3c23673ba84424bd4723378d451b7255eb5c",
+      "creator": "Kenney",
+      "source_page": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Original lossy Ogg Vorbis; 48 kHz PCM export does not restore lost information."
+    },
+    {
+      "file": "source\\impactPunch_medium_001.ogg",
+      "sha256": "e71d23abcc3f10d9d6bc9615b2a431fff70b12333a5fcdd9964457564ace4349",
+      "creator": "Kenney",
+      "source_page": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Original lossy Ogg Vorbis; 48 kHz PCM export does not restore lost information."
+    },
+    {
+      "file": "source\\impactSoft_medium_000.ogg",
+      "sha256": "7d3ba0bb5e60a11b5d3e558c141303dcf494256675fbf753c0d252d2cf0481e3",
+      "creator": "Kenney",
+      "source_page": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Original lossy Ogg Vorbis; 48 kHz PCM export does not restore lost information."
+    },
+    {
+      "file": "source\\impactSoft_medium_001.ogg",
+      "sha256": "7642a4fd43e547afe4f7adfadb3dabb681c0ff512f52c1674bae30a726841faf",
+      "creator": "Kenney",
+      "source_page": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Original lossy Ogg Vorbis; 48 kHz PCM export does not restore lost information."
+    },
+    {
+      "file": "source\\footstep_grass_000.ogg",
+      "sha256": "9d49497777405d78d7cf7f2888e28277f3a23192300cfd1d79d54876b20f479f",
+      "creator": "Kenney",
+      "source_page": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Original lossy Ogg Vorbis; 48 kHz PCM export does not restore lost information."
+    },
+    {
+      "file": "source\\footstep_grass_001.ogg",
+      "sha256": "fb28781bd22b2eefdc14077f1adf5c94d7fe9c3a130194633b55f3e0d39d9f04",
+      "creator": "Kenney",
+      "source_page": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Original lossy Ogg Vorbis; 48 kHz PCM export does not restore lost information."
+    },
+    {
+      "file": "source\\footstep_grass_002.ogg",
+      "sha256": "73a520139f5be716a403bfe9c80e0e94d1e61d8e9de04a354b336392164b53dc",
+      "creator": "Kenney",
+      "source_page": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Original lossy Ogg Vorbis; 48 kHz PCM export does not restore lost information."
+    },
+    {
+      "file": "source\\footstep_grass_003.ogg",
+      "sha256": "0546e1d8ab2def714425701a18bd34c5ee2794b12e858e5b595aabcf38a34137",
+      "creator": "Kenney",
+      "source_page": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required_attribution": "None",
+      "fidelity": "Original lossy Ogg Vorbis; 48 kHz PCM export does not restore lost information."
+    }
+  ],
+  "cues": [
+    {
+      "name": "BK_Windup_01.wav",
+      "brief": "A small scavenger pulls its leather-wrapped cudgel back; dry strap tension.",
+      "inspection": {
+        "duration_seconds": 0.55,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -23.633458795100065,
+        "rms_dbfs": -49.25930481275641,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.051625,
+        "tail_below_minus50db_seconds": 0.3548125
+      },
+      "sha256": "f3f274beaf20963d6df2ec88db0843fc02b81a9abfb0661b49510f8d8188f0a7"
+    },
+    {
+      "name": "BK_Windup_02.wav",
+      "brief": "A small scavenger pulls its leather-wrapped cudgel back; dry strap tension.",
+      "inspection": {
+        "duration_seconds": 0.55,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -26.322252968089558,
+        "rms_dbfs": -51.94153965727048,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.0873125,
+        "tail_below_minus50db_seconds": 0.33589583333333334
+      },
+      "sha256": "3133cb94b91a45685fefa0a95661a3ba37d73f51bd23154a6c0e5b0ee83ed1f3"
+    },
+    {
+      "name": "BK_Swing_01.wav",
+      "brief": "Short woody cudgel contact with a dry cloth movement tail.",
+      "inspection": {
+        "duration_seconds": 0.38,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -13.615563752223931,
+        "rms_dbfs": -34.98825815368083,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.000125,
+        "tail_below_minus50db_seconds": 0.027979166666666666
+      },
+      "sha256": "df8f3760385ab476b5393f5c3b8fa6b9f781e77de41b3890dfe21968d43d9bcb"
+    },
+    {
+      "name": "BK_Swing_02.wav",
+      "brief": "Short woody cudgel contact with a dry cloth movement tail.",
+      "inspection": {
+        "duration_seconds": 0.38,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -15.045231194764987,
+        "rms_dbfs": -38.17556177790187,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.00016666666666666666,
+        "tail_below_minus50db_seconds": 0.09239583333333333
+      },
+      "sha256": "ec2ad46df31806aa30e520b87685afc88c8f36aab1d1e4dde18a122331de6a53"
+    },
+    {
+      "name": "BK_Hurt_01.wav",
+      "brief": "Small body contact, bark and leather crumpling; physical foley, not a voice.",
+      "inspection": {
+        "duration_seconds": 0.32,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -10.114952608407485,
+        "rms_dbfs": -24.82988952214236,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.0013333333333333333,
+        "tail_below_minus50db_seconds": 0.028916666666666667
+      },
+      "sha256": "a7c2211ea1073e84c4826d23b574b7f5c5fb2fdd211d610dd623493b45e06fed"
+    },
+    {
+      "name": "BK_Hurt_02.wav",
+      "brief": "Small body contact, bark and leather crumpling; physical foley, not a voice.",
+      "inspection": {
+        "duration_seconds": 0.32,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -10.135152635099796,
+        "rms_dbfs": -24.86046365414331,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.0013958333333333333,
+        "tail_below_minus50db_seconds": 0.036
+      },
+      "sha256": "ad3fa5eb7ff14fba74c8b5e401aef2075d664eba3e287c7a776456199424c114"
+    },
+    {
+      "name": "BK_Death_01.wav",
+      "brief": "Light body slumps onto earth, apron rustles and wooden cudgel settles.",
+      "inspection": {
+        "duration_seconds": 0.85,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -9.96194642595716,
+        "rms_dbfs": -32.3952578599891,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.0006041666666666667,
+        "tail_below_minus50db_seconds": 0.34191666666666665
+      },
+      "sha256": "2d8caa9010e9d684b04ef51a55709ee77a35fd01628d80f4cbc7c9fb80482427"
+    },
+    {
+      "name": "BK_Death_02.wav",
+      "brief": "Light body slumps onto earth, apron rustles and wooden cudgel settles.",
+      "inspection": {
+        "duration_seconds": 0.85,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -9.926802763975616,
+        "rms_dbfs": -30.965459473628982,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.0006041666666666667,
+        "tail_below_minus50db_seconds": 0.5623958333333333
+      },
+      "sha256": "c8ac60a5df0dc8814ceb83d43aab4d7c686415b80e13c2302f209ca46d27fb52"
+    },
+    {
+      "name": "BK_Step_01.wav",
+      "brief": "Small bare three-toed feet on grass from separate recorded takes.",
+      "inspection": {
+        "duration_seconds": 0.3,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -20.24373184402556,
+        "rms_dbfs": -41.34244658955173,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.00020833333333333335,
+        "tail_below_minus50db_seconds": 0.20560416666666667
+      },
+      "sha256": "a9a3171aa27f6b33c0af35552cc868e8a0afd265da4721d309bd9e72a4ff44b9"
+    },
+    {
+      "name": "BK_Step_02.wav",
+      "brief": "Small bare three-toed feet on grass from separate recorded takes.",
+      "inspection": {
+        "duration_seconds": 0.3,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -17.408571071241298,
+        "rms_dbfs": -38.30168837675806,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.00025,
+        "tail_below_minus50db_seconds": 0.1684375
+      },
+      "sha256": "b7872de003ae1e86645651bd9009636015de47011ce7ec75642f8441e87ab18f"
+    },
+    {
+      "name": "BK_Step_03.wav",
+      "brief": "Small bare three-toed feet on grass from separate recorded takes.",
+      "inspection": {
+        "duration_seconds": 0.3,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -19.79219570265227,
+        "rms_dbfs": -39.52381330224053,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.00022916666666666666,
+        "tail_below_minus50db_seconds": 0.16504166666666667
+      },
+      "sha256": "b33a1e125276edc071bed76128163f9a3a96e9a3e119a600e280844fad04e1b9"
+    },
+    {
+      "name": "BK_Step_04.wav",
+      "brief": "Small bare three-toed feet on grass from separate recorded takes.",
+      "inspection": {
+        "duration_seconds": 0.3,
+        "sample_rate": 48000,
+        "channels": 1,
+        "codec": "pcm_s24le",
+        "peak_dbfs": -21.30978160653349,
+        "rms_dbfs": -42.37861180590117,
+        "full_scale_samples": 0,
+        "nonfinite_samples": 0,
+        "onset_at_minus50db_seconds": 0.00020833333333333335,
+        "tail_below_minus50db_seconds": 0.2258125
+      },
+      "sha256": "88495bed2bb56d8f90e51771f73a440b0d9a87749efcc65f7390821d5fc1ab6f"
+    }
+  ],
+  "perceptual_validation": "Not auditioned; user must check naturalness, repetition and combat mix."
+}

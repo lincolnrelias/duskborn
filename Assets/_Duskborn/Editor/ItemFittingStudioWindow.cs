@@ -37,6 +37,13 @@ namespace Duskborn.Editor
         private PlayableGraph _playableGraph;
         private AnimationPlayableOutput _playableOutput;
         private AnimationClipPlayable _clipPlayable;
+        private AnimatorControllerPlayable _previewBasePlayable;
+        private AnimationLayerMixerPlayable _previewLayerMixer;
+        private WeaponActionData _customPreviewAction;
+        private UnityEngine.Object _customPreviewOwner;
+        private string _customPreviewPath;
+        private bool _maskPreviewRefreshRequested;
+        private AvatarMask _previewAppliedMask;
 
         // Preview camera.
         private Vector3 _camTarget = new Vector3(0f, 1.0f, 0f);
@@ -59,6 +66,9 @@ namespace Duskborn.Editor
             public string Label;
             public AnimationClip Clip;
             public WeaponActionEvent[] Events;
+            public WeaponActionData Action;
+            public UnityEngine.Object Owner;
+            public string ActionPath;
         }
 
         private readonly List<ClipOption> _availableClips = new List<ClipOption>();
@@ -115,7 +125,7 @@ namespace Duskborn.Editor
         {
             _lastUpdateTime = EditorApplication.timeSinceStartup;
             EditorApplication.update += OnEditorUpdate;
-            Undo.undoRedoPerformed += OnProjectileUndoRedo;
+            Undo.undoRedoPerformed += OnCombatUndoRedo;
             bool loaded = LoadWindowState();
             InitPreview();
             RefreshWeaponAndClips(resetOffsetsFromProfile: !loaded);
@@ -125,7 +135,7 @@ namespace Duskborn.Editor
         {
             SaveWindowState();
             EditorApplication.update -= OnEditorUpdate;
-            Undo.undoRedoPerformed -= OnProjectileUndoRedo;
+            Undo.undoRedoPerformed -= OnCombatUndoRedo;
             DestroyPlayableGraph();
             CleanupPreview();
         }
@@ -342,6 +352,9 @@ namespace Duskborn.Editor
                 }
 
                 _animator = _characterInstance.GetComponentInChildren<Animator>();
+                Duskborn.Gameplay.Player.IronrootAppearance.EnsureAnimationEventReceiver(_animator);
+                // Scrubbing must never dispatch gameplay callbacks from imported clips.
+                if (_animator != null) _animator.fireEvents = false;
                 _preview.AddSingleGO(_characterInstance);
             }
 
@@ -396,25 +409,42 @@ namespace Duskborn.Editor
         private void UpdateCurrentClipPlayable()
         {
             if (!_playableGraph.IsValid()) return;
-
             AnimationClip clipToPlay = GetCurrentSelectedClip();
+            _playableOutput.SetSourcePlayable(Playable.Null);
+            if (_previewLayerMixer.IsValid()) _previewLayerMixer.Destroy();
+            if (_previewBasePlayable.IsValid()) _previewBasePlayable.Destroy();
+            if (_clipPlayable.IsValid()) _clipPlayable.Destroy();
 
-            if (_clipPlayable.IsValid())
-            {
-                _playableOutput.SetSourcePlayable(Playable.Null);
-                _clipPlayable.Destroy();
-            }
+            if (clipToPlay == null) return;
+            _clipPlayable = AnimationClipPlayable.Create(_playableGraph, clipToPlay);
+            _clipPlayable.SetApplyFootIK(false);
+            WeaponActionData action = GetLivePreviewAction();
+            bool preserveLocomotion = action == null || action.PreserveLocomotion;
+            AvatarMask weaponMask = selectedWeapon != null ? selectedWeapon.ActionMask : null;
+            AvatarMask mask = preserveLocomotion ? action != null ? action.ResolveMask(weaponMask) : weaponMask : null;
+            if (preserveLocomotion && mask == null)
+                mask = LoadCombatMaskPreset(false);
 
-            if (clipToPlay != null)
+            _previewAppliedMask = null;
+            if (mask != null && _animator.runtimeAnimatorController != null)
             {
-                _clipPlayable = AnimationClipPlayable.Create(_playableGraph, clipToPlay);
-                _playableOutput.SetSourcePlayable(_clipPlayable);
-                _currentTime = Mathf.Clamp(_currentTime, 0f, clipToPlay.length);
-                _normalizedTime = clipToPlay.length > 0f ? Mathf.Clamp01(_currentTime / clipToPlay.length) : 0f;
-                _clipPlayable.SetTime(_currentTime);
-                _playableGraph.Evaluate(0);
+                _previewBasePlayable = AnimatorControllerPlayable.Create(_playableGraph, _animator.runtimeAnimatorController);
+                _previewLayerMixer = AnimationLayerMixerPlayable.Create(_playableGraph, 2);
+                _previewLayerMixer.ConnectInput(0, _previewBasePlayable, 0, 1f);
+                _previewLayerMixer.ConnectInput(1, _clipPlayable, 0, 1f);
+                _previewLayerMixer.SetLayerAdditive(1, false);
+                _previewLayerMixer.SetLayerMaskFromAvatarMask(1, mask);
+                _previewAppliedMask = mask;
+                _playableOutput.SetSourcePlayable(_previewLayerMixer);
             }
+            else _playableOutput.SetSourcePlayable(_clipPlayable);
+
+            _currentTime = Mathf.Clamp(_currentTime, 0f, clipToPlay.length);
+            _normalizedTime = clipToPlay.length > 0f ? Mathf.Clamp01(_currentTime / clipToPlay.length) : 0f;
+            _clipPlayable.SetTime(_currentTime);
+            _playableGraph.Evaluate(0);
         }
+
 
         private AnimationClip GetCurrentSelectedClip()
         {
@@ -427,6 +457,7 @@ namespace Duskborn.Editor
 
         private void RefreshWeaponAndClips(bool resetOffsetsFromProfile = true)
         {
+            bool wasCustomClip = _selectedClipIndex == _availableClips.Count;
             _availableClips.Clear();
 
             if (selectedWeapon != null)
@@ -482,7 +513,10 @@ namespace Duskborn.Editor
                                     {
                                         Label = $"{actionType} - {comboLabel} ({entry.Clip.name})",
                                         Clip = entry.Clip,
-                                        Events = entry.Events
+                                        Events = entry.Events,
+                                        Action = action,
+                                        Owner = selectedWeapon,
+                                        ActionPath = $"actions.Array.data[{a}]"
                                     });
                                 }
                             }
@@ -511,7 +545,10 @@ namespace Duskborn.Editor
                                     {
                                         Label = $"Ability [{skillName}] ({entry.Clip.name})",
                                         Clip = entry.Clip,
-                                        Events = entry.Events
+                                        Events = entry.Events,
+                                        Action = skill.animation,
+                                        Owner = skill,
+                                        ActionPath = "animation"
                                     });
                                 }
                             }
@@ -520,7 +557,10 @@ namespace Duskborn.Editor
                 }
             }
 
-            if (_selectedClipIndex > _availableClips.Count)
+            if (!resetOffsetsFromProfile && wasCustomClip)
+                _selectedClipIndex = _availableClips.Count;
+
+            if (_selectedClipIndex < 0 || _selectedClipIndex > _availableClips.Count)
             {
                 _selectedClipIndex = 0;
             }
@@ -656,6 +696,7 @@ namespace Duskborn.Editor
             _sidebarScroll = EditorGUILayout.BeginScrollView(_sidebarScroll);
             DrawSidebar();
             EditorGUILayout.EndScrollView();
+            DrawSaveFooter();
             GUILayout.EndArea();
         }
 
@@ -882,10 +923,394 @@ namespace Duskborn.Editor
             GUILayout.Space(8);
             DrawAnimationSection();
             GUILayout.Space(8);
+            DrawWeaponCombatSection();
+            GUILayout.Space(8);
             DrawProjectileSection();
             GUILayout.Space(8);
             DrawAvatarSection();
             GUILayout.Space(12);
+        }
+
+        [SerializeField] private bool _showWeaponCombatEditor;
+        [SerializeField] private bool _showWeaponStats;
+
+        private void DrawWeaponCombatSection()
+        {
+            _showWeaponCombatEditor = EditorGUILayout.Foldout(_showWeaponCombatEditor,
+                "Weapon Animations, Impact Frames & Stats", true, EditorStyles.foldoutHeader);
+            if (!_showWeaponCombatEditor) return;
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                if (selectedWeapon == null)
+                {
+                    EditorGUILayout.HelpBox("Select a weapon to edit its combat settings.", MessageType.Info);
+                    return;
+                }
+
+                bool changed;
+                using (var weapon = new SerializedObject(selectedWeapon))
+                {
+                    weapon.Update();
+                    var actions = weapon.FindProperty("actions");
+                    actions.isExpanded = EditorGUILayout.Foldout(actions.isExpanded, "Attack Animations (LMB / RMB)", true);
+                    if (actions.isExpanded)
+                    {
+                        DrawCombatArraySize(actions, "Actions");
+                        for (int i = 0; i < actions.arraySize; i++)
+                        {
+                            var action = actions.GetArrayElementAtIndex(i);
+                            string label = i == 0 ? "LMB Attack" : i == 1 ? "RMB Attack" : $"Action {i + 1}";
+                            DrawCombatAction(action, label);
+                        }
+                    }
+
+                    DrawWeaponMaskSettings(weapon);
+                    var bonuses = weapon.FindProperty("bonuses");
+                    _showWeaponStats = EditorGUILayout.Foldout(_showWeaponStats, "Weapon Stats", true);
+                    if (_showWeaponStats)
+                    {
+                        EditorGUILayout.PropertyField(bonuses, new GUIContent("Stat Bonuses"), true);
+                        EditorGUILayout.PropertyField(weapon.FindProperty("typeModifiers"), true);
+                        EditorGUILayout.PropertyField(weapon.FindProperty("behaviour"));
+
+                    }
+
+                    var skills = weapon.FindProperty("skills");
+                    skills.isExpanded = EditorGUILayout.Foldout(skills.isExpanded, "Skills (Q / E / R)", true);
+                    if (skills.isExpanded)
+                    {
+                        DrawCombatArraySize(skills, "Skills", 3);
+                        for (int i = 0; i < skills.arraySize; i++)
+                        {
+                            var skill = skills.GetArrayElementAtIndex(i);
+                            EditorGUILayout.PropertyField(skill, new GUIContent(i == 0 ? "Q" : i == 1 ? "E" : "R"));
+                            if (skill.objectReferenceValue != null)
+                                DrawSharedCombatAsset(skill.objectReferenceValue, "Skill Animation & Stats");
+                        }
+                    }
+
+                    changed = weapon.ApplyModifiedProperties();
+                }
+
+                if (changed || _maskPreviewRefreshRequested)
+                {
+                    _maskPreviewRefreshRequested = false;
+                    if (changed) EditorUtility.SetDirty(selectedWeapon);
+                    RefreshWeaponAndClips(resetOffsetsFromProfile: false);
+                    Repaint();
+                }
+            }
+        }
+
+        private static void DrawCombatArraySize(SerializedProperty array, string label, int max = 64)
+        {
+            int previousSize = array.arraySize;
+            int size = EditorGUILayout.DelayedIntField(label, previousSize);
+            if (size == previousSize) return;
+            array.arraySize = Mathf.Clamp(size, 0, max);
+            for (int i = previousSize; i < array.arraySize; i++)
+            {
+                var element = array.GetArrayElementAtIndex(i);
+                if (element.propertyType == SerializedPropertyType.ObjectReference)
+                {
+                    element.objectReferenceValue = null;
+                }
+                else if (element.FindPropertyRelative("BaseSpeed") != null)
+                {
+                    element.FindPropertyRelative("BowAnimations").objectReferenceValue = null;
+                    element.FindPropertyRelative("BaseSpeed").floatValue = 1f;
+                    element.FindPropertyRelative("PreserveLocomotion").boolValue = true;
+                    element.FindPropertyRelative("MaskOverride").objectReferenceValue = null;
+                    element.FindPropertyRelative("ComboChain").boolValue = false;
+                    element.FindPropertyRelative("ComboResetTime").floatValue = 0.8f;
+                    foreach (string field in new[] { "Entries", "Clips", "Events", "ComboDamageMultipliers" })
+                        element.FindPropertyRelative(field).arraySize = 0;
+                }
+                else if (element.FindPropertyRelative("Clip") != null)
+                {
+                    element.FindPropertyRelative("Clip").objectReferenceValue = null;
+                    element.FindPropertyRelative("DamageMultiplier").floatValue = 1f;
+                    element.FindPropertyRelative("Events").arraySize = 0;
+                }
+                else
+                {
+                    element.FindPropertyRelative("Type").enumValueIndex = 0;
+                    element.FindPropertyRelative("NormalizedTime").floatValue = 0f;
+                }
+            }
+        }
+
+        private const string OneHandedMaskPath = "Assets/_Duskborn/Prefabs/Player/WeaponMask.mask";
+        private const string TwoHandedMaskPath = "Assets/_Duskborn/Prefabs/Player/TwoHandedWeaponMask.mask";
+        [SerializeField] private bool _showAnimationMasks;
+
+        private void DrawWeaponMaskSettings(SerializedObject weapon)
+        {
+            _showAnimationMasks = EditorGUILayout.Foldout(_showAnimationMasks, "Animation Masks", true);
+            if (!_showAnimationMasks) return;
+            var mask = weapon.FindProperty("actionMask");
+            EditorGUILayout.PropertyField(mask, new GUIContent("Weapon Mask"));
+            EditorGUILayout.HelpBox("Weapon presets also switch the currently previewed action to use the weapon mask. 2H includes both arms and torso while preserving walking. Other actions keep their overrides; use Full Body on an action for root motion.", MessageType.None);
+            DrawMaskPresetButtons(mask, null);
+        }
+
+        private void DrawMaskPresetButtons(SerializedProperty mask, SerializedProperty preserveLocomotion)
+        {
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                if (GUILayout.Button("1H", EditorStyles.miniButton))
+                    ApplyMaskButton(mask, preserveLocomotion, LoadCombatMaskPreset(false), false);
+                if (GUILayout.Button("2H", EditorStyles.miniButton))
+                    ApplyMaskButton(mask, preserveLocomotion, LoadCombatMaskPreset(true), false);
+                if (preserveLocomotion != null && GUILayout.Button("Full Body", EditorStyles.miniButton))
+                    ApplyMaskButton(mask, preserveLocomotion, null, true);
+                if (GUILayout.Button(preserveLocomotion != null ? "Use Weapon Mask" : "Default", EditorStyles.miniButton))
+                    ApplyMaskButton(mask, preserveLocomotion, null, false);
+            }
+        }
+
+        internal static AvatarMask LoadCombatMaskPreset(bool twoHanded)
+        {
+            string path = twoHanded ? TwoHandedMaskPath : OneHandedMaskPath;
+            var preset = AssetDatabase.LoadAssetAtPath<AvatarMask>(path);
+            if (preset != null) return preset;
+            // New assets may not have been discovered by Unity's incremental refresh yet.
+            if (File.Exists(path))
+            {
+                AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate);
+                preset = AssetDatabase.LoadAssetAtPath<AvatarMask>(path);
+                if (preset == null) throw new InvalidOperationException($"Unable to import animation mask at {path}.");
+                return preset;
+            }
+            preset = new AvatarMask { name = twoHanded ? "TwoHandedWeaponMask" : "WeaponMask" };
+            for (int i = 0; i < (int)AvatarMaskBodyPart.LastBodyPart; i++)
+            {
+                var part = (AvatarMaskBodyPart)i;
+                bool active = part == AvatarMaskBodyPart.RightArm || part == AvatarMaskBodyPart.RightFingers ||
+                    part == AvatarMaskBodyPart.RightHandIK || twoHanded &&
+                    (part == AvatarMaskBodyPart.Body || part == AvatarMaskBodyPart.Head ||
+                     part == AvatarMaskBodyPart.LeftArm || part == AvatarMaskBodyPart.LeftFingers || part == AvatarMaskBodyPart.LeftHandIK);
+                preset.SetHumanoidBodyPartActive(part, active);
+            }
+            AssetDatabase.CreateAsset(preset, path);
+            return preset;
+        }
+
+        internal static void AssignCombatMask(SerializedProperty mask, SerializedProperty preserveLocomotion,
+            AvatarMask preset, bool fullBody)
+        {
+            mask.objectReferenceValue = preset;
+            if (preserveLocomotion != null) preserveLocomotion.boolValue = !fullBody;
+        }
+
+        private void ApplyMaskButton(SerializedProperty mask, SerializedProperty preserveLocomotion,
+            AvatarMask preset, bool fullBody)
+        {
+            AssignCombatMask(mask, preserveLocomotion, preset, fullBody);
+            if (preserveLocomotion == null)
+            {
+                // A weapon preset should immediately affect the action being previewed,
+                // even if that action previously used full-body playback or an override.
+                GetPreviewActionSource(out var owner, out var path);
+                if (owner == mask.serializedObject.targetObject && !string.IsNullOrEmpty(path))
+                    AssignActionToWeaponMask(mask.serializedObject.FindProperty(path));
+                else if (owner != null && !string.IsNullOrEmpty(path))
+                {
+                    using (var data = new SerializedObject(owner))
+                    {
+                        data.Update();
+                        AssignActionToWeaponMask(data.FindProperty(path));
+                        if (data.ApplyModifiedProperties()) EditorUtility.SetDirty(owner);
+                    }
+                }
+            }
+            else
+            {
+                string path = preserveLocomotion.propertyPath;
+                path = path.Substring(0, path.LastIndexOf('.'));
+                var owner = mask.serializedObject.targetObject;
+                bool alreadyPreviewing = GetPreviewActionSource(out var previewOwner, out var previewPath) &&
+                    previewOwner == owner && previewPath == path;
+                if (!alreadyPreviewing)
+                {
+                    int index = _availableClips.FindIndex(option => option.Owner == owner && option.ActionPath == path);
+                    if (index >= 0) _selectedClipIndex = index;
+                }
+            }
+            _maskPreviewRefreshRequested = true;
+            GUI.changed = true;
+        }
+
+        internal static void AssignActionToWeaponMask(SerializedProperty action)
+        {
+            if (action == null) return;
+            action.FindPropertyRelative("MaskOverride").objectReferenceValue = null;
+            action.FindPropertyRelative("PreserveLocomotion").boolValue = true;
+        }
+
+        private bool GetPreviewActionSource(out UnityEngine.Object owner, out string path)
+        {
+            if (_selectedClipIndex >= 0 && _selectedClipIndex < _availableClips.Count)
+            {
+                owner = _availableClips[_selectedClipIndex].Owner;
+                path = _availableClips[_selectedClipIndex].ActionPath;
+            }
+            else
+            {
+                owner = _customPreviewOwner;
+                path = _customPreviewPath;
+            }
+            return owner != null && !string.IsNullOrEmpty(path);
+        }
+
+        private WeaponActionData GetLivePreviewAction()
+        {
+            if (GetPreviewActionSource(out var owner, out var path))
+            {
+                using (var data = new SerializedObject(owner))
+                {
+                    data.Update();
+                    var action = data.FindProperty(path);
+                    if (action != null)
+                        return new WeaponActionData
+                        {
+                            PreserveLocomotion = action.FindPropertyRelative("PreserveLocomotion").boolValue,
+                            MaskOverride = action.FindPropertyRelative("MaskOverride").objectReferenceValue as AvatarMask
+                        };
+                }
+            }
+            return _selectedClipIndex >= 0 && _selectedClipIndex < _availableClips.Count
+                ? _availableClips[_selectedClipIndex].Action : _customPreviewAction;
+        }
+
+
+        private void DrawCombatAction(SerializedProperty action, string label)
+        {
+            action.isExpanded = EditorGUILayout.Foldout(action.isExpanded, label, true);
+            if (!action.isExpanded) return;
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                var bow = action.FindPropertyRelative("BowAnimations");
+                EditorGUILayout.PropertyField(bow);
+                if (bow.objectReferenceValue != null)
+                    DrawSharedCombatAsset(bow.objectReferenceValue, "Bow Clips & Settings");
+                EditorGUILayout.PropertyField(action.FindPropertyRelative("BaseSpeed"));
+                var preserveLocomotion = action.FindPropertyRelative("PreserveLocomotion");
+                EditorGUILayout.PropertyField(preserveLocomotion);
+                var actionMask = action.FindPropertyRelative("MaskOverride");
+                using (new EditorGUI.DisabledScope(!preserveLocomotion.boolValue))
+                    EditorGUILayout.PropertyField(actionMask, new GUIContent("Action Mask"));
+                DrawMaskPresetButtons(actionMask, preserveLocomotion);
+                var combo = action.FindPropertyRelative("ComboChain");
+                EditorGUILayout.PropertyField(combo);
+                if (combo.boolValue)
+                    EditorGUILayout.PropertyField(action.FindPropertyRelative("ComboResetTime"));
+
+                // Clear the legacy fallback so removing every clip does not resurrect old entries.
+                var entries = action.FindPropertyRelative("Entries");
+                var legacyClips = action.FindPropertyRelative("Clips");
+                var legacyEvents = action.FindPropertyRelative("Events");
+                var legacyMultipliers = action.FindPropertyRelative("ComboDamageMultipliers");
+                if (entries.arraySize == 0 && legacyClips.arraySize > 0)
+                {
+                    entries.arraySize = legacyClips.arraySize;
+                    for (int i = 0; i < entries.arraySize; i++)
+                    {
+                        var entry = entries.GetArrayElementAtIndex(i);
+                        entry.FindPropertyRelative("Clip").objectReferenceValue = legacyClips.GetArrayElementAtIndex(i).objectReferenceValue;
+                        float multiplier = i < legacyMultipliers.arraySize ? legacyMultipliers.GetArrayElementAtIndex(i).floatValue : 1f;
+                        entry.FindPropertyRelative("DamageMultiplier").floatValue = multiplier > 0f ? multiplier : 1f;
+                        var events = entry.FindPropertyRelative("Events");
+                        events.arraySize = legacyEvents.arraySize;
+                        for (int e = 0; e < events.arraySize; e++)
+                        {
+                            var from = legacyEvents.GetArrayElementAtIndex(e);
+                            var to = events.GetArrayElementAtIndex(e);
+                            to.FindPropertyRelative("Type").enumValueIndex = from.FindPropertyRelative("Type").enumValueIndex;
+                            to.FindPropertyRelative("NormalizedTime").floatValue = from.FindPropertyRelative("NormalizedTime").floatValue;
+                        }
+                    }
+                }
+                legacyClips.arraySize = 0;
+                legacyEvents.arraySize = 0;
+                legacyMultipliers.arraySize = 0;
+                DrawCombatArraySize(entries, combo.boolValue ? "Combo Steps" : "Clip Variants");
+                for (int i = 0; i < entries.arraySize; i++)
+                {
+                    var entry = entries.GetArrayElementAtIndex(i);
+                    entry.isExpanded = EditorGUILayout.Foldout(entry.isExpanded,
+                        combo.boolValue ? $"Step {i + 1}" : $"Variant {i + 1}", true);
+                    if (!entry.isExpanded) continue;
+                    EditorGUILayout.PropertyField(entry.FindPropertyRelative("Clip"));
+                    EditorGUILayout.PropertyField(entry.FindPropertyRelative("DamageMultiplier"));
+                    var clip = entry.FindPropertyRelative("Clip").objectReferenceValue as AnimationClip;
+                    var events = entry.FindPropertyRelative("Events");
+                    EditorGUILayout.HelpBox("Hitbox Open / Close define the impact window. Spawn Projectile sets the firing moment. Frames start at 0; timing is stored as normalized clip time.", MessageType.None);
+                    DrawCombatArraySize(events, "Impact Events");
+                    for (int e = 0; e < events.arraySize; e++)
+                    {
+                        var impact = events.GetArrayElementAtIndex(e);
+                        EditorGUILayout.PropertyField(impact.FindPropertyRelative("Type"), new GUIContent($"Event {e + 1}"));
+                        var time = impact.FindPropertyRelative("NormalizedTime");
+                        EditorGUILayout.Slider(time, 0f, 1f, new GUIContent("Normalized Time"));
+                        using (new EditorGUI.DisabledScope(clip == null || clip.length <= 0f || clip.frameRate <= 0f))
+                        {
+                            float frameCount = clip != null ? clip.length * clip.frameRate : 0f;
+                            EditorGUI.BeginChangeCheck();
+                            int frame = EditorGUILayout.DelayedIntField("Impact Frame", Mathf.RoundToInt(time.floatValue * frameCount));
+                            if (EditorGUI.EndChangeCheck() && frameCount > 0f)
+                                time.floatValue = Mathf.Clamp01(frame / frameCount);
+                            if (GUILayout.Button("Preview Impact Pose", EditorStyles.miniButton))
+                            {
+                                _isPlaying = false;
+                                _customPreviewOwner = action.serializedObject.targetObject;
+                                _customPreviewPath = action.propertyPath;
+                                _customPreviewAction = new WeaponActionData
+                                {
+                                    PreserveLocomotion = preserveLocomotion.boolValue,
+                                    MaskOverride = actionMask.objectReferenceValue as AvatarMask
+                                };
+                                _customClip = clip;
+                                _selectedClipIndex = _availableClips.Count;
+                                _normalizedTime = time.floatValue;
+                                _currentTime = _normalizedTime * clip.length;
+                                UpdateCurrentClipPlayable();
+                                EvaluateAnimation();
+                                Repaint();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void DrawSharedCombatAsset(UnityEngine.Object asset, string label)
+        {
+            using (var data = new SerializedObject(asset))
+            {
+                data.Update();
+                var script = data.FindProperty("m_Script");
+                script.isExpanded = EditorGUILayout.Foldout(script.isExpanded, label, true);
+                if (!script.isExpanded) return;
+                EditorGUILayout.HelpBox($"Editing {asset.name}. Changes also affect weapons using this shared asset. Ctrl+Z undoes edits.", MessageType.Info);
+                var property = data.GetIterator();
+                bool enterChildren = true;
+                while (property.NextVisible(enterChildren))
+                {
+                    enterChildren = false;
+                    if (property.name == "m_Script") continue;
+                    if (property.name == "animation" && asset is WeaponSkill)
+                        DrawCombatAction(property, "Skill Animation & Impact Frames");
+                    else
+                        EditorGUILayout.PropertyField(property, true);
+                }
+                if (data.ApplyModifiedProperties())
+                {
+                    EditorUtility.SetDirty(asset);
+                    RefreshWeaponAndClips(resetOffsetsFromProfile: false);
+                    Repaint();
+                }
+            }
         }
 
         private void DrawItemSelectionSection()
@@ -1139,23 +1564,37 @@ namespace Duskborn.Editor
 
             GUILayout.Space(6);
 
-            // Save / Revert buttons.
-            EditorGUILayout.BeginHorizontal();
-            GUI.enabled = attachmentProfile != null;
-            GUI.backgroundColor = new Color(0.35f, 0.85f, 0.45f);
-            if (GUILayout.Button("💾 Save to Profile", GUILayout.Height(28)))
+            using (new EditorGUI.DisabledScope(attachmentProfile == null))
             {
-                SaveOffsetsToProfile();
+                if (GUILayout.Button("Revert Grip", GUILayout.Height(24)))
+                    RevertOffsetsFromProfile();
             }
-            GUI.backgroundColor = Color.white;
-            if (GUILayout.Button("Revert", GUILayout.Height(28), GUILayout.Width(80)))
-            {
-                RevertOffsetsFromProfile();
-            }
-            GUI.enabled = true;
-            EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.EndVertical();
+        }
+
+        private void DrawSaveFooter()
+        {
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            using (new EditorGUI.DisabledScope(selectedWeapon == null && attachmentProfile == null))
+            {
+                Color previousColor = GUI.backgroundColor;
+                GUI.backgroundColor = new Color(0.35f, 0.85f, 0.45f);
+                bool save = GUILayout.Button("Save Changes", GUILayout.Height(32));
+                GUI.backgroundColor = previousColor;
+                if (save) SaveStudioChanges();
+            }
+        }
+
+        private void SaveStudioChanges()
+        {
+            SaveOffsetsToProfile();
+            SaveProjectileConfiguration();
+            // Serialized combat edits mark the weapon, skill and bow assets dirty.
+            // Flush them together with the grip and projectile settings on Save.
+            AssetDatabase.SaveAssets();
+            SaveWindowState();
+            ShowNotification(new GUIContent("Saved item fitting, animations, impact frames and stats."));
         }
 
         private void SaveOffsetsToProfile()
@@ -1176,11 +1615,7 @@ namespace Duskborn.Editor
                 EditorUtility.SetDirty(selectedWeapon);
             }
 
-            AssetDatabase.SaveAssets();
-            SaveWindowState();
 
-            string weaponMsg = selectedWeapon != null ? $" and linked to '{selectedWeapon.DisplayName}'" : "";
-            ShowNotification(new GUIContent($"✓ Saved to Profile{weaponMsg}!"));
         }
 
         private void RevertOffsetsFromProfile()
@@ -1224,6 +1659,9 @@ namespace Duskborn.Editor
                 _customClip = (AnimationClip)EditorGUILayout.ObjectField("Custom Clip", _customClip, typeof(AnimationClip), false);
                 if (EditorGUI.EndChangeCheck())
                 {
+                    _customPreviewAction = null;
+                    _customPreviewOwner = null;
+                    _customPreviewPath = null;
                     _currentTime = 0f;
                     _normalizedTime = 0f;
                     UpdateCurrentClipPlayable();
@@ -1231,6 +1669,7 @@ namespace Duskborn.Editor
                 }
             }
 
+            EditorGUILayout.LabelField("Preview Mask", _previewAppliedMask != null ? _previewAppliedMask.name : "Full Body");
             AnimationClip activeClip = GetCurrentSelectedClip();
             float clipLength = activeClip != null ? activeClip.length : 0f;
 
@@ -1241,6 +1680,7 @@ namespace Duskborn.Editor
             if (GUILayout.Button(_isPlaying ? "⏸ Pause" : "▶ Reproduzir", GUILayout.Height(24)))
             {
                 _isPlaying = !_isPlaying;
+                if (_isPlaying) UpdateCurrentClipPlayable();
             }
 
             if (GUILayout.Button("⏮ Start", EditorStyles.miniButton, GUILayout.Height(24), GUILayout.Width(60)))

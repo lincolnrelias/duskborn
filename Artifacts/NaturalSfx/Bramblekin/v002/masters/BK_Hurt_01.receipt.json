@@ -1,0 +1,22 @@
+{
+  "cue": "BK_Hurt_01",
+  "sources": [
+    {
+      "file": "goblin-7.wav",
+      "sha256": "a5eb5208de6f4b0a3f7feeb3487d4bac22362fb7305ecfecfe8771eefa6aac27"
+    }
+  ],
+  "filter_graph": "[0:a]atrim=start=0.004666666666666667:end=0.252625,asetpts=PTS-STARTPTS,highpass=f=90,lowpass=f=9000,volume=-9.382679812948897dB,afade=t=in:d=0.002,afade=t=out:st=0.2419583333333333:d=0.006[out]",
+  "output_sha256": "449e5cbf5c1cf5cc3b1730dec09086b34e02e7f2e21fb7f47604250459833227",
+  "inspection": {
+    "duration": 0.2479375,
+    "sample_rate": 48000,
+    "channels": 1,
+    "peak_dbfs": -9.333810044555557,
+    "rms_dbfs": -26.176936489988435,
+    "clipped_samples": 0,
+    "onset_seconds": 0.008354166666666666,
+    "tail_silence_seconds": 0.004833333333333334
+  },
+  "format": "48 kHz mono PCM 24-bit WAV"
+}

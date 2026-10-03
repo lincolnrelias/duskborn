@@ -22,7 +22,7 @@ namespace InventorySystem.Core
     {
         public string Id { get; }
         public string DisplayName { get; }
-        public string Description { get; }
+        public virtual string Description { get; }
         public string IconId { get; }
         public abstract InventoryItemKind Kind { get; }
 

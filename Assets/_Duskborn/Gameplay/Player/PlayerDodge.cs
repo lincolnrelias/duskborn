@@ -65,7 +65,7 @@ namespace Duskborn.Gameplay.Player
 
         private void Update()
         {
-            if (!IsOwner) return;
+            if (!IsOwner || !_stats.IsAlive || !_cc.enabled) return;
 
             if (Input.GetKeyDown(KeyCode.LeftAlt) || Input.GetKeyDown(KeyCode.LeftControl))
                 TryDodge();

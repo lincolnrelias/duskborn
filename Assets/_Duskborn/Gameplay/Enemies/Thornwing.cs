@@ -31,6 +31,8 @@ namespace Duskborn.Gameplay.Enemies
         private float scanTime, dartCooldown, dartTime;
         private int sequence, side = 1;
         private bool rewarded;
+        private float normalAcceleration;
+        private bool normalAutoBraking;
         public ThornwingView View => view.Value;
         public double ActionAge => TimeManager != null ? TimeManager.TimePassed(View.StartTick) : 0;
         public override float MaxHP => scaledMaxHP.Value > 0 ? scaledMaxHP.Value : base.MaxHP;
@@ -39,6 +41,7 @@ namespace Duskborn.Gameplay.Enemies
         protected override void Awake()
         {
             base.Awake(); dartPath = new NavMeshPath(); clock.Changed += Publish; clock.Release += ReleaseShot;
+            normalAcceleration = Agent.acceleration; normalAutoBraking = Agent.autoBraking;
         }
         protected override void OnDestroy()
         {
@@ -62,6 +65,7 @@ namespace Duskborn.Gameplay.Enemies
         public override void ResetEnemy(Vector3 position)
         {
             base.ResetEnemy(position);
+            RestoreDartMovement();
             scaledMaxHP.Value = 0; rewarded = false; targetStats = null;
             scanTime = dartTime = 0; dartCooldown = .6f; side = 1;
             aim = position + transform.forward; destination = position; clock.Reset();
@@ -75,19 +79,22 @@ namespace Duskborn.Gameplay.Enemies
         protected override void Update()
         {
             if (!IsServerStarted || !IsSpawned || !IsAlive || !Agent.enabled || !Agent.isOnNavMesh) return;
+            if (TickIdleWhenNoPlayers()) { clock.Interrupt(); dartTime = 0; RestoreDartMovement(); return; }
             if (IsStaggered)
             {
-                clock.Interrupt(); TickStagger(); return;
+                clock.Interrupt(); dartTime = 0; RestoreDartMovement(); TickStagger(); return;
             }
+            // Dodge cooldown is wall time, including the shot's windup and recovery.
+            dartCooldown -= Time.deltaTime;
             var phase = clock.Phase;
             if (phase == ThornwingPhase.Windup && clock.Age < ThornwingClock.TrackingSeconds && TargetAlive())
                 aim = CurrentTarget.position + Vector3.up;
             if (phase == ThornwingPhase.Windup) Face(aim);
             clock.Tick(Time.deltaTime);
             if (clock.Phase != ThornwingPhase.Hunt) return;
-            scanTime -= Time.deltaTime; dartCooldown -= Time.deltaTime;
+            scanTime -= Time.deltaTime;
             if (scanTime <= 0 || !TargetAlive()) { AcquireTarget(); scanTime = .3f; }
-            if (!TargetAlive()) { Agent.ResetPath(); dartTime = 0; return; }
+            if (!TargetAlive()) { Agent.ResetPath(); dartTime = 0; RestoreDartMovement(); return; }
             Vector3 delta = CurrentTarget.position - transform.position;
             float elevation = delta.y; delta.y = 0; float distance = delta.magnitude;
             Face(CurrentTarget.position);
@@ -99,7 +106,7 @@ namespace Duskborn.Gameplay.Enemies
                 dartTime -= Time.deltaTime;
                 if (dartTime <= 0 || !Agent.hasPath || Agent.isPathStale ||
                     Agent.pathStatus != NavMeshPathStatus.PathComplete || Agent.remainingDistance < .2f)
-                { dartTime = 0; Agent.ResetPath(); Agent.speed = MoveSpeed; }
+                { dartTime = 0; Agent.ResetPath(); RestoreDartMovement(); }
                 else return;
             }
             if (dartCooldown <= 0 && distance <= ThornwingClock.Range && Mathf.Abs(elevation) <= ThornwingClock.MaxElevation)
@@ -115,9 +122,11 @@ namespace Duskborn.Gameplay.Enemies
                     if ((attempt & 1) != 0) choice = distance < 3f ? away * .9f - lateral * .5f : -choice;
                     if (attempt == 3 && distance < 3f) choice *= .6f;
                     if (!TryDartPath(transform.position + choice)) continue;
-                    Agent.isStopped = false; Agent.speed = MoveSpeed * 1.3f;
-                    if (Agent.SetPath(dartPath)) { dartCooldown = 2.4f; dartTime = .32f; return; }
-                    Agent.speed = MoveSpeed;
+                    Agent.isStopped = false; Agent.speed = MoveSpeed * 1.6f;
+                    // Braking over a one-metre route consumed most of the old short dash.
+                    Agent.autoBraking = false; Agent.acceleration = Mathf.Max(normalAcceleration, 60f);
+                    if (Agent.SetPath(dartPath)) { dartCooldown = 2.4f; dartTime = .4f; return; }
+                    RestoreDartMovement();
                 }
                 dartCooldown = .3f;
             }
@@ -149,7 +158,7 @@ namespace Duskborn.Gameplay.Enemies
             // Searching only at the old elevation rejects otherwise valid hillside dodges.
             if (!Physics.Raycast(candidate + Vector3.up * .8f, Vector3.down, out var support,
                     1.6f, solids, QueryTriggerInteraction.Ignore) ||
-                !NavMesh.SamplePosition(support.point, out var hit, .3f, filter) ||
+                !NavMesh.SamplePosition(support.point, out var hit, .45f, filter) ||
                 Mathf.Abs(hit.position.y - start.y) > .65f ||
                 (hit.position - start).sqrMagnitude > 2.56f ||
                 !NavMesh.CalculatePath(start, hit.position, filter, path) ||
@@ -170,7 +179,8 @@ namespace Duskborn.Gameplay.Enemies
                     // Require nearby support and clear the actual living capsule at every sample.
                     if (!Physics.Raycast(point + Vector3.up * .45f, Vector3.down, out var ground,
                         .9f, solids, QueryTriggerInteraction.Ignore) ||
-                        Mathf.Abs(ground.point.y - point.y) > .25f || ground.normal.y < .75f ||
+                        // Bakes normally sit above terrain. Do not loosen buried-navigation rejection.
+                        ground.point.y - point.y > .25f || point.y - ground.point.y > .35f || ground.normal.y < .75f ||
                         Physics.CheckCapsule(point + Vector3.up * .895f, point + Vector3.up * 1.405f,
                             .42f, solids, QueryTriggerInteraction.Ignore)) return false;
                 }
@@ -205,8 +215,13 @@ namespace Duskborn.Gameplay.Enemies
         {
             dartTime = 0;
             if (Agent != null && Agent.enabled && Agent.isOnNavMesh)
-            { Agent.ResetPath(); Agent.speed = MoveSpeed; Agent.isStopped = phase != ThornwingPhase.Hunt; }
+            { Agent.ResetPath(); RestoreDartMovement(); Agent.isStopped = phase != ThornwingPhase.Hunt; }
             view.Value = new ThornwingView { Phase = phase, Sequence = ++sequence, StartTick = TimeManager != null ? TimeManager.Tick : 0 };
+        }
+        private void RestoreDartMovement()
+        {
+            Agent.speed = MoveSpeed; Agent.acceleration = normalAcceleration;
+            Agent.autoBraking = normalAutoBraking;
         }
         protected override void Die()
         {

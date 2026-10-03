@@ -72,6 +72,7 @@ namespace Duskborn.Gameplay.Enemies
         {
             if (!IsServerStarted || !IsSpawned || !IsAlive) return;
             if (!Agent.enabled || !Agent.isOnNavMesh) return;
+            if (TickIdleWhenNoPlayers()) { _clock.Reset(); return; }
             // Movement uses the phase at frame start. A long windup frame cannot instantly hit.
             var phase = _clock.Phase;
             if (phase == BriarbackPhase.Charge) TickCharge();

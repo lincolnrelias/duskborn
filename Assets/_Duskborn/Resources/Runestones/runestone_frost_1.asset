@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4830ff8040ac474784de00cb3aee289, type: 3}
+  m_Name: runestone_frost_1
+  m_EditorClassIdentifier: Assembly-CSharp::InventorySystem.Data.MaterialDefinition
+  id: runestone_frost_1
+  displayName: Frost Runestone I
+  description: "Chilled: slows movement 5% per stack; 8 stacks freeze briefly. Applies 1 stacks per weapon hit; maximum 12 stacks. One etching per weapon."
+  icon: {fileID: 2800000, guid: 5b3672feaac74747b9f69e7147d34acd, type: 3}
+  dropPrefab: {fileID: 5752967656333843250, guid: e14a27b82f1640a4ba12891ec5418a01, type: 3}
+  rarity: 1
+  category: runestones

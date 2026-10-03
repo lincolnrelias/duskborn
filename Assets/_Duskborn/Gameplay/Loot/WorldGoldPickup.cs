@@ -14,15 +14,21 @@ namespace Duskborn.Gameplay.Loot
 
         private readonly SyncVar<int>  _amount      = new();
         private readonly SyncVar<bool> _collectible = new();
+        private readonly SyncVar<NetworkObject> _targetPlayer = new();
+        [SerializeField] private float lingerDuration = WorldItemPickup.DefaultLingerDuration;
         private bool _collected;
+        private bool _isFlying;
+        private float _spawnTime;
 
         public bool IsCollectible => _collectible.Value;
+        public NetworkObject TargetPlayer => _targetPlayer.Value;
 
         private uint _outlineMask;
         private uint _baseMask;
 
         private void Awake()
         {
+            _spawnTime = Time.time;
             if (outlineRenderer == null)
                 outlineRenderer = GetComponentInChildren<Renderer>();
 
@@ -35,17 +41,77 @@ namespace Duskborn.Gameplay.Loot
             }
         }
 
+        public override void OnStartClient()
+        {
+            base.OnStartClient();
+            var visuals = GetComponent<DroppedItemVisuals>();
+            if (visuals == null)
+                visuals = gameObject.AddComponent<DroppedItemVisuals>();
+            visuals.SetupGold();
+        }
+
         public override void OnStartServer()
         {
             base.OnStartServer();
-            Invoke(nameof(SetCollectible), 1f);
+            Invoke(nameof(SetCollectible), _targetPlayer.Value != null ? GetLingerDuration() : 1f);
         }
 
         private void SetCollectible() => _collectible.Value = true;
 
-        public void ServerInitialize(int amount)
+        private float GetLingerDuration() => WorldItemPickup.GetLingerDuration(NetworkObject, lingerDuration);
+
+        public void ServerInitialize(int amount, NetworkObject targetPlayer = null)
         {
             _amount.Value = amount;
+            _targetPlayer.Value = targetPlayer;
+            if (targetPlayer != null)
+            {
+                CancelInvoke(nameof(SetCollectible));
+                Invoke(nameof(SetCollectible), GetLingerDuration());
+            }
+        }
+
+        private void Update()
+        {
+            if (_collected) return;
+            var target = _targetPlayer.Value;
+            if (target == null || !target.gameObject.activeInHierarchy)
+            {
+                if (_isFlying)
+                {
+                    var body = GetComponent<Rigidbody>();
+                    if (body != null)
+                    {
+                        body.isKinematic = false;
+                        body.useGravity = true;
+                    }
+                    _isFlying = false;
+                }
+                return;
+            }
+
+            float flightDuration = Time.time - _spawnTime - GetLingerDuration();
+            if (flightDuration < 0f) return;
+
+            if (!_isFlying)
+            {
+                _isFlying = true;
+                var body = GetComponent<Rigidbody>();
+                if (body != null)
+                {
+                    body.linearVelocity = Vector3.zero;
+                    body.angularVelocity = Vector3.zero;
+                    body.isKinematic = true;
+                    body.useGravity = false;
+                }
+            }
+
+            Vector3 targetPosition = target.transform.position + Vector3.up * 0.85f;
+            transform.position = Vector3.MoveTowards(transform.position, targetPosition,
+                WorldItemPickup.GetFlightSpeed(flightDuration) * Time.deltaTime);
+
+            if (IsServerStarted && (transform.position - targetPosition).sqrMagnitude <= 1.2f * 1.2f)
+                ServerCollect(target.Owner);
         }
 
         public void ServerThrow(Vector3 impulse, float torque = 0f)

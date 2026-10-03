@@ -30,7 +30,7 @@ namespace Duskborn.Editor
             Check(prefab.GetComponentInChildren<Duskborn.Effects.WorldHealthBar>() != null, "Health UI missing.");
             Check(!new SerializedObject(prefab.GetComponent<NetworkTransform>()).FindProperty("_clientAuthoritative").boolValue, "Client controls movement.");
             var settings = new SerializedObject(enemy);
-            var swarmer = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Duskborn/Prefabs/Enemies/Swarmer.prefab");
+            var swarmer = AssetDatabase.LoadAssetAtPath<GameObject>(BramblekinBuilder.PrefabPath);
             Check(settings.FindProperty("deathDelay").floatValue ==
                 new SerializedObject(swarmer.GetComponent<EnemyBase>()).FindProperty("deathDelay").floatValue,
                 "Corpse lifetime differs from Swarmer standard.");
@@ -45,6 +45,14 @@ namespace Duskborn.Editor
             var presentation = new SerializedObject(prefab.GetComponent<ThornwingPresentation>());
             foreach (string field in new[] { "enemy", "visual", "leftWing", "rightWing", "eyes" })
                 Check(presentation.FindProperty(field).objectReferenceValue != null, "Missing presentation " + field);
+            var eyeRenderer = (Renderer)presentation.FindProperty("eyes").objectReferenceValue;
+            Check(eyeRenderer.sharedMaterial.IsKeywordEnabled("_EMISSION") &&
+                eyeRenderer.sharedMaterial.GetColor("_EmissionColor").maxColorComponent >= 2,
+                "Eyes must emit light independently of scene lighting.");
+            var flightMaterial = (Material)presentation.FindProperty("flightTrailMaterial").objectReferenceValue;
+            Check(flightMaterial != null && flightMaterial.renderQueue == 3000 &&
+                flightMaterial.GetFloat("_ZWrite") == 0 && flightMaterial.GetFloat("_DstBlend") == 1,
+                "Flight trails require a shared transparent additive material.");
             foreach (string cue in ThornwingBuilder.Cues)
             {
                 var clips = presentation.FindProperty(char.ToLowerInvariant(cue[0]) + cue.Substring(1) + "Clips");
@@ -107,6 +115,12 @@ namespace Duskborn.Editor
                 Check(buzz.priority == 128 && buzz.minDistance == 3 && buzz.maxDistance == 24,
                     "Flight buzz should remain local and below attack/voice priority.");
                 var flightPresentation = instance.GetComponent<ThornwingPresentation>();
+                var trails = instance.GetComponentsInChildren<TrailRenderer>();
+                Check(trails.Length == 2 && trails.All(t => t.sharedMaterial != null && t.time <= .3f &&
+                    !t.autodestruct && !t.emitting), "Bounded pooled flight trails missing.");
+                foreach (var trail in trails) { trail.emitting = true; trail.AddPosition(Vector3.zero); trail.AddPosition(Vector3.right); }
+                flightPresentation.ResetPresentation();
+                Check(trails.All(t => !t.emitting && t.positionCount == 0), "Pooled trails retained stale ribbons.");
                 typeof(ThornwingPresentation).GetMethod("UpdateBuzz", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(flightPresentation,null);
                 var selectedBuzz = buzz.clip; float selectedPitch = buzz.pitch;
                 Check(selectedBuzz != null && selectedBuzz.length == 4 && Mathf.Approximately(buzz.volume,.35f), "Buzz loop not configured.");
@@ -124,7 +138,8 @@ namespace Duskborn.Editor
                 Check(filters.Length == 6 && filters.Sum(f => f.sharedMesh.triangles.Length / 3) == 792, "Imported mesh budget mismatch.");
                 Check(filters.All(f => f.sharedMesh.uv.Length == f.sharedMesh.vertexCount), "Imported UVs missing.");
                 var bounds = new Bounds(visual.position, Vector3.zero);
-                foreach (var renderer in visual.GetComponentsInChildren<Renderer>()) bounds.Encapsulate(renderer.bounds);
+                // Ribbons intentionally extend beyond the anatomy and retain cached bounds after Clear.
+                foreach (var renderer in visual.GetComponentsInChildren<MeshRenderer>()) bounds.Encapsulate(renderer.bounds);
                 Check(bounds.size.x > 2 && bounds.size.x < 2.5f && bounds.min.y > .55f && bounds.max.y < 1.9f, "Hover/import dimensions: " + bounds);
                 var eyeRenderer = visual.GetComponentsInChildren<Renderer>().Single(r => r.name == "Eyes");
                 Check(eyeRenderer.transform.parent.name == "Head", "Eyes must follow the physical head.");
@@ -222,6 +237,10 @@ namespace Duskborn.Editor
                 }
                 Bake(0);
                 Check(Valid(Vector3.right),"Flat supported dart rejected.");
+                // The bake already sits above the collider; add a small terrain mismatch.
+                floor.transform.position += Vector3.down * .12f; Physics.SyncTransforms();
+                Check(Valid(Vector3.right), "Dart rejected normal navigation bake height tolerance.");
+                floor.transform.position += Vector3.up * .12f; Physics.SyncTransforms();
                 Check(!Valid(Vector3.right * 5),"Off-mesh/long dart accepted.");
                 blocker.transform.position = origin + new Vector3(.5f,1,0); blocker.SetActive(true); Physics.SyncTransforms();
                 Check(!Valid(Vector3.right),"Dart crossed a physical wall absent from the bake.");
@@ -296,7 +315,19 @@ namespace Duskborn.Editor
                 Check(!instance.GetComponent<Collider>().enabled && bodies.All(b => !b.isKinematic && b.GetComponent<Collider>().enabled), "Collision handover failed.");
                 Check(bodies.All(b => b.interpolation == RigidbodyInterpolation.Interpolate), "Corpse interpolation not enabled.");
                 ragdoll.EnableRagdoll(); // HP and impulse can arrive in either order; handover is idempotent.
-                ragdoll.ApplyImpulse(torso.position, new Vector3(.3f,.1f,.2f));
+                Physics.SyncTransforms(); physics.Simulate(.02f);
+                var beforeImpulse = bodies.Select(b => b.linearVelocity).ToArray();
+                ragdoll.ApplyImpulse(torso.worldCenterOfMass, Vector3.forward);
+                Physics.SyncTransforms(); physics.Simulate(.02f);
+                for (int i = 0; i < bodies.Length; i++)
+                    Check(bodies[i].linearVelocity.z > beforeImpulse[i].z + 1f,
+                        "Fatal-hit momentum did not reach " + bodies[i].name);
+                var firstImpulse = bodies.Select(b => b.linearVelocity).ToArray();
+                ragdoll.ApplyImpulse(torso.worldCenterOfMass, Vector3.forward);
+                physics.Simulate(.02f);
+                for (int i = 0; i < bodies.Length; i++)
+                    Check(bodies[i].linearVelocity.z < firstImpulse[i].z + .3f,
+                        "Fatal impulse replayed on " + bodies[i].name);
                 Physics.SyncTransforms();
                 for (int i = 0; i < 100; i++) physics.Simulate(.02f);
                 Check(torso.position.y < height - .3f && torso.position.y > -.2f, "Body did not fall onto the floor.");

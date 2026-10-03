@@ -1,0 +1,11 @@
+{
+  "name": "Bramblekin",
+  "height_m": 1.615,
+  "parts": 6,
+  "triangles": 2054,
+  "materials": 1,
+  "uv": "ten swatch atlas with per-face value grouping",
+  "facing": "Blender -Y, Unity +Z",
+  "animation": "runtime rigid-part procedural idle, walk, windup, swing, recovery; jointed ragdoll death",
+  "engine_grounding": "awaiting imported pose sampling and gameplay slope checks"
+}

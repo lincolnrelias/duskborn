@@ -558,22 +558,24 @@ MonoBehaviour:
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 65535
+  <PrefabId>k__BackingField: 30
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 13924125289621905989
   SceneId: 0
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
-    Rotation: {x: 0, y: 0, z: 0, w: 0}
-    Scale: {x: 0, y: 0, z: 0}
-    IsValid: 0
+    Rotation: {x: 0, y: 0, z: 0, w: 1}
+    Scale: {x: 1, y: 1, z: 1}
+    IsValid: 1
   <IsNested>k__BackingField: 0
   WasActiveDuringEdit: 0
   WasActiveDuringEdit_Set1: 1
   <ComponentIndex>k__BackingField: 0
   <PredictedSpawn>k__BackingField: {fileID: 0}
   <PredictedOwner>k__BackingField: {fileID: 0}
-  NetworkBehaviours: []
+  NetworkBehaviours:
+  - {fileID: 5881478743084594016}
+  - {fileID: 3311333347430092615}
   InitializedParentNetworkBehaviour: {fileID: 0}
   InitializedNestedNetworkObjects: []
   RuntimeParentNetworkBehaviour: {fileID: 0}
@@ -584,7 +586,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: 0
+  _initializedTimestamp: -8584105750096837617
 --- !u!114 &5881478743084594016
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -597,9 +599,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: FishNet.Runtime::FishNet.Component.Transforming.NetworkTransform
-  _componentIndexCache: 255
+  _componentIndexCache: 0
   _addedNetworkObject: {fileID: 4784779293470290242}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 4784779293470290242}
   _componentConfiguration: 0
   _synchronizeParent: 0
   _packing:
@@ -688,9 +690,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f975fa6e96032b499c0cbfdf59d9b41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Enemies.Thornwing
-  _componentIndexCache: 255
+  _componentIndexCache: 1
   _addedNetworkObject: {fileID: 4784779293470290242}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 4784779293470290242}
   _entity:
     maxHP: 24
     damage: 3
@@ -760,7 +762,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Enemies.EnemyRagdoll
   _animator: {fileID: 0}
-  _impulseScale: 0.8
+  _impulseScale: 2
+  _wholeBodyImpulseFraction: 0.8
+  _applyImpulseAtHitPoint: 1
   _settleDuration: 2
   _disableBoneCollidersWhileAlive: 1
   _restorePoseOnReset: 1
@@ -786,6 +790,7 @@ MonoBehaviour:
   leftWing: {fileID: 6130336886083959944}
   rightWing: {fileID: 7281218078151100441}
   eyes: {fileID: 2958913684044418540}
+  flightTrailMaterial: {fileID: 2100000, guid: 374160d75dc14875be46df6a3ffa1133, type: 2}
   windupClips:
   - {fileID: 8300000, guid: 91f061f89a6dc354b996af34bf7861f2, type: 3}
   - {fileID: 8300000, guid: 1c4bdf9fa9659a14b9658f244e0f9d71, type: 3}

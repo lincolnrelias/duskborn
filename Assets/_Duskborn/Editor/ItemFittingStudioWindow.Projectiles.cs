@@ -254,14 +254,6 @@ namespace Duskborn.Editor
                 }
             }
 
-            if (GUILayout.Button("Save Projectile Configuration"))
-            {
-                AssetDatabase.SaveAssetIfDirty(ranged);
-                if (ranged.projectile != null) AssetDatabase.SaveAssetIfDirty(ranged.projectile);
-                var playerPrefab = SpawnSettingsPrefab;
-                if (playerPrefab != null && PrefabUtility.IsPartOfPrefabAsset(playerPrefab))
-                    PrefabUtility.SavePrefabAsset(playerPrefab);
-            }
             EditorGUILayout.EndVertical();
 
             if (spawnEdited)
@@ -279,9 +271,19 @@ namespace Duskborn.Editor
             }
         }
 
-        private void OnProjectileUndoRedo()
+        private void SaveProjectileConfiguration()
         {
-            RebuildProjectilePreview();
+            if (!(selectedWeapon?.Behaviour is RangedWeaponBehaviour ranged)) return;
+            AssetDatabase.SaveAssetIfDirty(ranged);
+            if (ranged.projectile != null) AssetDatabase.SaveAssetIfDirty(ranged.projectile);
+            var playerPrefab = SpawnSettingsPrefab;
+            if (playerPrefab != null && PrefabUtility.IsPartOfPrefabAsset(playerPrefab))
+                PrefabUtility.SavePrefabAsset(playerPrefab);
+        }
+
+        private void OnCombatUndoRedo()
+        {
+            RefreshWeaponAndClips(resetOffsetsFromProfile: false);
             Repaint();
         }
 

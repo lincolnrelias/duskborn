@@ -369,6 +369,7 @@ namespace Duskborn.Gameplay.Player
                 Vector3 hitPoint = col.ClosestPoint(transform.position);
                 Vector3 hitDir   = (enemy.transform.position - transform.position).normalized;
                 enemy.TakeDamage(damage, isCrit, hitPoint, hitDir, _stats);
+                enemy.ApplyWeaponEtching(CurrentHitRune, _stats);
                 if (HitEnemiesCache.Count == 0) firstHitPos = enemy.transform.position;
                 HitEnemiesCache.Add(enemy);
                 DuskLog.Log(LogChannel.Combat, $"Cleave hit {col.name} — {damage:F1}{(isCrit ? " CRIT" : "")}");
@@ -423,6 +424,7 @@ namespace Duskborn.Gameplay.Player
                 Vector3 hitPoint = col.ClosestPoint(origin);
                 Vector3 hitDir   = (enemy.transform.position - transform.position).normalized;
                 enemy.TakeDamage(damage, isCrit, hitPoint, hitDir, _stats);
+                if (!unarmed) enemy.ApplyWeaponEtching(CurrentHitRune, _stats);
                 HitEnemiesCache.Add(enemy);
                 if (firstHitCol == null) firstHitCol = col;
                 DuskLog.Log(LogChannel.Combat, $"Hit {col.name} — {damage:F1}{(isCrit ? " CRIT" : "")}");

@@ -62,9 +62,9 @@ namespace Duskborn.Gameplay.Enemies
 
         // ── Stat accessors (delegate to EntityStats) ──────────────────────────
         public virtual float MaxHP  => _entity.MaxHP;
-        public float Damage         => _entity.Damage;
+        public float Damage         => _entity.Damage * Mathf.Max(.76f, 1f - .02f * RuneStacks(Duskborn.Gameplay.Enchanting.RuneKind.Radiance));
         public float AttackSpeed    => _entity.AttackSpeed;
-        public float MoveSpeed      => _entity.MoveSpeed;
+        public float MoveSpeed      => _entity.MoveSpeed * RuneMoveScale;
         public float CritChance     => _entity.CritChance;
         public float CritMultiplier => _entity.CritMultiplier;
 
@@ -113,6 +113,10 @@ namespace Duskborn.Gameplay.Enemies
         private Vector3  _lastDest;
         private float    _targetScanTimer;
         private bool     _warnedNoTarget;
+        private bool _idleRoaming;
+        private float _idleWait;
+        private Vector3 _idleCenter;
+        private NavMeshPath _idlePath;
         private bool     _warnedNoNavMesh;
 
         private readonly SyncVar<float> _currentHP = new();
@@ -158,6 +162,8 @@ namespace Duskborn.Gameplay.Enemies
                 _audioFeedback = gameObject.AddComponent<EnemyAudioFeedback>();
 
             SpawnWeaponVisual();
+            if (GetComponent<Duskborn.Effects.EnemyRuneVisuals>() == null)
+                gameObject.AddComponent<Duskborn.Effects.EnemyRuneVisuals>();
         }
 
         protected virtual bool UseGenericAudio => true;
@@ -182,6 +188,8 @@ namespace Duskborn.Gameplay.Enemies
 
             if (!IsServerStarted || !IsSpawned) return;
             if (!IsAlive) return;
+
+            if (TickIdleWhenNoPlayers()) return;
 
             if (_staggerTimer > 0f)
             {
@@ -249,6 +257,68 @@ namespace Duskborn.Gameplay.Enemies
         }
 
         // ── AI ────────────────────────────────────────────────────────────────
+
+        // Stop committed combat when nobody alive remains; roam around the disengage point.
+        // Shared by ground and flying variants, with bounded reachable paths and idle pauses.
+        protected bool TickIdleWhenNoPlayers()
+        {
+            TickRuneEffects();
+            if (!IsAlive) return true;
+            if (Agent != null && Agent.isActiveAndEnabled && Agent.isOnNavMesh) Agent.speed = MoveSpeed;
+            if (RuneFrozen)
+            {
+                if (Agent != null && Agent.isActiveAndEnabled && Agent.isOnNavMesh) Agent.ResetPath();
+                _weaponActionPlayer?.CancelAction();
+                return true;
+            }
+            if (PlayerRegistry.AliveCount > 0 &&
+                (GameStateManager.Instance == null || GameStateManager.Instance.CurrentState != GameState.GameOver))
+            {
+                if (_idleRoaming)
+                {
+                    _idleRoaming = false;
+                    _targetScanTimer = 0f;
+                    _lastDest = new Vector3(float.PositiveInfinity, 0, 0);
+                    if (Agent != null && Agent.isActiveAndEnabled && Agent.isOnNavMesh)
+                    { Agent.ResetPath(); Agent.speed = MoveSpeed; }
+                }
+                return false;
+            }
+            CurrentTarget = null;
+            _currentTargetStats = null;
+            if (!_idleRoaming)
+            {
+                _idleRoaming = true;
+                _idleCenter = transform.position;
+                _idleWait = UnityEngine.Random.Range(.5f, 2f);
+                _weaponActionPlayer?.CancelAction();
+                _staggerTimer = _knockbackTimer = 0f;
+                if (Agent != null && Agent.isActiveAndEnabled && Agent.isOnNavMesh) Agent.ResetPath();
+            }
+            if (Agent == null || !Agent.isActiveAndEnabled || !Agent.isOnNavMesh) return true;
+            Agent.isStopped = false;
+            Agent.speed = MoveSpeed * .35f;
+            if (Agent.pathPending) return true;
+            if (Agent.hasPath && Agent.pathStatus == NavMeshPathStatus.PathComplete &&
+                Agent.remainingDistance > Mathf.Max(.25f, Agent.stoppingDistance)) return true;
+            Agent.ResetPath();
+            _idleWait -= Time.deltaTime;
+            if (_idleWait > 0) return true;
+            _idleWait = UnityEngine.Random.Range(2f, 5f);
+            if (_idlePath == null) _idlePath = new NavMeshPath();
+            for (int attempt = 0; attempt < 4; attempt++)
+            {
+                Vector2 offset = UnityEngine.Random.insideUnitCircle * 6f;
+                Vector3 candidate = _idleCenter + new Vector3(offset.x, 0, offset.y);
+                if (!NavMesh.SamplePosition(candidate, out var hit, 2f, Agent.areaMask)) continue;
+                if ((hit.position - _idleCenter).sqrMagnitude > 64f) continue;
+                if (!Agent.CalculatePath(hit.position, _idlePath) ||
+                    _idlePath.status != NavMeshPathStatus.PathComplete) continue;
+                Agent.SetPath(_idlePath);
+                break;
+            }
+            return true;
+        }
 
         protected virtual void AcquireTarget()
         {
@@ -369,6 +439,9 @@ namespace Duskborn.Gameplay.Enemies
             _deathHitDirection = hitDirection.normalized;
             TakeDamage(amount, isCrit, attacker);
             if (IsServerStarted && IsAlive) ApplyKnockback(hitDirection);
+            // A later undirected hit must not inherit this contact, including after pooling.
+            _deathHitPoint = Vector3.zero;
+            _deathHitDirection = Vector3.zero;
         }
 
         private void ApplyKnockback(Vector3 direction)
@@ -404,7 +477,7 @@ namespace Duskborn.Gameplay.Enemies
             if (!IsServerStarted) return;
             if (!IsAlive) return;
             if (attacker != null) _lastAttacker = attacker;
-            float actual = amount * IncomingDamageMultiplier;
+            float actual = amount * IncomingDamageMultiplier * (1f + .03f * RuneStacks(Duskborn.Gameplay.Enchanting.RuneKind.Hex));
             _currentHP.Value = Mathf.Max(0f, _currentHP.Value - actual);
             RpcShowDamageNumber(transform.position, actual, isCrit);
             if (_currentHP.Value <= 0f) Die();
@@ -435,6 +508,7 @@ namespace Duskborn.Gameplay.Enemies
 
         protected virtual void Die()
         {
+            ResetRuneEffects();
             SetOutline(false);
             Agent.enabled = false;
             var col = GetComponent<Collider>();
@@ -461,7 +535,7 @@ namespace Duskborn.Gameplay.Enemies
         {
             if (_animator == null || !IsAlive) return;
 
-            Vector3 worldVel = IsServerStarted && Agent != null && Agent.isOnNavMesh
+            Vector3 worldVel = IsServerStarted && Agent != null && Agent.isActiveAndEnabled && Agent.isOnNavMesh
                 ? Agent.velocity
                 : (transform.position - _prevPosition) / Mathf.Max(Time.deltaTime, 0.0001f);
 
@@ -503,13 +577,18 @@ namespace Duskborn.Gameplay.Enemies
 
         public virtual void ResetEnemy(Vector3 position)
         {
+            ResetRuneEffects();
             // FishNet enables pooled objects before this reset. Keep listeners that
             // component OnEnable callbacks have just registered (including loot).
+            _idleRoaming = false;
+            _idleWait = 0f;
             CurrentTarget       = null;
             _currentTargetStats = null;
             _lastAttacker       = null;
             MeleeCooldown       = 0f;
             _knockbackTimer     = 0f;
+            _deathHitPoint      = Vector3.zero;
+            _deathHitDirection  = Vector3.zero;
             _staggerTimer       = 0f;
             _targetScanTimer    = 0f;
             _lastDest           = Vector3.zero;
@@ -530,6 +609,7 @@ namespace Duskborn.Gameplay.Enemies
             if (Agent != null)
             {
                 Agent.enabled = true;
+                Agent.speed = MoveSpeed;
                 if (Agent.isOnNavMesh) Agent.Warp(position);
             }
             var col = GetComponent<Collider>();

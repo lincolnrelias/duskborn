@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: weapon_blood_blade
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Equipment.WeaponDefinition
   id: weapon_blood_blade
-  displayName: "Bloodthirsty Blade"
-  description: "Ritual weapon forged from bones and crystal powder. Steals life with each strike, but drains the user's maximum vitality."
+  displayName: Bloodthirsty Blade
+  description: Ritual weapon forged from bones and crystal powder. Steals life with
+    each strike, but drains the user's maximum vitality.
   icon: {fileID: 2800000, guid: 29c2805d7ab641e8b3ca9b5ff758c926, type: 3}
   dropPrefab: {fileID: 0}
   rarity: 0
@@ -32,26 +33,28 @@ MonoBehaviour:
   typeModifiers: []
   behaviour: {fileID: 11400000, guid: c5a595ad70d17be40826423d131de2dd, type: 2}
   actions:
-  - BaseSpeed: 1
+  - BowAnimations: {fileID: 0}
+    BaseSpeed: 1
     PreserveLocomotion: 1
+    MaskOverride: {fileID: 31900000, guid: f7629346186289b4bb8d23fe8908bee0, type: 2}
     ComboChain: 1
     ComboResetTime: 0.8
     Entries:
-    - Clip: {fileID: 7400000, guid: 3558db8e6c045c3418d8e7593f8a88de, type: 3}
+    - Clip: {fileID: 7400000, guid: 013e0fecc9b81994cb5ada04e2e1cb91, type: 3}
       DamageMultiplier: 1
       Events:
       - Type: 0
-        NormalizedTime: 0.25
-    - Clip: {fileID: 7400000, guid: f9808de8e12794d468604280ad76ca36, type: 3}
+        NormalizedTime: 0.216
+    - Clip: {fileID: 7400000, guid: c9a2ed53d56d62740be43c06c115f8d0, type: 3}
       DamageMultiplier: 1
       Events:
       - Type: 0
-        NormalizedTime: 0.25
-    - Clip: {fileID: 7400000, guid: 210680178f4ec7045b47ffeeb53bc31d, type: 3}
+        NormalizedTime: 0.328
+    - Clip: {fileID: 7400000, guid: 5f6b60d7cf0e2c549923ee56aa6d307a, type: 3}
       DamageMultiplier: 1
       Events:
       - Type: 0
-        NormalizedTime: 0.25
+        NormalizedTime: 0.49
     Clips: []
     Events: []
     ComboDamageMultipliers: []
@@ -60,3 +63,4 @@ MonoBehaviour:
   audioProfile: {fileID: 11400000, guid: 658caad55867c5d41829bba0cc8ead5b, type: 2}
   effectProfile: {fileID: 11400000, guid: 4365837daea7cab4ebadeab220765a1c, type: 2}
   attachmentProfile: {fileID: 11400000, guid: 9f2df6ed45ef22d46836158bb96516b6, type: 2}
+  actionMask: {fileID: 31900000, guid: f7629346186289b4bb8d23fe8908bee0, type: 2}

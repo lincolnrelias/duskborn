@@ -1,0 +1,31 @@
+{
+  "recipe": {
+    "brief": "Small bare three-toed feet on grass from separate recorded takes.",
+    "source_file": "footstep_grass_000.ogg",
+    "take": 1
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Bramblekin\\v001\\source\\footstep_grass_000.ogg",
+    "-filter_complex",
+    "[0:a]atrim=start=0:duration=0.3,asetpts=PTS-STARTPTS,volume=-9dB[a];[a]apad,atrim=duration=0.3,afade=t=in:d=0.004,afade=t=out:st=0.26:d=0.04[out]",
+    "-map",
+    "[out]"
+  ],
+  "output": {
+    "file": "candidates\\BK_Step_01.wav",
+    "sha256": "a9a3171aa27f6b33c0af35552cc868e8a0afd265da4721d309bd9e72a4ff44b9"
+  },
+  "inspection": {
+    "duration_seconds": 0.3,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -20.24373184402556,
+    "rms_dbfs": -41.34244658955173,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.00020833333333333335,
+    "tail_below_minus50db_seconds": 0.20560416666666667
+  }
+}

@@ -93,7 +93,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584107125629324629
+  _initializedTimestamp: -8584105750096837617
 --- !u!195 &8885762537715847345
 NavMeshAgent:
   m_ObjectHideFlags: 0

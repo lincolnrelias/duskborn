@@ -25,6 +25,10 @@ namespace Duskborn.Gameplay.Equipment
         private WeaponItem  _activeWeapon;  // currently applied and held weapon
         private WeaponItem  _pendingWeapon; // waiting for debounce to commit
         private float       _debounceTimer;
+        private string _publishedRuneWeapon;
+        private int _publishedRune = -1;
+        private Duskborn.Effects.RuneAura _runeAura;
+        private Bounds _runeAuraBounds;
         private GameObject  _heldInstance;  // spawned weapon prefab under holdPoint
 
         private void Start()
@@ -37,7 +41,23 @@ namespace Duskborn.Gameplay.Equipment
         private void Update()
         {
             var combat = GetComponent<PlayerCombat>();
-            if (combat != null && !combat.IsOwner) return;
+            if (combat != null && !combat.IsOwner)
+            {
+                if (!string.IsNullOrEmpty(combat.RuneWeaponId))
+                    ShowObservedWeapon(PlayerCombat.FindRuneWeapon(combat.RuneWeaponId));
+                else if (_activeWeapon != null) { _pendingWeapon = null; CommitWeaponSwap(); }
+                if (_activeWeapon != null) _activeWeapon.Etching = combat.EquippedRune;
+                RefreshRuneAura();
+                return;
+            }
+            RefreshRuneAura();
+            if (combat != null && combat.IsClientStarted &&
+                (_publishedRuneWeapon != (_activeWeapon?.Id ?? "") || _publishedRune != (_activeWeapon?.Etching.Packed ?? 0)))
+            {
+                _publishedRuneWeapon = _activeWeapon?.Id ?? "";
+                _publishedRune = _activeWeapon?.Etching.Packed ?? 0;
+                combat.PublishRuneEquipment(_activeWeapon);
+            }
             if (!_subscribed) TryCacheActionBar();
 
             if (_debounceTimer > 0f)
@@ -98,9 +118,23 @@ namespace Duskborn.Gameplay.Equipment
                     : $"Weapon deselect pending ({DebounceSeconds}s)");
         }
 
+        private void RefreshRuneAura()
+        {
+            if (_heldInstance == null) return;
+            var rune = _activeWeapon?.Etching ?? default;
+            if (_runeAura == null)
+            {
+                if (!rune.IsValid) return;
+                _runeAura = _heldInstance.AddComponent<Duskborn.Effects.RuneAura>();
+                _runeAuraBounds = Duskborn.Effects.RuneAura.LocalBounds(_heldInstance.transform);
+            }
+            _runeAura.Configure(rune.kind, rune.level, _runeAuraBounds);
+        }
+
         private void CommitWeaponSwap()
         {
             _activeWeapon = _pendingWeapon;
+            _runeAura = null;
             GetComponent<WeaponActionPlayer>()?.SetEquippedWeapon(_activeWeapon);
 
             if (_heldInstance != null)

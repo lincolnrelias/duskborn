@@ -9,6 +9,9 @@ namespace Duskborn.Gameplay.Enemies
         [SerializeField] private Thornwing enemy;
         [SerializeField] private Transform visual, leftWing, rightWing;
         [SerializeField] private Renderer eyes;
+        [SerializeField] private Material flightTrailMaterial;
+        private TrailRenderer[] flightTrails;
+        private Vector3 previousTrailPosition;
         [SerializeField] private AudioClip[] windupClips, spitClips, hurtClips, deathClips, flutterClips, buzzClips;
         private Quaternion leftRest, rightRest;
         private AudioSource actionSource, voiceSource, flutterSource, buzzSource;
@@ -28,6 +31,7 @@ namespace Duskborn.Gameplay.Enemies
             buzzSource = Source(); buzzSource.loop = true; buzzSource.priority = 128;
             buzzSource.minDistance = 3; buzzSource.maxDistance = 24;
             ragdoll = GetComponent<EnemyRagdoll>();
+            flightTrails = new[] { CreateFlightTrail(leftWing), CreateFlightTrail(rightWing) };
             enemy.OnHealthChanged += HealthChanged;
         }
         private void OnDestroy() { if (enemy != null) enemy.OnHealthChanged -= HealthChanged; }
@@ -41,11 +45,14 @@ namespace Duskborn.Gameplay.Enemies
         private void OnEnable() => ResetPresentation();
         private void OnDisable()
         {
+            ClearFlightTrails();
             actionSource?.Stop(); voiceSource?.Stop(); flutterSource?.Stop();
             buzzSource?.Stop();
         }
         public void ResetPresentation()
         {
+            ClearFlightTrails();
+            previousTrailPosition = transform.position;
             sequence = -1; previousHP = enemy != null ? enemy.CurrentHP : 0;
             deathAge = -1; flutterAt = Time.time + .3f; shotAt = hurtAt = -100;
             deathCuePlayed = false;
@@ -109,6 +116,7 @@ namespace Duskborn.Gameplay.Enemies
             // Death impulse RPC may beat health replication. Stop pose writes in either order.
             if (!enemy.IsAlive || (ragdoll != null && ragdoll.IsRagdoll))
             {
+                if (flightTrails != null) foreach (var trail in flightTrails) trail.emitting = false;
                 buzzSource.Stop();
                 if (deathAge < 0)
                 {
@@ -138,10 +146,43 @@ namespace Duskborn.Gameplay.Enemies
             // Wing rotation supplies flight motion without moving the body off that anchor.
             visual.localPosition = Vector3.up * Thornwing.HoverHeight;
             visual.localRotation = Quaternion.identity;
-            float glow = warning ? 1 + 3 * Mathf.Clamp01(age / ThornwingClock.WindupSeconds) : .5f;
+            float glow = warning ? 2 + 4 * Mathf.Clamp01(age / ThornwingClock.WindupSeconds) : 2f;
             block.SetColor(Emission, new Color(1, .3f, .015f) * glow); eyes.SetPropertyBlock(block);
+            UpdateFlightTrails();
             if (!warning && Time.time >= flutterAt)
             { flutterAt = Time.time + 1.1f + Random.value * .6f; Play(flutterSource, Pick(flutterClips, ref lastFlutter), .3f); }
+        }
+        private TrailRenderer CreateFlightTrail(Transform wing)
+        {
+            var tip = new GameObject("FlightTrail"); tip.layer = gameObject.layer;
+            tip.transform.SetParent(wing, false);
+            var bounds = wing.GetComponent<MeshFilter>().sharedMesh.bounds;
+            // Choose the outer edge of each imported wing in its own mesh units.
+            Vector3 localTip = bounds.center;
+            localTip.x = Mathf.Abs(bounds.min.x) > Mathf.Abs(bounds.max.x) ? bounds.min.x : bounds.max.x;
+            tip.transform.localPosition = localTip;
+            var trail = tip.AddComponent<TrailRenderer>();
+            trail.sharedMaterial = flightTrailMaterial; trail.time = .28f;
+            trail.minVertexDistance = .07f; trail.startWidth = .075f; trail.endWidth = 0;
+            trail.startColor = new Color(1f, .5f, .08f, .65f);
+            trail.endColor = new Color(1f, .25f, .015f, 0);
+            trail.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            trail.receiveShadows = false; trail.autodestruct = false; trail.emitting = false;
+            return trail;
+        }
+        private void ClearFlightTrails()
+        {
+            if (flightTrails == null) return;
+            foreach (var trail in flightTrails) { trail.emitting = false; trail.Clear(); }
+        }
+        private void UpdateFlightTrails()
+        {
+            Vector3 position = transform.position;
+            float distance = Vector3.Distance(previousTrailPosition, position);
+            if (distance > 3f) ClearFlightTrails(); // Network teleports/reuse must not draw long ribbons.
+            bool moving = distance > .002f && distance <= 3f;
+            foreach (var trail in flightTrails) trail.emitting = moving;
+            previousTrailPosition = position;
         }
         private void UpdateBuzz()
         {

@@ -23,12 +23,14 @@ MonoBehaviour:
     quantity: 50
   - item: {fileID: 11400000, guid: ac75ce17d5fdcaf4d956e4f0e2ed6c88, type: 2}
     quantity: 20
+  - item: {fileID: 11400000, guid: a45a4b592eb540cab4344d69a2aee755, type: 2}
+    quantity: 1
   actionBarItems:
   - item: {fileID: 11400000, guid: 601f53b2da268ec439655f119087feb4, type: 2}
     quantity: 1
   - item: {fileID: 11400000, guid: 0aa265baf59b4068bf539eadb27c59f5, type: 2}
     quantity: 1
-  - item: {fileID: 11400000, guid: 2b976e74834525a448b6f02827781567, type: 2}
+  - item: {fileID: 11400000, guid: 38c49da4cbdb57540bb1bac95f0aecf3, type: 2}
     quantity: 1
   - item: {fileID: 11400000, guid: c4c56a0fcf2437566ec0298d24e48c13, type: 2}
     quantity: 1

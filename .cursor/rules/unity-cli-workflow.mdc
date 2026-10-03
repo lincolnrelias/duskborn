@@ -9,7 +9,7 @@ alwaysApply: true
 - Read `Docs/unity-cli.md` before changing the wrapper or its C# entry points.
 - Prefer `.\Tools\unity.ps1 all` after gameplay changes; use `compile` for a fast gate.
 - Keep Unity work non-interactive: never open/control the Editor UI or enter Play Mode.
-- Do not run the CLI while the user has this project open in Unity.
+- Source work and offline validation may proceed while Unity is open. For batch validation, use an isolated copy if Unity rejects a second process holding the same project; do not require the user to close it.
 - Treat `Logs/UnityCli` and `Builds` as generated output, not source files.
 - Report visual behavior as unverified unless a dedicated automated artifact proves it.
 - Always clear generated terrain before committing (`.\Tools\unity.ps1 clear-terrain` and delete leftover `NavMesh-TerrainManager*.asset` files).

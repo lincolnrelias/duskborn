@@ -17,7 +17,29 @@ namespace Duskborn.Gameplay.Player
         private MaterialPropertyBlock _block;
         private static readonly int BaseColor = Shader.PropertyToID("_BaseColor");
 
-        private void Awake() => Apply(skin, hair, shirt, trousers, showHair);
+        private void Awake()
+        {
+            EnsureAnimationEventReceiver(GetComponent<Animator>());
+            Apply(skin, hair, shirt, trousers, showHair);
+        }
+
+        // AnimationEvents are dispatched on the Animator GameObject, not the player root.
+        // Keep the receiver on this existing visual component so it is available even when
+        // Unity has not discovered newly added scripts during an incremental compilation.
+        public static IronrootAppearance EnsureAnimationEventReceiver(Animator animator)
+        {
+            if (animator == null) return null;
+            var receiver = animator.GetComponent<IronrootAppearance>();
+            if (receiver == null) receiver = animator.gameObject.AddComponent<IronrootAppearance>();
+            receiver.enabled = true;
+            return receiver;
+        }
+
+        // Vendor demo-controller callbacks are acknowledged here. WeaponActionData's
+        // configured impact timeline owns damage, projectile release and action completion.
+        public void OnAttack(AnimationEvent animationEvent) { }
+        public void OnShoot(AnimationEvent animationEvent) { }
+        public void OnFinishAttack(AnimationEvent animationEvent) { }
 
         // Preserve existing equipment profiles authored against the old character's bone axes.
         public static Transform EquipmentBone(Animator animator, HumanBodyBones bone)

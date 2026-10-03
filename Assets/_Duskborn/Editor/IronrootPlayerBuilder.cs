@@ -115,6 +115,8 @@ namespace Duskborn.Editor
                 if (old.name == "IronrootVisual" &&
                     AssetDatabase.GetAssetPath(PrefabUtility.GetCorrespondingObjectFromSource(old.gameObject)) == ModelPath)
                 {
+                    Duskborn.Gameplay.Player.IronrootAppearance.EnsureAnimationEventReceiver(old);
+                    PrefabUtility.SaveAsPrefabAsset(root, path);
                     Debug.Log("[Ironroot] Refreshed model in existing visual: " + path);
                     return;
                 }
@@ -131,6 +133,7 @@ namespace Duskborn.Editor
                 visual.name = "IronrootVisual";
                 var animator = visual.GetComponent<Animator>();
                 if (animator == null) throw new InvalidOperationException("Imported humanoid has no Animator.");
+                Duskborn.Gameplay.Player.IronrootAppearance.EnsureAnimationEventReceiver(animator);
                 animator.runtimeAnimatorController = controller;
                 animator.applyRootMotion = false;
                 animator.cullingMode = old.cullingMode;

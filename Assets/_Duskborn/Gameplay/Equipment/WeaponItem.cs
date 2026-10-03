@@ -28,6 +28,10 @@ namespace Duskborn.Gameplay.Equipment
         public ItemAttachmentProfile      AttachmentProfile { get; }
         public AvatarMask                 ActionMask        { get; }
 
+        public Duskborn.Gameplay.Enchanting.WeaponEtching Etching { get; set; }
+        public string EtchingDescription => Etching.IsValid
+            ? $"{Etching}: +{Etching.StacksPerHit} stacks per hit. {Duskborn.Gameplay.Enchanting.RuneCatalog.Effect(Etching.kind)}" : "Unetched";
+        public override string Description => base.Description + "\n" + EtchingDescription;
         public override InventoryItemKind Kind => InventoryItemKind.Equipment;
 
         public WeaponItem(string id, string displayName, string description,

@@ -39,7 +39,7 @@ namespace Duskborn.Editor
             var entries = prop.FindPropertyRelative("Entries");
             bool combo  = prop.FindPropertyRelative("ComboChain").boolValue;
 
-            float h = (lh + pad)                    // Speed
+            float h = (lh + pad) * 2f               // Speed + mask override
                     + (lh + pad)                    // Preserve Locomotion
                     + (lh + pad)                    // Combo toggle
                     + (combo ? lh + pad : 0f)       // Combo reset time
@@ -98,6 +98,9 @@ namespace Duskborn.Editor
                     new GUIContent("Combo Reset Time",
                         "Seconds after an attack ends before the chain resets to step 1."));
             }
+
+            r = Row(ref pos, lh, pad);
+            EditorGUI.PropertyField(r, prop.FindPropertyRelative("MaskOverride"), new GUIContent("Action Mask"));
 
             // ── Clips header + add button ─────────────────────────────────────
             r = Row(ref pos, lh, pad);

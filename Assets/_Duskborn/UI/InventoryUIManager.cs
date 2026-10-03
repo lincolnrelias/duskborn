@@ -46,6 +46,8 @@ namespace Duskborn.UI
         private void Awake()
         {
             Instance = this;
+            foreach (var def in Resources.LoadAll<MaterialDefinition>("Runestones"))
+                if (def != null && !string.IsNullOrEmpty(def.Id)) _defById[def.Id] = def;
             foreach (var def in Resources.LoadAll<MaterialDefinition>("Bosses/Items"))
                 if (def != null && !string.IsNullOrEmpty(def.Id)) _defById[def.Id] = def;
             if (resourceDefinitions != null)

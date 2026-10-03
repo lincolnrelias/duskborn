@@ -1,0 +1,33 @@
+{
+  "recipe": {
+    "brief": "Small body contact, bark and leather crumpling; physical foley, not a voice.",
+    "source_file": "impactPunch_medium_000.ogg",
+    "take": 1
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Bramblekin\\v001\\source\\impactPunch_medium_000.ogg",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Bramblekin\\v001\\source\\cloth1.ogg",
+    "-filter_complex",
+    "[0:a]atrim=start=0:duration=0.32,asetpts=PTS-STARTPTS,volume=-9dB[a];[1:a]atrim=duration=0.32,asetpts=PTS-STARTPTS,volume=-19dB[b];[a][b]amix=inputs=2:normalize=0:duration=longest[m];[m]apad,atrim=duration=0.32,afade=t=in:d=0.004,afade=t=out:st=0.28:d=0.04[out]",
+    "-map",
+    "[out]"
+  ],
+  "output": {
+    "file": "candidates\\BK_Hurt_01.wav",
+    "sha256": "a7c2211ea1073e84c4826d23b574b7f5c5fb2fdd211d610dd623493b45e06fed"
+  },
+  "inspection": {
+    "duration_seconds": 0.32,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -10.114952608407485,
+    "rms_dbfs": -24.82988952214236,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.0013333333333333333,
+    "tail_below_minus50db_seconds": 0.028916666666666667
+  }
+}

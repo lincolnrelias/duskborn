@@ -177,7 +177,7 @@ p=ROOT/'Assets/_Duskborn/Resources/Crafting/Recipe_SimpleBow.asset'
 p.write_text(re.sub(r'  outputItem: .*',f'  outputItem: {ref(bow)}',p.read_text()))
 # A separate archer test prefab; normal Swarmer waves remain as configured.
 path='Assets/_Duskborn/Prefabs/Enemies/ArcherTest.prefab'
-text=(ROOT/'Assets/_Duskborn/Prefabs/Enemies/Swarmer.prefab').read_text().replace('m_Name: Swarmer','m_Name: ArcherTest',1)
+text=(ROOT/'Assets/_Duskborn/Prefabs/Enemies/ArcherTest.prefab').read_text()
 text=re.sub(r'  weapon: .*',f'  weapon: {ref(bow)}',text)
 text=re.sub(r'  <AssetPathHash>k__BackingField: \d+','  <AssetPathHash>k__BackingField: '+str(int(guid(path)[:15],16)),text)
 write(path,text)

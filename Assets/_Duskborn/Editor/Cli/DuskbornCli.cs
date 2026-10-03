@@ -113,6 +113,21 @@ namespace Duskborn.Editor
             Debug.Log("[DuskbornCli] Thornwing build succeeded.");
         }
 
+        public static void BuildBramblekin()
+        {
+            EnsureCompilationSucceeded();
+            var errors = new List<string>();
+            Application.LogCallback capture = (message, stack, type) =>
+            {
+                if (type == LogType.Error || type == LogType.Exception || type == LogType.Assert) errors.Add(message);
+            };
+            Application.logMessageReceived += capture;
+            try { BramblekinBuilder.Build(); }
+            finally { Application.logMessageReceived -= capture; }
+            if (errors.Count > 0) throw new InvalidOperationException("Bramblekin build logged errors:\n" + string.Join("\n", errors));
+            Debug.Log("[DuskbornCli] Bramblekin build succeeded.");
+        }
+
         public static void BuildBriarback()
         {
             EnsureCompilationSucceeded();
@@ -209,6 +224,7 @@ namespace Duskborn.Editor
 
             var suites = new[]
             {
+                new TestSuite(nameof(ArcaneTableTests), ArcaneTableTests.RunAllTests),
                 new TestSuite(nameof(RangedCombatTests), RangedCombatTests.RunAllTests),
                 new TestSuite(nameof(FreeMovingCombatTests), FreeMovingCombatTests.RunAllTests),
                 new TestSuite(nameof(AudioDatabaseTests), AudioDatabaseTests.RunAllTests),
@@ -221,6 +237,7 @@ namespace Duskborn.Editor
                 new TestSuite(nameof(HollowWardenTests), HollowWardenTests.RunAllTests),
                 new TestSuite(nameof(BriarbackTests), BriarbackTests.RunAllTests),
                 new TestSuite(nameof(ThornwingTests), ThornwingTests.RunAllTests),
+                new TestSuite(nameof(BramblekinTests), BramblekinTests.RunAllTests),
                 new TestSuite(nameof(ItemTierDropTests), ItemTierDropTests.RunAllTests),
                 new TestSuite(nameof(ResourceGatheringTests), ResourceGatheringTests.RunAllTests),
                 new TestSuite(nameof(SpatialOccupancyMapTests), SpatialOccupancyMapTests.RunAllTests),

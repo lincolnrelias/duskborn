@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30f025e9978c4c2ba32a4b46bfece54f, type: 3}
+  m_Name: Recipe_runestone_frost_2
+  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
+  recipeId: Recipe_runestone_frost_2
+  recipeName: Frost Runestone II
+  description: "Chilled: slows movement 5% per stack; 8 stacks freeze briefly. Applies 2 stacks per weapon hit; maximum 12 stacks. One etching per weapon."
+  category: Runestones
+  tier: 2
+  requiredStation: 3
+  isAlwaysDiscovered: 1
+  outputItem: {fileID: 11400000, guid: ee8894e4cd8849e7833f823c6ab37f44, type: 2}
+  outputAmount: 1
+  ingredients:
+  - material: {fileID: 11400000, guid: 2a0acc988d7bb054889caff0a3472d3d, type: 2}
+    amount: 6
+  - material: {fileID: 11400000, guid: a92f16bb4ae5a6248b808453aecb3cf2, type: 2}
+    amount: 4
+  - material: {fileID: 11400000, guid: ac75ce17d5fdcaf4d956e4f0e2ed6c88, type: 2}
+    amount: 6
+  - material: {fileID: 11400000, guid: a3e031a0d03acc5498fc981e1a8b3200, type: 2}
+    amount: 2
+  fuelIngredients: []
+  processingSeconds: 0

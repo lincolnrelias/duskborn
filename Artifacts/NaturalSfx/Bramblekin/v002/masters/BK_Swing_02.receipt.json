@@ -1,0 +1,22 @@
+{
+  "cue": "BK_Swing_02",
+  "sources": [
+    {
+      "file": "cloth2.ogg",
+      "sha256": "8a7451193c38bc05483aec25dd193e163a15d44cf7fff04ac7912573231b0201"
+    }
+  ],
+  "filter_graph": "[0:a]atempo=1.7,atrim=duration=0.16,asetpts=PTS-STARTPTS,highpass=f=140,volume=-5dB,afade=t=in:d=0.002,afade=t=out:st=0.14:d=0.02[out]",
+  "output_sha256": "aa09181a419302967c8a0136d58cf76d49b3934407ab1df075ff73772c56a8eb",
+  "inspection": {
+    "duration": 0.16,
+    "sample_rate": 48000,
+    "channels": 1,
+    "peak_dbfs": -16.41101563950324,
+    "rms_dbfs": -36.612543627432125,
+    "clipped_samples": 0,
+    "onset_seconds": 0.030979166666666665,
+    "tail_silence_seconds": 0.004020833333333334
+  },
+  "format": "48 kHz mono PCM 24-bit WAV"
+}

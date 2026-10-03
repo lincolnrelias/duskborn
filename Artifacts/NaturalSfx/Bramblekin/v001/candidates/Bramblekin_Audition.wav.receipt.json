@@ -1,0 +1,51 @@
+{
+  "recipe": {
+    "brief": "All cue takes with silence, same mix gain as installed assets."
+  },
+  "ffmpeg_arguments": [
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Bramblekin\\v001\\candidates\\BK_Windup_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Bramblekin\\v001\\candidates\\BK_Windup_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Bramblekin\\v001\\candidates\\BK_Swing_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Bramblekin\\v001\\candidates\\BK_Swing_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Bramblekin\\v001\\candidates\\BK_Hurt_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Bramblekin\\v001\\candidates\\BK_Hurt_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Bramblekin\\v001\\candidates\\BK_Death_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Bramblekin\\v001\\candidates\\BK_Death_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Bramblekin\\v001\\candidates\\BK_Step_01.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Bramblekin\\v001\\candidates\\BK_Step_02.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Bramblekin\\v001\\candidates\\BK_Step_03.wav",
+    "-i",
+    "C:\\Users\\linco\\Mugg\\Artifacts\\NaturalSfx\\Bramblekin\\v001\\candidates\\BK_Step_04.wav",
+    "-filter_complex",
+    "[0:a]adelay=0|0[a0];[1:a]adelay=900|900[a1];[2:a]adelay=1800|1800[a2];[3:a]adelay=2530|2530[a3];[4:a]adelay=3260|3260[a4];[5:a]adelay=3930|3930[a5];[6:a]adelay=4600|4600[a6];[7:a]adelay=5800|5800[a7];[8:a]adelay=7000|7000[a8];[9:a]adelay=7650|7650[a9];[10:a]adelay=8300|8300[a10];[11:a]adelay=8950|8950[a11];[a0][a1][a2][a3][a4][a5][a6][a7][a8][a9][a10][a11]amix=inputs=12:normalize=0[out]",
+    "-map",
+    "[out]"
+  ],
+  "output": {
+    "file": "candidates\\Bramblekin_Audition.wav",
+    "sha256": "ce3d0616bcea9de4c9f35e0a0f259f1d29f8bed2e0b0b27b3523c58e30b2b51d"
+  },
+  "inspection": {
+    "duration_seconds": 9.25,
+    "sample_rate": 48000,
+    "channels": 1,
+    "codec": "pcm_s24le",
+    "peak_dbfs": -9.926802763975616,
+    "rms_dbfs": -34.130934208395125,
+    "full_scale_samples": 0,
+    "nonfinite_samples": 0,
+    "onset_at_minus50db_seconds": 0.051625,
+    "tail_below_minus50db_seconds": 0.2258125
+  }
+}

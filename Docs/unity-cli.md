@@ -28,6 +28,9 @@ and builds. The wrapper reads the required Unity version from
 - `build-thornwing` imports the original low-hovering moth and recorded foley, creates
   its ranged projectile/prefab/rewards, registers both FishNet collections, adds its
   weighted pool from night 1 onward, and checks ground reach, obstacles, reuse and seeded budgets.
+- `build-bramblekin` replaces the basic Swarmer prefab while retaining its GUID and
+  spawn slot, installs the original woodland scavenger and recorded foley, and
+  validates targeting, networking, imported pose grounding and seeded budgets.
 - `build-ironroot` imports the original Ironroot Humanoid, creates URP materials, replaces
   both player prefab visuals while preserving gameplay/controller references, and validates
   skinning and sampled locomotion clips. Requires `Artifacts/Ironroot/v002/Ironroot.fbx`.
@@ -63,8 +66,10 @@ Override executable discovery or the build destination when necessary:
 ## Operating rules
 
 - Do not open or control the Unity Editor UI and do not enter Play Mode.
-- Run the CLI only while this project is closed in any interactive Unity Editor;
-  Unity permits only one process to hold a project at a time.
+- Source changes and offline checks may proceed while this project is open.
+  Unity permits only one process to hold a project at a time, so use an isolated
+  copied project for batch validation when the live checkout is already held.
+  Do not require the user to close their Editor.
 - Keep CLI entry points synchronous and under `Assets/_Duskborn/Editor`.
 - Prefer `all` after gameplay changes and `compile` for a quick compilation gate.
 - Visual behavior remains a manual user check unless a dedicated offscreen test

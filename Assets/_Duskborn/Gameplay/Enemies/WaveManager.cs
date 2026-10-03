@@ -35,7 +35,7 @@ namespace Duskborn.Gameplay.Enemies
 
         public SpawnTimeline ActiveTimeline  => _activeTimeline;
         public int           AliveEnemyCount => _aliveCount;
-        public int           RemainingEvents => _activeTimeline == null
+        public int           RemainingEvents => !_waveActive || _activeTimeline == null
                                                 ? 0 : _activeTimeline.TotalEnemies - _nextEventIndex;
 
         private void Awake()
@@ -94,6 +94,7 @@ namespace Duskborn.Gameplay.Enemies
         private void OnNightStart(int nightNumber)
         {
             if (!InstanceFinder.IsServerStarted) return;
+            if (GameStateManager.Instance != null && GameStateManager.Instance.CurrentState != GameState.Running) return;
             if (nightNumber == 3) _wardenNight.TryBegin();
             int definitionIndex = HollowWardenNightRules.DefinitionIndex(nightNumber, nightDefinitions?.Length ?? 0);
             if (definitionIndex < 0 || nightDefinitions[definitionIndex] == null) return;
@@ -109,7 +110,6 @@ namespace Duskborn.Gameplay.Enemies
                                                            GameSession.Instance?.RNG);
             _nextEventIndex   = 0;
             _elapsedNightTime = 0f;
-            _aliveCount       = 0;
             _waveActive       = true;
 
             DuskLog.Log(LogChannel.Wave, $"{_activeTimeline}");
@@ -118,22 +118,28 @@ namespace Duskborn.Gameplay.Enemies
         private void OnNightEnd(int _)
         {
             if (!InstanceFinder.IsServerStarted) return;
+            if (GameStateManager.Instance != null && GameStateManager.Instance.CurrentState == GameState.GameOver)
+            { _waveActive = false; return; }
             _wardenNight.Cancel();
+            // Dawn stops new spawns; surviving mobs remain until killed or the run ends.
             _waveActive = false;
-            DespawnAll();
         }
 
         private void Update()
         {
             if (!InstanceFinder.IsServerStarted) return;
-            if (!_waveActive || _activeTimeline == null) return;
             if (GameStateManager.Instance != null && GameStateManager.Instance.CurrentState != GameState.Running)
             {
-                _wardenNight.Cancel();
                 _waveActive = false;
-                DespawnAll();
+                if (GameStateManager.Instance.CurrentState != GameState.GameOver)
+                {
+                    _wardenNight.Cancel();
+                    DespawnAll();
+                }
                 return;
             }
+
+            if (!_waveActive || _activeTimeline == null) return;
 
             _elapsedNightTime += Time.deltaTime;
 
@@ -176,8 +182,7 @@ namespace Duskborn.Gameplay.Enemies
 
         private void HandleEnemyDied(EnemyBase _)
         {
-            if (!_waveActive) return;
-            _aliveCount--;
+            _aliveCount = Mathf.Max(0, _aliveCount - 1);
         }
 
         private void DespawnAll()

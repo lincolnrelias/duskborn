@@ -1,0 +1,34 @@
+{
+  "enemy": "Bramblekin",
+  "revision": "v003",
+  "moveSpeed": 6.2,
+  "previousMoveSpeed": 3.6,
+  "triangles": 2054,
+  "articulatedParts": 10,
+  "ragdollJoints": 9,
+  "killingImpulse": 22,
+  "wholeBodyFraction": 0.65,
+  "suitesPassed": 19,
+  "suitesFailed": 0,
+  "validationProject": "Isolated copied project; live Editor remained open",
+  "physics": "Right/left/forward momentum, off-center torque, duplicate impulse guard, pooled reset passed",
+  "visual": "16 imported Unity pose deltas rendered in Blender; gait poses inspected",
+  "unverified": [
+    "Live terrain slopes and crowded gameplay",
+    "Host/client visual agreement"
+  ],
+  "files": [
+    {
+      "path": "Assets/_Duskborn/Prefabs/Enemies/Bramblekin.prefab",
+      "sha256": "ce0b0f7af6002a8165aa4336b2502766a7f709628e654f3276aab7448ac6f33b"
+    },
+    {
+      "path": "Assets/_Duskborn/Art/Models/Bramblekin/Bramblekin.fbx",
+      "sha256": "49660110a0124cffcac0a89de6eccdec405cb7a2f5821a2d7ca3464f408e560f"
+    },
+    {
+      "path": "Artifacts/Bramblekin/v003/Bramblekin.blend",
+      "sha256": "e171f436b0ea54ec4e0ff14a447b5cb50990ad2327f39ed3eeb4ced601ea1466"
+    }
+  ]
+}

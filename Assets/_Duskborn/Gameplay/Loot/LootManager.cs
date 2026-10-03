@@ -250,7 +250,7 @@ namespace Duskborn.Gameplay.Loot
 
             if (spawnGold)
             {
-                var go = SpawnGoldPickup(origin, goldAmount, spawnList.Count, total, baseAngle, rng);
+                var go = SpawnGoldPickup(origin, goldAmount, spawnList.Count, total, baseAngle, rng, harvester);
                 if (go != null)
                     RegisterAndIgnoreCollisions(go, spawnedColliders);
             }
@@ -303,7 +303,7 @@ namespace Duskborn.Gameplay.Loot
             return go;
         }
 
-        private GameObject SpawnGoldPickup(Vector3 origin, int amount, int throwIndex, int throwTotal, float baseAngle, SeededRNG rng)
+        private GameObject SpawnGoldPickup(Vector3 origin, int amount, int throwIndex, int throwTotal, float baseAngle, SeededRNG rng, PlayerStats harvester = null)
         {
             if (worldGoldPickupPrefab == null)
             {
@@ -328,7 +328,7 @@ namespace Duskborn.Gameplay.Loot
                 return null;
             }
 
-            goldPickup.ServerInitialize(amount);
+            goldPickup.ServerInitialize(amount, harvester != null ? harvester.GetComponent<NetworkObject>() : null);
             goldPickup.ServerThrow(throwVelocity, throwTorque);
             return go;
         }

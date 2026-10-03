@@ -35,6 +35,7 @@ namespace Duskborn.Gameplay.Equipment
         private AnimationLayerMixerPlayable _layerMixer;
         private AnimationClipPlayable       _clipPlayable;
         private AvatarMask                  _fullBodyMask;
+        private AvatarMask                  _fallbackUpperBodyMask;
         private AvatarMask                  _equippedActionMask;
         private BowPoseAnchor               _bowPoseAnchor;
         private BowLocomotionBodyAnchor     _bowLocomotionBodyAnchor;
@@ -154,6 +155,11 @@ namespace Duskborn.Gameplay.Equipment
                 if (Application.isPlaying) Destroy(_fullBodyMask);
                 else DestroyImmediate(_fullBodyMask);
             }
+            if (_fallbackUpperBodyMask != null)
+            {
+                if (Application.isPlaying) Destroy(_fallbackUpperBodyMask);
+                else DestroyImmediate(_fallbackUpperBodyMask);
+            }
         }
 
         private void BuildGraph()
@@ -168,13 +174,21 @@ namespace Duskborn.Gameplay.Equipment
             _aimLocomotionMixer = AnimationMixerPlayable.Create(_graph, 2);
             _aimLocomotionMixer.ConnectInput(0, _controllerPlayable, 0, 1f);
             if (BowPoseAnchor.Supports(animator))
-                _bowLocomotionBodyAnchor = new BowLocomotionBodyAnchor(_graph,_aimLocomotionMixer,_layerMixer);
+                _bowLocomotionBodyAnchor = new BowLocomotionBodyAnchor(_graph,_aimLocomotionMixer,_layerMixer,animator);
             _layerMixer.ConnectInput(0, _bowLocomotionBodyAnchor != null ? _bowLocomotionBodyAnchor.Locomotion : (Playable)_aimLocomotionMixer, 0, 1f);
             _layerMixer.SetLayerAdditive(1, false);
 
             _fullBodyMask = new AvatarMask();
+            _fallbackUpperBodyMask = new AvatarMask { name = "RuntimeUpperBodyMask" };
             for (int i = 0; i < (int)AvatarMaskBodyPart.LastBodyPart; i++)
+            {
                 _fullBodyMask.SetHumanoidBodyPartActive((AvatarMaskBodyPart)i, true);
+                var part = (AvatarMaskBodyPart)i;
+                bool upper = part != AvatarMaskBodyPart.Root && part != AvatarMaskBodyPart.LeftLeg &&
+                    part != AvatarMaskBodyPart.RightLeg && part != AvatarMaskBodyPart.LeftFootIK &&
+                    part != AvatarMaskBodyPart.RightFootIK;
+                _fallbackUpperBodyMask.SetHumanoidBodyPartActive(part, upper);
+            }
             _layerMixer.SetLayerMaskFromAvatarMask(1, ResolveMask(true, _equippedActionMask));
 
             _originalRootMotion = animator.applyRootMotion;
@@ -246,7 +260,7 @@ namespace Duskborn.Gameplay.Equipment
             DuskLog.Log(LogChannel.Audio, $"PlayAction [{actionIndex}]: firing swing audio. audioPlayer={(object)_audioPlayer ?? "null"} profile={weapon?.AudioProfile?.name ?? "null"}.");
             _audioPlayer?.PlaySwing(weapon?.AudioProfile);
 
-            ApplyMask(data.PreserveLocomotion, weapon.ActionMask);
+            ApplyMask(data.PreserveLocomotion, data.ResolveMask(weapon.ActionMask));
             _clipPlayable = AnimationClipPlayable.Create(_graph, _activeClip);
             _clipPlayable.SetApplyFootIK(false);
             _clipPlayable.SetSpeed(data.BaseSpeed * _runtimeSpeedMultiplier);
@@ -321,12 +335,15 @@ namespace Duskborn.Gameplay.Equipment
         private AvatarMask ResolveMask(bool preserveLocomotion, AvatarMask weaponMask)
         {
             if (!preserveLocomotion) return _fullBodyMask;
-            return weaponMask != null ? weaponMask : upperBodyMask != null ? upperBodyMask : _fullBodyMask;
+            return weaponMask != null ? weaponMask : upperBodyMask != null ? upperBodyMask : _fallbackUpperBodyMask;
         }
 
         private void ApplyMask(bool preserveLocomotion, AvatarMask weaponMask)
         {
             _layerMixer.SetLayerMaskFromAvatarMask(1, ResolveMask(preserveLocomotion, weaponMask));
+            // Humanoid Body curves can affect the hip solve even with legs masked
+            // out. Preserve locomotion's body pose for melee, skills and bow alike.
+            _bowLocomotionBodyAnchor?.SetEnabled(preserveLocomotion);
             animator.applyRootMotion = !preserveLocomotion;
             if (!preserveLocomotion)
                 _playerController?.SetInputEnabled(false);
@@ -383,7 +400,7 @@ namespace Duskborn.Gameplay.Equipment
 
         private void SetAimLocomotionWeight()
         {
-            _bowLocomotionBodyAnchor?.SetEnabled(true);
+            _bowLocomotionBodyAnchor?.SetEnabled(_activeData == null || _activeData.PreserveLocomotion);
             // Load/release only blend the upper body. The stride must continue
             // at full weight while grounded, including between repeated shots.
             float weight = _controllerPlayable.GetBool("IsGrounded") ? 1f : 0f;
@@ -454,7 +471,7 @@ namespace Duskborn.Gameplay.Equipment
 
             _sortedEvents = SortedEvents(entry.Events);
 
-            ApplyMask(data.PreserveLocomotion, _equippedActionMask);
+            ApplyMask(data.PreserveLocomotion, data.ResolveMask(_equippedActionMask));
             _clipPlayable = AnimationClipPlayable.Create(_graph, clip);
             _clipPlayable.SetApplyFootIK(false);
             _clipPlayable.SetSpeed(data.BaseSpeed * _runtimeSpeedMultiplier);

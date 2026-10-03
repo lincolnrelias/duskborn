@@ -296,10 +296,11 @@ namespace Duskborn.Gameplay.Player
         {
             if (_animator == null) return;
 
-            // The character aligns with the camera, so smoothed input represents local-space velocity:
-            // Y = forward / backward, X = lateral strafe.
-            _animator.SetFloat(HashVelocityX, _smoothedInput.x);
-            _animator.SetFloat(HashVelocityY, _smoothedInput.y);
+            // Camera and body headings differ while turning. Use achieved movement
+            // in body space so the legs also respond correctly to blocked movement.
+            Vector2 locomotion = GetLocomotionVelocity(_cc.velocity, transform.rotation, _stats.MoveSpeed);
+            _animator.SetFloat(HashVelocityX, locomotion.x);
+            _animator.SetFloat(HashVelocityY, locomotion.y);
 
             // Downhill movement can briefly lose controller contact between steps.
             // Keep both the controller and authored aim locomotion on the same gait
@@ -313,6 +314,14 @@ namespace Duskborn.Gameplay.Player
         }
 
         public void SetInputEnabled(bool enabled) => _inputEnabled = enabled;
+
+        public static Vector2 GetLocomotionVelocity(Vector3 worldVelocity, Quaternion bodyRotation, float moveSpeed)
+        {
+            if (moveSpeed <= Mathf.Epsilon) return Vector2.zero;
+            worldVelocity.y = 0f;
+            Vector3 localVelocity = Quaternion.Inverse(bodyRotation) * worldVelocity;
+            return new Vector2(localVelocity.x, localVelocity.z) / moveSpeed;
+        }
 
         // Keep the body facing the current direction (PlayerDodge uses this to keep the roll aligned).
         public void SetRotationEnabled(bool enabled) => _rotationEnabled = enabled;

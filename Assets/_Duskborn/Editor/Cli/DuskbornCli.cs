@@ -210,6 +210,7 @@ namespace Duskborn.Editor
             var suites = new[]
             {
                 new TestSuite(nameof(RangedCombatTests), RangedCombatTests.RunAllTests),
+                new TestSuite(nameof(FreeMovingCombatTests), FreeMovingCombatTests.RunAllTests),
                 new TestSuite(nameof(AudioDatabaseTests), AudioDatabaseTests.RunAllTests),
                 new TestSuite(nameof(BuildingTests), BuildingTests.Run),
                 new TestSuite(nameof(SceneFurnaceTests), SceneFurnaceTests.Run),

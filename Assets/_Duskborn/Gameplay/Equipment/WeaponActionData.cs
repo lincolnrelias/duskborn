@@ -21,6 +21,10 @@ namespace Duskborn.Gameplay.Equipment
         public BowAnimationSet BowAnimations;
         public float BaseSpeed          = 1f;
         public bool  PreserveLocomotion = true;
+        [Tooltip("Overrides this action's mask. Empty uses the weapon's mask. Ignored for full-body actions (Preserve Locomotion off).")]
+        public AvatarMask MaskOverride;
+
+        public AvatarMask ResolveMask(AvatarMask weaponMask) => MaskOverride != null ? MaskOverride : weaponMask;
 
         // Combo: entries become sequential steps instead of a random pick. Chain advances
         // when the next attack starts within ComboResetTime after the previous one ends.

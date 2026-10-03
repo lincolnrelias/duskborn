@@ -311,7 +311,7 @@ namespace Duskborn.Editor
                         jump.SetSpeed(0); jump.SetApplyFootIK(false);
                         movement=jump;
                     }
-                    bodyAnchor=new BowLocomotionBodyAnchor(graph,movement,layers);
+                    bodyAnchor=new BowLocomotionBodyAnchor(graph,movement,layers,animator);
                     layers.ConnectInput(0,bodyAnchor.Locomotion,0,1);
                     bodyAnchor.SetEnabled(true);
                     layers.SetLayerMaskFromAvatarMask(1,mask);

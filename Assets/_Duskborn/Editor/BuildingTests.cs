@@ -29,7 +29,7 @@ namespace Duskborn.Editor
 
                 var manager = BuildingUIManager.Create(owner.transform);
                 manager.ShowCatalog(definitions, d => BuildingPresentation.Create(d, inventory, null, false),
-                    _ => { }, () => { }, () => { }, () => { });
+                    _ => { }, () => { });
 
                 var canvas = owner.GetComponentInChildren<Canvas>();
                 canvas.renderMode = RenderMode.ScreenSpaceCamera;
@@ -163,8 +163,25 @@ namespace Duskborn.Editor
                 UnityEngine.Object.DestroyImmediate(storageObject);
                 var definitions = Resources.LoadAll<BuildableDefinition>("Building");
                 var ui = BuildingUIManager.Create(uiOwner.transform);
-                ui.ShowCatalog(definitions, d => BuildingPresentation.Create(d, inventory, null, false), _ => { }, () => { }, () => { }, () => { });
+                ui.ShowCatalog(definitions, d => BuildingPresentation.Create(d, inventory, null, false), _ => { }, () => { });
                 Check(uiOwner.transform.Find("BuildingUI/BuildingCatalog") != null, "catalog view hierarchy", ref passed);
+                var catalog = uiOwner.transform.Find("BuildingUI/BuildingCatalog");
+                Check(catalog.Find("Save") == null && catalog.Find("Load") == null,
+                    "checkpoint actions removed from catalog", ref passed);
+                Canvas.ForceUpdateCanvases();
+                var catalogScroll = catalog.Find("CatalogList/Cards").GetComponent<UnityEngine.UI.ScrollRect>();
+                var wheel = new PointerEventData(EventSystem.current) { scrollDelta = new Vector2(0, 10000) };
+                catalogScroll.OnScroll(wheel);
+                var topPosition = catalogScroll.content.anchoredPosition;
+                catalogScroll.OnScroll(wheel);
+                Check(Vector2.Distance(topPosition, catalogScroll.content.anchoredPosition) < .01f,
+                    "fast scrolling stops at catalog top", ref passed);
+                wheel.scrollDelta = new Vector2(0, -10000);
+                catalogScroll.OnScroll(wheel);
+                var bottomPosition = catalogScroll.content.anchoredPosition;
+                catalogScroll.OnScroll(wheel);
+                Check(Vector2.Distance(bottomPosition, catalogScroll.content.anchoredPosition) < .01f && !catalogScroll.inertia,
+                    "fast scrolling stops at catalog bottom without momentum", ref passed);
                 ui.ShowPlacement(BuildingPresentation.Create(definitions[0], inventory, null, false), null, 45, false);
                 var placement = uiOwner.transform.Find("BuildingUI/PlacementHUD");
                 Check(placement != null && !placement.GetComponent<UnityEngine.UI.Image>().raycastTarget, "placement HUD ignores clicks", ref passed);

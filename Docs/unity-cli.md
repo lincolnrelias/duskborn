@@ -14,6 +14,8 @@ and builds. The wrapper reads the required Unity version from
 .\Tools\unity.ps1 clear-terrain
 .\Tools\unity.ps1 all
 .\Tools\unity.ps1 capture-map
+.\Tools\unity.ps1 capture-building-icons
+.\Tools\unity.ps1 capture-building-ui
 .\Tools\unity.ps1 build-windows
 .\Tools\unity.ps1 build-warden
 .\Tools\unity.ps1 build-briarback
@@ -52,6 +54,13 @@ and builds. The wrapper reads the required Unity version from
 - `capture-map` renders the production minimap and world-map canvases with seeded terrain,
   player and structure fixtures into `Artifacts/WorldMap`, in edit mode using a hidden graphics
   process. This verifies the static HUD composition, not a live multiplayer session.
+- `capture-building-icons` renders the actual Workbench, Forge, and Arcane Table prefabs
+  into transparent 512 px icons under `Resources/UI/Briarwood`, and configures the skin
+  sprite import settings. It preserves model geometry and materials.
+- `capture-building-ui` captures the production building catalog with the Briarwood skin,
+  selected station and placeholder fixtures at 1080p and 720p into `Artifacts/BriarwoodUI`.
+  Both commands use a hidden graphics process in edit mode; use an isolated project copy
+  if the live checkout is already open. Neither enters Play Mode.
 - `build-windows` invokes the project's synchronous `BuildPipeline` entry point
   and creates `Builds/Windows/Mugg.exe` by default.
 

@@ -1,0 +1,93 @@
+{
+  "date": "2026-10-04",
+  "unity": "6000.4.1f1",
+  "validationProject": "Temp/BriarwoodUIProject",
+  "suitesPassed": 24,
+  "suitesFailed": 0,
+  "staticCaptureResolutions": [
+    "1920x1080",
+    "1280x720"
+  ],
+  "sprites": [
+    {
+      "name": "AlegreyaSC-Bold.ttf",
+      "bytes": 378796,
+      "sha256": "3EF96CBF3BE7B84D9DFF9B1AA1E2AC40EEC0CF323CCD0638395CDEF9C5A91528"
+    },
+    {
+      "name": "button.png",
+      "bytes": 1135338,
+      "sha256": "7E3EE0EE062BFA02CFA4B5C14C28FC5CD11D81EBE46B6940727C57595CBC936E"
+    },
+    {
+      "name": "crest.png",
+      "bytes": 1949336,
+      "sha256": "D54EF860AABA813615A985E7474915A99955E0C5D45C64DF6E37A7CFFEB1636B"
+    },
+    {
+      "name": "frame.png",
+      "bytes": 848261,
+      "sha256": "D94549303253433B221E749B09B88FB34B702B157B6A2BAF830872E0F80EA032"
+    },
+    {
+      "name": "Icon_arcane_table.png",
+      "bytes": 85128,
+      "sha256": "9D5D3AA7E6CFFD4942CC35C23050EB7695DDC70B631360D0F3790D0C0E443771"
+    },
+    {
+      "name": "Icon_forge.png",
+      "bytes": 89168,
+      "sha256": "6A27A3ACE5EEA3DEFED576705D6A40ECB545BCC85BAE94129E2ECA6907FCADEA"
+    },
+    {
+      "name": "Icon_workbench.png",
+      "bytes": 21436,
+      "sha256": "87E6E723336B7B424F20E90168823ED3F8A2A8E91EEDBFFE3F354B65A5B1557F"
+    },
+    {
+      "name": "socket.png",
+      "bytes": 2013901,
+      "sha256": "47BB97F148218906F4518AA23F0607431F74DEE21E8D50275E52EAFA27718A25"
+    }
+  ],
+  "captures": [
+    {
+      "name": "building-arcane_table-1280.png",
+      "sha256": "337681C7A5385CD320DEF5D1E2B9C6A1539D75EF090A9EB34F524919ED3CE10C"
+    },
+    {
+      "name": "building-arcane_table-1920.png",
+      "sha256": "AA0EEC0CC0B729C0A3FCF6A574DA22687EBB549B015FF29CA991F912DB80C101"
+    },
+    {
+      "name": "building-cauldron-1280.png",
+      "sha256": "DC6BA7C677E8F3A5890B1FF505EC3D1E77E13D0DCD18FACD422B8D2C3C230800"
+    },
+    {
+      "name": "building-cauldron-1920.png",
+      "sha256": "54D2432CEC247157D52FDB2189E74A6E9CB3D2BEF97EDF21291221DB49B25403"
+    },
+    {
+      "name": "building-forge-1280.png",
+      "sha256": "8489746AA7ECC896E23D10A5682DBA4AAAB0476F25DB2904F5CA9CFC8D481F04"
+    },
+    {
+      "name": "building-forge-1920.png",
+      "sha256": "7E07CE43B91B00C472C9CBEFD2158CF7472D7F8A1B21BA383CEA9230C0DFAC21"
+    },
+    {
+      "name": "building-workbench-1280.png",
+      "sha256": "789D030154DBEF1625FB3BDA223CBD37C0DDF13AD151A86C892530DD6CFDDCC6"
+    },
+    {
+      "name": "building-workbench-1920.png",
+      "sha256": "3FD34D6657DC7D45DEB405F52E12FDA67D857124B0D5AE6A034B15F589DFF94B"
+    }
+  ],
+  "manualRemaining": [
+    "Live hover and keyboard/cursor behavior",
+    "Catalog scrolling",
+    "Terrain contrast",
+    "Placement and multiplayer interaction"
+  ]
+}

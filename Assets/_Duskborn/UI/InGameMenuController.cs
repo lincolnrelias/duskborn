@@ -7,6 +7,7 @@ using UnityEngine.InputSystem;
 using Duskborn.Audio;
 using Duskborn.Core;
 using Duskborn.Gameplay.Player;
+using Duskborn.Gameplay.Building;
 
 namespace Duskborn.UI
 {
@@ -29,6 +30,7 @@ namespace Duskborn.UI
         // Menu state.
         public bool IsOpen { get; private set; } = false;
 
+        private string _checkpointMessage;
         private bool _showSettingsModal = false;
         private bool _showLoreModal = false;
         private bool _showConfirmMainMenu = false;
@@ -366,6 +368,7 @@ namespace Duskborn.UI
         public void OpenMenu()
         {
             IsOpen = true;
+            _checkpointMessage = null;
             _showSettingsModal = false;
             _showLoreModal = false;
             _showConfirmMainMenu = false;
@@ -498,7 +501,7 @@ namespace Duskborn.UI
         private void DrawMainPausePlaque(float screenW, float screenH)
         {
             float plaqueW = Mathf.Min(screenW * 0.44f, 440f);
-            float plaqueH = 490f;
+            float plaqueH = 620f;
             float plaqueX = (screenW - plaqueW) * 0.5f;
             float plaqueY = (screenH - plaqueH) * 0.5f;
 
@@ -548,15 +551,29 @@ namespace Duskborn.UI
                 _showLoreModal = true;
             }
 
+            float checkpointW = (btnW - 12f) * .5f;
+            if (DrawStoneButton(new Rect(btnX, startY + spacing * 3, checkpointW, btnH), "SAVE BUILDINGS", false, false))
+            {
+                PlayClickSound();
+                _checkpointMessage = BuildingController.Local?.Checkpoint(false) ?? "Building system is not ready.";
+            }
+            if (DrawStoneButton(new Rect(btnX + checkpointW + 12f, startY + spacing * 3, checkpointW, btnH), "LOAD BUILDINGS", false, false))
+            {
+                PlayClickSound();
+                _checkpointMessage = BuildingController.Local?.Checkpoint(true) ?? "Building system is not ready.";
+            }
+            GUI.Label(new Rect(btnX, startY + spacing * 4, btnW, 52),
+                _checkpointMessage ?? "Infrastructure checkpoint · solo host\nLoad before gathering or spending materials.", _modalBodyStyle);
+
             // 4. Return to Main Menu.
-            if (DrawStoneButton(new Rect(btnX, startY + spacing * 3, btnW, btnH), "🏰   MAIN MENU", false, false))
+            if (DrawStoneButton(new Rect(btnX, startY + spacing * 5, btnW, btnH), "🏰   MAIN MENU", false, false))
             {
                 PlayClickSound();
                 _showConfirmMainMenu = true;
             }
 
             // 5. Leave the Realm (Quit Game).
-            if (DrawStoneButton(new Rect(btnX, startY + spacing * 4, btnW, btnH), "✕   LEAVE THE REALM", false, true))
+            if (DrawStoneButton(new Rect(btnX, startY + spacing * 6, btnW, btnH), "✕   LEAVE THE REALM", false, true))
             {
                 PlayClickSound();
                 _showConfirmQuit = true;

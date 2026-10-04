@@ -1,0 +1,32 @@
+{
+  "generator": "Built-in ImageGen",
+  "assets": [
+    {
+      "name": "frame",
+      "prompt": "Use case: ui-mockup. Production game UI sprite, not a mockup screenshot. Match ONLY the LEFT Briarwood & Iron theme from reference: hand-painted chunky low-poly medieval fantasy, rich dark timber, forged iron, aged brass, broad faceted painted bevels, restrained thorn carvings. Front-on orthographic flat sprite with genuinely transparent outside background, centered and uncropped. No text, no labels, no watermark, no scene, no ground shadow. Crisp silhouette, broad shapes and restrained texture, readable at small size. Make ONE square outer menu frame, near 1024 x 1024. Thick dark wooden perimeter, large dark iron corner plates and small brass rivets; sparse carved thorns near upper edge. Completely EMPTY TRANSPARENT interior window, NOT dark filled panel. Border thickness about 9% of square on all sides. Straight continuous middle sections for nine-slice scaling. NO central badge or crest on the top edge; it will be separately placed. Keep all four corners and every edge entirely in view with only 2% transparent outer padding.",
+      "generatorOutput": "C:\\Users\\linco\\.codex\\generated_images\\01a10711-c8f6-79e1-899a-7c21b7d54390\\exec-fe371a6d-1498-45ff-8cd3-9ffe1a3a8b8a.png"
+    },
+    {
+      "name": "socket",
+      "prompt": "Use case: ui-mockup. Production game UI sprite, not a mockup screenshot. Match ONLY the LEFT Briarwood & Iron theme from reference: hand-painted chunky low-poly medieval fantasy, rich dark timber, forged iron, aged brass, broad faceted painted bevels, restrained thorn carvings. Front-on orthographic flat sprite with genuinely transparent outside background, centered and uncropped. No text, no labels, no watermark, no scene, no ground shadow. Crisp silhouette, broad shapes and restrained texture, readable at small size. Make ONE square recessed item/detail socket, near 1024 x 1024. Very thin aged-brass bevel rim, small brass pointed corner fittings, calm opaque dark charcoal-brown leather interior. Frame thickness about 5% on all four sides. Interior uniform subtle texture and mostly flat dark value, no object, no glyph, no crest. Straight edges for nine-slice. Entire square visible with only 2% transparent outside padding. Much lighter framing than the outer timber frame.",
+      "generatorOutput": "C:\\Users\\linco\\.codex\\generated_images\\01a10711-c8f6-79e1-899a-7c21b7d54390\\exec-b8be0a35-4453-4abb-8229-2a8905b9ea7f.png"
+    },
+    {
+      "name": "button",
+      "prompt": "Use case: ui-mockup. Production game UI sprite, not a mockup screenshot. Match ONLY the LEFT Briarwood & Iron theme from reference: hand-painted chunky low-poly medieval fantasy, rich dark timber, forged iron, aged brass, broad faceted painted bevels, restrained thorn carvings. Front-on orthographic flat sprite with genuinely transparent outside background, centered and uncropped. No text, no labels, no watermark, no scene, no ground shadow. Crisp silhouette, broad shapes and restrained texture, readable at small size. Make ONE horizontal rectangular button sprite, broad aspect ratio 4:1, occupying image width with 3% outside transparent padding. Substantial aged brass edge and carved brown timber inset plate, tapered faceted corners, broad bevel, tiny iron or bronze fasteners at the ends. Empty center for runtime text, low noise. Uniform edge for nine-slice scaling. No arrows, no icon, no text. Warm brown/aged gold family, clear light bevel at top, darker bevel at bottom, no cast shadow outside.",
+      "generatorOutput": "C:\\Users\\linco\\.codex\\generated_images\\01a10711-c8f6-79e1-899a-7c21b7d54390\\exec-b3104e5e-7df2-46de-8797-c3463b782e8c.png",
+      "superseded": true
+    },
+    {
+      "name": "crest",
+      "prompt": "Use case: ui-mockup. Production game UI sprite, not a mockup screenshot. Match ONLY the LEFT Briarwood & Iron theme from reference: hand-painted chunky low-poly medieval fantasy, rich dark timber, forged iron, aged brass, broad faceted painted bevels, restrained thorn carvings. Front-on orthographic flat sprite with genuinely transparent outside background, centered and uncropped. No text, no labels, no watermark, no scene, no ground shadow. Crisp silhouette, broad shapes and restrained texture, readable at small size. Make ONE isolated centered hexagonal aged brass header medallion, square image near 1024 x 1024. Broad faceted beveled rim around a dark bronze inset. In its center a bold clearly recognizable single raised silver blacksmith HAMMER emblem with short brown handle placed diagonally. Exactly one hammer, no moon, no crossed tools, no letters. Hammer high contrast within badge. Outer silhouette hexagonal as in top center badge of the Briarwood menu, compact symmetrical composition, occupy 90% square, entirely transparent outside. This is the building menu header crest.",
+      "generatorOutput": "C:\\Users\\linco\\.codex\\generated_images\\01a10711-c8f6-79e1-899a-7c21b7d54390\\exec-5bd3e54a-4cd3-4052-9009-5cf910cbf6bb.png"
+    },
+    {
+      "name": "button",
+      "prompt": "Use case: ui-mockup. Generate a PRODUCTION game button sprite, a SINGLE plain horizontal rectangle of carved dark brown timber inside a thin aged brass beveled rim with faceted corners. Briarwood & Iron stylized hand-painted low-poly fantasy. Exact 5:1 aspect ratio of the button silhouette. Genuinely transparent outside. Fill most image width and height with only 2% empty margin. Broad soft painterly bevel, dark smooth wood interior suitable for clear ivory runtime text. ONLY a thin continuous gold rim and the smooth dark wood inset. NO central crest, NO hexagonal badge, NO emblems, NO ornaments extending above or below the rectangular outline, NO thorns, NO large corner metal plates, NO text, NO arrows, NO symbols. All four straight edges and all four small beveled corners fully visible. Front-on orthographic; no perspective, no scene, no drop shadow. Clean reusable nine-slice sprite; grain subtle enough not to fight text. Match warmth and materials of reference left theme without copying menu frame ornament.",
+      "generatorOutput": "C:\\Users\\linco\\.codex\\generated_images\\01a10711-c8f6-79e1-899a-7c21b7d54390\\exec-454c2cd4-4de3-4dd5-9df8-6a10822c75d0.png",
+      "selected": true
+    }
+  ]
+}

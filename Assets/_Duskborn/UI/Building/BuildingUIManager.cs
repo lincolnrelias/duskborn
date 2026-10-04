@@ -112,13 +112,11 @@ namespace Duskborn.UI.Building
             IReadOnlyList<BuildableDefinition> definitions,
             Func<BuildableDefinition, BuildablePresentation> presentation,
             Action<BuildableDefinition> place,
-            Action close,
-            Action save,
-            Action load)
+            Action close)
         {
             station.SetActive(false);
             confirmation.SetActive(false);
-            catalog.Show(definitions, presentation, place, close, save, load);
+            catalog.Show(definitions, presentation, place, close);
         }
 
         public void RefreshCatalog() => catalog.Refresh();

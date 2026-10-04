@@ -680,8 +680,7 @@ namespace Duskborn.Gameplay.Building
             if (resources != null) resources.InitializeFromInitialDatabase();
             InventoryUIManager.Instance?.SyncAllResources();
 
-            ui.ShowCatalog(world.Definitions, Presentation, definition => Begin(definition), Cancel,
-                () => Checkpoint(false), () => Checkpoint(true));
+            ui.ShowCatalog(world.Definitions, Presentation, definition => Begin(definition), Cancel);
             UnlockCursor();
         }
 
@@ -703,23 +702,25 @@ namespace Duskborn.Gameplay.Building
             return BuildingPresentation.Create(definition, resources, discovery, alreadyPlaced);
         }
 
-        private void Checkpoint(bool load)
+        public string Checkpoint(bool load)
         {
-            if (!player.IsServerStarted || PlayerInteractor.BuildingPeers.Count != 1 || busy ||
+            if (player == null || !player.IsOwner || !player.IsServerStarted || resources == null ||
+                BuildingWorld.Instance == null || PlayerInteractor.BuildingPeers.Count != 1 || busy ||
                 PlayerInteractor.BuildingPeers.Any(peer => peer.BuildingTransactionPending))
             {
-                ui.ShowToast("Saving / loading requires a solo host and no pending transactions.", true);
-                return;
+                return "Requires a solo host with no pending transactions.";
             }
             try
             {
                 if (load) BuildingWorld.Instance.Load(resources); else BuildingWorld.Instance.Save(resources);
-                ui.ShowToast(load ? "Infrastructure loaded." : "Infrastructure saved.");
+                InventoryUIManager.Instance?.SyncAllResources();
+                ui?.RefreshCatalog();
+                return load ? "Infrastructure loaded." : "Infrastructure saved.";
             }
             catch (Exception exception)
             {
-                ui.ShowToast("Checkpoint failed: " + exception.Message, true);
                 Debug.LogException(exception);
+                return "Checkpoint failed: " + exception.Message;
             }
         }
 

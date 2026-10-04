@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_runestone_blood_2
   recipeName: Blood Runestone II
-  description: "Bleeding: 1 damage per stack each second. Applies 2 stacks per weapon hit; maximum 12 stacks. One etching per weapon."
+  description: 'Bleeding: 1 damage per stack each second. Applies 2 stacks per weapon
+    hit; maximum 12 stacks. One etching per weapon.'
   category: Runestones
   tier: 2
   requiredStation: 3
@@ -30,5 +31,7 @@ MonoBehaviour:
     amount: 2
   - material: {fileID: 11400000, guid: ac75ce17d5fdcaf4d956e4f0e2ed6c88, type: 2}
     amount: 2
+  - material: {fileID: 11400000, guid: 92430656619154f4b9a7534a958f4ae7, type: 2}
+    amount: 6
   fuelIngredients: []
   processingSeconds: 0

@@ -14,6 +14,8 @@ namespace Duskborn.UI
     public class WorldLoadingScreenUI : MonoBehaviour
     {
         public static WorldLoadingScreenUI Instance { get; private set; }
+        public static bool IsBlockingGameplay => Instance != null &&
+            Instance.gameObject.activeInHierarchy && Instance.isGenerating;
  
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStatics()
@@ -31,10 +33,13 @@ namespace Duskborn.UI
         [Header("Visual Configuration")]
         public bool autoFadeOut = true;
         public float fadeOutSpeed = 2.2f;
+        [Tooltip("Seconds used to gently reveal gameplay after the local player camera is ready.")]
+        [Min(0.1f)] public float gameplayRevealDuration = 3f;
 
         private float _currentAlpha = 1f;
         public float CurrentAlpha => _currentAlpha;
         private bool _isFadingOut = false;
+        private Coroutine _completionRoutine;
         public bool IsFadingOut => _isFadingOut;
         private float _tipTimer = 0f;
         private int _currentTipIndex = 0;
@@ -89,7 +94,7 @@ namespace Duskborn.UI
                 return;
             }
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+            if (Application.isPlaying) DontDestroyOnLoad(gameObject);
             InitEmbers();
         }
 
@@ -113,6 +118,7 @@ namespace Duskborn.UI
 
         public void Show(string initialStage = "Forging the Ancient Terrain...", string initialDetail = "Allocating geological data...")
         {
+            CancelCompletion();
             gameObject.SetActive(true);
             isGenerating = true;
             _isFadingOut = false;
@@ -132,28 +138,73 @@ namespace Duskborn.UI
 
         public void CompleteAndFadeOut(Action onFinished = null)
         {
+            if (_completionRoutine != null) return;
             targetProgress = 1.0f;
             stageTitle = "The Twilight Reveals Itself!";
             stageDetail = "World consecrated. Entering the wild lands...";
-            StartCoroutine(FadeOutRoutine(onFinished));
+            _completionRoutine = StartCoroutine(FadeOutRoutine(onFinished));
+        }
+
+        private void CancelCompletion()
+        {
+            if (_completionRoutine != null) StopCoroutine(_completionRoutine);
+            _completionRoutine = null;
+            _isFadingOut = false;
+        }
+
+        private void OnDisable()
+        {
+            CancelCompletion();
+            isGenerating = false;
+            _currentAlpha = 0f;
+        }
+
+        private bool IsReadyToReveal()
+        {
+            var world = ChunkGridManager.Instance;
+            if (world != null && !world.IsWorldReady) return false;
+            var network = FishNet.InstanceFinder.NetworkManager;
+            if (network == null) return true;
+            // A dedicated server has no local player or view to reveal.
+            if (Application.isBatchMode && !network.ClientManager.Started) return true;
+            var camera = Duskborn.Gameplay.Player.PlayerCameraController.LocalInstance;
+            return network.ClientManager.Started && camera != null && camera.IsReadyForWorldReveal;
         }
 
         private IEnumerator FadeOutRoutine(Action onFinished)
         {
+            stageDetail = "Preparing your arrival in the sanctuary...";
+            while (!IsReadyToReveal()) yield return null;
+            // Let camera LateUpdate and the first rendered world frame settle behind
+            // the opaque loading screen before exposing the player view.
+            yield return null;
             yield return new WaitForSecondsRealtime(0.4f);
+            currentProgress = 1f;
 
             _isFadingOut = true;
-            while (_currentAlpha > 0.01f)
+            float elapsed = 0f;
+            float duration = Mathf.Max(0.1f, gameplayRevealDuration);
+            while (elapsed < duration)
             {
-                _currentAlpha = Mathf.MoveTowards(_currentAlpha, 0f, Time.unscaledDeltaTime * fadeOutSpeed);
+                // Regeneration during the transition must not expose an unfinished world.
+                if (!IsReadyToReveal())
+                {
+                    _currentAlpha = 1f;
+                    elapsed = 0f;
+                    yield return null;
+                    continue;
+                }
+                elapsed += Time.unscaledDeltaTime;
+                _currentAlpha = 1f - Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / duration));
                 yield return null;
             }
 
             _currentAlpha = 0f;
             isGenerating = false;
             _isFadingOut = false;
-            onFinished?.Invoke();
+            _completionRoutine = null;
             gameObject.SetActive(false);
+            onFinished?.Invoke();
 
             if (!Duskborn.Gameplay.Player.PlayerCameraController.IsAnyMenuOpen())
             {
@@ -224,6 +275,8 @@ namespace Duskborn.UI
             InitStyles();
 
             Matrix4x4 origMatrix = GUI.matrix;
+            int previousDepth = GUI.depth;
+            GUI.depth = -1000;
             float scale = Screen.height / 1080f;
             if (scale <= 0.001f) scale = 1f;
             float virtualW = Screen.width / scale;
@@ -282,6 +335,7 @@ namespace Duskborn.UI
 
             GUI.color = prevGuiColor;
             GUI.matrix = origMatrix;
+            GUI.depth = previousDepth;
         }
 
         private void DrawEmbers(float w, float h)

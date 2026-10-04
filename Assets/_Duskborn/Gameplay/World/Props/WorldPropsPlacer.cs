@@ -32,6 +32,7 @@ namespace Duskborn.Gameplay.World
         public SpatialOccupancyMap OccupancyMap => _occupancyMap;
 
         private bool _isSubscribed;
+        private ChunkGridManager _worldManager;
 
         private void Awake()
         {
@@ -42,6 +43,7 @@ namespace Duskborn.Gameplay.World
         private void OnEnable()
         {
             SubscribeToNetworkEvents();
+            SubscribeToWorldReady();
 
             if (Application.isPlaying)
             {
@@ -52,6 +54,7 @@ namespace Duskborn.Gameplay.World
         private void Start()
         {
             SubscribeToNetworkEvents();
+            SubscribeToWorldReady();
 
             EnsureSpawnPointsReady();
 
@@ -106,6 +109,20 @@ namespace Duskborn.Gameplay.World
         private void OnDisable()
         {
             UnsubscribeFromNetworkEvents();
+            if (_worldManager != null)
+                _worldManager.OnWorldGenerationComplete -= SpawnAllPropsOnServer;
+            _worldManager = null;
+        }
+
+        private void SubscribeToWorldReady()
+        {
+            var manager = ChunkGridManager.Instance;
+            if (_worldManager == manager) return;
+            if (_worldManager != null)
+                _worldManager.OnWorldGenerationComplete -= SpawnAllPropsOnServer;
+            _worldManager = manager;
+            if (_worldManager != null)
+                _worldManager.OnWorldGenerationComplete += SpawnAllPropsOnServer;
         }
 
         private void SubscribeToNetworkEvents()
@@ -172,6 +189,10 @@ namespace Duskborn.Gameplay.World
         {
             if (!Application.isPlaying) return;
             if (InstanceFinder.ServerManager == null || !InstanceFinder.ServerManager.Started) return;
+            SubscribeToWorldReady();
+            // The terrain pipeline owns placement until collisions, props and navigation
+            // are complete. A server connection must not start a second placement pass.
+            if (ChunkGridManager.Instance != null && !ChunkGridManager.Instance.IsWorldReady) return;
 
             EnsureContainer();
             if (propsContainer == null) return;
@@ -188,6 +209,10 @@ namespace Duskborn.Gameplay.World
                 return;
             }
 
+            // Cached scene props predate newly introduced deposits. Add missing crystal
+            // families only on the host, using the same terrain/spacing placement path.
+            var manager = ChunkGridManager.Instance;
+            if (manager != null) EnsureElementalDeposits(manager.config, manager.propsConfig, manager.ActivePropsSeed);
             int spawnedCount = 0;
             for (int i = 0; i < nobs.Length; i++)
             {
@@ -655,6 +680,42 @@ namespace Duskborn.Gameplay.World
 
             SyncWithPlayerSpawners(_spawnPoints.ToArray());
             DuskLog.Log(LogChannel.World, $"[WorldPropsPlacer] {_spawnPoints.Count} player spawn points generated successfully with the terrain.");
+        }
+
+        public int EnsureElementalDeposits(LowPolyTerrainConfig terrainConfig, WorldPropsConfig propsConfig, int seed)
+        {
+            if (terrainConfig == null || propsConfig == null || propsConfig.extraProps == null) return 0;
+            EnsureContainer();
+            var present = new HashSet<Duskborn.Gameplay.Enchanting.RuneKind>();
+            foreach (var crystal in propsContainer.GetComponentsInChildren<Duskborn.Effects.ElementalCrystalNodeVisual>(true))
+                present.Add(crystal.Element);
+            var missing = new List<PropDefinition>();
+            foreach (var prop in propsConfig.extraProps)
+            {
+                if (prop == null || prop.prefab == null) continue;
+                var visual = prop.prefab.GetComponent<Duskborn.Effects.ElementalCrystalNodeVisual>();
+                if (visual != null && !present.Contains(visual.Element)) missing.Add(prop);
+            }
+            if (missing.Count == 0) return 0;
+            _occupancyMap.RegisterClearing(Vector2.zero, propsConfig.centerClearingRadius, OccupancyType.Player_Sanctuary);
+            // Rebuild physical occupancy for previously serialized scene props.
+            foreach (Transform existing in propsContainer)
+                _occupancyMap.Register(existing.position, 2f, 0f, OccupancyType.Resource_Solid);
+            float length = terrainConfig.chunkSize * terrainConfig.cellSize;
+            float radius = Mathf.Min(terrainConfig.chunksX, terrainConfig.chunksZ) * length * .5f;
+            float boundary = (terrainConfig.boundaryType != LowPolyTerrainConfig.MapBoundaryType.None
+                ? terrainConfig.GetPlayableBoundaryRadius(radius) : radius) * .95f;
+            int before = propsContainer.childCount;
+            foreach (var prop in missing)
+            {
+                int element = (int)prop.prefab.GetComponent<Duskborn.Effects.ElementalCrystalNodeVisual>().Element;
+                var rng = new SeededRNG(seed ^ (0x435259 + element * 7919));
+                for (int z = -terrainConfig.chunksZ / 2; z < -terrainConfig.chunksZ / 2 + terrainConfig.chunksZ; z++)
+                    for (int x = -terrainConfig.chunksX / 2; x < -terrainConfig.chunksX / 2 + terrainConfig.chunksX; x++)
+                        PlaceIndividualPropsForChunk(prop, x * length, (x + 1) * length, z * length, (z + 1) * length,
+                            propsConfig.centerClearingRadius * propsConfig.centerClearingRadius, boundary, terrainConfig, rng);
+            }
+            return propsContainer.childCount - before;
         }
 
         private void PlaceResourceNodes(LowPolyTerrainConfig terrainConfig, WorldPropsConfig propsConfig, SeededRNG rng)

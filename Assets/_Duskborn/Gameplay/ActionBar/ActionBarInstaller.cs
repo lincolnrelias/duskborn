@@ -295,7 +295,7 @@ namespace Duskborn.Gameplay.ActionBar
             {
                 var canvasField = typeof(InventorySystem.Bootstrap.InventoryInstaller).GetField("canvas", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                 var invCanvas = (canvasField?.GetValue(invInstaller) as Canvas) ?? invInstaller.GetComponentInParent<Canvas>();
-                if (invCanvas != null)
+                if (invCanvas != null && !Duskborn.UI.WorldMapUI.OwnsCanvas(invCanvas))
                 {
                     var scaler = invCanvas.GetComponent<CanvasScaler>();
                     if (scaler != null && scaler.uiScaleMode == CanvasScaler.ScaleMode.ScaleWithScreenSize)
@@ -306,6 +306,7 @@ namespace Duskborn.Gameplay.ActionBar
             foreach (var c in FindObjectsByType<Canvas>(FindObjectsSortMode.None))
             {
                 if (c == canvas) continue;
+                if (Duskborn.UI.WorldMapUI.OwnsCanvas(c)) continue;
                 if (c.renderMode == RenderMode.WorldSpace) continue;
                 if (c.gameObject.name.IndexOf("Inventory", StringComparison.OrdinalIgnoreCase) >= 0)
                 {

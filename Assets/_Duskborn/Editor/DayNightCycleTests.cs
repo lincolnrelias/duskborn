@@ -22,8 +22,72 @@ namespace Duskborn.Editor
             RunTest(Test_DirectionalLightAndShadowSanity, ref passed, ref total);
             RunTest(Test_DynamicAtmosphericFogAndDensitySanity, ref passed, ref total);
             RunTest(Test_EnvironmentVisualBootstrapperPipeline, ref passed, ref total);
+            RunTest(Test_WorldEntryWaitsForGenerationAndReveal, ref passed, ref total);
 
             Debug.Log($"<color=#55FF55><b>[DayNightCycleTests] {passed}/{total} tests passed!</b></color>");
+        }
+
+        private static void Test_WorldEntryWaitsForGenerationAndReveal()
+        {
+            const System.Reflection.BindingFlags flags = System.Reflection.BindingFlags.Instance |
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public;
+            var previousWorld = ChunkGridManager.Instance;
+            bool previousMenuEntry = Duskborn.UI.MainMenuController.LoadedFromMainMenu;
+            var worldOwner = new GameObject("World entry readiness regression");
+            var clockOwner = new GameObject("World entry clock regression");
+            var loadingOwner = new GameObject("World entry reveal regression");
+            try
+            {
+                var world = worldOwner.AddComponent<ChunkGridManager>();
+                typeof(ChunkGridManager).GetProperty("Instance").SetValue(null, world);
+                var clock = clockOwner.AddComponent<DayNightCycle>();
+                // The static edit-mode runner does not perform a network spawn.
+                // Bind SyncVars to their fixture owner before exercising StartCycle.
+                var networkObject = clockOwner.GetComponent<FishNet.Object.NetworkObject>();
+                if (networkObject == null) networkObject = clockOwner.AddComponent<FishNet.Object.NetworkObject>();
+                typeof(FishNet.Object.NetworkBehaviour).GetField("_networkObjectCache", flags).SetValue(clock, networkObject);
+                foreach (var field in typeof(DayNightCycle).GetFields(flags))
+                    if (field.GetValue(clock) is FishNet.Object.Synchronizing.Internal.SyncBase sync)
+                        sync.NetworkBehaviour = clock;
+                var ready = typeof(DayNightCycle).GetMethod("IsWorldEntryReady", flags);
+                Duskborn.UI.MainMenuController.LoadedFromMainMenu = false;
+                AssertTrue(!(bool)ready.Invoke(clock, null), "The clock must wait for terrain/props/navigation.");
+
+                clock.StartCycle();
+                AssertTrue(!(bool)typeof(DayNightCycle).GetField("_running", flags).GetValue(clock),
+                    "Requesting the cycle during loading must not start the timer.");
+                AssertApproximately(clock.PhaseTimeRemaining, clock.PhaseDuration, .001f,
+                    "Loading must preserve the entire first day.");
+
+                typeof(ChunkGridManager).GetProperty("IsWorldReady").SetValue(world, true);
+                Duskborn.UI.MainMenuController.LoadedFromMainMenu = true;
+                AssertTrue(!(bool)ready.Invoke(clock, null), "The menu handoff must also finish.");
+                Duskborn.UI.MainMenuController.LoadedFromMainMenu = false;
+
+                var loading = EditModeTestSupport.AddInitialized<Duskborn.UI.WorldLoadingScreenUI>(loadingOwner);
+                loading.Show();
+                AssertTrue(Duskborn.UI.WorldLoadingScreenUI.IsBlockingGameplay, "Loading must block player input.");
+                AssertTrue(!(bool)ready.Invoke(clock, null), "World readiness alone must not bypass the reveal.");
+
+                typeof(ChunkGridManager).GetProperty("IsWorldReady").SetValue(world, false);
+                var fade = (System.Collections.IEnumerator)typeof(Duskborn.UI.WorldLoadingScreenUI)
+                    .GetMethod("FadeOutRoutine", flags).Invoke(loading, new object[] { null });
+                AssertTrue(fade.MoveNext() && fade.Current == null, "The reveal must wait for the world.");
+                AssertTrue(!loading.IsFadingOut && loading.CurrentAlpha == 1f, "Unfinished terrain must stay covered.");
+
+                typeof(ChunkGridManager).GetProperty("IsWorldReady").SetValue(world, true);
+                loading.gameObject.SetActive(false);
+                AssertTrue(!Duskborn.UI.WorldLoadingScreenUI.IsBlockingGameplay, "Hiding the cover must release input.");
+                AssertTrue((bool)ready.Invoke(clock, null), "The clock may start after readiness and reveal.");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(loadingOwner);
+                UnityEngine.Object.DestroyImmediate(clockOwner);
+                UnityEngine.Object.DestroyImmediate(worldOwner);
+                typeof(ChunkGridManager).GetProperty("Instance").SetValue(null, previousWorld);
+                Duskborn.UI.MainMenuController.LoadedFromMainMenu = previousMenuEntry;
+            }
         }
 
         private static void RunTest(Action testMethod, ref int passed, ref int total)

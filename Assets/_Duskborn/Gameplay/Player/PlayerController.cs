@@ -128,6 +128,7 @@ namespace Duskborn.Gameplay.Player
         public void OnMove(InputValue value)
         {
             if (!IsOwner) return;
+            if (Duskborn.UI.WorldLoadingScreenUI.IsBlockingGameplay) { _moveInput = Vector2.zero; return; }
             _moveInput = value.Get<Vector2>();
         }
 
@@ -140,6 +141,7 @@ namespace Duskborn.Gameplay.Player
 
         public void ToggleSprint()
         {
+            if (Duskborn.UI.WorldLoadingScreenUI.IsBlockingGameplay) return;
             if (Time.frameCount == _lastToggleFrame) return;
             _lastToggleFrame = Time.frameCount;
             _isSprinting = !_isSprinting;
@@ -154,6 +156,7 @@ namespace Duskborn.Gameplay.Player
 
         public void QueueJump()
         {
+            if (Duskborn.UI.WorldLoadingScreenUI.IsBlockingGameplay) return;
             if (!_inputEnabled || !_stats.IsAlive) return;
 
             var dodge = GetComponent<PlayerDodge>();
@@ -173,6 +176,16 @@ namespace Duskborn.Gameplay.Player
 
             if (!IsOwner) return;
             if (!_inputEnabled || !_stats.IsAlive) return;
+
+            if (Duskborn.UI.WorldLoadingScreenUI.IsBlockingGameplay)
+            {
+                _moveInput = _smoothedInput = _inputSmoothVelocity = Vector2.zero;
+                _jumpBufferTimer = 0f;
+                // Allow gravity to settle the character without moving under the cover.
+                HandleMovement();
+                UpdateAnimator();
+                return;
+            }
 
             if (Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift))
                 ToggleSprint();

@@ -31,11 +31,12 @@ namespace Duskborn.Audio
                 DayNightCycle.Instance.OnDayStart += HandleDayStart;
                 DayNightCycle.Instance.OnNightStart += HandleNightStart;
 
-                // Start the appropriate track for the current phase.
-                if (DayNightCycle.Instance.IsDay)
-                    HandleDayStart();
-                else
-                    HandleNightStart(DayNightCycle.Instance.CurrentNight);
+                // Catch up the music without replaying a phase-transition horn.
+                // OnDayStart fires once loading/reveal finishes; that event owns
+                // the arrival horn, including when this component starts earlier.
+                var currentMusic = DayNightCycle.Instance.IsDay ? dayMusic : nightMusic;
+                if (currentMusic != null && AudioManager.Instance != null)
+                    AudioManager.Instance.PlayMusic(currentMusic, musicFadeTime);
             }
             else
             {

@@ -10,7 +10,7 @@ using Duskborn.Gameplay.Loot;
 
 namespace Duskborn.Gameplay.Player
 {
-    public class PlayerStats : NetworkBehaviour, IDamageable, IHealthProvider
+    public class PlayerStats : NetworkBehaviour, IDamageable, IHealthProvider, IDebuffSource
     {
         [Header("Class")]
         [SerializeField] private ClassDefinition classDefinition;
@@ -86,6 +86,12 @@ namespace Duskborn.Gameplay.Player
         // ── HP (networked) ────────────────────────────────────────────────────
         private readonly SyncVar<float> _currentHP = new();
 
+        public bool TryGetDebuff(Duskborn.Gameplay.Enchanting.RuneKind kind, out DebuffView view)
+        {
+            view = default;
+            if (_statusEffects == null) _statusEffects = GetComponent<Combat.StatusEffectController>();
+            return IsAlive && _statusEffects != null && _statusEffects.TryGetDebuff(kind, out view);
+        }
         public float CurrentHP => _currentHP.Value;
         public bool  IsAlive   => _currentHP.Value > 0f;
 
@@ -113,6 +119,7 @@ namespace Duskborn.Gameplay.Player
             _hitFlash = GetComponent<HitFlash>();
             if (_hitFlash == null) _hitFlash = gameObject.AddComponent<HitFlash>();
             _statusEffects = GetComponent<Combat.StatusEffectController>();
+            WorldHealthBar.EnsureForActor(transform);
         }
 
         private void OnCurrentHPSync(float prev, float next, bool asServer)

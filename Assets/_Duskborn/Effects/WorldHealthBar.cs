@@ -29,6 +29,20 @@ namespace Duskborn.Effects
         [Header("Configuration")]
         [SerializeField] private HealthBarConfig config;
 
+        public static WorldHealthBar EnsureForActor(Transform actor)
+        {
+            var existing = actor.GetComponentInChildren<WorldHealthBar>(true);
+            if (existing != null) return existing;
+            var go = new GameObject("Actor vitality", typeof(RectTransform));
+            go.transform.SetParent(actor, false); return go.AddComponent<WorldHealthBar>();
+        }
+        private const float CombatWorldScale = .6f;
+        private bool _ownsConfig;
+        private static Sprite _solidSprite;
+        private bool _combatStyle;
+        private bool _playerStyle;
+        private RuneStatusBar _debuffBar;
+        private TextMeshProUGUI _healthText;
         private IHealthProvider _provider;
         private CanvasGroup     _canvasGroup;
         private Camera          _mainCamera;
@@ -51,6 +65,10 @@ namespace Duskborn.Effects
             if (transform.parent != null)
                 _lastParentScale = transform.parent.lossyScale;
 
+            _provider = GetComponentInParent<IHealthProvider>();
+            _playerStyle = _provider is Duskborn.Gameplay.Player.PlayerStats;
+            _combatStyle = _playerStyle || _provider is Duskborn.Gameplay.Enemies.EnemyBase;
+            if (_combatStyle) BuildCombatStyle();
             ComputeAnchorOffset();
             SetupTargetName();
 
@@ -80,10 +98,10 @@ namespace Duskborn.Effects
                 ghostFill.enabled    = false;
             }
 
-            if (background != null && config != null)
+            if (!_combatStyle && background != null && config != null)
                 background.color = config.bgColor;
 
-            if (frame != null && config != null)
+            if (!_combatStyle && frame != null && config != null)
                 frame.color = config.frameColor;
 
             _canvasGroup.alpha = 0f;
@@ -96,6 +114,59 @@ namespace Duskborn.Effects
         /// Respect maximum height to avoid projecting the bar into the sky on tall trees (15m),
         /// and expand the horizontal radius to include bulky branches and foliage (avoiding clipping on large trees).
         /// </summary>
+        private void BuildCombatStyle()
+        {
+            if (config == null) config = Resources.Load<HealthBarConfig>("HealthBarConfig");
+            if (config == null) { config = ScriptableObject.CreateInstance<HealthBarConfig>(); _ownsConfig = true; }
+            for (int i = transform.childCount - 1; i >= 0; i--)
+            {
+                var child = transform.GetChild(i); child.gameObject.SetActive(false);
+                if (Application.isPlaying) Destroy(child.gameObject); else DestroyImmediate(child.gameObject);
+            }
+            GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
+            GetComponent<Canvas>().sortingOrder = 20;
+            GetComponent<CanvasGroup>().blocksRaycasts = false;
+            ApplyWorldScale();
+            var rect = (RectTransform)transform; rect.sizeDelta = new Vector2(2.3f, .15f);
+            frame = CombatImage("Iron rim", transform, new Vector2(2.3f, .15f), new Color(.32f, .38f, .46f, 1));
+            background = CombatImage("Inset dark track", transform, new Vector2(2.26f, .11f), new Color(.025f, .035f, .055f, .98f));
+            ghostFill = CombatImage("Damage trail", transform, new Vector2(2.26f, .11f), new Color(1f, .69f, .22f, .9f));
+            fill = CombatImage("Vitality", transform, new Vector2(2.26f, .11f), GetBarColor(1));
+            foreach (var image in new[] { fill, ghostFill })
+            { image.type = Image.Type.Filled; image.fillMethod = Image.FillMethod.Horizontal; image.fillOrigin = 0; }
+            var sheen = CombatImage("Top light", transform, new Vector2(2.26f, .012f), new Color(1, 1, 1, .25f));
+            sheen.rectTransform.anchoredPosition = new Vector2(0, .045f);
+            for (int i = 1; i < 4; i++)
+            {
+                var mark = CombatImage("Quarter mark", transform, new Vector2(.008f, .04f), new Color(.02f, .03f, .04f, .55f));
+                mark.rectTransform.anchoredPosition = new Vector2((i / 4f - .5f) * 2.26f, -.035f);
+            }
+            nameLabel = CombatText("Name", new Vector2(2.3f, .16f), new Vector2(0, .17f), .12f);
+            _healthText = CombatText("Health", new Vector2(2.2f, .14f), Vector2.zero, .095f);
+            _healthText.fontStyle = FontStyles.Bold; _healthText.outlineWidth = .2f;
+            var source = GetComponentInParent<IDebuffSource>();
+            if (source != null)
+            {
+                var row = new GameObject("Debuffs above health", typeof(RectTransform)); row.transform.SetParent(transform, false);
+                _debuffBar = row.AddComponent<RuneStatusBar>(); _debuffBar.Initialize(source);
+            }
+        }
+        private static Image CombatImage(string label, Transform parent, Vector2 size, Color color)
+        {
+            var image = new GameObject(label, typeof(RectTransform), typeof(Image)).GetComponent<Image>();
+            image.transform.SetParent(parent, false); image.rectTransform.sizeDelta = size; image.color = color; image.raycastTarget = false;
+            if (_solidSprite == null)
+                _solidSprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0, 0, Texture2D.whiteTexture.width, Texture2D.whiteTexture.height), Vector2.one * .5f);
+            image.sprite = _solidSprite;
+            return image;
+        }
+        private TextMeshProUGUI CombatText(string label, Vector2 size, Vector2 position, float fontSize)
+        {
+            var text = new GameObject(label, typeof(RectTransform), typeof(TextMeshProUGUI)).GetComponent<TextMeshProUGUI>();
+            text.transform.SetParent(transform, false); text.rectTransform.sizeDelta = size; text.rectTransform.anchoredPosition = position;
+            text.fontSize = fontSize; text.alignment = TextAlignmentOptions.Center; text.color = Color.white; text.raycastTarget = false;
+            return text;
+        }
         private void ComputeAnchorOffset()
         {
             if (transform.parent == null) return;
@@ -138,7 +209,7 @@ namespace Duskborn.Effects
             }
 
             var rt = GetComponent<RectTransform>();
-            float barHalfHeight = rt != null ? rt.sizeDelta.y * 0.5f : 0.08f;
+            float barHalfHeight = rt != null ? rt.sizeDelta.y * 0.5f * (_combatStyle ? CombatWorldScale : 1f) : 0.08f;
             float yGap = config != null ? config.yOffset : 0.35f;
 
             // Convert the world offset to parent local space, respecting entity scale.
@@ -287,6 +358,8 @@ namespace Duskborn.Effects
 
         private void OnDestroy()
         {
+            if (_ownsConfig && config != null)
+            { if (Application.isPlaying) Destroy(config); else DestroyImmediate(config); }
             if (_provider != null)
                 _provider.OnHealthChanged -= HandleHealthChanged;
         }
@@ -313,6 +386,11 @@ namespace Duskborn.Effects
 
         private void LateUpdate()
         {
+            if (_debuffBar != null) _debuffBar.Refresh();
+            if (_healthText != null && _provider != null)
+                _healthText.SetText("{0} / {1}", Mathf.Ceil(_provider.CurrentHP), Mathf.Ceil(_provider.MaxHP));
+            if (!_playerStyle && _debuffBar != null && _debuffBar.HasDebuffs)
+            { _canvasGroup.alpha = 1f; _fadeTimer = .2f; }
             if (_canvasGroup != null && _canvasGroup.alpha <= 0.001f && _fadeTimer <= 0f && Mathf.Abs(_displayFill - _targetFill) < 0.001f)
                 return;
 
@@ -330,6 +408,17 @@ namespace Duskborn.Effects
         /// Keep the billboard aligned with the camera and clamp to the viewport when the entity is nearby
         /// or very tall, ensuring the health bar remains within the visible screen area.
         /// </summary>
+        private void ApplyWorldScale()
+        {
+            if (transform.parent == null) return;
+            Vector3 scale = transform.parent.lossyScale;
+            float size = _combatStyle ? CombatWorldScale : 1f;
+            transform.localScale = new Vector3(
+                scale.x != 0f ? size / Mathf.Abs(scale.x) : size,
+                scale.y != 0f ? size / Mathf.Abs(scale.y) : size,
+                scale.z != 0f ? size / Mathf.Abs(scale.z) : size);
+        }
+
         private void UpdatePositionAndScreenClamping()
         {
             if (transform.parent == null) return;
@@ -339,11 +428,7 @@ namespace Duskborn.Effects
 
             // Ensure uniform world scale regardless of parent scaling.
             Vector3 pScale = transform.parent.lossyScale;
-            transform.localScale = new Vector3(
-                pScale.x != 0f ? 1f / Mathf.Abs(pScale.x) : 1f,
-                pScale.y != 0f ? 1f / Mathf.Abs(pScale.y) : 1f,
-                pScale.z != 0f ? 1f / Mathf.Abs(pScale.z) : 1f
-            );
+            ApplyWorldScale();
 
             if (!_hasAnchorComputed || pScale != _lastParentScale)
             {
@@ -361,7 +446,8 @@ namespace Duskborn.Effects
 
             // Forward offset (toward the player) respecting trunk / canopy radius.
             float extraForward = config != null ? config.forwardOffset : 0.35f;
-            float totalForward = _horizontalRadius + extraForward;
+            // Combat UI stays above the body; wings must not push it toward the lens.
+            float totalForward = _combatStyle ? .15f : _horizontalRadius + extraForward;
 
             // Prevent excessive camera proximity.
             if (distToCam > 0.6f)
@@ -389,7 +475,7 @@ namespace Duskborn.Effects
                         {
                             // Safe depth when clamping to the viewport:
                             // Ensure the bar stays in front of the tree face nearest the camera.
-                            float safeZ = Mathf.Min(barVp.z, parentVp.z - _horizontalRadius - extraForward);
+                            float safeZ = Mathf.Min(barVp.z, parentVp.z - totalForward);
                             safeZ = Mathf.Max(0.5f, safeZ);
                             Vector3 clampedWorld = _mainCamera.ViewportToWorldPoint(new Vector3(clampedX, clampedY, safeZ));
                             transform.position = clampedWorld;
@@ -449,6 +535,11 @@ namespace Duskborn.Effects
 
         private Color GetBarColor(float t)
         {
+            if (_combatStyle)
+            {
+                Color healthy = _playerStyle ? new Color(.12f, .82f, .68f) : new Color(.9f, .16f, .24f);
+                return Color.Lerp(new Color(1f, .38f, .12f), healthy, Mathf.Clamp01(t * 2f));
+            }
             if (config == null) return Color.green;
 
             if (t > config.midThreshold)

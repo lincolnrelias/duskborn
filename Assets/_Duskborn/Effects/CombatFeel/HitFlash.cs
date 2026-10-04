@@ -41,7 +41,7 @@ namespace Duskborn.Effects
             var all  = GetComponentsInChildren<Renderer>(true);
             var list = new System.Collections.Generic.List<Renderer>(all.Length);
             foreach (var r in all)
-                if (r is MeshRenderer || r is SkinnedMeshRenderer) list.Add(r);
+                if ((r is MeshRenderer || r is SkinnedMeshRenderer) && r.GetComponent<RuneSurfaceMesh>() == null) list.Add(r);
 
             _renderers = list.ToArray();
         }

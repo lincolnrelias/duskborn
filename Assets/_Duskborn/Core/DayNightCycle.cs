@@ -76,12 +76,13 @@ namespace Duskborn.Core
         private readonly SyncVar<float> _timeRemaining = new();
         private readonly SyncVar<int>   _nightSync     = new();
         private readonly SyncVar<bool>  _isDaySync     = new(true);
+        private readonly SyncVar<bool>  _cycleStarted  = new(false);
 
         public DayPhase    Phase              => _isDaySync.Value ? DayPhase.Day : DayPhase.Night;
         public int         CurrentNight       => _nightSync.Value;
         public float       PhaseTimeRemaining => _timeRemaining.Value;
         public float       PhaseDuration      => _isDaySync.Value ? dayDuration : nightDuration;
-        public float       PhaseProgress      => PhaseDuration > 0f
+        public float       PhaseProgress      => Application.isPlaying && !_cycleStarted.Value ? 0f : PhaseDuration > 0f
                                                  ? Mathf.Clamp01(1f - (_timeRemaining.Value / PhaseDuration))
                                                  : 1f;
 
@@ -105,6 +106,7 @@ namespace Duskborn.Core
         public event Action              OnDawnStart;
 
         private bool _running;
+        private bool _startRequested;
         private int _heldEncounterNight;
         private const int TotalNights = 7;
         private CyclePeriod _lastPeriod = (CyclePeriod)(-1);
@@ -173,9 +175,32 @@ namespace Duskborn.Core
 
         public void StartCycle()
         {
-            _running = true;
+            if (_running || _startRequested) return;
+            _startRequested = true;
+            _cycleStarted.Value = false;
             _nightSync.Value = 0;
-            BeginDay();
+            _isDaySync.Value = true;
+            _timeRemaining.Value = dayDuration;
+            _heldEncounterNight = 0;
+            _lastPeriod = (CyclePeriod)(-1);
+        }
+
+        public override void OnStopServer()
+        {
+            _running = false;
+            _startRequested = false;
+            _cycleStarted.Value = false;
+            base.OnStopServer();
+        }
+
+        private bool IsWorldEntryReady()
+        {
+            var world = ChunkGridManager.Instance;
+            if (world != null && !world.IsWorldReady) return false;
+            if (Duskborn.UI.MainMenuController.LoadedFromMainMenu) return false;
+            var loading = Duskborn.UI.WorldLoadingScreenUI.Instance;
+            return loading == null || !loading.gameObject.activeInHierarchy ||
+                (!loading.isGenerating && !loading.IsFadingOut);
         }
 
         private void Update()
@@ -184,7 +209,18 @@ namespace Duskborn.Core
             UpdateLighting();
 
             if (!Application.isPlaying) return;
-            if (!_running || !IsServerStarted) return;
+            if (!IsServerStarted || !IsWorldEntryReady()) return;
+            if (!_running)
+            {
+                if (_startRequested)
+                {
+                    _startRequested = false;
+                    _running = true;
+                    _cycleStarted.Value = true;
+                    BeginDay();
+                }
+                return;
+            }
 
             // Keep a finite clock/lighting value while a mid-run boss owns the night.
             if (_heldEncounterNight == CurrentNight && IsNight)
@@ -262,7 +298,7 @@ namespace Duskborn.Core
                 _                     => "Day"
             };
 
-            if (CurrentPeriod != _lastPeriod)
+            if ((!Application.isPlaying || _cycleStarted.Value) && CurrentPeriod != _lastPeriod)
             {
                 _lastPeriod = CurrentPeriod;
                 OnPeriodChanged?.Invoke(CurrentPeriod);

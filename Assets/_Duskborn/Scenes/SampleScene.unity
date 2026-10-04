@@ -183,7 +183,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: SceneId
-      value: 3061837790
+      value: 2139090906
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: WasActiveDuringEdit
@@ -306,7 +306,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2002914817134659099, guid: 1964db849fc5f9e4da3f95cb2eaeb0d1, type: 3}
       propertyPath: SceneId
-      value: 901771229
+      value: 1455423453
       objectReference: {fileID: 0}
     - target: {fileID: 2002914817134659099, guid: 1964db849fc5f9e4da3f95cb2eaeb0d1, type: 3}
       propertyPath: WasActiveDuringEdit
@@ -627,7 +627,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: SceneId
-      value: 1468002297
+      value: 519962585
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: WasActiveDuringEdit
@@ -740,6 +740,37 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e1a0316d80816c44cb68cbe778dd50e9, type: 3}
+--- !u!1 &231932947
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 231932948}
+  m_Layer: 0
+  m_Name: SpawnPoints
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &231932948
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 231932947}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 10.030546, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1866741457}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!224 &242797313 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 790095091216091730, guid: e1a0316d80816c44cb68cbe778dd50e9, type: 3}
@@ -1095,7 +1126,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: SceneId
-      value: 1451098077
+      value: 880672763
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: WasActiveDuringEdit
@@ -4675,7 +4706,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: SceneId
-      value: 2629693405
+      value: 1426063324
       objectReference: {fileID: 0}
     - target: {fileID: 8058475873678479222, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
       propertyPath: WasActiveDuringEdit
@@ -4931,7 +4962,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2002914817134659099, guid: 1964db849fc5f9e4da3f95cb2eaeb0d1, type: 3}
       propertyPath: SceneId
-      value: 3179151322
+      value: 1996353502
       objectReference: {fileID: 0}
     - target: {fileID: 2002914817134659099, guid: 1964db849fc5f9e4da3f95cb2eaeb0d1, type: 3}
       propertyPath: WasActiveDuringEdit
@@ -5876,8 +5907,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1866741457}
   - component: {fileID: 1866741456}
-  - component: {fileID: 1866741458}
   - component: {fileID: 1866741459}
+  - component: {fileID: 1866741460}
   m_Layer: 0
   m_Name: TerrainManager
   m_TagString: Untagged
@@ -5899,7 +5930,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ChunkGridManager
   config: {fileID: 11400000, guid: 4a5b6c7d8e9f0123456789abcdef0123, type: 2}
   propsConfig: {fileID: 11400000, guid: 7d6f92b4d93f44b09b2d76d29288b085, type: 2}
-  propsPlacer: {fileID: 1866741458}
+  propsPlacer: {fileID: 1866741460}
   useRandomSeed: 0
   customSeed: 4442612
   propsSeed: 1999832
@@ -5932,22 +5963,9 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1340930403}
+  - {fileID: 231932948}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1866741458
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1866741455}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 92a8aa04457546a8b0f8e12825bce1de, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.World.WorldPropsPlacer
-  propsContainer: {fileID: 1340930403}
-  spawnPointsContainer: {fileID: 0}
 --- !u!114 &1866741459
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5980,6 +5998,20 @@ MonoBehaviour:
   m_MinRegionArea: 2
   m_NavMeshData: {fileID: 0}
   m_BuildHeightMesh: 0
+--- !u!114 &1866741460
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1866741455}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77e42864b6ba474b9f21cf8074588f5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.World.WorldPropsPlacer
+  propsContainer: {fileID: 1340930403}
+  spawnPointsContainer: {fileID: 231932948}
 --- !u!1001 &1866968905
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6345,7 +6377,7 @@ MonoBehaviour:
   <PrefabId>k__BackingField: 65535
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 0
-  SceneId: 4240306141
+  SceneId: 931135486
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
     Rotation: {x: 0, y: 0, z: 0, w: 0}
@@ -6381,6 +6413,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b9632d7e6228ec44afdb13e29da02b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.UI.InventoryUIManager
+  <LastClosedFrame>k__BackingField: -1
   installer: {fileID: 1870906752}
   inventoryRoot: {fileID: 6283936001038893360}
   actionBarInstaller: {fileID: 1304203857}
@@ -6389,6 +6422,16 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 1a517227434bc244ea2f70fd56b7c1b2, type: 2}
   - {fileID: 11400000, guid: 2a0acc988d7bb054889caff0a3472d3d, type: 2}
   - {fileID: 11400000, guid: bf7b5f988956014458ebc1a8ae0e761e, type: 2}
+  _resourceInventory: {fileID: 0}
+  _playerInteractor: {fileID: 0}
+  _playerEquipment: {fileID: 0}
+  _dropEventSubscribed: 0
+  _actionBarDropSubscribed: 0
+  _hoveredInventorySlot: -1
+  _hoveredActionBarSlot: -1
+  _slotEventsSubscribed: 0
+  _stationContext: 0
+  _positionBeforeStation: {x: 0, y: 0}
 --- !u!114 &1870906752
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7549,7 +7592,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2002914817134659099, guid: 1964db849fc5f9e4da3f95cb2eaeb0d1, type: 3}
       propertyPath: SceneId
-      value: 1027600379
+      value: 3720347644
       objectReference: {fileID: 0}
     - target: {fileID: 2002914817134659099, guid: 1964db849fc5f9e4da3f95cb2eaeb0d1, type: 3}
       propertyPath: WasActiveDuringEdit

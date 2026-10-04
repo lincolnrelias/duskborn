@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4830ff8040ac474784de00cb3aee289, type: 3}
+  m_Name: material_frost_crystal
+  m_EditorClassIdentifier: Assembly-CSharp::InventorySystem.Data.MaterialDefinition
+  id: material_frost_crystal
+  displayName: Frost Crystal
+  description: Mined from magical frost crystal nodes. Used at the Arcane Table to
+    craft Frost runestones.
+  icon: {fileID: 2800000, guid: e07de0d166b94081b861e119b11662fc, type: 3}
+  dropPrefab: {fileID: 5730378362320477944, guid: 3ab15507a96a23b448e7ca84d96cf904, type: 3}
+  rarity: 1
+  category: crystal

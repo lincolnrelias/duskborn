@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_runestone_frost_1
   recipeName: Frost Runestone I
-  description: "Chilled: slows movement 5% per stack; 8 stacks freeze briefly. Applies 1 stacks per weapon hit; maximum 12 stacks. One etching per weapon."
+  description: 'Chilled: slows movement 5% per stack; 8 stacks freeze briefly. Applies
+    1 stacks per weapon hit; maximum 12 stacks. One etching per weapon.'
   category: Runestones
   tier: 1
   requiredStation: 3
@@ -28,5 +29,7 @@ MonoBehaviour:
     amount: 2
   - material: {fileID: 11400000, guid: ac75ce17d5fdcaf4d956e4f0e2ed6c88, type: 2}
     amount: 2
+  - material: {fileID: 11400000, guid: add63bfabff16fa488fef2673e1f801e, type: 2}
+    amount: 3
   fuelIngredients: []
   processingSeconds: 0

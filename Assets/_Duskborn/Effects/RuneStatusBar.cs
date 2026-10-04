@@ -6,53 +6,78 @@ using UnityEngine.UI;
 
 namespace Duskborn.Effects
 {
+    /// <summary>Shared health-bar child, with a dim base and clockwise remaining-time image.</summary>
     public sealed class RuneStatusBar : MonoBehaviour
     {
-        private Canvas _canvas;
-        private Camera _camera;
         private readonly RectTransform[] _chips = new RectTransform[9];
+        private readonly Image[] _clocks = new Image[9];
         private readonly TextMeshProUGUI[] _counts = new TextMeshProUGUI[9];
-        public void Configure(float height)
+        private readonly Sprite[] _ownedSprites = new Sprite[9];
+        private IDebuffSource _source;
+        public bool HasDebuffs { get; private set; }
+
+        public void Initialize(IDebuffSource source)
         {
-            _canvas = gameObject.AddComponent<Canvas>(); _canvas.renderMode = RenderMode.WorldSpace;
-            var rect = GetComponent<RectTransform>(); rect.sizeDelta = new Vector2(288, 24);
-            transform.localPosition = Vector3.up * height; transform.localScale = Vector3.one * .0075f;
+            _source = source;
+            var rect = (RectTransform)transform;
+            rect.sizeDelta = new Vector2(2.24f, .33f);
+            rect.anchoredPosition = new Vector2(0, .40f);
             for (int i = 1; i <= 8; i++)
             {
-                var rune = (RuneKind)i;
-                var chip = new GameObject(rune + " stacks", typeof(RectTransform)).GetComponent<RectTransform>();
-                chip.SetParent(transform, false); chip.sizeDelta = new Vector2(36, 24); _chips[i] = chip;
-                var image = new GameObject("Rune", typeof(RectTransform), typeof(RawImage)).GetComponent<RawImage>();
-                image.transform.SetParent(chip, false); image.raycastTarget = false;
-                image.rectTransform.sizeDelta = new Vector2(20, 20); image.rectTransform.anchoredPosition = new Vector2(-8, 0);
-                image.texture = Resources.Load<MaterialDefinition>("Runestones/" + RuneCatalog.Id(rune, 1))?.Icon;
-                var label = new GameObject("Count", typeof(RectTransform), typeof(TextMeshProUGUI)).GetComponent<TextMeshProUGUI>();
-                label.transform.SetParent(chip, false); label.raycastTarget = false; label.fontSize = 13; label.fontStyle = FontStyles.Bold;
-                label.color = Color.white; label.outlineWidth = .2f;
-                label.alignment = TextAlignmentOptions.MidlineLeft;
-                label.rectTransform.sizeDelta = new Vector2(18, 24); label.rectTransform.anchoredPosition = new Vector2(12, 0);
-                _counts[i] = label; chip.gameObject.SetActive(false);
+                var kind = (RuneKind)i;
+                var chip = new GameObject(kind + " status", typeof(RectTransform)).GetComponent<RectTransform>();
+                chip.SetParent(transform, false); chip.sizeDelta = new Vector2(.26f, .29f); _chips[i] = chip;
+                Image panel = Image("Obsidian socket", chip, new Vector2(.26f, .29f), new Color(.025f, .032f, .055f, .96f));
+                var border = Image("Element accent", chip, new Vector2(.26f, .018f), RuneCatalog.Color(kind));
+                border.rectTransform.anchoredPosition = new Vector2(0, .14f);
+                Texture2D texture = Resources.Load<MaterialDefinition>("Runestones/" + RuneCatalog.Id(kind, 1))?.Icon as Texture2D;
+                Sprite sprite = texture != null ? Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.one * .5f) : null;
+                _ownedSprites[i] = sprite;
+                var baseIcon = Image("Expired portion", chip, new Vector2(.23f, .23f), new Color(.25f, .27f, .31f, .8f));
+                baseIcon.sprite = sprite; baseIcon.preserveAspect = true;
+                var clock = Image("Clockwise time remaining", chip, new Vector2(.23f, .23f), Color.white);
+                clock.sprite = sprite; clock.preserveAspect = true; clock.type = UnityEngine.UI.Image.Type.Filled;
+                clock.fillMethod = UnityEngine.UI.Image.FillMethod.Radial360;
+                clock.fillOrigin = (int)UnityEngine.UI.Image.Origin360.Top; clock.fillClockwise = true; _clocks[i] = clock;
+                var countSocket = Image("Stack badge", chip, new Vector2(.13f, .115f), new Color(.015f, .02f, .03f, 1));
+                countSocket.rectTransform.anchoredPosition = new Vector2(.065f, -.095f);
+                var count = new GameObject("Stacks", typeof(RectTransform), typeof(TextMeshProUGUI)).GetComponent<TextMeshProUGUI>();
+                count.transform.SetParent(countSocket.transform, false); count.rectTransform.sizeDelta = countSocket.rectTransform.sizeDelta;
+                count.raycastTarget = false; count.fontSize = .093f; count.fontStyle = FontStyles.Bold;
+                count.alignment = TextAlignmentOptions.Center; count.color = Color.white;
+                _counts[i] = count; chip.gameObject.SetActive(false);
             }
         }
-        public void SetStacks(int[] values)
+
+        private static Image Image(string name, Transform parent, Vector2 size, Color color)
         {
+            var image = new GameObject(name, typeof(RectTransform), typeof(Image)).GetComponent<Image>();
+            image.transform.SetParent(parent, false); image.rectTransform.sizeDelta = size;
+            image.color = color; image.raycastTarget = false; return image;
+        }
+
+        public void Refresh()
+        {
+            if (_source == null) return;
             int active = 0;
-            for (int i = 1; i <= 8; i++) if (values[i] != 0) active++;
-            _canvas.enabled = active > 0;
+            for (int i = 1; i <= 8; i++) if (_source.TryGetDebuff((RuneKind)i, out _)) active++;
+            HasDebuffs = active > 0;
             int ordinal = 0;
             for (int i = 1; i <= 8; i++)
             {
-                bool show = values[i] != 0; _chips[i].gameObject.SetActive(show);
+                bool show = _source.TryGetDebuff((RuneKind)i, out var view);
+                _chips[i].gameObject.SetActive(show);
                 if (!show) continue;
-                _chips[i].anchoredPosition = new Vector2((ordinal++ - (active - 1) * .5f) * 36, 0);
-                _counts[i].text = values[i] < 0 ? "!" : values[i].ToString();
+                _chips[i].anchoredPosition = new Vector2((ordinal++ - (active - 1) * .5f) * .28f, 0);
+                _clocks[i].fillAmount = Mathf.Clamp01(view.Remaining);
+                _counts[i].SetText("{0}", view.Stacks);
+                _counts[i].color = view.Locked ? RuneCatalog.Color((RuneKind)i) : Color.white;
             }
         }
-        private void LateUpdate()
+        private void OnDestroy()
         {
-            if (_camera == null) _camera = Camera.main;
-            if (_camera == null || !_canvas.enabled) return;
-            transform.rotation = _camera.transform.rotation;
+            foreach (var sprite in _ownedSprites)
+                if (sprite != null) { if (Application.isPlaying) Destroy(sprite); else DestroyImmediate(sprite); }
         }
     }
 }

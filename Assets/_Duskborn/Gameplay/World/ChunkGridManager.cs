@@ -301,6 +301,9 @@ public class ChunkGridManager : MonoBehaviour
             }
         }
 
+        // Scene terrain can survive commit cleanup while its generated NavMesh does not.
+        // Restore navigation before allowing players or wave spawns into this world.
+        EnsureRuntimeNavigation();
         IsGenerating = false;
         IsWorldReady = true;
         OnWorldGenerationComplete?.Invoke();
@@ -314,7 +317,7 @@ public class ChunkGridManager : MonoBehaviour
         IsWorldReady = false;
 
         WorldLoadingScreenUI loadingUI = null;
-        if (showLoadingScreen && Application.isPlaying)
+        if (Application.isPlaying && (showLoadingScreen || WorldLoadingScreenUI.IsBlockingGameplay))
         {
             loadingUI = WorldLoadingScreenUI.EnsureInstance();
             loadingUI.Show("Awakening the Twilight...", "Synchronizing the sanctuary and ancestral lands...");
@@ -358,6 +361,10 @@ public class ChunkGridManager : MonoBehaviour
             }
         }
 
+        if (navMeshSurface == null || navMeshSurface.navMeshData == null)
+            yield return RebuildNavMeshAsync();
+        else
+            EnsureRuntimeNavigation();
         IsGenerating = false;
         IsWorldReady = true;
         OnWorldGenerationComplete?.Invoke();
@@ -383,7 +390,7 @@ public class ChunkGridManager : MonoBehaviour
         IsWorldReady = false;
 
         WorldLoadingScreenUI loadingUI = null;
-        if (showLoadingScreen && Application.isPlaying)
+        if (Application.isPlaying && (showLoadingScreen || WorldLoadingScreenUI.IsBlockingGameplay))
         {
             loadingUI = WorldLoadingScreenUI.EnsureInstance();
             loadingUI.Show("Building World...", "Initializing terrain seeds...");
@@ -1161,6 +1168,17 @@ public class ChunkGridManager : MonoBehaviour
         return navMeshSurface;
     }
 
+    public void EnsureRuntimeNavigation()
+    {
+        var surface = EnsureNavMeshSurface();
+        if (surface == null) return;
+        Physics.SyncTransforms();
+        if (surface.navMeshData == null)
+            RebuildNavMesh();
+        else
+            surface.AddData();
+    }
+
     [ContextMenu("Rebuild NavMesh")]
     public void RebuildNavMesh()
     {
@@ -1195,7 +1213,14 @@ public class ChunkGridManager : MonoBehaviour
 
         if (navMeshSurface.navMeshData == null)
         {
-            navMeshSurface.navMeshData = new NavMeshData();
+            // UpdateNavMesh builds in the data's coordinate frame, while AddData
+            // installs it at the surface transform. Match BuildNavMeshData's
+            // origin so translated terrain does not receive the offset twice.
+            navMeshSurface.navMeshData = new NavMeshData(navMeshSurface.agentTypeID)
+            {
+                position = navMeshSurface.transform.position,
+                rotation = navMeshSurface.transform.rotation
+            };
         }
 
         AsyncOperation op = navMeshSurface.UpdateNavMesh(navMeshSurface.navMeshData);
@@ -1212,6 +1237,9 @@ public class ChunkGridManager : MonoBehaviour
             navMeshSurface.BuildNavMesh();
         }
 
+        // UpdateNavMesh populates data but does not register newly created data for queries.
+        // Without AddData, SamplePosition rejects every wave spawn on a fresh world.
+        EnsureRuntimeNavigation();
         onProgress?.Invoke(1.0f, "Navigation mesh complete.");
         Debug.Log("[ChunkGridManager] Asynchronous NavMesh completed successfully.");
     }

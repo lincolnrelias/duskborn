@@ -18,6 +18,7 @@ namespace Duskborn.Gameplay.Hotkeys
         public const string Skill3   = "Skill3";
         public const string Interact = "Interact";
         public const string Build = "Build";
+        public const string Map = "Map";
         public const string BuildRotate = "BuildRotate";
         public const string Dodge    = "Dodge";
 
@@ -32,6 +33,7 @@ namespace Duskborn.Gameplay.Hotkeys
         // against this, so new actions only need a const + an entry here.
         public static readonly Binding[] DefaultBindings =
         {
+            new() { actionId = Map, key = KeyCode.M },
             new() { actionId = Build, key = KeyCode.B },
             new() { actionId = BuildRotate, key = KeyCode.R },
             new() { actionId = Skill1,   key = KeyCode.Q },

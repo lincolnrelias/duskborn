@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_runestone_stone_2
   recipeName: Stone Runestone II
-  description: "Burdened: slows movement 4% per stack. Applies 2 stacks per weapon hit; maximum 12 stacks. One etching per weapon."
+  description: 'Burdened: slows movement 4% per stack. Applies 2 stacks per weapon
+    hit; maximum 12 stacks. One etching per weapon.'
   category: Runestones
   tier: 2
   requiredStation: 3
@@ -30,5 +31,7 @@ MonoBehaviour:
     amount: 2
   - material: {fileID: 11400000, guid: ac75ce17d5fdcaf4d956e4f0e2ed6c88, type: 2}
     amount: 2
+  - material: {fileID: 11400000, guid: 34eb0441839ffd747b5d63ba593a30cc, type: 2}
+    amount: 6
   fuelIngredients: []
   processingSeconds: 0

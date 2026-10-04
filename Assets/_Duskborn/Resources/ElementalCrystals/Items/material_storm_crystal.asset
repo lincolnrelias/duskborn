@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4830ff8040ac474784de00cb3aee289, type: 3}
+  m_Name: material_storm_crystal
+  m_EditorClassIdentifier: Assembly-CSharp::InventorySystem.Data.MaterialDefinition
+  id: material_storm_crystal
+  displayName: Storm Crystal
+  description: Mined from magical storm crystal nodes. Used at the Arcane Table to
+    craft Storm runestones.
+  icon: {fileID: 2800000, guid: 700d4a0d618c442f8e481e475cf6055d, type: 3}
+  dropPrefab: {fileID: 5586754164676103279, guid: ebd800c49e8eef3428ced2988b84941a, type: 3}
+  rarity: 1
+  category: crystal

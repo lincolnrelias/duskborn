@@ -16,6 +16,8 @@ namespace Duskborn.Gameplay.Player
     public class PlayerCameraController : MonoBehaviour
     {
         public static PlayerCameraController LocalInstance { get; set; }
+        public bool IsReadyForWorldReveal => _isInitialized && _controller != null &&
+            _controller.IsOwner && _mainCam != null && _mainCam.isActiveAndEnabled;
 
         [Header("Target and Positioning")]
         [Tooltip("Pivot point relative to the player (chest / eye height).")]
@@ -324,6 +326,7 @@ namespace Duskborn.Gameplay.Player
         private void HandleZoomInput()
         {
             if (_isRotationLocked || IsAnyMenuOpen()) return;
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
 
             // Support zoom while holding Alt or using dedicated keys ([ and ]).
             var kb = Keyboard.current;
@@ -357,6 +360,7 @@ namespace Duskborn.Gameplay.Player
         /// </summary>
         public static bool IsAnyMenuOpen()
         {
+            if (WorldMapUI.Instance != null && WorldMapUI.Instance.IsExpanded) return true;
             if (Duskborn.Gameplay.Building.BuildingController.MenuOpen) return true;
             if (InGameMenuController.Instance != null && InGameMenuController.Instance.IsOpen)
                 return true;
@@ -411,12 +415,25 @@ namespace Duskborn.Gameplay.Player
             if (kb != null && kb.leftAltKey.wasPressedThisFrame && !_isRotationLocked &&
                 !(_combat != null && _combat.HasRangedWeaponEquipped))
             {
-                _isAltUnlocked = !_isCursorLocked;
+                _isAltUnlocked = _isCursorLocked;
                 SetCursorLocked(!_isCursorLocked);
                 return;
             }
 
             bool anyMenuOpen = IsAnyMenuOpen();
+
+            // A visible pointer over the map belongs to UI before any automatic
+            // recovery or click-to-focus handling. UGUI's cached hit can still be
+            // from the previous frame when camera Update runs first.
+            if (Cursor.visible && Cursor.lockState != CursorLockMode.Locked &&
+                WorldMapUI.Instance != null && WorldMapUI.Instance.ContainsScreenPoint(
+                    Mouse.current != null ? Mouse.current.position.ReadValue() : (Vector2)Input.mousePosition))
+            {
+                _wasAnyMenuOpen = anyMenuOpen;
+                _isAltUnlocked = true;
+                SetCursorLocked(false);
+                return;
+            }
 
             // When an open / visible element closes / hides, ensure the cursor disappears immediately.
             if (_wasAnyMenuOpen && !anyMenuOpen)
@@ -471,6 +488,7 @@ namespace Duskborn.Gameplay.Player
             }
 
             bool isOverUI = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
+            if (isOverUI) return;
 
             // Case 1: NO menu is open and the cursor was visible / unlocked.
             // Clicking anywhere focuses the game, hides the cursor, and locks aim.

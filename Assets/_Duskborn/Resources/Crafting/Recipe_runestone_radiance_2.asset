@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_runestone_radiance_2
   recipeName: Radiance Runestone II
-  description: "Seared: 1 damage per stack each second; reduces enemy damage 2% per stack. Applies 2 stacks per weapon hit; maximum 12 stacks. One etching per weapon."
+  description: 'Seared: 1 damage per stack each second; reduces enemy damage 2% per
+    stack. Applies 2 stacks per weapon hit; maximum 12 stacks. One etching per weapon.'
   category: Runestones
   tier: 2
   requiredStation: 3
@@ -30,5 +31,7 @@ MonoBehaviour:
     amount: 6
   - material: {fileID: 11400000, guid: a3e031a0d03acc5498fc981e1a8b3200, type: 2}
     amount: 2
+  - material: {fileID: 11400000, guid: b0ebfaa24d2ea634e9d26a6d1aed853b, type: 2}
+    amount: 6
   fuelIngredients: []
   processingSeconds: 0

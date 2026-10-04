@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4830ff8040ac474784de00cb3aee289, type: 3}
+  m_Name: material_blood_crystal
+  m_EditorClassIdentifier: Assembly-CSharp::InventorySystem.Data.MaterialDefinition
+  id: material_blood_crystal
+  displayName: Blood Crystal
+  description: Mined from magical blood crystal nodes. Used at the Arcane Table to
+    craft Blood runestones.
+  icon: {fileID: 2800000, guid: 941bec55413c46eea46775c210595c40, type: 3}
+  dropPrefab: {fileID: 8990948201890967570, guid: a35046d5a18b4c843b617f0a8cbe340f, type: 3}
+  rarity: 1
+  category: crystal

@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_runestone_storm_1
   recipeName: Storm Runestone I
-  description: "Charged: 6 stacks discharge for 18 damage and stagger. Applies 1 stacks per weapon hit; maximum 12 stacks. One etching per weapon."
+  description: 'Charged: 6 stacks discharge for 18 damage and stagger. Applies 1
+    stacks per weapon hit; maximum 12 stacks. One etching per weapon.'
   category: Runestones
   tier: 1
   requiredStation: 3
@@ -28,5 +29,7 @@ MonoBehaviour:
     amount: 2
   - material: {fileID: 11400000, guid: 1a517227434bc244ea2f70fd56b7c1b2, type: 2}
     amount: 2
+  - material: {fileID: 11400000, guid: 9a8090b8ed0e6984d8019545c37b6a21, type: 2}
+    amount: 3
   fuelIngredients: []
   processingSeconds: 0

@@ -50,6 +50,7 @@ namespace Duskborn.UI
 
         private void OnEnable()
         {
+            if (Application.isPlaying) WorldMapUI.Ensure();
             LocalPlayerContext.OnLocalPlayerRegistered += HandleLocalPlayerRegistered;
             LocalPlayerContext.OnLocalPlayerUnregistered += HandleLocalPlayerUnregistered;
             TryCacheLocalPlayer();

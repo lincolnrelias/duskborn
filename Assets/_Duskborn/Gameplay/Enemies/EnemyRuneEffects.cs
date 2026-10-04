@@ -5,11 +5,25 @@ using UnityEngine;
 
 namespace Duskborn.Gameplay.Enemies
 {
-    public abstract partial class EnemyBase
+    public abstract partial class EnemyBase : Duskborn.Effects.IDebuffSource
     {
         private readonly SyncVar<ulong> _runeStacks = new();
         private readonly SyncVar<bool> _runeFrozen = new();
         private readonly SyncVar<RuneKind> _runeLockKind = new();
+        private readonly SyncDictionary<int, Duskborn.Effects.DebuffTiming> _runeTiming = new();
+        private double RuneNetworkTime => TimeManager != null ? TimeManager.TicksToTime(TimeManager.Tick) : Time.timeAsDouble;
+        public bool TryGetDebuff(RuneKind kind, out Duskborn.Effects.DebuffView view)
+        {
+            view = default;
+            int stacks = RuneStacks(kind);
+            bool locked = RuneFrozen && RuneLockKind == kind;
+            if (!IsAlive || (stacks <= 0 && !locked)) return false;
+            // Stack/control state drives visibility. Clock metadata can arrive in a later
+            // network update and must never hide an already active debuff or its VFX.
+            float remaining = _runeTiming.TryGetValue((int)kind, out var timing) ? timing.Remaining(RuneNetworkTime) : 1f;
+            view = new Duskborn.Effects.DebuffView(Mathf.Max(1, stacks), remaining, locked);
+            return true;
+        }
         private float _runeFrozenUntil;
         private readonly float[] _runeExpires = new float[9];
         private readonly PlayerStats[] _runeAttackers = new PlayerStats[9];
@@ -35,6 +49,8 @@ namespace Duskborn.Gameplay.Enemies
             SetRuneStacks(rune.kind, stacks);
             _runeExpires[(int)rune.kind] = Time.time + (rune.kind == RuneKind.Venom ? 9f : RuneCatalog.Duration);
             _runeAttackers[(int)rune.kind] = attacker;
+            _runeTiming[(int)rune.kind] = new Duskborn.Effects.DebuffTiming(RuneNetworkTime,
+                rune.kind == RuneKind.Venom ? 9f : RuneCatalog.Duration, stacks);
             if (!hadStacks) _runeTickAt = Time.time + 1f;
             if (rune.kind == RuneKind.Storm && RuneCatalog.ShouldProc(rune.kind, stacks))
             {
@@ -45,6 +61,7 @@ namespace Duskborn.Gameplay.Enemies
                 _runeFrozen.Value = true;
                 _runeLockKind.Value = RuneKind.Storm;
                 _runeFrozenUntil = Time.time + .4f;
+                _runeTiming[(int)rune.kind] = new Duskborn.Effects.DebuffTiming(RuneNetworkTime, .4f, 1);
                 _staggerTimer = Mathf.Max(_staggerTimer, .4f);
             }
             if (rune.kind == RuneKind.Frost && RuneCatalog.ShouldProc(rune.kind, stacks))
@@ -54,7 +71,9 @@ namespace Duskborn.Gameplay.Enemies
                 // Bosses still receive chill, with a shorter freeze to preserve encounters.
                 _runeFrozen.Value = true;
                 _runeLockKind.Value = RuneKind.Frost;
-                _runeFrozenUntil = Time.time + (this is HollowWardenBoss ? .35f : 1.2f);
+                float lockDuration = this is HollowWardenBoss ? .35f : 1.2f;
+                _runeFrozenUntil = Time.time + lockDuration;
+                _runeTiming[(int)rune.kind] = new Duskborn.Effects.DebuffTiming(RuneNetworkTime, lockDuration, 1);
                 _staggerTimer = Mathf.Max(_staggerTimer, .35f);
             }
         }
@@ -90,6 +109,7 @@ namespace Duskborn.Gameplay.Enemies
             _runeFrozen.Value = false;
             _runeLockKind.Value = RuneKind.None;
             _runeFrozenUntil = 0;
+            _runeTiming.Clear();
             System.Array.Clear(_runeExpires, 0, _runeExpires.Length);
             System.Array.Clear(_runeAttackers, 0, _runeAttackers.Length);
             _runeTickAt = Time.time + 1f;

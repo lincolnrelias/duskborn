@@ -225,6 +225,9 @@ namespace Duskborn.Editor
             var suites = new[]
             {
                 new TestSuite(nameof(ArcaneTableTests), ArcaneTableTests.RunAllTests),
+                new TestSuite(nameof(ElementalCrystalTests), ElementalCrystalTests.RunAllTests),
+                new TestSuite(nameof(RunePresentationTests), RunePresentationTests.RunAllTests),
+                new TestSuite(nameof(RuntimePresentationRegressionTests), RuntimePresentationRegressionTests.RunAllTests),
                 new TestSuite(nameof(RangedCombatTests), RangedCombatTests.RunAllTests),
                 new TestSuite(nameof(FreeMovingCombatTests), FreeMovingCombatTests.RunAllTests),
                 new TestSuite(nameof(AudioDatabaseTests), AudioDatabaseTests.RunAllTests),
@@ -241,6 +244,7 @@ namespace Duskborn.Editor
                 new TestSuite(nameof(ItemTierDropTests), ItemTierDropTests.RunAllTests),
                 new TestSuite(nameof(ResourceGatheringTests), ResourceGatheringTests.RunAllTests),
                 new TestSuite(nameof(SpatialOccupancyMapTests), SpatialOccupancyMapTests.RunAllTests),
+                new TestSuite(nameof(WorldMapTests), WorldMapTests.RunAllTests),
                 new TestSuite(nameof(UIResolutionScalingTests), UIResolutionScalingTests.RunAllTests),
                 new TestSuite(nameof(WorldHealthBarTests), WorldHealthBarTests.RunAllTests),
                 new TestSuite(nameof(ItemFittingStudioTests), ItemFittingStudioTests.RunAllTests)

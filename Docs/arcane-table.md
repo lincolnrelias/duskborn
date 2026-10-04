@@ -19,7 +19,7 @@ One rune is consumed per etching. Each weapon has one etching. Replacing one req
 
 Each effect has a 12-stack cap. Hits refresh its duration; effects other than Venom last 6 seconds. Stone and Frost reductions combine with a 25% movement floor. Enemy death and pool reset clear stacks, source attribution, timers, and control effects. Periodic kills retain loot attribution to the player who applied the effect.
 
-Weapon auras, projectile auras, debuff particles, discharge bursts, and overhead rune icons/counts communicate effects. Fire uses rising wisps; Venom bubbles; Storm jagged arcs; Stone falling chips; Frost snow crystals; Blood droplets; Hex broken rings; Radiance rays. Consumed charge/freeze displays an exclamation mark rather than a fictitious stack count. The dedicated URP shader is in Resources so it is included in builds.
+Weapon auras, projectile auras, debuff particles, discharge bursts, and overhead rune icons/counts communicate effects. Fire uses rising wisps; Venom bubbles; Storm jagged arcs; Stone falling chips; Frost snow crystals; Blood droplets; Hex broken rings; Radiance rays. Consumed charge/freeze displays one control-effect stack with its own short countdown. The dedicated URP shader is in Resources so it is included in builds.
 
 ## Crafting and item assets
 
@@ -55,3 +55,28 @@ Generated with the built-in imagegen tool. One transparent three-tier strip per 
 Shared prompt: "Game inventory sprite asset: [family] runestone tier progression strip. Exactly THREE separate stones in one horizontal row, equal spaced centers at one sixth, one half and five sixths of width. Transparent background. Hand-painted low-poly medieval fantasy inventory icons. Each dark slate hexagonal stone bears a deeply etched glowing [symbol] rune. Tier 1 simple chipped stone; tier 2 silver bevel two inset gems; tier 3 ornate gold bevel three gems. All stones same scale occupying 70% of each square cell, centered with generous empty transparent margins, fully separate, no overlap, no text, no letters, no labels, no shadows outside stone. Wide image aspect ratio 3:1. Crisp silhouette readable at 64px."
 
 The family/symbol pairs were Flame/orange flame, Venom/green serpent fang, Storm/yellow lightning bolt, Stone/ochre mountain, Frost/cyan snowflake, Blood/crimson blood drop, Hex/violet broken eye, and Radiance/gold white sun.
+
+## Health and debuff presentation
+
+Enemies and players share an iron-framed health track with numeric HP, quarter markers,
+a delayed amber damage trail, and a debuff row above the name. Enemy vitality is crimson;
+player vitality is teal. Enemy bars remain visible while debuffs are active. Player bars
+start hidden, show after damage, and fade after the existing recent-hit delay. Existing gathering-node bars retain their style.
+
+Each icon has a dim base, a clockwise radial image starting at the top for remaining time,
+and a stack badge. Rune timing is replicated using FishNet network time, including refreshes
+at the stack cap and the short Storm/Frost control durations. Late observers receive the
+current deadline. PlayerStats exposes the same presentation source and forwards existing
+Burn, Slow, Stun and Bleed statuses (Flame, Stone, Storm and Blood icons); invulnerability
+is a buff and is excluded. These legacy statuses accept an optional stack amount.
+
+A single composite surface shader chooses distinct rune patterns in actor space; it does
+not add all colors into white or replace authored materials. Extra mesh passes follow
+skinning and blend shapes, and do not participate in hit flashes or invulnerability material
+swaps. Particles use different silhouettes and vertical bands, share an emission budget,
+and preserve their colors when overlapping. Cleared effects disable the surface pass.
+
+`RunePresentationTests` checks timing refresh/expiration, eight-icon layout, actor integration,
+surface isolation and particle limits. `Tools/unity.ps1 capture-runes` produces a static GPU
+preview using the actual actor/weapon prefabs. Combat motion, pooled reuse and multiplayer
+clock synchronization still need an in-game check with two clients.

@@ -164,6 +164,7 @@ namespace Duskborn.Gameplay.Enemies
             SpawnWeaponVisual();
             if (GetComponent<Duskborn.Effects.EnemyRuneVisuals>() == null)
                 gameObject.AddComponent<Duskborn.Effects.EnemyRuneVisuals>();
+            Duskborn.Effects.WorldHealthBar.EnsureForActor(transform);
         }
 
         protected virtual bool UseGenericAudio => true;

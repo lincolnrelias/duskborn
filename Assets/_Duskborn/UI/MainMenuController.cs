@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -29,6 +30,7 @@ namespace Duskborn.UI
         private bool _showSettingsModal = false;
         private float _masterVolume = 1.0f;
         private bool _isFullScreen = true;
+        private bool _isLoadingGame;
 
         // Atmospheric twilight ember particles.
         private struct DuskEmber
@@ -202,15 +204,27 @@ namespace Duskborn.UI
 
         public void LoadGame()
         {
+            if (_isLoadingGame) return;
+            _isLoadingGame = true;
             Debug.Log($"[MainMenuController] Starting journey in scene: {targetGameScene}");
             LoadedFromMainMenu = true;
-            SceneManager.LoadScene(targetGameScene);
+            WorldLoadingScreenUI.EnsureInstance().Show("Opening the Twilight Portal...", "Preparing your expedition...");
+            StartCoroutine(LoadGameRoutine());
+        }
+
+        private IEnumerator LoadGameRoutine()
+        {
+            // Render the loading cover before scene deserialization can stall a frame.
+            yield return null;
+            var operation = SceneManager.LoadSceneAsync(targetGameScene);
+            while (operation != null && !operation.isDone) yield return null;
         }
 
         private const float RefHeight = 1080f;
 
         private void OnGUI()
         {
+            if (_isLoadingGame) return;
             InitStyles();
 
             Matrix4x4 origMatrix = GUI.matrix;

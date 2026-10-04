@@ -1,0 +1,50 @@
+[
+  {
+    "element": "flame",
+    "triangles": 392,
+    "mesh_objects": 3,
+    "uv": true
+  },
+  {
+    "element": "nature",
+    "triangles": 358,
+    "mesh_objects": 4,
+    "uv": true
+  },
+  {
+    "element": "storm",
+    "triangles": 380,
+    "mesh_objects": 3,
+    "uv": true
+  },
+  {
+    "element": "earth",
+    "triangles": 322,
+    "mesh_objects": 3,
+    "uv": true
+  },
+  {
+    "element": "frost",
+    "triangles": 406,
+    "mesh_objects": 3,
+    "uv": true
+  },
+  {
+    "element": "blood",
+    "triangles": 358,
+    "mesh_objects": 4,
+    "uv": true
+  },
+  {
+    "element": "dark",
+    "triangles": 384,
+    "mesh_objects": 4,
+    "uv": true
+  },
+  {
+    "element": "light",
+    "triangles": 350,
+    "mesh_objects": 4,
+    "uv": true
+  }
+]

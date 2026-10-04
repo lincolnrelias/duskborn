@@ -422,6 +422,17 @@ namespace Duskborn.Editor
 
                 if (wb.StationType != expectedTypes[i])
                     throw new Exception($"Station '{prefabs[i]}' expected StationType {expectedTypes[i]}, but has {wb.StationType}.");
+
+                var networkObject = prefab.GetComponent<FishNet.Object.NetworkObject>();
+                var registry = AssetDatabase.LoadAssetAtPath<FishNet.Managing.Object.SinglePrefabObjects>(
+                    "Assets/_Duskborn/Network/DefaultPrefabObjects.asset");
+                if (networkObject == null || registry == null)
+                    throw new Exception($"Station '{prefabs[i]}' must have a NetworkObject and gameplay registry.");
+                bool registered = false;
+                for (int index = 0; index < registry.GetObjectCount(); index++)
+                    if (registry.GetObject(true, index) == networkObject) registered = true;
+                if (!registered)
+                    throw new Exception($"Station '{prefabs[i]}' is missing from the gameplay NetworkManager's spawnable prefabs.");
             }
         }
 

@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Position = 0)]
-    [ValidateSet('help', 'compile', 'validate', 'test', 'test-warden', 'build-windows', 'build-warden', 'build-briarback', 'build-bramblekin', 'build-thornwing', 'build-ironroot', 'test-ironroot', 'clear-terrain', 'all')]
+    [ValidateSet('help', 'compile', 'validate', 'test', 'test-warden', 'build-windows', 'build-warden', 'build-briarback', 'build-bramblekin', 'build-thornwing', 'build-ironroot', 'test-ironroot', 'clear-terrain', 'capture-runes', 'capture-map', 'build-crystals', 'capture-crystals', 'all')]
     [string]$Command = 'help',
 
     [string]$UnityPath,
@@ -31,6 +31,10 @@ Unity CLI workflow
   .\Tools\unity.ps1 build-ironroot
   .\Tools\unity.ps1 test-ironroot
   .\Tools\unity.ps1 clear-terrain
+  .\Tools\unity.ps1 build-crystals
+  .\Tools\unity.ps1 capture-crystals
+  .\Tools\unity.ps1 capture-runes
+  .\Tools\unity.ps1 capture-map
   .\Tools\unity.ps1 all
 
 Options:
@@ -85,11 +89,11 @@ function Invoke-UnityTask {
     }
     $unityArguments = @(
         '-batchmode',
-        '-nographics',
         '-projectPath', $projectRoot,
         '-logFile', $logPath,
         '-timestamps'
     ) + $TaskArguments
+    if ($Name -notin @('capture-runes', 'capture-crystals', 'capture-map')) { $unityArguments += '-nographics' }
 
     Write-Host "[unity-cli] Running $Name with $script:resolvedUnityPath"
     $quotedArguments = $unityArguments | ForEach-Object {
@@ -141,6 +145,23 @@ if ($Command -eq 'help') {
 $script:resolvedUnityPath = Resolve-UnityExecutable
 
 switch ($Command) {
+    'capture-map' {
+        Invoke-UnityTask -Name 'capture-map' -TaskArguments @('-quit', '-executeMethod', 'Duskborn.Editor.WorldMapCapture.Run') -SuccessMarker '[WorldMapCapture] Capture succeeded:' -ExpectedOutput (Join-Path $projectRoot 'Artifacts/WorldMap/world-map.png')
+    }
+    'build-crystals' {
+        Invoke-UnityTask -Name 'build-crystals' -TaskArguments @('-quit', '-executeMethod', 'Duskborn.Editor.ElementalCrystalBuilder.Build') -SuccessMarker '[ElementalCrystalBuilder] Build succeeded.'
+    }
+    'capture-crystals' {
+        Invoke-UnityTask -Name 'capture-crystals' -TaskArguments @('-quit', '-executeMethod', 'Duskborn.Editor.ElementalCrystalCapture.Run') -SuccessMarker '[ElementalCrystalCapture] Capture succeeded:' -ExpectedOutput (Join-Path $projectRoot 'Artifacts/ElementalCrystals/crystals-overview.png')
+    }
+
+    'capture-runes' {
+        Invoke-UnityTask -Name 'capture-runes' `
+            -TaskArguments @('-quit', '-executeMethod', 'Duskborn.Editor.RuneVisualCapture.Run') `
+            -SuccessMarker '[RuneVisualCapture] Capture succeeded:' `
+            -ExpectedOutput (Join-Path $projectRoot 'Artifacts/RunePresentation/runes-overview.png')
+    }
+
     'build-bramblekin' {
         Invoke-UnityTask -Name 'build-bramblekin' `
             -TaskArguments @('-quit', '-executeMethod', 'Duskborn.Editor.DuskbornCli.BuildBramblekin') `

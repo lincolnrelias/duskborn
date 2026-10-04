@@ -34,7 +34,7 @@ Material:
     - _CloudScale: 0.75
     - _CloudSoftness: 0.08
     - _CloudWarpStrength: 0.65
-    - _DayNightBlend: 0.65
+    - _DayNightBlend: 1
     - _DuskDawnIntensity: 1.45
     - _GroundFalloff: 1.2
     - _GroundHeight: 0.45
@@ -73,14 +73,14 @@ Material:
     - _DuskDawnColor: {r: 1, g: 0.48, b: 0.22, a: 1}
     - _MoonColor: {r: 0.85, g: 0.92, b: 1, a: 1}
     - _MoonCrescentOffset: {r: 0.32, g: 0.18, b: 0, a: 0}
-    - _MoonDirection: {r: 0.96460205, g: -0.05233586, b: 0.2584644, a: 0}
+    - _MoonDirection: {r: 0.52060246, g: 0.7314367, b: -0.4404241, a: 0}
     - _MoonHaloColor: {r: 0.35, g: 0.55, b: 0.95, a: 1}
     - _NightGroundColor: {r: 0.03, g: 0.04, b: 0.08, a: 1}
     - _NightHorizonColor: {r: 0.12, g: 0.18, b: 0.32, a: 1}
     - _NightZenithColor: {r: 0.04, g: 0.06, b: 0.16, a: 1}
     - _StarColor: {r: 0.95, g: 0.98, b: 1, a: 1}
     - _SunColor: {r: 1, g: 0.96, b: 0.78, a: 1}
-    - _SunDirection: {r: -0.96460205, g: -0.052336074, b: 0.25846434, a: 0}
+    - _SunDirection: {r: -0.31307822, g: -0.8426343, b: 0.43812037, a: 0}
     - _SunHaloColor: {r: 1, g: 0.82, b: 0.45, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

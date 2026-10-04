@@ -194,6 +194,7 @@ namespace Duskborn.UI
 
         private void TryFindIntegrations()
         {
+            if (WorldMapUI.OwnsCanvas(_canvas)) _canvas = null;
             if (_inventoryUIManager == null)
                 _inventoryUIManager = FindAnyObjectByType<InventoryUIManager>();
 
@@ -205,7 +206,8 @@ namespace Duskborn.UI
 
             if (_canvas == null)
             {
-                if (_inventoryInstaller != null && _inventoryInstaller.GetComponentInParent<Canvas>() != null)
+                if (_inventoryInstaller != null && _inventoryInstaller.GetComponentInParent<Canvas>() != null &&
+                    !WorldMapUI.OwnsCanvas(_inventoryInstaller.GetComponentInParent<Canvas>()))
                 {
                     _canvas = _inventoryInstaller.GetComponentInParent<Canvas>();
                 }
@@ -213,18 +215,19 @@ namespace Duskborn.UI
                 {
                     foreach (var c in FindObjectsByType<Canvas>(FindObjectsSortMode.None))
                     {
-                        if (c.renderMode != RenderMode.WorldSpace)
+                        if (c.renderMode != RenderMode.WorldSpace && !WorldMapUI.OwnsCanvas(c))
                         {
                             _canvas = c;
                             break;
                         }
                     }
-                    if (_canvas == null) _canvas = FindAnyObjectByType<Canvas>();
                 }
             }
 
             if (_canvas != null && _canvas.renderMode != RenderMode.WorldSpace)
             {
+                if (_craftingRoot != null && WorldMapUI.OwnsCanvas(_craftingRoot.GetComponentInParent<Canvas>()))
+                    _craftingRoot.SetParent(_canvas.transform, false);
                 var scaler = _canvas.GetComponent<CanvasScaler>();
                 if (scaler == null)
                     scaler = _canvas.gameObject.AddComponent<CanvasScaler>();

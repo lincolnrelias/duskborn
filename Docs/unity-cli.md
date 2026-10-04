@@ -13,6 +13,7 @@ and builds. The wrapper reads the required Unity version from
 .\Tools\unity.ps1 test-warden
 .\Tools\unity.ps1 clear-terrain
 .\Tools\unity.ps1 all
+.\Tools\unity.ps1 capture-map
 .\Tools\unity.ps1 build-windows
 .\Tools\unity.ps1 build-warden
 .\Tools\unity.ps1 build-briarback
@@ -48,6 +49,9 @@ and builds. The wrapper reads the required Unity version from
   Edit-mode UI tests initialize their fixtures explicitly and check requested cursor
   state; native cursor locking and visible rendering still require a manual check.
 - `all` runs compile, validation, and tests, but does not build a player.
+- `capture-map` renders the production minimap and world-map canvases with seeded terrain,
+  player and structure fixtures into `Artifacts/WorldMap`, in edit mode using a hidden graphics
+  process. This verifies the static HUD composition, not a live multiplayer session.
 - `build-windows` invokes the project's synchronous `BuildPipeline` entry point
   and creates `Builds/Windows/Mugg.exe` by default.
 
@@ -78,3 +82,12 @@ Override executable discovery or the build destination when necessary:
   The current suites are menu-style static methods driven by `DuskbornCli.RunTests`.
 
 The `test-warden` command runs focused boss asset/mechanics/regression checks without rebuilding prefabs.
+
+## Rune presentation capture
+
+`Tools/unity.ps1 capture-runes` runs a hidden batch-mode graphics process to save
+`Artifacts/RunePresentation/runes-overview.png`. It renders production prefabs,
+all eight rune families, a mixed enemy, player statuses, and etched weapons without
+entering Play Mode or controlling the Editor UI. Run against an isolated copy when
+the live project is open. This is a static composition check; combat motion and
+multiplayer timer behavior still need in-game observation.

@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4830ff8040ac474784de00cb3aee289, type: 3}
+  m_Name: material_dark_crystal
+  m_EditorClassIdentifier: Assembly-CSharp::InventorySystem.Data.MaterialDefinition
+  id: material_dark_crystal
+  displayName: Dark Crystal
+  description: Mined from magical dark crystal nodes. Used at the Arcane Table to
+    craft Hex runestones.
+  icon: {fileID: 2800000, guid: 2652f8c6357140f4948fc95c9c14019a, type: 3}
+  dropPrefab: {fileID: 7163252566230907736, guid: 63590c3203e62174e92881579bc80a44, type: 3}
+  rarity: 1
+  category: crystal

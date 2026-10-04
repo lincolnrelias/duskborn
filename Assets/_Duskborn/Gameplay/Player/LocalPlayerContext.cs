@@ -35,6 +35,12 @@ namespace Duskborn.Gameplay.Player
             WeaponHandler = controller.GetComponent<PlayerWeaponHandler>();
             Resources     = controller.GetComponent<ResourceInventory>();
 
+            if (Application.isPlaying)
+            {
+                Duskborn.UI.InGameMenuController.EnsureInstance();
+                Duskborn.UI.WorldMapUI.Ensure();
+            }
+
             OnLocalPlayerRegistered?.Invoke();
         }
 

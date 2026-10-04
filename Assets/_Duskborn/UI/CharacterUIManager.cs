@@ -231,6 +231,7 @@ namespace Duskborn.UI
 
         private void TryFindIntegrations()
         {
+            if (WorldMapUI.OwnsCanvas(_canvas)) _canvas = null;
             if (_inventoryUI == null)
                 _inventoryUI = FindAnyObjectByType<InventoryUIManager>();
 
@@ -238,20 +239,23 @@ namespace Duskborn.UI
             {
                 if (_inventoryUI != null && _inventoryUI.Installer != null)
                     _canvas = _inventoryUI.Installer.GetComponentInParent<Canvas>();
+                if (WorldMapUI.OwnsCanvas(_canvas)) _canvas = null;
 
                 if (_canvas == null)
                 {
                     foreach (var c in FindObjectsByType<Canvas>(FindObjectsSortMode.None))
                     {
-                        if (c.renderMode != RenderMode.WorldSpace)
+                        if (c.renderMode != RenderMode.WorldSpace && !WorldMapUI.OwnsCanvas(c))
                         {
                             _canvas = c;
                             break;
                         }
                     }
-                    if (_canvas == null) _canvas = FindAnyObjectByType<Canvas>();
                 }
             }
+
+            if (_canvas != null && _characterRoot != null && WorldMapUI.OwnsCanvas(_characterRoot.GetComponentInParent<Canvas>()))
+                _characterRoot.SetParent(_canvas.transform, false);
 
             if (_equipment == null || _playerStats == null)
             {

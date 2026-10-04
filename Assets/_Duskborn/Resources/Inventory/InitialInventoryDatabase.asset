@@ -25,6 +25,10 @@ MonoBehaviour:
     quantity: 20
   - item: {fileID: 11400000, guid: a45a4b592eb540cab4344d69a2aee755, type: 2}
     quantity: 1
+  - item: {fileID: 11400000, guid: 8457aa2d27f549c593c6fc78cd182ea9, type: 2}
+    quantity: 1
+  - item: {fileID: 11400000, guid: e7ef4923a7ad480f9309547bed9da30c, type: 2}
+    quantity: 1
   actionBarItems:
   - item: {fileID: 11400000, guid: 601f53b2da268ec439655f119087feb4, type: 2}
     quantity: 1

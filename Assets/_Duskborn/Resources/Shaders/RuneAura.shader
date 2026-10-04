@@ -10,7 +10,7 @@ Shader "Duskborn/RuneAura"
         Pass
         {
             Tags { "LightMode"="SRPDefaultUnlit" }
-            Blend SrcAlpha One
+            Blend SrcAlpha OneMinusSrcAlpha
             ZWrite Off
             Cull Off
             HLSLPROGRAM

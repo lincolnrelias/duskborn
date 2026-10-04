@@ -26,6 +26,14 @@ MonoBehaviour:
   fiberProp: {fileID: 11400000, guid: d6a181d9482b4e4d9968ec2ce046a9e6, type: 2}
   extraProps:
   - {fileID: 11400000, guid: bd0c106b6a323624eaf5349ecf63ade3, type: 2}
+  - {fileID: 11400000, guid: ce52840632ee9534d84ad116244aa806, type: 2}
+  - {fileID: 11400000, guid: ab895c85562514c4da854f0e3c8cba7a, type: 2}
+  - {fileID: 11400000, guid: 52820f97589fc6f418079cab8e8e2968, type: 2}
+  - {fileID: 11400000, guid: ba9f20683397678498826ba1e3a73630, type: 2}
+  - {fileID: 11400000, guid: ea5216bc47f831440a09b856e774ddff, type: 2}
+  - {fileID: 11400000, guid: d4e2fe680b1589b4698e80d93de7c3c1, type: 2}
+  - {fileID: 11400000, guid: 66f03bea60b5acb49ad0e69391a84e4d, type: 2}
+  - {fileID: 11400000, guid: f51d0e7d57ff5ea46bd68e2c6dd88987, type: 2}
   chestPrefab: {fileID: 606149192729443004, guid: c77021576fdb5f84d88f2f3176ebb659, type: 3}
   totalChests: 10
   basicLootTable: {fileID: 11400000, guid: 950a218e4beb2224ab756592277a2c09, type: 2}

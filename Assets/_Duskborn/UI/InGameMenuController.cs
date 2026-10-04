@@ -85,25 +85,31 @@ namespace Duskborn.UI
         private GUIStyle _modalBodyStyle;
         private bool _stylesInitialized = false;
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStatics() => Instance = null;
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void AutoInitialize()
         {
-            string currentScene = SceneManager.GetActiveScene().name;
-            if (currentScene == "MainMenu") return;
-
+            // Create the persistent listener even when launching through MainMenu.
+            // AfterSceneLoad runs once at startup, not after each scene transition.
             EnsureInstance();
         }
 
         public static InGameMenuController EnsureInstance()
         {
-            if (Instance != null) return Instance;
-
-            Instance = FindAnyObjectByType<InGameMenuController>();
-            if (Instance != null) return Instance;
+            if (Instance == null)
+                Instance = FindAnyObjectByType<InGameMenuController>(FindObjectsInactive.Include);
+            if (Instance != null)
+            {
+                Instance.gameObject.SetActive(true);
+                Instance.enabled = true;
+                return Instance;
+            }
 
             GameObject go = new GameObject("[InGameMenuController]");
             Instance = go.AddComponent<InGameMenuController>();
-            DontDestroyOnLoad(go);
+            if (Application.isPlaying) DontDestroyOnLoad(go);
             return Instance;
         }
 
@@ -116,7 +122,7 @@ namespace Duskborn.UI
             }
 
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+            if (Application.isPlaying) DontDestroyOnLoad(gameObject);
 
             SceneManager.sceneLoaded += OnSceneLoaded;
             InitEmbers();
@@ -126,6 +132,7 @@ namespace Duskborn.UI
 
         private void OnDestroy()
         {
+            if (Instance == this) Instance = null;
             SceneManager.sceneLoaded -= OnSceneLoaded;
             CleanupTextures();
             if (IsOpen)
@@ -139,7 +146,6 @@ namespace Duskborn.UI
             if (scene.name == "MainMenu")
             {
                 CloseMenu(false);
-                gameObject.SetActive(false);
             }
             else
             {
@@ -298,6 +304,15 @@ namespace Duskborn.UI
             // Close that menu and do NOT open the pause menu!
             bool closedOtherMenu = false;
 
+            // Escape opens pause even when the world chart was visible.
+            var map = WorldMapUI.Instance;
+            if (map != null && map.IsExpanded)
+            {
+                map.CloseExpanded();
+                OpenMenu();
+                return;
+            }
+
             // Workbench / Crafting.
             var crafting = CraftingUIManager.Instance ?? FindAnyObjectByType<CraftingUIManager>();
             if (crafting != null && (crafting.IsOpen || crafting.LastClosedFrame == Time.frameCount))
@@ -384,13 +399,15 @@ namespace Duskborn.UI
 
             Time.timeScale = 1f;
 
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+            bool keepPointer = SceneManager.GetActiveScene().name == "MainMenu" ||
+                PlayerCameraController.IsAnyMenuOpen();
+            Cursor.lockState = keepPointer ? CursorLockMode.None : CursorLockMode.Locked;
+            Cursor.visible = keepPointer;
 
             if (PlayerCameraController.LocalInstance != null)
             {
-                PlayerCameraController.LocalInstance.SetRotationLocked(false);
-                PlayerCameraController.LocalInstance.SetCursorLocked(true);
+                PlayerCameraController.LocalInstance.SetRotationLocked(keepPointer);
+                PlayerCameraController.LocalInstance.SetCursorLocked(!keepPointer);
             }
 
             if (playSound)

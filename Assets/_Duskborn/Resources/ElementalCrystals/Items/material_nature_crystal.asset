@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4830ff8040ac474784de00cb3aee289, type: 3}
+  m_Name: material_nature_crystal
+  m_EditorClassIdentifier: Assembly-CSharp::InventorySystem.Data.MaterialDefinition
+  id: material_nature_crystal
+  displayName: Nature Crystal
+  description: Mined from magical nature crystal nodes. Used at the Arcane Table
+    to craft Venom runestones.
+  icon: {fileID: 2800000, guid: cee5d2fdea614ecdb47212618910658b, type: 3}
+  dropPrefab: {fileID: 2433929621523515938, guid: 2a9d2153824aebe42bee9900bf9ecf76, type: 3}
+  rarity: 1
+  category: crystal

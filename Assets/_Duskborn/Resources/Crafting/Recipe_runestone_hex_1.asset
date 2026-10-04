@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Crafting.CraftingRecipe
   recipeId: Recipe_runestone_hex_1
   recipeName: Hex Runestone I
-  description: "Cursed: increases incoming damage 3% per stack. Applies 1 stacks per weapon hit; maximum 12 stacks. One etching per weapon."
+  description: 'Cursed: increases incoming damage 3% per stack. Applies 1 stacks
+    per weapon hit; maximum 12 stacks. One etching per weapon.'
   category: Runestones
   tier: 1
   requiredStation: 3
@@ -28,5 +29,7 @@ MonoBehaviour:
     amount: 2
   - material: {fileID: 11400000, guid: c4b918a240194689b940e7da3c11f104, type: 2}
     amount: 2
+  - material: {fileID: 11400000, guid: 4e0c743ea82a48047ae8a5f689765868, type: 2}
+    amount: 3
   fuelIngredients: []
   processingSeconds: 0

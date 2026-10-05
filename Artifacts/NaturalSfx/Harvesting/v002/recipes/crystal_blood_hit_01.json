@@ -1,0 +1,30 @@
+{
+  "layers": [
+    {
+      "source": "impactGlass_light_000.ogg",
+      "start": 0,
+      "duration": 0.32,
+      "gain_db": -2,
+      "playback_rate": 0.8,
+      "lowpass_hz": null,
+      "fade_in_ms": 2,
+      "fade_out_ms": 30,
+      "delay_seconds": 0
+    },
+    {
+      "source": "1529.wav",
+      "start": 0.070375,
+      "duration": 0.32,
+      "gain_db": -9,
+      "playback_rate": 0.85,
+      "lowpass_hz": null,
+      "fade_in_ms": 2,
+      "fade_out_ms": 30,
+      "delay_seconds": 0.02
+    }
+  ],
+  "final_gain_db": 1.9987732967702874,
+  "sample_rate": 48000,
+  "channels": 1,
+  "encoding": "PCM24"
+}

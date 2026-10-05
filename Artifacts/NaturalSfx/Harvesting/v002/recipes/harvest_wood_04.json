@@ -1,0 +1,15 @@
+{
+  "layers": [
+    {
+      "source": "Artifacts\\NaturalSfx\\Harvesting\\v001\\candidates\\harvest_wood_04.wav",
+      "sha256": "8dff43a224acb08b4279ebb6e36397f26dcfe0a93e0645a258dfb67ff34cce0b",
+      "gain_db": 0,
+      "prior_provenance": "../v001/manifest.json",
+      "delay_seconds": 0
+    }
+  ],
+  "final_gain_db": 4.7210047537443165,
+  "sample_rate": 48000,
+  "channels": 1,
+  "encoding": "PCM24"
+}

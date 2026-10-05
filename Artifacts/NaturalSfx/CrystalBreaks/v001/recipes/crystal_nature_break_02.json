@@ -1,0 +1,41 @@
+{
+  "layers": [
+    {
+      "source": "1300.wav",
+      "start": 0.17860416666666667,
+      "duration": 0.42,
+      "gain_db": -1,
+      "playback_rate": 1,
+      "lowpass_hz": null,
+      "fade_in_ms": 2,
+      "fade_out_ms": 30,
+      "delay_seconds": 0
+    },
+    {
+      "source": "impactWood_heavy_001.ogg",
+      "start": 0,
+      "duration": 0.28,
+      "gain_db": -6,
+      "playback_rate": 1,
+      "lowpass_hz": null,
+      "fade_in_ms": 2,
+      "fade_out_ms": 30,
+      "delay_seconds": 0.012
+    },
+    {
+      "source": "footstep_grass_001.ogg",
+      "start": 0,
+      "duration": 0.48,
+      "gain_db": -3,
+      "playback_rate": 1,
+      "lowpass_hz": null,
+      "fade_in_ms": 2,
+      "fade_out_ms": 30,
+      "delay_seconds": 0.12
+    }
+  ],
+  "final_gain_db": -0.4999997099772593,
+  "sample_rate": 48000,
+  "channels": 1,
+  "encoding": "PCM24"
+}

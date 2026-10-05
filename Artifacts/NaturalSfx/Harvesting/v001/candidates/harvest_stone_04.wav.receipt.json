@@ -1,0 +1,91 @@
+{
+  "operation": "mix",
+  "sources": [
+    {
+      "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_stone_04_body.wav",
+      "sha256": "2ef8f9928a57967cef8b07058415f4ed0f194e8e9a41894f790b726ed51eee85"
+    },
+    {
+      "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_stone_04_texture.wav",
+      "sha256": "9f25e8a0238db1666258902c20d9203882efe2400d5dd2bcb589de0a008d6387"
+    }
+  ],
+  "recipe": {
+    "layers": [
+      {
+        "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_stone_04_body.wav",
+        "delay_ms": 0
+      },
+      {
+        "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_stone_04_texture.wav",
+        "delay_ms": 62
+      }
+    ]
+  },
+  "channels": 1,
+  "inspection": {
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "pcm_s24le",
+        "codec_long_name": "PCM signed 24-bit little-endian",
+        "codec_type": "audio",
+        "codec_tag_string": "[1][0][0][0]",
+        "codec_tag": "0x0001",
+        "sample_fmt": "s32",
+        "sample_rate": "48000",
+        "channels": 1,
+        "channel_layout": "mono",
+        "bits_per_sample": 24,
+        "initial_padding": 0,
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "0/0",
+        "time_base": "1/48000",
+        "duration_ts": 26400,
+        "duration": "0.550000",
+        "bit_rate": "1152000",
+        "bits_per_raw_sample": "24",
+        "disposition": {
+          "default": 0,
+          "dub": 0,
+          "original": 0,
+          "comment": 0,
+          "lyrics": 0,
+          "karaoke": 0,
+          "forced": 0,
+          "hearing_impaired": 0,
+          "visual_impaired": 0,
+          "clean_effects": 0,
+          "attached_pic": 0,
+          "timed_thumbnails": 0,
+          "non_diegetic": 0,
+          "captions": 0,
+          "descriptions": 0,
+          "metadata": 0,
+          "dependent": 0,
+          "still_image": 0,
+          "multilayer": 0
+        }
+      }
+    ],
+    "format": {
+      "filename": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\candidates\\harvest_stone_04.wav",
+      "nb_streams": 1,
+      "nb_programs": 0,
+      "nb_stream_groups": 0,
+      "format_name": "wav",
+      "format_long_name": "WAV / WAVE (Waveform Audio)",
+      "duration": "0.550000",
+      "size": "79302",
+      "bit_rate": "1153483",
+      "probe_score": 99,
+      "tags": {
+        "encoder": "Lavf62.3.100"
+      }
+    }
+  },
+  "output": {
+    "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\candidates\\harvest_stone_04.wav",
+    "sha256": "e45d07cd7f51f703054d5984cc42f1b483b157b4f4e6dea9a0e1a79b04a14234"
+  }
+}

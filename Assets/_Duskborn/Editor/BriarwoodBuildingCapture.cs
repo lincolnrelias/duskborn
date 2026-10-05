@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Duskborn.Gameplay.Building;
+using Duskborn.Gameplay.Crafting;
 using Duskborn.Gameplay.Loot;
 using Duskborn.UI.Building;
 using UnityEditor;
@@ -112,9 +113,45 @@ namespace Duskborn.Editor
                     camera.targetTexture = target;
                     foreach (var id in new[] { "workbench", "forge", "arcane_table", "cauldron" })
                     {
+                        manager.ShowCatalog(definitions, d => BuildingPresentation.Create(d, inventory, null, false), _ => { }, () => { });
                         owner.transform.Find("BuildingUI/BuildingCatalog/CatalogList/Cards/Content/Buildable_" + id).GetComponent<Button>().onClick.Invoke();
                         Canvas.ForceUpdateCanvases(); camera.Render();
                         Write(target, "Artifacts/BriarwoodUI/building-" + id + "-" + size.x + ".png", false);
+                    }
+                    foreach (var state in new[] { "empty", "processing", "blocked", "ready", "material-dropdown", "fuel-dropdown" })
+                    {
+                        bool loaded = state != "empty";
+                        var recipe = Resources.LoadAll<CraftingRecipe>("Crafting").First(r =>
+                            r.RequiredStation == CraftingStationType.Forge && r.ProcessingSeconds > 0 && r.FuelIngredients.Count > 0);
+                        foreach (var ingredient in recipe.Ingredients.Concat(recipe.FuelIngredients))
+                            inventory.EnsureStartingAmount(ingredient.material.Id, ingredient.amount * 3);
+                        var forgeRecipes = Resources.LoadAll<CraftingRecipe>("Crafting")
+                            .Where(r => r.RequiredStation == CraftingStationType.Forge && r.ProcessingSeconds > 0).ToArray();
+                        foreach (var ingredient in forgeRecipes.SelectMany(r => r.Ingredients.Concat(r.FuelIngredients)))
+                            inventory.EnsureStartingAmount(ingredient.material.Id, ingredient.amount * 3);
+                        manager.BeginForgeStation("FORGE", () => { });
+                        manager.AddForgeProcessor(() => loaded ? recipe.Ingredients[0].material.Icon : null,
+                            () => loaded ? recipe.FuelIngredients[0].material.Icon : null,
+                            () => state == "ready" || state == "blocked" ? recipe.Icon : null,
+                            () => loaded ? string.Join("\n", recipe.Ingredients.Select(i => i.material.DisplayName + "  " + i.amount + "/" + i.amount)) : "",
+                            () => loaded ? string.Join("\n", recipe.FuelIngredients.Select(i => i.material.DisplayName + "  " + i.amount + "/" + i.amount)) : "",
+                            () => state == "ready" || state == "blocked" ? recipe.OutputItem.DisplayName + " ×" + recipe.OutputAmount : "Empty",
+                            () => state == "empty" ? "Load material and fuel from your inventory." :
+                                state == "blocked" ? "OUTPUT FULL • smelting paused" :
+                                state == "ready" ? "Output ready to collect." : recipe.RecipeName + " • " + (recipe.ProcessingSeconds * .45f).ToString("0.0") + "s",
+                            () => state == "processing" ? .55f : 0f,
+                            () => state == "processing" ? .5f : 0f,
+                            () => state == "blocked", () => { }, () => { }, () => { },
+                            fuel => forgeRecipes.SelectMany(r => fuel ? r.FuelIngredients : r.Ingredients)
+                                .GroupBy(i => i.material.Id).Select(group => group.First()).Select(i => new ForgeInventoryOption
+                            { Id = i.material.Id, Name = i.material.DisplayName, Icon = i.material.Icon, Owned = inventory.GetCount(i.material.Id) }).ToArray(),
+                            (_, __) => { });
+                        manager.Tick();
+                        if (state.EndsWith("dropdown"))
+                            owner.transform.Find("BuildingUI/StationPanel/ForgeContent/ForgeProcessor/" +
+                                (state.StartsWith("fuel") ? "FuelSlot" : "InputSlot")).GetComponent<Button>().onClick.Invoke();
+                        Canvas.ForceUpdateCanvases(); camera.Render();
+                        Write(target, "Artifacts/BriarwoodUI/forge-" + state + "-" + size.x + ".png", false);
                     }
                     camera.targetTexture = null; UnityEngine.Object.DestroyImmediate(target);
                 }

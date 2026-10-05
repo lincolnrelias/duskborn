@@ -1,0 +1,12 @@
+{
+  "layers": [
+    {
+      "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_ore_01_body.wav",
+      "delay_ms": 0
+    },
+    {
+      "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_ore_01_texture.wav",
+      "delay_ms": 35
+    }
+  ]
+}

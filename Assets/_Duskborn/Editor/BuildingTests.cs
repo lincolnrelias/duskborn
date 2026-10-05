@@ -195,13 +195,76 @@ namespace Duskborn.Editor
                 Check(forgeProcessor != null &&
                       !uiOwner.transform.Find("BuildingUI/StationPanel/StationScroll").gameObject.activeSelf,
                     "forge uses fixed non-scrollable content", ref passed);
-                Check(forgeProcessor.GetComponentsInChildren<UnityEngine.UI.Image>(true).All(image => image.sprite == null),
-                    "forge panels do not depend on UI sprites", ref passed);
+                ui.Tick();
+                Check(forgeProcessor.Find("InputSlot/Value").GetComponent<UnityEngine.UI.Text>().text == "input" &&
+                      forgeProcessor.Find("FuelSlot/Value").GetComponent<UnityEngine.UI.Text>().text == "fuel" &&
+                      forgeProcessor.Find("OutputSlot/Value").GetComponent<UnityEngine.UI.Text>().text == "output" &&
+                      forgeProcessor.Find("StatusPanel/Status").GetComponent<UnityEngine.UI.Text>().text == "status",
+                    "forge skin refreshes loaded materials, fuel, output and status", ref passed);
                 Check(uiOwner.transform.Find("BuildingUI/StationPanel/Header/CloseButton") != null,
                     "station header close button", ref passed);
                 var outputHandler = forgeProcessor.Find("OutputSlot").GetComponent<ForgeSlotClickHandler>();
                 outputHandler.OnPointerClick(new PointerEventData(null) { button = PointerEventData.InputButton.Right });
                 Check(outputCollected, "forge output supports right-click collection", ref passed);
+                ui.BeginForgeStation("FORGE", () => { });
+                int loadCount = 0;
+                string loadedId = null;
+                bool loadedFuel = false;
+                bool pendingLoad = false;
+                int owned = 3;
+                var inputOptions = Enumerable.Range(0, 7).Select(i => new ForgeInventoryOption
+                    { Id = i == 0 ? "iron" : "iron_" + i, Name = "Iron", Owned = owned }).ToArray();
+                var fuelOptions = new[] { new ForgeInventoryOption { Id = "wood", Name = "Wood", Owned = 2 } };
+                ui.AddForgeProcessor(() => null, () => null, () => null, () => "", () => "", () => "Empty", () => "Waiting",
+                    () => 0, () => 0, () => false, () => { }, () => { }, () => { },
+                    fuel => { inputOptions[0].Owned = owned; inputOptions[0].Blocker = pendingLoad ? "Loading" : null; return fuel ? fuelOptions : inputOptions; },
+                    (id, fuel) => { loadCount++; loadedId = id; loadedFuel = fuel; pendingLoad = true; }, () => pendingLoad);
+                forgeProcessor = uiOwner.transform.Find("BuildingUI/StationPanel/ForgeContent/ForgeProcessor");
+                var inputButton = forgeProcessor.Find("InputSlot").GetComponent<UnityEngine.UI.Button>();
+                inputButton.onClick.Invoke();
+                var picker = uiOwner.transform.Find("BuildingUI/StationPanel/ForgePicker");
+                Check(picker.Find("Dropdown/Items/Content/Item_iron") != null && picker.Find("Dropdown/Items/Content/Item_wood") == null,
+                    "material dropdown contains only supplied material options", ref passed);
+                var itemButton = picker.Find("Dropdown/Items/Content/Item_iron").GetComponent<UnityEngine.UI.Button>();
+                UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(
+                    picker.Find("Dropdown/Items/Content").GetComponent<RectTransform>());
+                var firstTile = itemButton.GetComponent<RectTransform>();
+                var fourthTile = picker.Find("Dropdown/Items/Content/Item_iron_3").GetComponent<RectTransform>();
+                var fifthTile = picker.Find("Dropdown/Items/Content/Item_iron_4").GetComponent<RectTransform>();
+                Check(Mathf.Abs(firstTile.rect.width - firstTile.rect.height) < .01f &&
+                      Mathf.Abs(firstTile.anchoredPosition.y - fourthTile.anchoredPosition.y) < .01f &&
+                      fourthTile.anchoredPosition.x > firstTile.anchoredPosition.x &&
+                      fifthTile.anchoredPosition.y < firstTile.anchoredPosition.y,
+                    "inventory squares wrap after four items", ref passed);
+                var repeatedSelection = itemButton.onClick;
+                owned = 0;
+                itemButton.onClick.Invoke();
+                Check(loadCount == 0, "dropdown rechecks owned quantity before loading", ref passed);
+                owned = 3;
+                itemButton.onClick.Invoke();
+                repeatedSelection.Invoke();
+                ui.Tick();
+                Check(loadCount == 1 && loadedId == "iron" && !loadedFuel && !inputButton.interactable,
+                    "material selection submits once and pending disables slots", ref passed);
+                pendingLoad = false;
+                forgeProcessor.Find("FuelSlot").GetComponent<UnityEngine.UI.Button>().onClick.Invoke();
+                picker = uiOwner.transform.Find("BuildingUI/StationPanel/ForgePicker");
+                Check(picker.Find("Dropdown/Items/Content/Item_wood") != null && picker.Find("Dropdown/Items/Content/Item_iron") == null,
+                    "fuel dropdown contains only supplied fuel options", ref passed);
+                var pickerScroll = picker.Find("Dropdown/Items").GetComponent<UnityEngine.UI.ScrollRect>();
+                Check(pickerScroll.movementType == UnityEngine.UI.ScrollRect.MovementType.Clamped && !pickerScroll.inertia,
+                    "inventory dropdown scroll is clamped without inertia", ref passed);
+                picker.Find("Dropdown/Items/Content/Item_wood").GetComponent<UnityEngine.UI.Button>().onClick.Invoke();
+                Check(loadCount == 2 && loadedFuel && loadedId == "wood", "fuel selection preserves slot role", ref passed);
+                var controller = inventoryObject.AddComponent<BuildingController>();
+                var recipeFor = typeof(BuildingController).GetMethod("ForgeRecipeFor", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var forgeRecipe = Resources.Load<Duskborn.Gameplay.Crafting.CraftingRecipe>("Crafting/Recipe_SmeltIronBar");
+                var forgeRecipes = new[] { forgeRecipe };
+                Check(recipeFor.Invoke(controller, new object[] { forgeRecipe.Ingredients[0].material.Id, false, forgeRecipes }) == forgeRecipe &&
+                      recipeFor.Invoke(controller, new object[] { forgeRecipe.Ingredients[0].material.Id, true, forgeRecipes }) == null &&
+                      recipeFor.Invoke(controller, new object[] { forgeRecipe.FuelIngredients[0].material.Id, true, forgeRecipes }) == forgeRecipe &&
+                      recipeFor.Invoke(controller, new object[] { "unrelated_item", false, forgeRecipes }) == null,
+                    "forge recipe filter separates actual fuel and material inventory items", ref passed);
                 Debug.Log($"[BuildingTests] {passed} checks passed.");
             }
             finally

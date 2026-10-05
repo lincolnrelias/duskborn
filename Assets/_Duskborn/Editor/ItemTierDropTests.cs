@@ -21,6 +21,12 @@ namespace Duskborn.Editor
             int passed = 0;
             int total = 0;
 
+            RunTest(Test_DropsScatterAndReleaseIndependently, ref passed, ref total);
+            RunTest(Test_NodeContactAndBoundedDebris, ref passed, ref total);
+            RunTest(Test_HarvestAudioDistinctAndNonRepeating, ref passed, ref total);
+            RunTest(Test_WeightedLaunchAndRepeatedSetup, ref passed, ref total);
+            RunTest(Test_CollectionTakesOverPhysicsAndHover, ref passed, ref total);
+            RunTest(Test_HoverCatchPreservesMomentumAndFrameRate, ref passed, ref total);
             RunTest(Test_ItemRarity_HierarchyAndOrdering, ref passed, ref total);
             RunTest(Test_ItemTierHelper_ColorsAndLights, ref passed, ref total);
             RunTest(Test_AudioDatabase_TierDropClipsRegistered, ref passed, ref total);
@@ -34,6 +40,184 @@ namespace Duskborn.Editor
             RunTest(Test_DroppedItemVisuals_RarityAdjustments_WhiteGreenAndSkyward, ref passed, ref total);
 
             Debug.Log($"<color=#55FF55><b>[ItemTierDropTests] {passed}/{total} tests passed!</b></color>");
+        }
+
+        private static void Test_DropsScatterAndReleaseIndependently()
+        {
+            var go = new GameObject("Scatter regression");
+            try
+            {
+                var manager = go.AddComponent<LootManager>();
+                var rng = new Duskborn.Core.SeededRNG(3719);
+                var replay = new Duskborn.Core.SeededRNG(3719);
+                float minSpeed = float.MaxValue, maxSpeed = 0, minRadius = float.MaxValue, maxRadius = 0;
+                float minDelay = float.MaxValue, maxDelay = 0;
+                var angles = new List<float>();
+                for (int i = 0; i < 5; i++)
+                {
+                    var launch = manager.CreateDropLaunch(Vector3.zero, i, 5, 0, rng);
+                    var again = manager.CreateDropLaunch(Vector3.zero, i, 5, 0, replay);
+                    if (launch.Velocity != again.Velocity || launch.Position != again.Position || launch.ReleaseDelay != again.ReleaseDelay)
+                        throw new Exception("Seeded launch plan is not reproducible.");
+                    float radius = new Vector2(launch.Position.x, launch.Position.z).magnitude;
+                    minRadius = Mathf.Min(minRadius, radius); maxRadius = Mathf.Max(maxRadius, radius);
+                    minSpeed = Mathf.Min(minSpeed, launch.Velocity.magnitude); maxSpeed = Mathf.Max(maxSpeed, launch.Velocity.magnitude);
+                    if (launch.ReleaseDelay < 0 || launch.ReleaseDelay > .32f || radius > .251f)
+                        throw new Exception("Cascade exceeded bounded time/spread.");
+                    if (i == 0 && launch.ReleaseDelay != 0) throw new Exception("First drop must release immediately.");
+                    if (i > 0) minDelay = Mathf.Min(minDelay, launch.ReleaseDelay);
+                    maxDelay = Mathf.Max(maxDelay, launch.ReleaseDelay);
+                    angles.Add(launch.Azimuth * Mathf.Rad2Deg % 360f);
+                }
+                angles.Sort();
+                float minGap = 360f, maxGap = 0;
+                for (int i = 0; i < 5; i++)
+                {
+                    float gap = (angles[(i + 1) % 5] - angles[i] + 360f) % 360f;
+                    minGap = Mathf.Min(minGap, gap); maxGap = Mathf.Max(maxGap, gap);
+                }
+                if (maxGap - minGap < 30f || maxSpeed - minSpeed < .4f || maxRadius - minRadius < .03f || maxDelay - minDelay < .03f)
+                    throw new Exception("Five drops still share regular angles, speed, radius, or release time.");
+            }
+            finally { UnityEngine.Object.DestroyImmediate(go); }
+        }
+
+        private static void Test_NodeContactAndBoundedDebris()
+        {
+            var nodeObject = new GameObject("Node contact regression");
+            try
+            {
+                nodeObject.transform.position = new Vector3(10, 0, 10);
+                var collider = nodeObject.AddComponent<BoxCollider>();
+                collider.center = Vector3.up * .5f; collider.size = new Vector3(2, 1, 2);
+                var node = nodeObject.AddComponent<ResourceNode>();
+                Physics.SyncTransforms();
+                Vector3 point = node.GetHitPosition(new Vector3(10, .5f, 15));
+                if (Vector3.Distance(point, new Vector3(10, .5f, 11)) > .001f)
+                    throw new Exception("Node contact feedback must be placed on the struck surface.");
+                for (int i = 0; i < 40; i++)
+                    Duskborn.Effects.ResourceHitFeedback.Emit(point, Vector3.forward, "Metal", false, i % 2 == 0);
+                var root = Duskborn.Effects.ResourceHitFeedback.Root;
+                if (root == null || root.transform.parent != null)
+                    throw new Exception("Debris must survive independently of a depleted node.");
+                var systems = root.GetComponentsInChildren<ParticleSystem>();
+                if (systems.Length != Duskborn.Effects.ResourceHitFeedback.SiteCapacity * 2)
+                    throw new Exception("Repeated hits allocated more particle sites than the pool permits.");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(nodeObject);
+                if (Duskborn.Effects.ResourceHitFeedback.Root != null)
+                    UnityEngine.Object.DestroyImmediate(Duskborn.Effects.ResourceHitFeedback.Root);
+            }
+        }
+
+        private static void Test_HarvestAudioDistinctAndNonRepeating()
+        {
+            var settings = AudioDatabase.Instance.ResourcesSettings;
+            foreach (var bank in new[] { settings.woodHarvestClips, settings.stoneHarvestClips, settings.oreHarvestClips, settings.foliageHarvestClips })
+            {
+                if (bank == null || bank.Length < 4) throw new Exception("Harvest material needs four distinct performances.");
+                var seen = new HashSet<AudioClip>();
+                foreach (var clip in bank)
+                {
+                    if (clip == null || !seen.Add(clip) || clip.channels != 1 || clip.frequency != 48000)
+                        throw new Exception("Harvest recordings are missing, duplicated, or incorrectly imported.");
+                }
+                AudioClip previous = null;
+                for (int i = 0; i < 24; i++)
+                {
+                    AudioClip before = previous;
+                    var selected = ResourceAudioSettings.PickWithoutRepeat(bank, ref previous);
+                    if (selected == null || selected == before) throw new Exception("Adjacent node hits repeated the same recording.");
+                }
+            }
+        }
+
+
+        private static void Test_CollectionTakesOverPhysicsAndHover()
+        {
+            var go = new GameObject("Collection pose regression");
+            try
+            {
+                var body = go.AddComponent<Rigidbody>();
+                var visuals = go.AddComponent<DroppedItemVisuals>();
+                visuals.Setup(ItemRarity.Epic);
+                var position = new Vector3(2f, 3f, 4f);
+                go.transform.position = position;
+                visuals.BeginCollectionMotion();
+                if (body.interpolation != RigidbodyInterpolation.None || !body.isKinematic || body.useGravity ||
+                    go.transform.position != position)
+                    throw new Exception("Collection must own the visible pose without a physics interpolation jump.");
+                var hover = typeof(DroppedItemVisuals).GetMethod("UpdateIdleHover",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                for (int frame = 0; frame < 10; frame++)
+                {
+                    position += Vector3.right * .1f;
+                    go.transform.position = position;
+                    hover.Invoke(visuals, new object[] { 10f + frame / 120f });
+                    if (go.transform.position != position)
+                        throw new Exception("Idle hovering overwrote a collection frame.");
+                }
+                visuals.Setup(ItemRarity.Rare);
+                if (!body.isKinematic || body.interpolation != RigidbodyInterpolation.None)
+                    throw new Exception("Delayed rarity synchronization reactivated physics during collection.");
+                visuals.BeginDropMotion(Vector3.up, Vector3.zero);
+                if (body.isKinematic || !body.useGravity || body.interpolation != RigidbodyInterpolation.Interpolate)
+                    throw new Exception("A cancelled collection must restore interpolated drop physics.");
+            }
+            finally { UnityEngine.Object.DestroyImmediate(go); }
+        }
+
+        private static void Test_WeightedLaunchAndRepeatedSetup()
+        {
+            var go = new GameObject("Weighted drop regression");
+            try
+            {
+                var body = go.AddComponent<Rigidbody>();
+                var collider = go.AddComponent<BoxCollider>();
+                var visuals = go.AddComponent<DroppedItemVisuals>();
+                visuals.Setup(ItemRarity.Epic);
+                body.isKinematic = true;
+                body.useGravity = false;
+                visuals.Setup(ItemRarity.Epic);
+                if (!body.isKinematic || body.useGravity)
+                    throw new Exception("Repeated rarity sync released a caught item.");
+                Vector3 launch = new Vector3(2f, 4f, 0f);
+                Vector3 tumble = new Vector3(1f, 2f, 3f);
+                visuals.BeginDropMotion(launch, tumble);
+                if (body.isKinematic || !body.useGravity || body.linearVelocity != launch || body.angularVelocity != tumble)
+                    throw new Exception("Rethrow must restore launch momentum and free physics.");
+                if (body.linearDamping > 0.2f || body.interpolation != RigidbodyInterpolation.Interpolate)
+                    throw new Exception("Launch must preserve its arc and interpolate between physics ticks.");
+                if (collider.sharedMaterial == null || collider.sharedMaterial.dynamicFriction < 0.4f)
+                    throw new Exception("Drop contact must resist sliding.");
+            }
+            finally { UnityEngine.Object.DestroyImmediate(go); }
+        }
+
+        private static void Test_HoverCatchPreservesMomentumAndFrameRate()
+        {
+            Vector3 target = new Vector3(0f, 0.8f, 0f);
+            Vector3 start = target + Vector3.up * 0.1f;
+            Vector3 incoming = new Vector3(2f, -4f, 0f);
+            Vector3 position = start, velocity = incoming;
+            DroppedItemVisuals.StepHoverSpring(ref position, ref velocity, target, 1f / 120f);
+            if (position.y >= start.y || position.x <= start.x || velocity.sqrMagnitude < 0.1f)
+                throw new Exception("Hover catch erased incoming momentum instead of braking it.");
+            Vector3 at30 = start, speed30 = incoming, at120 = start, speed120 = incoming;
+            bool undershot = false;
+            for (int i = 0; i < 30; i++)
+            {
+                DroppedItemVisuals.StepHoverSpring(ref at30, ref speed30, target, 1f / 30f);
+                undershot |= at30.y < target.y;
+            }
+            for (int i = 0; i < 120; i++)
+                DroppedItemVisuals.StepHoverSpring(ref at120, ref speed120, target, 1f / 120f);
+            if (!undershot || Vector3.Distance(at30, target) > 0.001f || speed30.magnitude > 0.01f)
+                throw new Exception("Hover catch must overshoot slightly and settle within one second.");
+            if (Vector3.Distance(at30, at120) > 0.00001f || Vector3.Distance(speed30, speed120) > 0.00001f)
+                throw new Exception("Hover catch varies with rendering frame rate.");
         }
 
         private static void RunTest(Action testMethod, ref int passed, ref int total)

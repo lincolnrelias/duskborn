@@ -40,10 +40,6 @@ namespace Duskborn.Gameplay.Loot
         [SerializeField] private float coneAngle = 35f;
         [Tooltip("Per-item random variance applied to coneAngle.")]
         [SerializeField] private float coneAngleVariance = 8f;
-        [Tooltip("Fraction (0-1) of each item's angular slot used for random azimuth jitter, so items stay evenly spaced regardless of count.")]
-        [Range(0f, 1f)]
-        [SerializeField] private float azimuthJitter = 0.4f;
-
         [Tooltip("Random tumbling torque applied to items upon launch.")]
         [SerializeField] private float throwTorque = 4.0f;
 
@@ -174,8 +170,8 @@ namespace Duskborn.Gameplay.Loot
                 }
             }
 
-            // Instantly burst-throw all items from the body simultaneously
-            SpawnAllLootInstant(spawnList, spawnGold, goldAmount, origin, total, rng, rarestItemIndex, rarestItemRarity, harvester);
+            // Release an irregular, short cascade with precomputed server launch plans.
+            SpawnLootCascade(spawnList, spawnGold, goldAmount, origin, total, rng, rarestItemIndex, rarestItemRarity, harvester);
 
             DuskLog.Log(LogChannel.Loot,
                 $"LootManager: dropping {spawnList.Count} item(s) at {origin} (rarest: {rarestItemRarity}, night {currentNight}).");
@@ -225,36 +221,66 @@ namespace Duskborn.Gameplay.Loot
             return baseCount + guaranteedExtra + (extraOne ? 1 : 0);
         }
 
-        private void SpawnAllLootInstant(
+        public struct DropLaunch
+        {
+            public Vector3 Velocity, Position;
+            public float Azimuth, Torque, ReleaseDelay;
+        }
+
+        public DropLaunch CreateDropLaunch(Vector3 origin, int index, int total, float baseAngle, SeededRNG rng)
+        {
+            Vector3 velocity = ComputeThrowDirection(index, total, baseAngle, rng, out float azimuth);
+            return new DropLaunch { Velocity = velocity,
+                Position = CalculateSpawnPosition(origin, azimuth, total, rng), Azimuth = azimuth,
+                Torque = throwTorque * RandRange(rng, .65f, 1.4f),
+                ReleaseDelay = SampleReleaseDelay(index, total, rng) };
+        }
+
+        public static float SampleReleaseDelay(int index, int total, SeededRNG rng) =>
+            index == 0 || total <= 1 ? 0f : RandRange(rng, .025f, Mathf.Min(.32f, .12f + total * .022f));
+
+        private void SpawnLootCascade(
             List<(GameObject prefab, string id, ItemRarity rarity)> spawnList,
-            bool spawnGold,
-            int goldAmount,
-            Vector3 origin,
-            int total,
-            SeededRNG rng,
-            int rarestItemIndex,
-            ItemRarity rarestRarity,
-            PlayerStats harvester = null)
+            bool spawnGold, int goldAmount, Vector3 origin, int total, SeededRNG rng,
+            int rarestItemIndex, ItemRarity rarestRarity, PlayerStats harvester = null)
         {
             float baseAngle = RandRange(rng, 0f, 360f);
-            var spawnedColliders = new List<Collider>();
-
+            var releases = new List<(GameObject prefab, string id, ItemRarity rarity, bool gold, bool rarest, DropLaunch launch)>();
             for (int i = 0; i < spawnList.Count; i++)
             {
-                var (prefab, id, rarity) = spawnList[i];
-                bool isRarest = (i == rarestItemIndex);
-                var go = SpawnItem(prefab, id, rarity, origin, i, total, baseAngle, rng, isRarest, harvester);
-                if (go != null)
-                    RegisterAndIgnoreCollisions(go, spawnedColliders);
+                var entry = spawnList[i];
+                releases.Add((entry.prefab, entry.id, entry.rarity, false, i == rarestItemIndex,
+                    CreateDropLaunch(origin, i, total, baseAngle, rng)));
             }
-
             if (spawnGold)
+                releases.Add((null, null, ItemRarity.Common, true, false,
+                    CreateDropLaunch(origin, spawnList.Count, total, baseAngle, rng)));
+            releases.Sort((a, b) => a.launch.ReleaseDelay.CompareTo(b.launch.ReleaseDelay));
+            // Sample the whole burst before yielding: timing must not change seeded
+            // loot randomness when another node is harvested during the cascade.
+            StartCoroutine(ReleaseLoot());
+
+            IEnumerator ReleaseLoot()
             {
-                var go = SpawnGoldPickup(origin, goldAmount, spawnList.Count, total, baseAngle, rng, harvester);
-                if (go != null)
-                    RegisterAndIgnoreCollisions(go, spawnedColliders);
+                float started = Time.time;
+                var spawnedColliders = new List<Collider>();
+                foreach (var release in releases)
+                {
+                    while (Time.time - started < release.launch.ReleaseDelay)
+                    {
+                        if (!InstanceFinder.IsServerStarted) yield break;
+                        yield return null;
+                    }
+                    if (!InstanceFinder.IsServerStarted) yield break;
+                    GameObject go = release.gold
+                        ? SpawnGoldPickup(origin, goldAmount, 0, total, baseAngle, null, harvester, release.launch)
+                        : SpawnItem(release.prefab, release.id, release.rarity, origin, 0, total,
+                            baseAngle, null, release.rarest, harvester, release.launch);
+                    if (go != null) RegisterAndIgnoreCollisions(go, spawnedColliders);
+                }
             }
         }
+
 
         private void RegisterAndIgnoreCollisions(GameObject go, List<Collider> collidersList)
         {
@@ -281,10 +307,12 @@ namespace Duskborn.Gameplay.Loot
             float baseAngle,
             SeededRNG rng,
             bool isRarest,
-            PlayerStats harvester = null)
+            PlayerStats harvester = null, DropLaunch? scheduledLaunch = null)
         {
-            Vector3 throwVelocity = ComputeThrowDirection(index, total, baseAngle, rng, out float azimuth);
-            Vector3 spawnPos       = CalculateSpawnPosition(origin, azimuth, total);
+            DropLaunch launch = scheduledLaunch ?? CreateDropLaunch(origin, index, total, baseAngle, rng);
+            Vector3 throwVelocity = launch.Velocity;
+            Vector3 spawnPos = launch.Position;
+            float azimuth = launch.Azimuth;
 
             var go = Instantiate(prefab, spawnPos, Quaternion.Euler(0f, azimuth * Mathf.Rad2Deg, 0f));
             InstanceFinder.ServerManager.Spawn(go);
@@ -293,8 +321,11 @@ namespace Duskborn.Gameplay.Loot
             {
                 NetworkObject targetPlayerNob = harvester != null ? harvester.GetComponent<NetworkObject>() : null;
                 pickup.ServerInitialize(id, 1, rarity, targetPlayerNob);
-                pickup.ServerThrow(throwVelocity, throwTorque);
-                if (isRarest)
+                pickup.ServerThrow(throwVelocity, launch.Torque);
+                bool rawCrystal = !string.IsNullOrEmpty(id) &&
+                    id.StartsWith("material_", System.StringComparison.Ordinal) &&
+                    id.EndsWith("_crystal", System.StringComparison.Ordinal);
+                if (isRarest && !rawCrystal)
                 {
                     // The sound always comes from the highest-rarity item dropped by that object!
                     pickup.RpcPlayDropSound(rarity);
@@ -303,7 +334,7 @@ namespace Duskborn.Gameplay.Loot
             return go;
         }
 
-        private GameObject SpawnGoldPickup(Vector3 origin, int amount, int throwIndex, int throwTotal, float baseAngle, SeededRNG rng, PlayerStats harvester = null)
+        private GameObject SpawnGoldPickup(Vector3 origin, int amount, int throwIndex, int throwTotal, float baseAngle, SeededRNG rng, PlayerStats harvester = null, DropLaunch? scheduledLaunch = null)
         {
             if (worldGoldPickupPrefab == null)
             {
@@ -312,8 +343,10 @@ namespace Duskborn.Gameplay.Loot
                 return null;
             }
 
-            Vector3 throwVelocity = ComputeThrowDirection(throwIndex, throwTotal, baseAngle, rng, out float azimuth);
-            Vector3 spawnPos       = CalculateSpawnPosition(origin, azimuth, throwTotal);
+            DropLaunch launch = scheduledLaunch ?? CreateDropLaunch(origin, throwIndex, throwTotal, baseAngle, rng);
+            Vector3 throwVelocity = launch.Velocity;
+            Vector3 spawnPos = launch.Position;
+            float azimuth = launch.Azimuth;
 
             var go = Instantiate(worldGoldPickupPrefab, spawnPos, Quaternion.Euler(0f, azimuth * Mathf.Rad2Deg, 0f));
             InstanceFinder.ServerManager.Spawn(go);
@@ -329,44 +362,30 @@ namespace Duskborn.Gameplay.Loot
             }
 
             goldPickup.ServerInitialize(amount, harvester != null ? harvester.GetComponent<NetworkObject>() : null);
-            goldPickup.ServerThrow(throwVelocity, throwTorque);
+            goldPickup.ServerThrow(throwVelocity, launch.Torque);
             return go;
         }
 
-        private Vector3 CalculateSpawnPosition(Vector3 origin, float azimuth, int total)
+        private Vector3 CalculateSpawnPosition(Vector3 origin, float azimuth, int total, SeededRNG rng)
         {
-            Vector3 spawnPos = origin + Vector3.up * spawnHeightOffset;
-            if (total > 1 && spawnSpreadRadius > 0f)
-            {
-                Vector3 radialOffset = new Vector3(Mathf.Cos(azimuth), 0f, Mathf.Sin(azimuth)) * spawnSpreadRadius;
-                spawnPos += radialOffset;
-            }
-            return spawnPos;
+            // Sample the disk, not its perimeter: drops no longer begin on a ring.
+            float radius = Mathf.Max(0f, spawnSpreadRadius) * Mathf.Sqrt(RandRange(rng, 0f, 1f));
+            return origin + new Vector3(Mathf.Cos(azimuth) * radius,
+                spawnHeightOffset + RandRange(rng, -.06f, .1f), Mathf.Sin(azimuth) * radius);
         }
 
-        // Spaces items evenly around a full circle, each launched along a cone surface
-        // (fixed angle from straight up) so the burst forms a cone widening toward the top.
         private Vector3 ComputeThrowDirection(int index, int total, float baseAngle, SeededRNG rng, out float azimuth)
         {
-            float slotDeg  = total > 0 ? 360f / total : 0f;
-            float jitter   = slotDeg * 0.5f * azimuthJitter;
-            float angleDeg = total == 1
-                ? baseAngle
-                : (baseAngle + slotDeg * index + RandRange(rng, -jitter, jitter));
-
-            azimuth = angleDeg * Mathf.Deg2Rad;
-
-            float cone  = Mathf.Clamp(coneAngle + RandRange(rng, -coneAngleVariance, coneAngleVariance), 0f, 90f) * Mathf.Deg2Rad;
-            float speed = Mathf.Max(0f, throwSpeed + RandRange(rng, -throwSpeedVariance, throwSpeedVariance));
-
-            float radial = speed * Mathf.Sin(cone);
-            float up     = speed * Mathf.Cos(cone);
-
-            return new Vector3(
-                Mathf.Cos(azimuth) * radial,
-                up,
-                Mathf.Sin(azimuth) * radial
-            );
+            // Independent azimuths allow clusters and gaps instead of regular polygons.
+            azimuth = (baseAngle + RandRange(rng, 0f, 360f)) * Mathf.Deg2Rad;
+            float cone = Mathf.Clamp(coneAngle + RandRange(rng, -Mathf.Max(18f, coneAngleVariance),
+                Mathf.Max(18f, coneAngleVariance)), 5f, 80f) * Mathf.Deg2Rad;
+            float variance = Mathf.Max(throwSpeedVariance, throwSpeed * .35f);
+            float speed = Mathf.Max(.1f, throwSpeed + RandRange(rng, -variance, variance));
+            // Vary lift and outward speed independently so the apexes don't line up.
+            float radial = speed * Mathf.Sin(cone) * RandRange(rng, .65f, 1.3f);
+            float up = speed * Mathf.Cos(cone) * RandRange(rng, .75f, 1.2f);
+            return new Vector3(Mathf.Cos(azimuth) * radial, up, Mathf.Sin(azimuth) * radial);
         }
 
         private static float RandRange(SeededRNG rng, float min, float max) =>

@@ -71,7 +71,7 @@ namespace Duskborn.Gameplay.Loot
             }
         }
 
-        private void Update()
+        private void LateUpdate()
         {
             if (_collected) return;
             var target = _targetPlayer.Value;
@@ -79,12 +79,7 @@ namespace Duskborn.Gameplay.Loot
             {
                 if (_isFlying)
                 {
-                    var body = GetComponent<Rigidbody>();
-                    if (body != null)
-                    {
-                        body.isKinematic = false;
-                        body.useGravity = true;
-                    }
+                    GetComponent<DroppedItemVisuals>()?.BeginDropMotion(Vector3.zero, Vector3.zero);
                     _isFlying = false;
                 }
                 return;
@@ -96,14 +91,9 @@ namespace Duskborn.Gameplay.Loot
             if (!_isFlying)
             {
                 _isFlying = true;
-                var body = GetComponent<Rigidbody>();
-                if (body != null)
-                {
-                    body.linearVelocity = Vector3.zero;
-                    body.angularVelocity = Vector3.zero;
-                    body.isKinematic = true;
-                    body.useGravity = false;
-                }
+                var visuals = GetComponent<DroppedItemVisuals>();
+                if (visuals == null) visuals = gameObject.AddComponent<DroppedItemVisuals>();
+                visuals.BeginCollectionMotion();
             }
 
             Vector3 targetPosition = target.transform.position + Vector3.up * 0.85f;
@@ -119,11 +109,9 @@ namespace Duskborn.Gameplay.Loot
             var rb = GetComponent<Rigidbody>();
             if (rb != null)
             {
-                rb.linearVelocity = Vector3.zero;
-                rb.angularVelocity = Vector3.zero;
-                rb.AddForce(impulse, ForceMode.VelocityChange);
-                if (torque > 0f)
-                    rb.AddTorque(Random.insideUnitSphere * torque, ForceMode.VelocityChange);
+                var visuals = GetComponent<DroppedItemVisuals>();
+                if (visuals == null) visuals = gameObject.AddComponent<DroppedItemVisuals>();
+                visuals.BeginDropMotion(impulse, Random.insideUnitSphere * Mathf.Max(0f, torque));
             }
             else
                 DuskLog.Warn(LogChannel.Loot, $"{name}: ServerThrow called but no Rigidbody found.");

@@ -1,0 +1,15 @@
+{
+  "layers": [
+    {
+      "source": "Artifacts\\NaturalSfx\\Harvesting\\v001\\candidates\\harvest_ore_02.wav",
+      "sha256": "a14a67d0ab4d431f7d685e96530cb75abe63835da23f615e14237f07d11d779c",
+      "gain_db": 0,
+      "prior_provenance": "../v001/manifest.json",
+      "delay_seconds": 0
+    }
+  ],
+  "final_gain_db": 5.5,
+  "sample_rate": 48000,
+  "channels": 1,
+  "encoding": "PCM24"
+}

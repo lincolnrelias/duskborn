@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-04",
+  "workflow": "Hidden Unity CLI in Temp/BriarwoodUIProject, edit mode",
+  "suitesPassed": 24,
+  "suitesFailed": 0,
+  "craftingChecksPassed": 17,
+  "resolutions": [
+    "1280x720",
+    "1920x1080"
+  ],
+  "captureStates": [
+    "missing",
+    "ready",
+    "empty"
+  ],
+  "manualChecks": [
+    "Paired inventory and panel dragging",
+    "Hover/focus and terrain contrast",
+    "Live resource changes and repeated crafting",
+    "Escape and cursor restoration"
+  ]
+}

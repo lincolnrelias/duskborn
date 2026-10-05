@@ -382,6 +382,8 @@ namespace Duskborn.Gameplay.Building
         private void RenderForge(PlacedBuilding building)
         {
             var recipe = selectedRecipe;
+            var forgeRecipes = Resources.LoadAll<CraftingRecipe>("Crafting")
+                .Where(r => r.RequiredStation == CraftingStationType.Forge && r.ProcessingSeconds > 0).ToArray();
             ui.AddForgeProcessor(
                 () => building.State.inputs.Count > 0 ? MaterialIcon(building.State.inputs[0].id) : null,
                 () => building.State.fuel.Count > 0 ? MaterialIcon(building.State.fuel[0].id) : null,
@@ -408,32 +410,57 @@ namespace Duskborn.Gameplay.Building
                 {
                     if (building.State.contents.Count > 0)
                         Send(new BuildingCommand { action = "collect", instance = building.State.instanceId });
-                });
+                },
+                fuel => ForgeInventoryOptions(building, fuel, forgeRecipes),
+                (id, fuel) => TryAssignInventoryItem(id, fuel),
+                () => busy);
 
         }
 
-        public bool TryAssignInventoryItem(string materialId)
+        public bool TryAssignInventoryItem(string materialId) => TryAssignInventoryItem(materialId, null);
+
+        private CraftingRecipe ForgeRecipeFor(string id, bool? fuel, IReadOnlyList<CraftingRecipe> recipes)
+        {
+            bool Fits(CraftingRecipe r) => r != null && (fuel == true
+                ? IngredientAmount(r.FuelIngredients, id) > 0
+                : fuel == false ? IngredientAmount(r.Ingredients, id) > 0 && IngredientAmount(r.FuelIngredients, id) == 0
+                : IngredientAmount(r.Ingredients, id) > 0 || IngredientAmount(r.FuelIngredients, id) > 0);
+            if (Fits(selectedRecipe) && recipes.Contains(selectedRecipe)) return selectedRecipe;
+            return recipes.FirstOrDefault(r => Fits(r) && (discovery == null || discovery.IsDiscovered(r)))
+                ?? recipes.FirstOrDefault(Fits);
+        }
+
+        private IReadOnlyList<ForgeInventoryOption> ForgeInventoryOptions(PlacedBuilding building, bool fuel, IReadOnlyList<CraftingRecipe> recipes)
+        {
+            var result = new List<ForgeInventoryOption>();
+            if (resources == null || building == null || station != building) return result;
+            foreach (var entry in resources.Counts.Where(e => e.Value > 0).OrderBy(e => MaterialName(e.Key)))
+            {
+                var recipe = ForgeRecipeFor(entry.Key, fuel, recipes);
+                if (recipe == null) continue;
+                bool incompatibleFuel = building.State.fuel.Any(stack => IngredientAmount(recipe.FuelIngredients, stack.id) <= 0);
+                bool locked = !string.IsNullOrEmpty(building.State.selectedRecipe) && building.State.selectedRecipe != recipe.RecipeId &&
+                    (building.State.inputs.Count > 0 || incompatibleFuel || building.State.jobs.Count > 0);
+                int loaded = fuel ? building.FuelAmount(entry.Key) : building.InputAmount(entry.Key);
+                result.Add(new ForgeInventoryOption
+                {
+                    Id = entry.Key, Name = MaterialName(entry.Key), Icon = MaterialIcon(entry.Key), Owned = entry.Value,
+                    Blocker = busy ? "Loading…" : locked ? "Empty the forge to change recipe" :
+                        loaded >= PlacedBuilding.SlotStackCapacity ? "Slot full" :
+                        discovery != null && !discovery.IsDiscovered(recipe) ? "Recipe undiscovered" : null
+                });
+            }
+            return result;
+        }
+
+        private bool TryAssignInventoryItem(string materialId, bool? fuelSlot)
         {
             if (busy || station == null || !MenuOpen || station.Definition.station != CraftingStationType.Forge ||
                 string.IsNullOrEmpty(materialId) || resources == null) return false;
             var recipes = Resources.LoadAll<CraftingRecipe>("Crafting")
                 .Where(recipe => recipe.RequiredStation == CraftingStationType.Forge && recipe.ProcessingSeconds > 0)
                 .ToArray();
-            var discoveredRecipes = recipes
-                .Where(recipe => discovery == null || discovery.IsDiscovered(recipe))
-                .ToArray();
-            var recipe = selectedRecipe;
-            bool compatible = recipe != null &&
-                (IngredientAmount(recipe.Ingredients, materialId) > 0 || IngredientAmount(recipe.FuelIngredients, materialId) > 0);
-            if (!compatible)
-            {
-                recipe = discoveredRecipes.FirstOrDefault(candidate =>
-                    IngredientAmount(candidate.Ingredients, materialId) > 0 ||
-                    IngredientAmount(candidate.FuelIngredients, materialId) > 0)
-                    ?? recipes.FirstOrDefault(candidate =>
-                    IngredientAmount(candidate.Ingredients, materialId) > 0 ||
-                    IngredientAmount(candidate.FuelIngredients, materialId) > 0);
-            }
+            var recipe = ForgeRecipeFor(materialId, fuelSlot, recipes);
             if (recipe == null)
             {
                 ui.ShowToast("This item cannot be used in the forge.", true);

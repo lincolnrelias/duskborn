@@ -133,9 +133,9 @@ namespace Duskborn.Gameplay.Loot
                 _visuals.Setup(rarity);
         }
 
-        private void Update()
+        private void LateUpdate()
         {
-            if (_targetPlayer.Value != null && CanFlyToPlayer(Rarity))
+            if (_isFlying || (_targetPlayer.Value != null && CanFlyToPlayer(Rarity)))
             {
                 UpdateFlyTowardsTarget();
             }
@@ -147,11 +147,10 @@ namespace Duskborn.Gameplay.Loot
             var targetNob = _targetPlayer.Value;
             if (targetNob == null || !targetNob.gameObject.activeInHierarchy)
             {
-                var rb = GetComponent<Rigidbody>();
-                if (rb != null && rb.isKinematic)
+                if (_isFlying)
                 {
-                    rb.isKinematic = false;
-                    rb.useGravity = true;
+                    _visuals?.BeginDropMotion(Vector3.zero, Vector3.zero);
+                    _isFlying = false;
                 }
                 return;
             }
@@ -165,14 +164,7 @@ namespace Duskborn.Gameplay.Loot
             if (!_isFlying)
             {
                 _isFlying = true;
-                var rb = GetComponent<Rigidbody>();
-                if (rb != null)
-                {
-                    rb.linearVelocity = Vector3.zero;
-                    rb.angularVelocity = Vector3.zero;
-                    rb.isKinematic = true;
-                    rb.useGravity = false;
-                }
+                _visuals?.BeginCollectionMotion();
             }
 
             Vector3 targetPos = targetNob.transform.position + Vector3.up * 0.85f;
@@ -237,11 +229,9 @@ namespace Duskborn.Gameplay.Loot
             var rb = GetComponent<Rigidbody>();
             if (rb != null)
             {
-                rb.linearVelocity = Vector3.zero;
-                rb.angularVelocity = Vector3.zero;
-                rb.AddForce(impulse, ForceMode.VelocityChange);
-                if (torque > 0f)
-                    rb.AddTorque(Random.insideUnitSphere * torque, ForceMode.VelocityChange);
+                var visuals = GetComponent<DroppedItemVisuals>();
+                if (visuals == null) visuals = gameObject.AddComponent<DroppedItemVisuals>();
+                visuals.BeginDropMotion(impulse, Random.insideUnitSphere * Mathf.Max(0f, torque));
             }
             else
                 DuskLog.Warn(LogChannel.Loot, $"{name}: ServerThrow called but no Rigidbody found.");
@@ -274,38 +264,7 @@ namespace Duskborn.Gameplay.Loot
         {
             playerNob.GetComponent<ResourceInventory>()?.Add(resourceId, amount);
 
-            AudioClip clip = null;
-            float volume = 1.0f;
-
-            if (Duskborn.Audio.AudioDatabase.Instance != null)
-            {
-                clip = Duskborn.Audio.AudioDatabase.Instance.GetPickupClip(rarity) ?? pickupClip;
-                volume = Duskborn.Audio.AudioDatabase.Instance.GetPickupVolume(rarity);
-            }
-            else
-            {
-                string clipName = rarity switch
-                {
-                    ItemRarity.Common    => "pickup_common",
-                    ItemRarity.Uncommon  => "pickup_uncommon",
-                    ItemRarity.Rare      => "pickup_rare",
-                    ItemRarity.Epic      => "pickup_epic",
-                    ItemRarity.Legendary => "pickup_legendary",
-                    _                    => "pickup_common"
-                };
-
-                clip = Resources.Load<AudioClip>($"SFX/{clipName}")
-                    ?? pickupClip
-                    ?? Resources.Load<AudioClip>("SFX/item_pickup");
-            }
-
-            if (clip != null)
-            {
-                if (Duskborn.Audio.AudioManager.Instance != null)
-                    Duskborn.Audio.AudioManager.Instance.PlayAtPoint(clip, playerNob.transform.position, volume);
-                else
-                    AudioSource.PlayClipAtPoint(clip, playerNob.transform.position, volume);
-            }
+            Duskborn.Audio.GatheringFoley.PlayPickup(resourceId, playerNob.transform.position, rarity);
         }
     }
 }

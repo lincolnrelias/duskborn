@@ -1,0 +1,41 @@
+{
+  "layers": [
+    {
+      "source": "impactMining_001.ogg",
+      "start": 0,
+      "duration": 0.2,
+      "gain_db": -10,
+      "playback_rate": 1,
+      "lowpass_hz": 4500,
+      "fade_in_ms": 2,
+      "fade_out_ms": 30,
+      "delay_seconds": 0
+    },
+    {
+      "source": "cloth2.ogg",
+      "start": 0.06583333333333333,
+      "duration": 0.23,
+      "gain_db": -8,
+      "playback_rate": 1,
+      "lowpass_hz": 4500,
+      "fade_in_ms": 2,
+      "fade_out_ms": 30,
+      "delay_seconds": 0.012
+    },
+    {
+      "source": "impactMetal_light_001.ogg",
+      "start": 0,
+      "duration": 0.19,
+      "gain_db": -15,
+      "playback_rate": 1,
+      "lowpass_hz": 5500,
+      "fade_in_ms": 2,
+      "fade_out_ms": 30,
+      "delay_seconds": 0.025
+    }
+  ],
+  "final_gain_db": 2.9859123050700016,
+  "sample_rate": 48000,
+  "channels": 1,
+  "encoding": "PCM24"
+}

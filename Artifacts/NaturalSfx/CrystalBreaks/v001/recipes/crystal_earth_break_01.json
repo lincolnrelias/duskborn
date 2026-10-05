@@ -1,0 +1,41 @@
+{
+  "layers": [
+    {
+      "source": "impactMining_000.ogg",
+      "start": 0,
+      "duration": 0.3,
+      "gain_db": 0,
+      "playback_rate": 0.86,
+      "lowpass_hz": null,
+      "fade_in_ms": 2,
+      "fade_out_ms": 30,
+      "delay_seconds": 0
+    },
+    {
+      "source": "footstep_concrete_000.ogg",
+      "start": 0,
+      "duration": 0.47,
+      "gain_db": -4,
+      "playback_rate": 1,
+      "lowpass_hz": null,
+      "fade_in_ms": 2,
+      "fade_out_ms": 20.604166666666668,
+      "delay_seconds": 0.09
+    },
+    {
+      "source": "impactMining_001.ogg",
+      "start": 0,
+      "duration": 0.25,
+      "gain_db": -10,
+      "playback_rate": 0.9,
+      "lowpass_hz": null,
+      "fade_in_ms": 2,
+      "fade_out_ms": 30,
+      "delay_seconds": 0.22
+    }
+  ],
+  "final_gain_db": -3.4588050542905058,
+  "sample_rate": 48000,
+  "channels": 1,
+  "encoding": "PCM24"
+}

@@ -1,0 +1,226 @@
+[
+  {
+    "element": "flame",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_flame_break_01.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_flame_break_live_v2_01.wav",
+    "guid": "f701ba63110a493e891dfb9a0473649c",
+    "sha256": "ad126f79e32bdc57977c80db5f3bcaccd194d468ff761d718b78a8844bdda142"
+  },
+  {
+    "element": "flame",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_flame_break_02.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_flame_break_live_v2_02.wav",
+    "guid": "9acf37394c3a4016b1999612f6bcc044",
+    "sha256": "ea900e407ac9a535137814d7090b958c5da5ae675fe8204b265d3b2a8aa702ac"
+  },
+  {
+    "element": "flame",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_flame_break_03.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_flame_break_live_v2_03.wav",
+    "guid": "20ae5b1772124c2892e7c812ff0f6b63",
+    "sha256": "1e9bad2b1b50f6b94e76255447f85b7bc05b98ad1ad5145774e0fccca2232260"
+  },
+  {
+    "element": "flame",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_flame_break_04.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_flame_break_live_v2_04.wav",
+    "guid": "5cf1b9e9398542ad81da2155ac4489a2",
+    "sha256": "cb40065be09d949142d84ba54c7e87a61aa041ada96d5a98f13262f45fc6f392"
+  },
+  {
+    "element": "nature",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_nature_break_01.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_nature_break_live_v2_01.wav",
+    "guid": "80b7157a79b54f86bd3550ccd7d74440",
+    "sha256": "c36e957d5f7255b20c0fc2beab4f2360b017718795143b5762f98f26f7006a32"
+  },
+  {
+    "element": "nature",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_nature_break_02.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_nature_break_live_v2_02.wav",
+    "guid": "8f115df417a7406ab7aeb768d2f31ef5",
+    "sha256": "973edd6efa088fdae355d635f3fd2aa8f2f8186de83ebd65c1eea592e55741f3"
+  },
+  {
+    "element": "nature",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_nature_break_03.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_nature_break_live_v2_03.wav",
+    "guid": "41ec7920e01749e1aa828e0a97e1c017",
+    "sha256": "fe7331e4eb7a1165f3eab3e42f753a0394a5344da8eb2ce0e158c6d1d702b748"
+  },
+  {
+    "element": "nature",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_nature_break_04.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_nature_break_live_v2_04.wav",
+    "guid": "c1af5562d819491d8c39ad7dfd82ab7d",
+    "sha256": "f86a63e3746a74398e2cb0ac8ce98dda2887e04988c98576a86fcdf987635cf0"
+  },
+  {
+    "element": "storm",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_storm_break_01.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_storm_break_live_v2_01.wav",
+    "guid": "d09a56ece8cd4953b8fd0850121b2d94",
+    "sha256": "6f3467b87923d8073465c04784aeb6fe3560e2a1a060787792c127892b13efdb"
+  },
+  {
+    "element": "storm",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_storm_break_02.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_storm_break_live_v2_02.wav",
+    "guid": "c177ad6de5fc4e2399442c7e52fc0858",
+    "sha256": "974b408e89383172ecd4d076da1f05ff2ccb4621af4447e813849ad85450a1a0"
+  },
+  {
+    "element": "storm",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_storm_break_03.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_storm_break_live_v2_03.wav",
+    "guid": "48d74fe57f434258a6f7831708e0c11d",
+    "sha256": "28931f3c1c6c73a7bb31c99948078b967009f1f3153aab39a8c6ea444cd30098"
+  },
+  {
+    "element": "storm",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_storm_break_04.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_storm_break_live_v2_04.wav",
+    "guid": "48f92c950e4d4581a4ee5d5b60d7fb58",
+    "sha256": "9bb86da8f01e6fed5051f1971dd95d7f70145b4ce161508a1b1168825110123a"
+  },
+  {
+    "element": "earth",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_earth_break_01.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_earth_break_live_v2_01.wav",
+    "guid": "1f45d032b6824d66929ea1f5c19632ba",
+    "sha256": "9721e1a7f9a76def7daf6783cc15c03fd655c78fe732ce37161efeabcedd5901"
+  },
+  {
+    "element": "earth",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_earth_break_02.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_earth_break_live_v2_02.wav",
+    "guid": "51e2424ae5b5490fa88e069acbbfb750",
+    "sha256": "b4a766caf1c564abf3b4c6be162e7cacdbb4c0265f48cce08377d5bfbc91aec6"
+  },
+  {
+    "element": "earth",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_earth_break_03.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_earth_break_live_v2_03.wav",
+    "guid": "b15c8844156847d09d78b21fbc296cc8",
+    "sha256": "726f6fff181aeb1557c7fb28da6f54468a4f91c0cc17d6300e1ad9db0bfe3726"
+  },
+  {
+    "element": "earth",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_earth_break_04.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_earth_break_live_v2_04.wav",
+    "guid": "ecd5c0a9040c440c98bbf1ed0c0e072c",
+    "sha256": "bebb618730cfb8e0f5ff4d99b8678e4ddb17ebfa43f4c1d16c778736adf47403"
+  },
+  {
+    "element": "frost",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_frost_break_01.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_frost_break_live_v2_01.wav",
+    "guid": "2afd1d5ab67b46019bcdb0cbb56e1dac",
+    "sha256": "af2ee36ea0912a99d8e0b472e1587fbcf707748fee045e61a2e57124e05ae65e"
+  },
+  {
+    "element": "frost",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_frost_break_02.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_frost_break_live_v2_02.wav",
+    "guid": "91268bcc6de844298451939d793520e5",
+    "sha256": "21089a565d178db09f7ffc27e81e8ea130209a76e987235f58f955c318348d04"
+  },
+  {
+    "element": "frost",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_frost_break_03.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_frost_break_live_v2_03.wav",
+    "guid": "51190baf58a84b0fadcca7feeef31b55",
+    "sha256": "c2f40de2ffdbbfb1ea744bf82f9a6b82d0504cdc89a1b552ae056b19bf5e7d4e"
+  },
+  {
+    "element": "frost",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_frost_break_04.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_frost_break_live_v2_04.wav",
+    "guid": "b262ee54749347329e7c924f477f8818",
+    "sha256": "b194bb3560c3391ad134268357cba6f33b44b23460de776c898f90f8577b6d93"
+  },
+  {
+    "element": "blood",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_blood_break_01.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_blood_break_live_v2_01.wav",
+    "guid": "9a02ffb7663b4f09bce74290900b7f9e",
+    "sha256": "de14c8a0e9fdea1339340627b0eb570ec6ca572d5c1f37ef640c659e1bb6459a"
+  },
+  {
+    "element": "blood",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_blood_break_02.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_blood_break_live_v2_02.wav",
+    "guid": "938ce3dc63eb44edb4232e8f1a3b4a94",
+    "sha256": "f270a92066d1a91d85c31424df169c20b7748a65a24a0af8e95c890489b02939"
+  },
+  {
+    "element": "blood",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_blood_break_03.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_blood_break_live_v2_03.wav",
+    "guid": "dbe43df6f22f4514be23053937fd4ce7",
+    "sha256": "bb1edeef21aefc1bc24b5fb7980105e17c5f61477960d2d3b8bf0ccc47e9ba48"
+  },
+  {
+    "element": "blood",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_blood_break_04.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_blood_break_live_v2_04.wav",
+    "guid": "5822700057e347b0913670eb9490a0cd",
+    "sha256": "9f2034c0efb75c4c8b25376693a39ee1afb205ecc7f3e405db2cc19fc718ad36"
+  },
+  {
+    "element": "dark",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_dark_break_01.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_dark_break_live_v2_01.wav",
+    "guid": "5ed25cba26824b91bdc37f9a1f7c3f45",
+    "sha256": "6b408557f35c5e51a1b71cc6d26a2db259089a5ac220c59de2fb4f7e51ab891f"
+  },
+  {
+    "element": "dark",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_dark_break_02.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_dark_break_live_v2_02.wav",
+    "guid": "5d5be88ad0534005819701a4d403f9bd",
+    "sha256": "4b126ec280e4cf03560f87912337e59085b81cfee25581a3b44713ba7e23501a"
+  },
+  {
+    "element": "dark",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_dark_break_03.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_dark_break_live_v2_03.wav",
+    "guid": "bc162ae2b31a4027a1ffae41f1b8c4bc",
+    "sha256": "d5500dd49db5d7a321c8785ef083e9c94750ee6f2e2bd2991183cec132f78956"
+  },
+  {
+    "element": "dark",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_dark_break_04.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_dark_break_live_v2_04.wav",
+    "guid": "d2ca9177d69147f9805d946345a13714",
+    "sha256": "d1aee31d7e5711f2399cad35d4575641ef5b3d6d86b8e55880737f607327c914"
+  },
+  {
+    "element": "light",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_light_break_01.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_light_break_live_v2_01.wav",
+    "guid": "03895912d3cc4a5ab02d4fb0e441553b",
+    "sha256": "78473bca401902981714151ec7dd44c1a0705b5aead857e410bbec68db53a8d8"
+  },
+  {
+    "element": "light",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_light_break_02.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_light_break_live_v2_02.wav",
+    "guid": "ddc38c65b50c4ab2915aa0136b50ef98",
+    "sha256": "bc7372677fe6894f2a549340c6d90a951d31b1850c5fd9fb5508e6bd421636a2"
+  },
+  {
+    "element": "light",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_light_break_03.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_light_break_live_v2_03.wav",
+    "guid": "2523a9bb4e7847f0bbd1cac058750a3d",
+    "sha256": "eb8c426bafd5aff0e334d216af3436b619056458c39d6fd4435f32933c6d7a1e"
+  },
+  {
+    "element": "light",
+    "source": "Artifacts\\NaturalSfx\\CrystalBreaks\\v001\\candidates\\crystal_light_break_04.wav",
+    "installed": "Assets\\_Duskborn\\Resources\\SFX\\CrystalBreaksV2\\crystal_light_break_live_v2_04.wav",
+    "guid": "52eb9e77b314433b86937d5cbddd2fac",
+    "sha256": "e87af296d02ceffb1ce312f4b0b5a93baeeea976d491cd863032fcb76c4917c0"
+  }
+]

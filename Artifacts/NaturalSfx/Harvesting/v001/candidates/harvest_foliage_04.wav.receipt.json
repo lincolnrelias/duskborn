@@ -1,0 +1,91 @@
+{
+  "operation": "mix",
+  "sources": [
+    {
+      "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_foliage_04_body.wav",
+      "sha256": "4a9ba397b6a5feb77f92dfb214ce4d6443bbc892ecc9802379b0e1a3375d739c"
+    },
+    {
+      "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_foliage_04_texture.wav",
+      "sha256": "cae9ef080b6218e08c2a7c53186f2cdeac8ee1d86f070be467453405d9a7a058"
+    }
+  ],
+  "recipe": {
+    "layers": [
+      {
+        "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_foliage_04_body.wav",
+        "delay_ms": 0
+      },
+      {
+        "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_foliage_04_texture.wav",
+        "delay_ms": 62
+      }
+    ]
+  },
+  "channels": 1,
+  "inspection": {
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "pcm_s24le",
+        "codec_long_name": "PCM signed 24-bit little-endian",
+        "codec_type": "audio",
+        "codec_tag_string": "[1][0][0][0]",
+        "codec_tag": "0x0001",
+        "sample_fmt": "s32",
+        "sample_rate": "48000",
+        "channels": 1,
+        "channel_layout": "mono",
+        "bits_per_sample": 24,
+        "initial_padding": 0,
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "0/0",
+        "time_base": "1/48000",
+        "duration_ts": 26261,
+        "duration": "0.547104",
+        "bit_rate": "1152000",
+        "bits_per_raw_sample": "24",
+        "disposition": {
+          "default": 0,
+          "dub": 0,
+          "original": 0,
+          "comment": 0,
+          "lyrics": 0,
+          "karaoke": 0,
+          "forced": 0,
+          "hearing_impaired": 0,
+          "visual_impaired": 0,
+          "clean_effects": 0,
+          "attached_pic": 0,
+          "timed_thumbnails": 0,
+          "non_diegetic": 0,
+          "captions": 0,
+          "descriptions": 0,
+          "metadata": 0,
+          "dependent": 0,
+          "still_image": 0,
+          "multilayer": 0
+        }
+      }
+    ],
+    "format": {
+      "filename": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\candidates\\harvest_foliage_04.wav",
+      "nb_streams": 1,
+      "nb_programs": 0,
+      "nb_stream_groups": 0,
+      "format_name": "wav",
+      "format_long_name": "WAV / WAVE (Waveform Audio)",
+      "duration": "0.547104",
+      "size": "78886",
+      "bit_rate": "1153506",
+      "probe_score": 99,
+      "tags": {
+        "encoder": "Lavf62.3.100"
+      }
+    }
+  },
+  "output": {
+    "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\candidates\\harvest_foliage_04.wav",
+    "sha256": "ff6a90886c97f46e5a5819d6c99ddcab2715d8d6761cf02fb4bea93452314ca7"
+  }
+}

@@ -190,7 +190,8 @@ namespace Duskborn.Audio
         {
             AudioListener.volume = masterVolume;
 
-            float activeMusicVol = masterVolume * musicVolume;
+            // AudioListener applies master gain once to every category.
+            float activeMusicVol = musicVolume;
             if (_activeSourceIsA && _musicSourceA != null)
             {
                 _musicSourceA.volume = activeMusicVol;
@@ -201,7 +202,7 @@ namespace Duskborn.Audio
             }
 
             if (_ambienceSource != null)
-                _ambienceSource.volume = masterVolume * ambienceVolume;
+                _ambienceSource.volume = ambienceVolume;
         }
 
         // ── Soundtrack and Crossfade ──
@@ -239,7 +240,7 @@ namespace Duskborn.Audio
             newSource.Play();
 
             float elapsed = 0f;
-            float targetVol = masterVolume * musicVolume;
+            float targetVol = musicVolume;
             float startOldVol = oldSource.isPlaying ? oldSource.volume : 0f;
 
             while (elapsed < duration)
@@ -288,14 +289,14 @@ namespace Duskborn.Audio
             if (clip == null) return;
             float pitch = 1.0f + Random.Range(-pitchJitter, pitchJitter);
             _sfx2DSource.pitch = pitch;
-            _sfx2DSource.PlayOneShot(clip, volumeScale * masterVolume * sfxVolume);
+            _sfx2DSource.PlayOneShot(clip, volumeScale * sfxVolume);
         }
 
         public void PlayUISfx(AudioClip clip, float volumeScale = 1.0f)
         {
             if (clip == null) return;
             _uiSource.pitch = 1.0f;
-            _uiSource.PlayOneShot(clip, volumeScale * masterVolume * uiVolume);
+            _uiSource.PlayOneShot(clip, volumeScale * uiVolume);
         }
 
         // Positional 3D Sound Effects
@@ -324,7 +325,7 @@ namespace Duskborn.Audio
             src.maxDistance = maxDistance;
             src.spatialBlend = spatialBlend;
             src.pitch = 1.0f + Random.Range(-pitchJitter, pitchJitter);
-            src.volume = volumeScale * masterVolume * sfxVolume;
+            src.volume = volumeScale * sfxVolume;
             src.clip = clip;
             src.Play();
 

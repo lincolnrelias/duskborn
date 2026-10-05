@@ -9,8 +9,10 @@ using UnityEngine.UI;
 using UnityEngine.InputSystem;
 #endif
 using Duskborn.Audio;
+using Duskborn.UI.Building;
 using Duskborn.Core;
 using Duskborn.Gameplay.ActionBar;
+using Duskborn.Gameplay.Building;
 using Duskborn.Gameplay.Crafting;
 using Duskborn.Gameplay.Equipment;
 using Duskborn.Gameplay.Loot;
@@ -37,10 +39,6 @@ namespace Duskborn.UI
         [SerializeField] private AudioClip clickSound;
         [SerializeField] private AudioClip craftSound;
         [SerializeField] private AudioClip errorSound;
-
-        [Header("Interface Sprites")]
-        [SerializeField] private Sprite panelFrameSprite;
-        [SerializeField] private Sprite slotFrameSprite;
 
         // System state.
         public bool IsOpen { get; private set; }
@@ -94,6 +92,8 @@ namespace Duskborn.UI
         private Vector2 _originalInventoryPos = new Vector2(0, 25);
         private bool _hasOriginalInventoryPos;
         private bool _inventoryOpenedByCrafting;
+        private bool _craftInProgress;
+        private static TMP_FontAsset _headingFont;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void AutoInitialize()
@@ -131,7 +131,6 @@ namespace Duskborn.UI
 
         private void Start()
         {
-            LoadSprites();
             LoadDefaultRecipes();
 
             LocalPlayerContext.OnLocalPlayerRegistered += HandleLocalPlayerRegistered;
@@ -361,6 +360,7 @@ namespace Duskborn.UI
             RefreshRecipeList();
 
             IsOpen = true;
+            RefreshDetailsView();
             PlaySound(openSound);
 
             // Block camera rotation and release the cursor.
@@ -467,6 +467,14 @@ namespace Duskborn.UI
 
         public void CraftSelectedRecipe()
         {
+            if (_craftInProgress) return;
+            _craftInProgress = true;
+            try { ExecuteSelectedRecipe(); }
+            finally { _craftInProgress = false; }
+        }
+
+        private void ExecuteSelectedRecipe()
+        {
             if (_selectedRecipe == null) return;
             TryFindIntegrations();
             if (CurrentWorkbench == null || !IsLocalPlayerNearWorkbench(4f) || _selectedRecipe.RequiredStation != CurrentWorkbench.StationType)
@@ -525,7 +533,7 @@ namespace Duskborn.UI
                 }
                 _playerResources.Add(material.Id, selectedRecipe.OutputAmount);
                 RefreshRecipeListStates(); RefreshDetailsView();
-                ShowStatusFeedback("Material crafted!", false);
+                ShowCraftConfirmation($"{selectedRecipe.RecipeName} crafted!");
                 return;
             }
             // Register before ItemAdded notifies the inventory presenter.
@@ -542,11 +550,11 @@ namespace Duskborn.UI
                 return;
             }
             PlaySound(craftSound);
-            ShowStatusFeedback($"<b>{selectedRecipe.RecipeName}</b> crafted successfully!", false);
             DuskLog.Log(LogChannel.Inventory, $"Crafted '{selectedRecipe.RecipeName}' at Workbench.");
 
             RefreshRecipeListStates();
             RefreshDetailsView();
+            ShowCraftConfirmation($"{selectedRecipe.RecipeName} crafted!");
         }
 
         private bool HasFreeInventorySlot()
@@ -562,8 +570,15 @@ namespace Duskborn.UI
         private void ShowStatusFeedback(string message, bool isError)
         {
             if (_statusLabel == null) return;
-            string colorHex = isError ? "#f87171" : "#4ade80";
+            string colorHex = "#" + ColorUtility.ToHtmlStringRGB(isError ? BriarwoodCatalogTheme.Negative : BriarwoodCatalogTheme.Positive);
             _statusLabel.text = $"<color={colorHex}>{message}</color>";
+        }
+
+        private void ShowCraftConfirmation(string message)
+        {
+            if (_statusLabel == null) return;
+            // Keep the refreshed blocker visible after a confirmed craft consumes materials.
+            _statusLabel.text = $"<color=#{ColorUtility.ToHtmlStringRGB(BriarwoodCatalogTheme.Positive)}>{message}</color>\n{_statusLabel.text}";
         }
 
         // Panel Visual Updates
@@ -584,8 +599,8 @@ namespace Duskborn.UI
                 var img = _tabViews[i].GetComponent<Image>();
                 if (img != null)
                     img.color = _categories[i] == _activeCategory
-                        ? new Color(0.48f, 0.30f, 0.12f, 1f)
-                        : new Color(0.10f, 0.13f, 0.18f, 0.96f);
+                        ? new Color(.32f, .24f, .13f, 1f)
+                        : BriarwoodCatalogTheme.Raised;
 
                 var outline = _tabViews[i].GetComponent<Outline>();
                 if (outline != null)
@@ -598,7 +613,7 @@ namespace Duskborn.UI
             if (_recipeListContainer == null) return;
 
             foreach (var go in _recipeEntryViews)
-                Destroy(go);
+                RemoveView(go);
             _recipeEntryViews.Clear();
             _filteredRecipes.Clear();
 
@@ -711,9 +726,9 @@ namespace Duskborn.UI
                 if (bg != null)
                 {
                     if (isSelected)
-                        bg.color = new Color(0.22f, 0.30f, 0.42f, 1f); // Blue/gray highlight
+                        bg.color = new Color(.32f, .24f, .13f, 1f); // Brass selection.
                     else
-                        bg.color = new Color(0.12f, 0.14f, 0.18f, 0.95f);
+                        bg.color = BriarwoodCatalogTheme.Raised;
                 }
 
                 // Selection border.
@@ -721,14 +736,16 @@ namespace Duskborn.UI
                 if (outline != null)
                 {
                     outline.enabled = isSelected;
-                    outline.effectColor = new Color(0.96f, 0.72f, 0.22f, 1f); // Bright gold.
+                    outline.effectColor = BriarwoodCatalogTheme.Brass; // Brass selection.
                 }
 
                 // Craftability indicator ("Indicator" child).
                 var indicator = view.transform.Find("Indicator")?.GetComponent<TextMeshProUGUI>();
                 if (indicator != null)
                 {
-                    indicator.text = canCraft ? "<color=#4ade80>● Ready</color>" : "<color=#64748b>Missing</color>";
+                    bool discovered = _discoveryTracker != null && _discoveryTracker.IsDiscovered(recipe);
+                    indicator.text = !discovered ? "Undiscovered" : canCraft ? "Ready" : "Missing materials";
+                    indicator.color = !discovered ? BriarwoodCatalogTheme.Muted : canCraft ? BriarwoodCatalogTheme.Positive : BriarwoodCatalogTheme.Negative;
                 }
             }
         }
@@ -740,7 +757,12 @@ namespace Duskborn.UI
                 if (_detailTitle != null) _detailTitle.text = "Select a recipe";
                 if (_detailStats != null) _detailStats.text = string.Empty;
                 if (_detailDescription != null) _detailDescription.text = string.Empty;
+                if (_detailCategory != null) _detailCategory.text = string.Empty;
+                if (_detailIcon != null) _detailIcon.color = Color.clear;
+                foreach (var view in _ingredientViews) RemoveView(view);
+                _ingredientViews.Clear();
                 if (_craftButton != null) _craftButton.interactable = false;
+                ShowStatusFeedback("No recipes in this category.", true);
                 return;
             }
 
@@ -758,14 +780,7 @@ namespace Duskborn.UI
                     CraftingTier.Thornheart => "Tier 4",
                     _ => ""
                 };
-                string stationStr = _selectedRecipe.RequiredStation switch
-                {
-                    CraftingStationType.Forge => "Forge",
-                    CraftingStationType.Cauldron => "Cauldron",
-                    CraftingStationType.ArcaneTable => "Arcane Table",
-                    _ => "Workbench"
-                };
-                _detailCategory.text = $"{_selectedRecipe.Category} • {tierStr} • {stationStr}";
+                _detailCategory.text = $"{_selectedRecipe.Category} • {tierStr} • Makes {_selectedRecipe.OutputAmount}";
             }
 
             // Large icon.
@@ -801,11 +816,30 @@ namespace Duskborn.UI
 
             if (!discovered) ShowStatusFeedback("Discover this recipe's ingredients.", true);
             else if (!hasProcessor) ShowStatusFeedback("Build this station [B] to process materials.", true);
-            else if (!canCraft) ShowStatusFeedback("Insufficient resources", true);
+            else if (!canCraft) ShowStatusFeedback(MissingMaterials(_selectedRecipe), true);
             else if (!hasSpace)
                 ShowStatusFeedback("Inventory full", true);
             else
                 ShowStatusFeedback("Ready to craft!", false);
+        }
+
+        private string MissingMaterials(CraftingRecipe recipe)
+        {
+            if (_playerResources == null) return "Resource inventory unavailable.";
+            if (!MaterialCosts.Aggregate(recipe.Ingredients, recipe.FuelIngredients, out var costs))
+                return "Recipe materials unavailable.";
+            foreach (var cost in costs)
+            {
+                int deficit = cost.Value - _playerResources.GetCount(cost.Key);
+                if (deficit <= 0) continue;
+                foreach (var ingredient in recipe.Ingredients)
+                    if (ingredient.material != null && ingredient.material.Id == cost.Key)
+                        return $"Need {deficit} more {ingredient.material.DisplayName}";
+                foreach (var fuel in recipe.FuelIngredients)
+                    if (fuel.material != null && fuel.material.Id == cost.Key)
+                        return $"Need {deficit} more {fuel.material.DisplayName}";
+            }
+            return "Insufficient resources";
         }
 
         private string BuildStatsString(CraftingRecipe recipe)
@@ -821,8 +855,8 @@ namespace Duskborn.UI
                 foreach (var b in gear.Bonuses)
                 {
                     string sign = b.Value >= 0 ? "+" : "";
-                    string colorHex = b.Value >= 0 ? "#86efac" : "#f87171";
-                    lines.Add($"<color={colorHex}>{sign}{b.Value * 100:F0}% {b.Type}</color>");
+                    string colorHex = "#" + ColorUtility.ToHtmlStringRGB(b.Value >= 0 ? BriarwoodCatalogTheme.Positive : BriarwoodCatalogTheme.Negative);
+                    lines.Add($"<color={colorHex}>{b.FormatLine()}</color>");
                 }
                 return string.Join("\n", lines);
             }
@@ -834,8 +868,8 @@ namespace Duskborn.UI
                 foreach (var b in weapon.Bonuses)
                 {
                     string sign = b.Value >= 0 ? "+" : "";
-                    string colorHex = b.Value >= 0 ? "#86efac" : "#f87171";
-                    lines.Add($"<color={colorHex}>{sign}{b.Value * 100:F0}% {b.Type}</color>");
+                    string colorHex = "#" + ColorUtility.ToHtmlStringRGB(b.Value >= 0 ? BriarwoodCatalogTheme.Positive : BriarwoodCatalogTheme.Negative);
+                    lines.Add($"<color={colorHex}>{b.FormatLine()}</color>");
                 }
 
                 foreach (var mod in weapon.TypeModifiers)
@@ -846,7 +880,7 @@ namespace Duskborn.UI
                     else if (mod.Type == Duskborn.Gameplay.TargetType.MiningNode || (int)mod.Type == 512) targetName = "Rocks / Ores";
                     else if (mod.Type == Duskborn.Gameplay.TargetType.Humanoid) targetName = "Humanoids";
 
-                    lines.Add($"<color=#fde047>{sign}{mod.Bonus * 100:F0}% Damage vs {targetName}</color>");
+                    lines.Add($"<color=#{ColorUtility.ToHtmlStringRGB(BriarwoodCatalogTheme.Brass)}>{sign}{mod.Bonus * 100:F0}% Damage vs {targetName}</color>");
                 }
 
                 return string.Join("\n", lines);
@@ -860,7 +894,7 @@ namespace Duskborn.UI
             if (_ingredientsContainer == null) return;
 
             foreach (var go in _ingredientViews)
-                Destroy(go);
+                RemoveView(go);
             _ingredientViews.Clear();
 
             foreach (var ing in recipe.Ingredients)
@@ -879,6 +913,12 @@ namespace Duskborn.UI
             }
 
             ResetScroll(_ingredientsScrollRect);
+        }
+
+        private static void RemoveView(GameObject view)
+        {
+            view.SetActive(false);
+            if (Application.isPlaying) Destroy(view); else DestroyImmediate(view);
         }
 
         private static void ResetScroll(ScrollRect scrollRect)
@@ -913,13 +953,13 @@ namespace Duskborn.UI
             _craftingRoot.anchorMin = new Vector2(0.5f, 0.5f);
             _craftingRoot.anchorMax = new Vector2(0.5f, 0.5f);
             _craftingRoot.pivot = new Vector2(0.5f, 0.5f);
-            _craftingRoot.sizeDelta = new Vector2(460f, 420f);
+            _craftingRoot.sizeDelta = new Vector2(460f, 480f);
             _craftingRoot.anchoredPosition = new Vector2(CraftingPanelPairedX, 0f);
             _craftingRoot.localScale = Vector3.one * CraftingPanelScale;
 
             // A full opaque backing prevents transparent frame sprites from exposing the world
             // through the middle of the crafting screen.
-            var backdrop = CreatePanel("Backdrop", frameGO.transform, new Color(0.025f, 0.035f, 0.055f, 0.985f));
+            var backdrop = CreatePanel("Backdrop", frameGO.transform, BriarwoodCatalogTheme.Leather);
             backdrop.anchorMin = Vector2.zero;
             backdrop.anchorMax = Vector2.one;
             backdrop.sizeDelta = Vector2.zero;
@@ -929,16 +969,7 @@ namespace Duskborn.UI
 
             var frameImg = frameGO.GetComponent<Image>();
             frameImg.raycastTarget = true;
-            if (panelFrameSprite != null)
-            {
-                frameImg.sprite = panelFrameSprite;
-                frameImg.type = Image.Type.Sliced;
-                frameImg.color = new Color(0.95f, 0.95f, 0.95f, 1f);
-            }
-            else
-            {
-                frameImg.color = new Color(0.055f, 0.07f, 0.10f, 0.985f);
-            }
+            frameImg.color = BriarwoodCatalogTheme.Leather;
 
             // Drag using the frame body.
             var frameDrag = frameGO.AddComponent<DraggablePanel>();
@@ -956,7 +987,7 @@ namespace Duskborn.UI
             headerRect.sizeDelta = new Vector2(0, 42);
 
             var headerImg = headerGO.GetComponent<Image>();
-            headerImg.color = new Color(0.12f, 0.075f, 0.035f, 0.98f);
+            headerImg.color = BriarwoodCatalogTheme.Raised;
             headerImg.raycastTarget = true;
             AddFrameOutline(headerGO, new Color(0.84f, 0.55f, 0.20f, 0.55f), new Vector2(1f, -1f));
 
@@ -964,7 +995,7 @@ namespace Duskborn.UI
             headerDrag.TargetPanel = _craftingRoot;
 
             // Title inside the header.
-            var titleGO = CreateText("Title", headerGO.transform, "WORKBENCH", 13, FontStyles.Bold, new Color(0.98f, 0.82f, 0.38f, 1f), TextAlignmentOptions.Left);
+            var titleGO = CreateText("Title", headerGO.transform, "WORKBENCH", 13, FontStyles.Bold, BriarwoodCatalogTheme.Brass, TextAlignmentOptions.Left);
             _headerTitle = titleGO.GetComponent<TextMeshProUGUI>();
             var titleRect = titleGO.GetComponent<RectTransform>();
             titleRect.anchorMin = new Vector2(0, 0.40f);
@@ -974,7 +1005,7 @@ namespace Duskborn.UI
             titleRect.sizeDelta = new Vector2(-60, 0);
 
             var subtitleGO = CreateText("Subtitle", headerGO.transform, "CRAFTING CATALOG", 7.5f, FontStyles.Bold,
-                new Color(0.74f, 0.66f, 0.52f, 1f), TextAlignmentOptions.Left);
+                BriarwoodCatalogTheme.Muted, TextAlignmentOptions.Left);
             var subtitleRect = subtitleGO.GetComponent<RectTransform>();
             subtitleRect.anchorMin = new Vector2(0, 0);
             subtitleRect.anchorMax = new Vector2(1, 0.45f);
@@ -992,7 +1023,7 @@ namespace Duskborn.UI
             closeBtnGO.GetComponent<Button>().onClick.AddListener(() => { PlaySound(clickSound); Close(); });
 
             // Header divider.
-            var headerDiv = CreatePanel("HeaderDivider", frameGO.transform, new Color(0.24f, 0.28f, 0.36f, 0.8f));
+            var headerDiv = CreatePanel("HeaderDivider", frameGO.transform, BriarwoodCatalogTheme.Brass);
             headerDiv.anchorMin = new Vector2(0, 1);
             headerDiv.anchorMax = new Vector2(1, 1);
             headerDiv.pivot = new Vector2(0.5f, 1);
@@ -1008,7 +1039,7 @@ namespace Duskborn.UI
             _tabsContainer.pivot = new Vector2(0.5f, 1);
             _tabsContainer.anchoredPosition = new Vector2(0, -45);
             _tabsContainer.sizeDelta = new Vector2(-28, 25);
-            tabBarGO.GetComponent<Image>().color = new Color(0.035f, 0.05f, 0.075f, 0.88f);
+            tabBarGO.GetComponent<Image>().color = BriarwoodCatalogTheme.Leather;
 
             var tabHlg = tabBarGO.GetComponent<HorizontalLayoutGroup>();
             tabHlg.spacing = 3f;
@@ -1030,7 +1061,7 @@ namespace Duskborn.UI
                     tabLabel.overflowMode = TextOverflowModes.Ellipsis;
                 }
                 var tabOutline = tabGO.AddComponent<Outline>();
-                tabOutline.effectColor = new Color(0.94f, 0.66f, 0.26f, 0.9f);
+                tabOutline.effectColor = BriarwoodCatalogTheme.Brass;
                 tabOutline.effectDistance = new Vector2(1f, -1f);
                 tabOutline.enabled = cat == _activeCategory;
                 string captured = cat;
@@ -1039,15 +1070,15 @@ namespace Duskborn.UI
             }
 
             // 3. Left Column: Recipe List.
-            var leftCol = CreatePanel("LeftColumn", frameGO.transform, new Color(0.08f, 0.09f, 0.12f, 0.7f));
+            var leftCol = CreatePanel("LeftColumn", frameGO.transform, BriarwoodCatalogTheme.Leather);
             leftCol.anchorMin = new Vector2(0, 0);
             leftCol.anchorMax = new Vector2(0, 1);
             leftCol.pivot = new Vector2(0, 0.5f);
             leftCol.sizeDelta = new Vector2(180f, -86f);
             leftCol.anchoredPosition = new Vector2(14f, -34f);
-            AddFrameOutline(leftCol.gameObject, new Color(0.24f, 0.30f, 0.40f, 0.85f), new Vector2(1f, -1f));
+            AddFrameOutline(leftCol.gameObject, BriarwoodCatalogTheme.Raised, new Vector2(1f, -1f));
 
-            var recipesTitle = CreateText("RecipesHeader", leftCol.transform, "RECIPES", 10, FontStyles.Bold, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
+            var recipesTitle = CreateText("RecipesHeader", leftCol.transform, "RECIPES", 10, FontStyles.Bold, BriarwoodCatalogTheme.Muted, TextAlignmentOptions.Left);
             var rTitleRect = recipesTitle.GetComponent<RectTransform>();
             rTitleRect.anchorMin = new Vector2(0, 1);
             rTitleRect.anchorMax = new Vector2(1, 1);
@@ -1128,7 +1159,7 @@ namespace Duskborn.UI
             var handleRect = handleGO.GetComponent<RectTransform>();
             handleRect.sizeDelta = Vector2.zero;
             var handleImg = handleGO.GetComponent<Image>();
-            handleImg.color = new Color(0.3f, 0.35f, 0.45f, 1f);
+            handleImg.color = BriarwoodCatalogTheme.Brass;
 
             var scrollbar = scrollbarGO.GetComponent<Scrollbar>();
             scrollbar.direction = Scrollbar.Direction.BottomToTop;
@@ -1140,15 +1171,15 @@ namespace Duskborn.UI
             _recipeScrollRect = scrollRect;
 
             // 4. Right Column: Selected Recipe Details.
-            var rightCol = CreatePanel("RightColumn", frameGO.transform, new Color(0.08f, 0.09f, 0.12f, 0.7f));
+            var rightCol = CreatePanel("RightColumn", frameGO.transform, BriarwoodCatalogTheme.Leather);
             rightCol.anchorMin = new Vector2(1, 0);
             rightCol.anchorMax = new Vector2(1, 1);
             rightCol.pivot = new Vector2(1, 0.5f);
             rightCol.sizeDelta = new Vector2(250f, -86f);
             rightCol.anchoredPosition = new Vector2(-14f, -34f);
-            AddFrameOutline(rightCol.gameObject, new Color(0.24f, 0.30f, 0.40f, 0.85f), new Vector2(1f, -1f));
+            AddFrameOutline(rightCol.gameObject, BriarwoodCatalogTheme.Raised, new Vector2(1f, -1f));
 
-            var detailsTitle = CreateText("DetailsHeader", rightCol.transform, "DETAILS", 10, FontStyles.Bold, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
+            var detailsTitle = CreateText("DetailsHeader", rightCol.transform, "DETAILS", 10, FontStyles.Bold, BriarwoodCatalogTheme.Muted, TextAlignmentOptions.Left);
             var dTitleRect = detailsTitle.GetComponent<RectTransform>();
             dTitleRect.anchorMin = new Vector2(0, 1);
             dTitleRect.anchorMax = new Vector2(1, 1);
@@ -1157,13 +1188,13 @@ namespace Duskborn.UI
             dTitleRect.sizeDelta = new Vector2(-16, 18);
 
             // Preview box (icon + title + category).
-            var previewBox = CreatePanel("PreviewBox", rightCol.transform, new Color(0.12f, 0.14f, 0.18f, 0.85f));
+            var previewBox = CreatePanel("PreviewBox", rightCol.transform, BriarwoodCatalogTheme.Raised);
             previewBox.anchorMin = new Vector2(0, 1);
             previewBox.anchorMax = new Vector2(1, 1);
             previewBox.pivot = new Vector2(0.5f, 1);
             previewBox.anchoredPosition = new Vector2(0, -24);
             previewBox.sizeDelta = new Vector2(-14, 48);
-            AddFrameOutline(previewBox.gameObject, new Color(0.34f, 0.42f, 0.55f, 0.65f), new Vector2(1f, -1f));
+            AddFrameOutline(previewBox.gameObject, BriarwoodCatalogTheme.Raised, new Vector2(1f, -1f));
 
             // Large icon slot.
             var iconSlot = CreatePanel("IconSlot", previewBox.transform, new Color(0.06f, 0.07f, 0.09f, 1f));
@@ -1172,12 +1203,11 @@ namespace Duskborn.UI
             iconSlot.pivot = new Vector2(0, 0.5f);
             iconSlot.anchoredPosition = new Vector2(6, 0);
             iconSlot.sizeDelta = new Vector2(38, 38);
-            if (slotFrameSprite != null)
-            {
-                var sImg = iconSlot.GetComponent<Image>();
-                sImg.sprite = slotFrameSprite;
-                sImg.type = Image.Type.Sliced;
-            }
+            var sImg = iconSlot.GetComponent<Image>();
+            sImg.sprite = Resources.Load<Sprite>("UI/Briarwood/socket");
+            sImg.type = Image.Type.Sliced;
+            sImg.pixelsPerUnitMultiplier = 8f;
+            sImg.color = Color.white;
 
             var iconInnerGO = new GameObject("Icon", typeof(RectTransform), typeof(Image));
             iconInnerGO.transform.SetParent(iconSlot.transform, false);
@@ -1201,7 +1231,7 @@ namespace Duskborn.UI
             _detailTitle.overflowMode = TextOverflowModes.Ellipsis;
 
             // Item category.
-            var itemCatGO = CreateText("ItemCategory", previewBox.transform, "Tool • Level 1", 9, FontStyles.Normal, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
+            var itemCatGO = CreateText("ItemCategory", previewBox.transform, "Tool • Level 1", 9, FontStyles.Normal, BriarwoodCatalogTheme.Muted, TextAlignmentOptions.Left);
             var itemCatRect = itemCatGO.GetComponent<RectTransform>();
             itemCatRect.anchorMin = new Vector2(0, 0.5f);
             itemCatRect.anchorMax = new Vector2(1, 0.5f);
@@ -1213,15 +1243,15 @@ namespace Duskborn.UI
             _detailCategory.overflowMode = TextOverflowModes.Ellipsis;
 
             // Attributes & Bonuses box.
-            var statsBox = CreatePanel("StatsBox", rightCol.transform, new Color(0.05f, 0.06f, 0.08f, 0.9f));
+            var statsBox = CreatePanel("StatsBox", rightCol.transform, BriarwoodCatalogTheme.Leather);
             statsBox.anchorMin = new Vector2(0, 1);
             statsBox.anchorMax = new Vector2(1, 1);
             statsBox.pivot = new Vector2(0.5f, 1);
             statsBox.anchoredPosition = new Vector2(0, -76);
-            statsBox.sizeDelta = new Vector2(-14, 60);
-            AddFrameOutline(statsBox.gameObject, new Color(0.19f, 0.27f, 0.37f, 0.8f), new Vector2(1f, -1f));
+            statsBox.sizeDelta = new Vector2(-14, 80);
+            AddFrameOutline(statsBox.gameObject, BriarwoodCatalogTheme.Raised, new Vector2(1f, -1f));
 
-            var statsTextGO = CreateText("StatsText", statsBox.transform, "+15% Damage\n+300% Damage vs Trees", 9.5f, FontStyles.Normal, new Color(0.85f, 0.9f, 0.95f, 1f), TextAlignmentOptions.TopLeft);
+            var statsTextGO = CreateText("StatsText", statsBox.transform, "+15% Damage\n+300% Damage vs Trees", 9.5f, FontStyles.Normal, BriarwoodCatalogTheme.Ink, TextAlignmentOptions.TopLeft);
             var statsTextRect = statsTextGO.GetComponent<RectTransform>();
             statsTextRect.anchorMin = Vector2.zero;
             statsTextRect.anchorMax = Vector2.one;
@@ -1231,12 +1261,12 @@ namespace Duskborn.UI
             _detailStats.overflowMode = TextOverflowModes.Ellipsis;
 
             // Flavor description.
-            var descGO = CreateText("Description", rightCol.transform, "Tool description...", 9, FontStyles.Italic, new Color(0.55f, 0.60f, 0.68f, 1f), TextAlignmentOptions.TopLeft);
+            var descGO = CreateText("Description", rightCol.transform, "Tool description...", 9, FontStyles.Italic, BriarwoodCatalogTheme.Muted, TextAlignmentOptions.TopLeft);
             var descRect = descGO.GetComponent<RectTransform>();
             descRect.anchorMin = new Vector2(0, 1);
             descRect.anchorMax = new Vector2(1, 1);
             descRect.pivot = new Vector2(0.5f, 1);
-            descRect.anchoredPosition = new Vector2(0, -140);
+            descRect.anchoredPosition = new Vector2(0, -160);
             descRect.sizeDelta = new Vector2(-14, 28);
             _detailDescription = descGO.GetComponent<TextMeshProUGUI>();
             _detailDescription.textWrappingMode = TextWrappingModes.Normal;
@@ -1244,13 +1274,20 @@ namespace Duskborn.UI
             _detailDescription.overflowMode = TextOverflowModes.Ellipsis;
 
             // Ingredients section.
-            var reqHeader = CreateText("ReqHeader", rightCol.transform, "REQUIRED MATERIALS", 9.5f, FontStyles.Bold, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
+            var reqHeader = CreateText("ReqHeader", rightCol.transform, "MATERIALS", 9.5f, FontStyles.Bold, BriarwoodCatalogTheme.Muted, TextAlignmentOptions.Left);
             var reqHeaderRect = reqHeader.GetComponent<RectTransform>();
             reqHeaderRect.anchorMin = new Vector2(0, 1);
             reqHeaderRect.anchorMax = new Vector2(1, 1);
             reqHeaderRect.pivot = new Vector2(0, 1);
-            reqHeaderRect.anchoredPosition = new Vector2(8, -170);
+            reqHeaderRect.anchoredPosition = new Vector2(8, -190);
             reqHeaderRect.sizeDelta = new Vector2(-16, 16);
+            var convention = CreateText("HaveNeedHeader", rightCol.transform, "HAVE / NEED", 9.5f, FontStyles.Bold, BriarwoodCatalogTheme.Muted, TextAlignmentOptions.Right);
+            var conventionRect = convention.GetComponent<RectTransform>();
+            conventionRect.anchorMin = new Vector2(.6f, 1);
+            conventionRect.anchorMax = Vector2.one;
+            conventionRect.pivot = new Vector2(1, 1);
+            conventionRect.anchoredPosition = new Vector2(-8, -190);
+            conventionRect.sizeDelta = new Vector2(-8, 16);
 
             var ingScrollGO = new GameObject("IngredientsScroll", typeof(RectTransform), typeof(ScrollRect));
             ingScrollGO.transform.SetParent(rightCol.transform, false);
@@ -1258,8 +1295,8 @@ namespace Duskborn.UI
             ingScrollRectTransform.anchorMin = new Vector2(0, 1);
             ingScrollRectTransform.anchorMax = new Vector2(1, 1);
             ingScrollRectTransform.pivot = new Vector2(0.5f, 1);
-            ingScrollRectTransform.anchoredPosition = new Vector2(0, -188);
-            ingScrollRectTransform.sizeDelta = new Vector2(-14, 52);
+            ingScrollRectTransform.anchoredPosition = new Vector2(0, -208);
+            ingScrollRectTransform.sizeDelta = new Vector2(-14, 92);
 
             var ingViewportGO = new GameObject("Viewport", typeof(RectTransform), typeof(Image), typeof(Mask));
             ingViewportGO.transform.SetParent(ingScrollGO.transform, false);
@@ -1326,7 +1363,7 @@ namespace Duskborn.UI
             var ingHandleRect = ingHandleGO.GetComponent<RectTransform>();
             ingHandleRect.sizeDelta = Vector2.zero;
             var ingHandleImg = ingHandleGO.GetComponent<Image>();
-            ingHandleImg.color = new Color(0.3f, 0.35f, 0.45f, 1f);
+            ingHandleImg.color = BriarwoodCatalogTheme.Brass;
 
             var ingScrollbar = ingScrollbarGO.GetComponent<Scrollbar>();
             ingScrollbar.direction = Scrollbar.Direction.BottomToTop;
@@ -1344,8 +1381,9 @@ namespace Duskborn.UI
             statusRect.anchorMax = new Vector2(1, 0);
             statusRect.pivot = new Vector2(0.5f, 0);
             statusRect.anchoredPosition = new Vector2(0, 42);
-            statusRect.sizeDelta = new Vector2(-14, 18);
+            statusRect.sizeDelta = new Vector2(-14, 34);
             _statusLabel = statusGO.GetComponent<TextMeshProUGUI>();
+            _statusLabel.textWrappingMode = TextWrappingModes.Normal;
 
             // Craft button.
             var craftBtnGO = CreateButton("CraftButton", rightCol.transform, "CRAFT", new Vector2(-20, 30), new Color(0.85f, 0.55f, 0.12f, 1f));
@@ -1359,13 +1397,16 @@ namespace Duskborn.UI
             _craftButtonLabel = craftBtnGO.GetComponentInChildren<TextMeshProUGUI>();
             if (_craftButtonLabel != null) _craftButtonLabel.fontSize = 11.5f;
 
-            // Craft button colors.
-            var btnColors = _craftButton.colors;
-            btnColors.normalColor = new Color(0.85f, 0.55f, 0.12f, 1f);
-            btnColors.highlightedColor = new Color(0.98f, 0.72f, 0.22f, 1f);
-            btnColors.pressedColor = new Color(0.70f, 0.42f, 0.08f, 1f);
-            btnColors.disabledColor = new Color(0.25f, 0.28f, 0.35f, 0.7f);
-            _craftButton.colors = btnColors;
+            var timberFrame = BriarwoodCatalogTheme.Sprite("BriarwoodFrame", frameGO.transform, "frame", true);
+            timberFrame.pixelsPerUnitMultiplier = 6f;
+            timberFrame.rectTransform.anchorMin = Vector2.zero;
+            timberFrame.rectTransform.anchorMax = Vector2.one;
+            timberFrame.rectTransform.offsetMin = new Vector2(-26, -26);
+            timberFrame.rectTransform.offsetMax = new Vector2(26, 26);
+            var crest = BriarwoodCatalogTheme.Sprite("HammerCrest", frameGO.transform, "crest");
+            crest.rectTransform.anchorMin = crest.rectTransform.anchorMax = new Vector2(.5f, 1f);
+            crest.rectTransform.sizeDelta = new Vector2(62, 62);
+            crest.rectTransform.anchoredPosition = new Vector2(0, 24);
 
             // Start hidden until explicitly activated through Open().
             frameGO.SetActive(false);
@@ -1381,7 +1422,7 @@ namespace Duskborn.UI
             go.GetComponent<LayoutElement>().preferredHeight = 46f;
 
             var img = go.GetComponent<Image>();
-            img.color = isHidden ? new Color(0.08f, 0.09f, 0.11f, 0.95f) : new Color(0.12f, 0.14f, 0.18f, 0.95f);
+            img.color = isHidden ? new Color(0.08f, 0.09f, 0.11f, 0.95f) : BriarwoodCatalogTheme.Raised;
 
             var outline = go.GetComponent<Outline>();
             outline.effectDistance = new Vector2(1.5f, -1.5f);
@@ -1420,7 +1461,7 @@ namespace Duskborn.UI
             labelTmp.overflowMode = TextOverflowModes.Ellipsis;
 
             // Status indicator (Ready / Missing).
-            var indGO = CreateText("Indicator", go.transform, "Ready", 8.5f, FontStyles.Normal, new Color(0.58f, 0.64f, 0.72f, 1f), TextAlignmentOptions.Left);
+            var indGO = CreateText("Indicator", go.transform, "Ready", 8.5f, FontStyles.Normal, BriarwoodCatalogTheme.Muted, TextAlignmentOptions.Left);
             var indRect = indGO.GetComponent<RectTransform>();
             indRect.anchorMin = new Vector2(0, 0.5f);
             indRect.anchorMax = new Vector2(1, 0.5f);
@@ -1473,7 +1514,7 @@ namespace Duskborn.UI
             rowGO.GetComponent<LayoutElement>().preferredHeight = 22f;
 
             var img = rowGO.GetComponent<Image>();
-            img.color = new Color(0.12f, 0.14f, 0.18f, 0.6f);
+            img.color = BriarwoodCatalogTheme.Raised;
 
             // Material icon.
             var iconGO = new GameObject("Icon", typeof(RectTransform), typeof(Image));
@@ -1500,7 +1541,7 @@ namespace Duskborn.UI
 
             // Quantity (green when sufficient, red otherwise).
             bool enough = current >= required;
-            string countColor = enough ? "#4ade80" : "#f87171";
+            string countColor = "#" + ColorUtility.ToHtmlStringRGB(enough ? BriarwoodCatalogTheme.Positive : BriarwoodCatalogTheme.Negative);
             string countText = $"<color={countColor}>{current}</color> / {required}";
 
             var countGO = CreateText("Count", rowGO.transform, countText, 9.5f, FontStyles.Bold, Color.white, TextAlignmentOptions.Right);
@@ -1518,10 +1559,9 @@ namespace Duskborn.UI
 
         private void ConfigureScroll(ScrollRect scrollRect)
         {
-            // Elastic movement was allowing the list to visibly spring past its first and last card.
-            // Clamped bounds retain the responsive drag feel without exposing empty space.
+            // Recipe and requirement lists stop immediately at either boundary.
             scrollRect.movementType = ScrollRect.MovementType.Clamped;
-            scrollRect.inertia = true;
+            scrollRect.inertia = false;
             scrollRect.decelerationRate = 0.12f;
             // Wheel input is routed explicitly by HandleCraftingWheelInput so it cannot be
             // swallowed by the draggable frame or a nested viewport.
@@ -1616,7 +1656,7 @@ namespace Duskborn.UI
             {
                 var image = gameObject.GetComponent<Image>();
                 if (image != null)
-                    image.color = new Color(0.20f, 0.27f, 0.36f, 1f);
+                    image.color = new Color(.27f, .21f, .14f, 1f);
             });
 
             var exit = new EventTrigger.Entry { eventID = EventTriggerType.PointerExit };
@@ -1633,10 +1673,19 @@ namespace Duskborn.UI
             var tmp = go.GetComponent<TextMeshProUGUI>();
             if (TMP_Settings.defaultFontAsset != null)
                 tmp.font = TMP_Settings.defaultFontAsset;
+            if (style == FontStyles.Bold && (name == "Title" || name.EndsWith("Header") || name == "ItemTitle" || name == "Label"))
+            {
+                if (_headingFont == null)
+                {
+                    var font = Resources.Load<Font>("UI/Briarwood/AlegreyaSC-Bold");
+                    if (font != null) _headingFont = TMP_FontAsset.CreateFontAsset(font);
+                }
+                if (_headingFont != null) tmp.font = _headingFont;
+            }
             tmp.text = content;
             tmp.fontSize = size;
             tmp.fontStyle = style;
-            tmp.color = color;
+            tmp.color = color == Color.white ? BriarwoodCatalogTheme.Ink : color;
             tmp.alignment = alignment;
             tmp.raycastTarget = false;
             return go;
@@ -1644,13 +1693,20 @@ namespace Duskborn.UI
 
         private static GameObject CreateButton(string name, Transform parent, string label, Vector2 sizeDelta, Color color)
         {
-            var go = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button));
-            go.transform.SetParent(parent, false);
+            Button button;
+            if (name.StartsWith("Tab_"))
+            {
+                var tab = CreatePanel(name, parent, BriarwoodCatalogTheme.Raised);
+                button = tab.gameObject.AddComponent<Button>();
+                button.targetGraphic = tab.GetComponent<Image>();
+            }
+            else button = BriarwoodCatalogTheme.Button(name, parent, string.Empty, null, name == "CraftButton");
+            // Crafting uses TMP while sharing the trimmed sprite and button states.
+            var oldLabel = button.transform.Find("Label");
+            if (oldLabel != null) RemoveView(oldLabel.gameObject);
+            var go = button.gameObject;
             var rect = go.GetComponent<RectTransform>();
             rect.sizeDelta = sizeDelta;
-
-            var img = go.GetComponent<Image>();
-            img.color = color;
 
             var labelGO = CreateText("Label", go.transform, label, 13, FontStyles.Bold, Color.white, TextAlignmentOptions.Center);
             var labelRect = labelGO.GetComponent<RectTransform>();
@@ -1670,34 +1726,6 @@ namespace Duskborn.UI
             {
                 if (r != null && !_recipes.Contains(r))
                     _recipes.Add(r);
-            }
-        }
-
-        private void LoadSprites()
-        {
-            if (panelFrameSprite == null && _inventoryUIManager != null)
-            {
-                var invImg = _inventoryUIManager.InventoryFrameRect?.GetComponent<Image>();
-                if (invImg != null && invImg.sprite != null)
-                    panelFrameSprite = invImg.sprite;
-            }
-
-            if (panelFrameSprite == null)
-            {
-                panelFrameSprite = Resources.Load<Sprite>("Textures/frame_classic");
-            }
-
-            if (slotFrameSprite == null && _inventoryInstaller != null && _inventoryInstaller.SlotViews != null && _inventoryInstaller.SlotViews.Count > 0)
-            {
-                var slotView = _inventoryInstaller.SlotViews[0];
-                var slotImg = slotView.GetComponent<Image>();
-                if (slotImg != null && slotImg.sprite != null)
-                    slotFrameSprite = slotImg.sprite;
-            }
-
-            if (slotFrameSprite == null)
-            {
-                slotFrameSprite = Resources.Load<Sprite>("Textures/inventory_slot");
             }
         }
 

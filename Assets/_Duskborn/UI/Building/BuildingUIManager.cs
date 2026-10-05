@@ -6,6 +6,15 @@ using UnityEngine.UI;
 
 namespace Duskborn.UI.Building
 {
+    public sealed class ForgeInventoryOption
+    {
+        public string Id;
+        public string Name;
+        public Texture2D Icon;
+        public int Owned;
+        public string Blocker;
+    }
+
     public sealed class BuildingUIManager
     {
         private readonly GameObject canvas;
@@ -17,6 +26,9 @@ namespace Duskborn.UI.Building
         private readonly RectTransform forgeContent;
         private readonly Text stationTitle;
         private readonly Text stationSubtitle;
+        private readonly Image forgeFrame;
+        private readonly RawImage forgeStationIcon;
+        private GameObject forgePicker;
         private readonly GameObject confirmation;
         private readonly Text confirmationTitle;
         private readonly Text confirmationBody;
@@ -70,6 +82,26 @@ namespace Duskborn.UI.Building
             forgeContent = (RectTransform)BuildingUIElements.Object("ForgeContent", station.transform, typeof(RectTransform)).transform;
             BuildingUIElements.Anchors(forgeContent, new Vector2(.035f, .045f), new Vector2(.965f, .86f), Vector2.zero, Vector2.zero);
             forgeContent.gameObject.SetActive(false);
+            forgeFrame = BriarwoodCatalogTheme.Sprite("BriarwoodFrame", station.transform, "frame", true);
+            forgeFrame.sprite = BriarwoodCatalogTheme.ForgeSprite("frame");
+            forgeFrame.pixelsPerUnitMultiplier = 3f;
+            BuildingUIElements.Stretch(forgeFrame.rectTransform, -10, -10, 10, 10);
+            forgeFrame.gameObject.SetActive(false);
+            var forgeIconHolder = BriarwoodCatalogTheme.Sprite("ForgeCrest", station.transform, "socket", true);
+            forgeIconHolder.sprite = BriarwoodCatalogTheme.ForgeSprite("socket");
+            forgeIconHolder.pixelsPerUnitMultiplier = 6f;
+            forgeIconHolder.rectTransform.anchorMin = forgeIconHolder.rectTransform.anchorMax = new Vector2(.5f, 1f);
+            forgeIconHolder.rectTransform.sizeDelta = new Vector2(92, 92);
+            forgeIconHolder.rectTransform.anchoredPosition = new Vector2(0, 8);
+            forgeStationIcon = BuildingUIElements.Object("ForgeIcon", forgeIconHolder.transform,
+                typeof(RectTransform), typeof(CanvasRenderer), typeof(RawImage)).GetComponent<RawImage>();
+            forgeStationIcon.texture = Resources.Load<Texture2D>("UI/Briarwood/Icon_forge");
+            forgeStationIcon.raycastTarget = false;
+            // Trim the model capture's alpha padding without distorting its silhouette.
+            forgeStationIcon.uvRect = new Rect(136f / 512f, 52f / 512f, 240f / 512f, 394f / 512f);
+            forgeStationIcon.rectTransform.anchorMin = forgeStationIcon.rectTransform.anchorMax = new Vector2(.5f, .5f);
+            forgeStationIcon.rectTransform.sizeDelta = new Vector2(44, 72);
+            forgeIconHolder.gameObject.SetActive(false);
             station.SetActive(false);
 
             confirmation = BuildingUIElements.Object("Confirmation", canvas.transform,
@@ -130,12 +162,15 @@ namespace Duskborn.UI.Building
         {
             catalog.Hide();
             confirmation.SetActive(false);
+            CloseForgePicker();
             stationRefreshers.Clear();
             ClearChildren(stationContent);
             ClearChildren(forgeContent);
             stationCloseAction = close;
             stationTitle.text = title;
             stationSubtitle.text = "STATION";
+            SetForgeSkin(false);
+            ((RectTransform)station.transform).pivot = new Vector2(.5f, .5f);
             BuildingUIElements.Anchors((RectTransform)station.transform, new Vector2(.08f, .12f), new Vector2(.48f, .9f), Vector2.zero, Vector2.zero);
             stationScroll.SetActive(true);
             forgeContent.gameObject.SetActive(false);
@@ -146,16 +181,47 @@ namespace Duskborn.UI.Building
         {
             catalog.Hide();
             confirmation.SetActive(false);
+            CloseForgePicker();
             stationRefreshers.Clear();
             ClearChildren(stationContent);
             ClearChildren(forgeContent);
             stationCloseAction = close;
             stationTitle.text = title;
             stationSubtitle.text = "SMELTING";
-            BuildingUIElements.Anchors((RectTransform)station.transform, new Vector2(.09f, .18f), new Vector2(.47f, .82f), Vector2.zero, Vector2.zero);
+            SetForgeSkin(true);
+            BuildingUIElements.Anchors((RectTransform)station.transform, new Vector2(.065f, .5f), new Vector2(.065f, .5f), Vector2.zero, Vector2.zero);
+            var forgeRect = (RectTransform)station.transform;
+            forgeRect.pivot = new Vector2(0, .5f);
+            forgeRect.sizeDelta = new Vector2(700, 580);
             stationScroll.SetActive(false);
             forgeContent.gameObject.SetActive(true);
             station.SetActive(true);
+        }
+
+        private void SetForgeSkin(bool forge)
+        {
+            forgeFrame.gameObject.SetActive(forge);
+            forgeStationIcon.transform.parent.gameObject.SetActive(forge);
+            var stationSurface = station.GetComponent<Image>();
+            stationSurface.color = forge ? Color.white : BuildingUIElements.Backdrop;
+            stationSurface.sprite = forge ? BriarwoodCatalogTheme.ForgeSprite("surface") : null;
+            stationSurface.type = forge ? Image.Type.Sliced : Image.Type.Simple;
+            stationSurface.pixelsPerUnitMultiplier = 6f;
+            var header = stationTitle.transform.parent.GetComponent<Image>();
+            BuildingUIElements.Anchors(header.rectTransform, new Vector2(forge ? .035f : .02f, forge ? .82f : .88f),
+                new Vector2(forge ? .965f : .98f, forge ? .94f : .98f), Vector2.zero, Vector2.zero);
+            BuildingUIElements.Anchors(forgeContent, new Vector2(.07f, .12f), new Vector2(.93f, .80f), Vector2.zero, Vector2.zero);
+            header.color = forge ? new Color(.8f, .72f, .60f) : new Color(.09f, .065f, .035f, .99f);
+            header.sprite = forge ? BriarwoodCatalogTheme.ForgeSprite("surface") : null;
+            header.type = forge ? Image.Type.Sliced : Image.Type.Simple;
+            header.pixelsPerUnitMultiplier = 6f;
+            stationTitle.font = forge ? Resources.Load<Font>("UI/Briarwood/AlegreyaSC-Bold") : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            stationTitle.color = forge ? BriarwoodCatalogTheme.Ink : new Color(.98f, .82f, .38f, 1f);
+            stationTitle.fontSize = forge ? 28 : 23;
+            stationSubtitle.fontSize = forge ? 14 : 11;
+            stationSubtitle.color = forge ? BriarwoodCatalogTheme.Muted : new Color(.70f, .65f, .55f, 1f);
+            BuildingUIElements.Anchors(stationTitle.rectTransform, new Vector2(.035f, .38f), new Vector2(.82f, .97f), Vector2.zero, Vector2.zero);
+            BuildingUIElements.Anchors(stationSubtitle.rectTransform, new Vector2(.035f, .04f), new Vector2(.82f, .42f), Vector2.zero, Vector2.zero);
         }
 
         public void AddStationLabel(Func<string> value, int height = 86)
@@ -213,76 +279,84 @@ namespace Duskborn.UI.Building
             Func<bool> warning,
             Action returnInput,
             Action returnFuel,
-            Action collectOutput)
+            Action collectOutput,
+            Func<bool, IReadOnlyList<ForgeInventoryOption>> inventoryOptions = null,
+            Action<string, bool> loadItem = null,
+            Func<bool> pending = null)
         {
-            var root = BuildingUIElements.SolidPanel("ForgeProcessor", forgeContent, new Color(.045f, .055f, .07f, .98f),
-                new Color(.24f, .28f, .34f, .95f));
+            var root = BriarwoodCatalogTheme.Panel("ForgeProcessor", forgeContent, Color.clear);
             BuildingUIElements.Stretch(root.rectTransform);
 
-            var hint = BuildingUIElements.Label("Hint", root.transform, 13, TextAnchor.MiddleCenter);
-            hint.text = "RIGHT-CLICK IN INVENTORY TO LOAD";
+            var hint = BuildingUIElements.Label("Hint", root.transform, 18, TextAnchor.MiddleCenter);
+            hint.text = "Click MATERIAL or FUEL to choose from your inventory.";
             hint.fontStyle = FontStyle.Bold;
-            hint.color = new Color(.73f, .68f, .58f, 1f);
+            hint.color = BriarwoodCatalogTheme.Muted;
             BuildingUIElements.Anchors(hint.rectTransform, new Vector2(.03f, .89f), new Vector2(.97f, .98f), Vector2.zero, Vector2.zero);
 
-            var input = ForgeSlot("InputSlot", root.transform, "MATERIAL", inputIcon?.Invoke(), null, returnInput, out var inputValue);
-            BuildingUIElements.Anchors((RectTransform)input.transform, new Vector2(.055f, .53f), new Vector2(.30f, .86f), Vector2.zero, Vector2.zero);
+            var input = ForgeSlot("InputSlot", root.transform, "MATERIAL", inputIcon?.Invoke(), () => ShowForgePicker(false, inventoryOptions, loadItem), returnInput, out var inputValue);
+            BuildingUIElements.Anchors((RectTransform)input.transform, new Vector2(.035f, .47f), new Vector2(.325f, .88f), Vector2.zero, Vector2.zero);
             var inputImage = input.GetComponentInChildren<RawImage>();
-            var fuel = ForgeSlot("FuelSlot", root.transform, "FUEL", fuelIcon?.Invoke(), null, returnFuel, out var fuelValue);
-            BuildingUIElements.Anchors((RectTransform)fuel.transform, new Vector2(.055f, .13f), new Vector2(.30f, .46f), Vector2.zero, Vector2.zero);
+            var fuel = ForgeSlot("FuelSlot", root.transform, "FUEL", fuelIcon?.Invoke(), () => ShowForgePicker(true, inventoryOptions, loadItem), returnFuel, out var fuelValue);
+            BuildingUIElements.Anchors((RectTransform)fuel.transform, new Vector2(.035f, .04f), new Vector2(.325f, .45f), Vector2.zero, Vector2.zero);
             var fuelImage = fuel.GetComponentInChildren<RawImage>();
 
-            var flameBackObject = BuildingUIElements.Object("FlameBack", root.transform, typeof(RectTransform), typeof(CanvasRenderer), typeof(ForgeProgressGraphic));
-            var flameBack = flameBackObject.GetComponent<ForgeProgressGraphic>();
-            flameBack.color = new Color(.18f, .20f, .23f, 1f);
-            flameBack.raycastTarget = false;
-            BuildingUIElements.Anchors((RectTransform)flameBackObject.transform, new Vector2(.37f, .22f), new Vector2(.49f, .41f), Vector2.zero, Vector2.zero);
             var flameObject = BuildingUIElements.Object("FlameFill", root.transform, typeof(RectTransform), typeof(CanvasRenderer), typeof(ForgeProgressGraphic));
             var flame = flameObject.GetComponent<ForgeProgressGraphic>();
-            flame.color = new Color(1f, .34f, .045f, 1f);
             flame.raycastTarget = false;
-            BuildingUIElements.Anchors((RectTransform)flameObject.transform, new Vector2(.37f, .22f), new Vector2(.49f, .41f), Vector2.zero, Vector2.zero);
-            var emberObject = BuildingUIElements.Object("FlameCore", root.transform, typeof(RectTransform), typeof(CanvasRenderer), typeof(ForgeProgressGraphic));
-            var ember = emberObject.GetComponent<ForgeProgressGraphic>();
-            ember.color = new Color(1f, .78f, .16f, 1f);
-            ember.raycastTarget = false;
-            BuildingUIElements.Anchors((RectTransform)emberObject.transform, new Vector2(.402f, .23f), new Vector2(.466f, .36f), Vector2.zero, Vector2.zero);
-
-            var arrowTrack = BuildingUIElements.SolidPanel("ProgressTrack", root.transform, new Color(.025f, .03f, .04f, 1f),
-                new Color(.28f, .31f, .35f, .9f));
-            BuildingUIElements.Anchors(arrowTrack.rectTransform, new Vector2(.37f, .665f), new Vector2(.65f, .72f), Vector2.zero, Vector2.zero);
-            var arrowFill = BuildingUIElements.SolidPanel("ProgressFill", arrowTrack.transform, BuildingUIElements.Accent);
+            BuildingUIElements.Anchors(flame.rectTransform, new Vector2(.405f, .29f), new Vector2(.605f, .63f), Vector2.zero, Vector2.zero);
+            var arrowTrack = BriarwoodCatalogTheme.Sprite("ProgressTrack", root.transform, "socket", true);
+            arrowTrack.sprite = BriarwoodCatalogTheme.ForgeSprite("socket");
+            arrowTrack.pixelsPerUnitMultiplier = 12f;
+            arrowTrack.raycastTarget = false;
+            BuildingUIElements.Anchors(arrowTrack.rectTransform, new Vector2(.37f, .68f), new Vector2(.60f, .80f), Vector2.zero, Vector2.zero);
+            var well = BuildingUIElements.SolidPanel("Recess", arrowTrack.transform, Color.clear);
+            well.raycastTarget = false;
+            BuildingUIElements.Stretch(well.rectTransform, 8, 8, -8, -8);
+            var arrowFill = BuildingUIElements.SolidPanel("ProgressFill", well.transform, BriarwoodCatalogTheme.Positive);
             arrowFill.raycastTarget = false;
             arrowFill.rectTransform.anchorMin = Vector2.zero;
             arrowFill.rectTransform.anchorMax = new Vector2(0f, 1f);
             arrowFill.rectTransform.pivot = Vector2.zero;
             arrowFill.rectTransform.offsetMin = Vector2.zero;
             arrowFill.rectTransform.offsetMax = Vector2.zero;
+            var grain = BriarwoodCatalogTheme.ForgeSurface("PaintGrain", arrowFill.transform, new Color(1, 1, 1, .25f));
+            grain.raycastTarget = false;
+            BuildingUIElements.Stretch(grain.rectTransform);
+            var shine = BuildingUIElements.SolidPanel("BevelLight", arrowFill.transform, new Color(1f, .94f, .72f, .35f));
+            shine.raycastTarget = false;
+            BuildingUIElements.Anchors(shine.rectTransform, new Vector2(0, .78f), Vector2.one, Vector2.zero, Vector2.zero);
+            var shade = BuildingUIElements.SolidPanel("BevelShadow", arrowFill.transform, new Color(0, 0, 0, .25f));
+            shade.raycastTarget = false;
+            BuildingUIElements.Anchors(shade.rectTransform, Vector2.zero, new Vector2(1, .18f), Vector2.zero, Vector2.zero);
             for (int i = 1; i < 5; i++)
             {
                 float x = i / 5f;
-                var tick = BuildingUIElements.SolidPanel("Tick", arrowTrack.transform, new Color(.02f, .025f, .032f, .7f));
+                var tick = BuildingUIElements.SolidPanel("Tick", well.transform, new Color(.91f, .69f, .34f, .28f));
                 tick.raycastTarget = false;
                 BuildingUIElements.Anchors(tick.rectTransform, new Vector2(x, .08f), new Vector2(x, .92f), new Vector2(-1f, 0f), new Vector2(1f, 0f));
             }
-            var progressValue = BuildingUIElements.Label("ProgressValue", arrowTrack.transform, 13, TextAnchor.MiddleCenter);
+            var progressValue = BuildingUIElements.Label("ProgressValue", well.transform, 16, TextAnchor.MiddleCenter);
             progressValue.fontStyle = FontStyle.Bold;
             BuildingUIElements.Stretch(progressValue.rectTransform);
-            var arrowHead = BuildingUIElements.Label("ArrowHead", root.transform, 32, TextAnchor.MiddleCenter);
+            var arrowHead = BuildingUIElements.Label("ArrowHead", root.transform, 24, TextAnchor.MiddleCenter);
             arrowHead.text = "▶";
-            arrowHead.color = BuildingUIElements.Accent;
-            BuildingUIElements.Anchors(arrowHead.rectTransform, new Vector2(.69f, .63f), new Vector2(.735f, .76f), Vector2.zero, Vector2.zero);
+            arrowHead.color = BriarwoodCatalogTheme.Brass;
+            BuildingUIElements.Anchors(arrowHead.rectTransform, new Vector2(.61f, .665f), new Vector2(.66f, .79f), Vector2.zero, Vector2.zero);
 
-            var output = ForgeSlot("OutputSlot", root.transform, "OUTPUT · RMB", outputIcon?.Invoke(), collectOutput, collectOutput, out var outputValue, true);
+            var output = ForgeSlot("OutputSlot", root.transform, "OUTPUT", outputIcon?.Invoke(), collectOutput, collectOutput, out var outputValue, true);
             // Keep the output cell square-ish at the panel's aspect ratio instead
             // of stretching it into a tall card. Its centre aligns to the arrow.
-            BuildingUIElements.Anchors((RectTransform)output.transform, new Vector2(.745f, .56f), new Vector2(.96f, .82f), Vector2.zero, Vector2.zero);
+            BuildingUIElements.Anchors((RectTransform)output.transform, new Vector2(.665f, .47f), new Vector2(.955f, .88f), Vector2.zero, Vector2.zero);
             var outputImage = output.GetComponentInChildren<RawImage>();
 
-            var statusPanel = BuildingUIElements.SolidPanel("StatusPanel", root.transform, new Color(.025f, .03f, .04f, .96f));
-            BuildingUIElements.Anchors(statusPanel.rectTransform, new Vector2(.34f, .06f), new Vector2(.97f, .19f), Vector2.zero, Vector2.zero);
-            var status = BuildingUIElements.Label("Status", statusPanel.transform, 14, TextAnchor.MiddleCenter);
-            BuildingUIElements.Stretch(status.rectTransform, 8, 2, -8, -2);
+            var statusPanel = BriarwoodCatalogTheme.ForgeSurface("StatusPanel", root.transform, new Color(.8f, .72f, .60f));
+            BuildingUIElements.Anchors(statusPanel.rectTransform, new Vector2(.36f, .05f), new Vector2(.965f, .27f), Vector2.zero, Vector2.zero);
+            var status = BriarwoodCatalogTheme.Label("Status", statusPanel.transform, 17, TextAnchor.MiddleCenter);
+            BuildingUIElements.Stretch(status.rectTransform, 14, 8, -14, -8);
+            var slotHint = BriarwoodCatalogTheme.Label("SlotHint", root.transform, 15, TextAnchor.MiddleCenter);
+            slotHint.text = "Loaded / Need • Right-click to return • Click output to collect";
+            slotHint.color = BriarwoodCatalogTheme.Muted;
+            BuildingUIElements.Anchors(slotHint.rectTransform, new Vector2(0, -.045f), new Vector2(1, .01f), Vector2.zero, Vector2.zero);
 
             stationRefreshers.Add(() =>
             {
@@ -292,21 +366,22 @@ namespace Duskborn.UI.Building
                 SetForgeSlotIcon(inputImage, inputIcon?.Invoke());
                 SetForgeSlotIcon(fuelImage, fuelIcon?.Invoke());
                 SetForgeSlotIcon(outputImage, outputIcon?.Invoke());
-                inputValue.text = inputText();
-                fuelValue.text = fuelText();
+                var materialSummary = inputText();
+                var fuelSummary = fuelText();
+                inputValue.text = string.IsNullOrEmpty(materialSummary) ? "Empty" : materialSummary;
+                fuelValue.text = string.IsNullOrEmpty(fuelSummary) ? "Empty" : fuelSummary;
                 outputValue.text = outputText();
                 status.text = statusText();
-                status.color = isWarning ? BuildingUIElements.Negative : BuildingUIElements.Text;
-                arrowFill.color = isWarning ? BuildingUIElements.Negative : BuildingUIElements.Accent;
+                status.color = isWarning ? BriarwoodCatalogTheme.Negative : BriarwoodCatalogTheme.Ink;
+                arrowFill.color = isWarning ? BriarwoodCatalogTheme.Negative : BriarwoodCatalogTheme.Positive;
                 arrowHead.color = arrowFill.color;
                 arrowFill.rectTransform.anchorMax = new Vector2(value, 1f);
                 progressValue.text = value > 0f ? Mathf.RoundToInt(value * 100f) + "%" : "—";
-                flame.color = isWarning ? BuildingUIElements.Negative : new Color(1f, .46f, .08f, 1f);
                 float fire = Mathf.Clamp01(flameProgress());
                 flame.Progress = fire;
-                ember.Progress = Mathf.Clamp01(fire * 1.18f);
                 flame.Phase = Time.unscaledTime;
-                ember.Phase = Time.unscaledTime + .65f;
+                bool canAct = pending == null || !pending();
+                input.interactable = fuel.interactable = output.interactable = canAct;
             });
         }
 
@@ -387,6 +462,7 @@ namespace Duskborn.UI.Building
 
         public void HidePanels()
         {
+            CloseForgePicker();
             catalog.Hide();
             station.SetActive(false);
             HideConfirmation();
@@ -409,10 +485,12 @@ namespace Duskborn.UI.Building
 
         private static void ClearChildren(Transform parent)
         {
-            foreach (Transform child in parent)
+            for (int i = parent.childCount - 1; i >= 0; i--)
             {
+                var child = parent.GetChild(i);
                 child.gameObject.SetActive(false);
-                UnityEngine.Object.Destroy(child.gameObject);
+                if (Application.isPlaying) UnityEngine.Object.Destroy(child.gameObject);
+                else UnityEngine.Object.DestroyImmediate(child.gameObject);
             }
         }
 
@@ -421,6 +499,143 @@ namespace Duskborn.UI.Building
             if (image == null) return;
             image.texture = texture;
             image.enabled = texture != null;
+        }
+
+        private void CloseForgePicker()
+        {
+            if (forgePicker == null) return;
+            forgePicker.SetActive(false);
+            if (Application.isPlaying) UnityEngine.Object.Destroy(forgePicker);
+            else UnityEngine.Object.DestroyImmediate(forgePicker);
+            forgePicker = null;
+        }
+
+        private void ShowForgePicker(bool fuel, Func<bool, IReadOnlyList<ForgeInventoryOption>> options, Action<string, bool> load)
+        {
+            CloseForgePicker();
+            if (options == null || load == null) return;
+            // A transparent dismissal layer intercepts clicks outside the dropdown.
+            var dismiss = BuildingUIElements.SolidPanel("ForgePicker", station.transform, Color.clear);
+            forgePicker = dismiss.gameObject;
+            BuildingUIElements.Stretch(dismiss.rectTransform);
+            dismiss.gameObject.AddComponent<Button>().onClick.AddListener(CloseForgePicker);
+            var panel = BriarwoodCatalogTheme.ForgeSurface("Dropdown", dismiss.transform, new Color(.85f, .78f, .65f));
+            panel.rectTransform.anchorMin = panel.rectTransform.anchorMax = new Vector2(0, 1);
+            panel.rectTransform.pivot = new Vector2(0, 1);
+            var border = panel.gameObject.AddComponent<Outline>();
+            border.effectColor = BriarwoodCatalogTheme.Brass;
+            var title = BriarwoodCatalogTheme.Label("Title", panel.transform, 20, TextAnchor.MiddleLeft, true);
+            title.text = fuel ? "CHOOSE FUEL" : "CHOOSE MATERIAL";
+            BuildingUIElements.Anchors(title.rectTransform, new Vector2(0, 1), Vector2.one, new Vector2(16, -46), new Vector2(-64, -8));
+            var close = BriarwoodCatalogTheme.Button("Close", panel.transform, "X", CloseForgePicker);
+            BuildingUIElements.Anchors((RectTransform)close.transform, Vector2.one, Vector2.one, new Vector2(-50, -42), new Vector2(-12, -10));
+            var closeText = close.GetComponentInChildren<Text>();
+            closeText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            closeText.fontSize = 17;
+            BuildingUIElements.Stretch(closeText.rectTransform, 2, 2, -2, -2);
+            var scroll = BuildingUIElements.Scroll("Items", panel.transform, out var content, true);
+            scroll.movementType = ScrollRect.MovementType.Clamped;
+            scroll.inertia = false;
+            BuildingUIElements.Stretch((RectTransform)scroll.transform, 12, 12, -12, -54);
+            // Replace the station list layout with fixed square inventory tiles.
+            var grid = content.GetComponent<GridLayoutGroup>();
+            grid.cellSize = new Vector2(128, 128);
+            grid.spacing = new Vector2(8, 8);
+            grid.padding = new RectOffset(6, 6, 6, 6);
+            grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            grid.constraintCount = 4;
+            grid.startAxis = GridLayoutGroup.Axis.Horizontal;
+            grid.childAlignment = TextAnchor.UpperLeft;
+            var empty = BriarwoodCatalogTheme.Label("Empty", panel.transform, 18, TextAnchor.MiddleCenter);
+            empty.text = "No matching items in your inventory.";
+            BuildingUIElements.Stretch(empty.rectTransform, 16, 16, -16, -54);
+            empty.gameObject.SetActive(false);
+            string previous = null;
+            float nextRefresh = 0;
+            void Refresh()
+            {
+                if (dismiss == null || !dismiss.gameObject.activeSelf || Time.unscaledTime < nextRefresh) return;
+                nextRefresh = Time.unscaledTime + .2f;
+                var current = options(fuel);
+                string key = string.Empty;
+                if (current != null)
+                    foreach (var item in current) key += item.Id + ":" + item.Owned + ":" + item.Blocker + ";";
+                if (key == previous) return;
+                previous = key;
+                ClearChildren(content);
+                int count = current?.Count ?? 0;
+                float height = Mathf.Min(356, 78 + Mathf.Max(1, Mathf.CeilToInt(count / 4f)) * 136);
+                panel.rectTransform.sizeDelta = new Vector2(588, height);
+                panel.rectTransform.anchoredPosition = new Vector2(56, -Mathf.Min(fuel ? 320 : 190, 540 - height));
+                empty.gameObject.SetActive(count == 0);
+                scroll.gameObject.SetActive(count > 0);
+                if (current == null || current.Count == 0)
+                {
+                    return;
+                }
+                foreach (var item in current)
+                {
+                    var captured = item;
+                    var row = BriarwoodCatalogTheme.Button("Item_" + item.Id, content, string.Empty, () =>
+                    {
+                        // Recheck the current inventory and pending state before submitting.
+                        var latest = options(fuel);
+                        if (latest == null) return;
+                        foreach (var candidate in latest)
+                        {
+                            if (candidate.Id != captured.Id || candidate.Owned <= 0 || !string.IsNullOrEmpty(candidate.Blocker)) continue;
+                            CloseForgePicker();
+                            load(captured.Id, fuel);
+                            return;
+                        }
+                    });
+                    row.GetComponent<Image>().sprite = BriarwoodCatalogTheme.ForgeSprite("socket");
+                    row.GetComponent<Image>().pixelsPerUnitMultiplier = 8f;
+                    row.interactable = item.Owned > 0 && string.IsNullOrEmpty(item.Blocker);
+                    var text = row.GetComponentInChildren<Text>();
+                    text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                    text.fontSize = 14;
+                    text.alignment = TextAnchor.MiddleCenter;
+                    text.text = item.Name;
+                    BuildingUIElements.Anchors(text.rectTransform, new Vector2(.08f, .07f), new Vector2(.92f, .34f), Vector2.zero, Vector2.zero);
+                    var amount = BriarwoodCatalogTheme.Label("Owned", row.transform, 13, TextAnchor.MiddleCenter);
+                    amount.text = "Have " + item.Owned;
+                    amount.color = BriarwoodCatalogTheme.Brass;
+                    BuildingUIElements.Anchors(amount.rectTransform, new Vector2(.08f, .81f), new Vector2(.92f, .97f), Vector2.zero, Vector2.zero);
+                    var icon = BuildingUIElements.Object("Icon", row.transform, typeof(RectTransform), typeof(CanvasRenderer), typeof(RawImage)).GetComponent<RawImage>();
+                    icon.texture = item.Icon;
+                    icon.enabled = item.Icon != null;
+                    icon.raycastTarget = false;
+                    icon.rectTransform.anchorMin = icon.rectTransform.anchorMax = new Vector2(.5f, .57f);
+                    icon.rectTransform.sizeDelta = new Vector2(50, 50);
+                    if (item.Icon == null && string.IsNullOrEmpty(item.Blocker))
+                    {
+                        var fallback = BriarwoodCatalogTheme.Label("Fallback", row.transform, 28, TextAnchor.MiddleCenter, true);
+                        fallback.text = string.IsNullOrEmpty(item.Name) ? "?" : item.Name.Substring(0, 1).ToUpperInvariant();
+                        fallback.color = BriarwoodCatalogTheme.Muted;
+                        BuildingUIElements.Anchors(fallback.rectTransform, new Vector2(.2f, .36f), new Vector2(.8f, .78f), Vector2.zero, Vector2.zero);
+                    }
+                    if (!string.IsNullOrEmpty(item.Blocker))
+                    {
+                        icon.enabled = false;
+                        var reason = BriarwoodCatalogTheme.Label("Blocker", row.transform, 12, TextAnchor.MiddleCenter);
+                        reason.color = BriarwoodCatalogTheme.Negative;
+                        reason.text = item.Blocker;
+                        BuildingUIElements.Anchors(reason.rectTransform, new Vector2(.08f, .34f), new Vector2(.92f, .80f), Vector2.zero, Vector2.zero);
+                    }
+                }
+            }
+            // Remove old dropdown refreshers when reopening, avoiding accumulated closures.
+            stationRefreshers.RemoveAll(refresh => refresh.Target is ForgePickerRefresh);
+            var pickerRefresh = new ForgePickerRefresh { Refresh = Refresh };
+            stationRefreshers.Add(pickerRefresh.Tick);
+            Refresh();
+        }
+
+        private sealed class ForgePickerRefresh
+        {
+            internal Action Refresh;
+            internal void Tick() => Refresh();
         }
 
         private static Button MiniButton(Transform parent, string caption, Action action, float minX, float maxX)
@@ -442,8 +657,10 @@ namespace Duskborn.UI.Building
             out Text value,
             bool highlighted = false)
         {
-            var button = BuildingUIElements.SolidButton(name, parent, string.Empty, leftClick);
+            var button = BriarwoodCatalogTheme.Button(name, parent, string.Empty, leftClick, highlighted);
             var slotImage = button.GetComponent<Image>();
+            slotImage.sprite = BriarwoodCatalogTheme.ForgeSprite("socket");
+            slotImage.pixelsPerUnitMultiplier = 4f;
             if (highlighted && slotImage != null)
             {
                 var outline = button.gameObject.GetComponent<Outline>();
@@ -455,23 +672,22 @@ namespace Duskborn.UI.Building
             if (title != null)
             {
                 title.text = caption;
-                title.fontSize = 12;
+                title.fontSize = 20;
                 title.fontStyle = FontStyle.Bold;
                 title.alignment = TextAnchor.UpperCenter;
-                title.color = highlighted ? BuildingUIElements.Accent : BuildingUIElements.Text;
-                BuildingUIElements.Anchors(title.rectTransform, new Vector2(.04f, .77f), new Vector2(.96f, .97f), Vector2.zero, Vector2.zero);
+                title.color = highlighted ? BriarwoodCatalogTheme.Brass : BriarwoodCatalogTheme.Ink;
+                BuildingUIElements.Anchors(title.rectTransform, new Vector2(.08f, .70f), new Vector2(.92f, .9f), Vector2.zero, Vector2.zero);
             }
-            var iconFrame = BuildingUIElements.SolidPanel("IconFrame", button.transform, new Color(.025f, .035f, .05f, 1f),
-                new Color(.25f, .29f, .34f, 1f));
+            var iconFrame = BuildingUIElements.SolidPanel("IconFrame", button.transform, Color.clear);
             iconFrame.raycastTarget = false;
-            BuildingUIElements.Anchors(iconFrame.rectTransform, new Vector2(.27f, .32f), new Vector2(.73f, .74f), Vector2.zero, Vector2.zero);
+            BuildingUIElements.Anchors(iconFrame.rectTransform, new Vector2(.29f, .38f), new Vector2(.71f, .76f), Vector2.zero, Vector2.zero);
             var raw = BuildingUIElements.Object("Icon", iconFrame.transform, typeof(RectTransform), typeof(CanvasRenderer), typeof(RawImage)).GetComponent<RawImage>();
             raw.texture = icon;
             raw.enabled = icon != null;
             raw.raycastTarget = false;
             BuildingUIElements.Stretch(raw.rectTransform, 5, 5, -5, -5);
-            value = BuildingUIElements.Label("Value", button.transform, 11, TextAnchor.MiddleCenter);
-            BuildingUIElements.Anchors(value.rectTransform, new Vector2(.04f, .025f), new Vector2(.96f, .31f), Vector2.zero, Vector2.zero);
+            value = BriarwoodCatalogTheme.Label("Value", button.transform, 18, TextAnchor.MiddleCenter);
+            BuildingUIElements.Anchors(value.rectTransform, new Vector2(.08f, .09f), new Vector2(.92f, .36f), Vector2.zero, Vector2.zero);
             return button;
         }
     }

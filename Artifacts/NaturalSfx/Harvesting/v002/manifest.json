@@ -1,0 +1,4150 @@
+{
+  "brief": "Louder dry harvest contacts; snapping timber with leafy collapse; eight physically textured crystal banks; short, rounded material and bag pickup foley. No oscillator/noise synthesis or rarity jingles.",
+  "sources": [
+    {
+      "file": "1299.wav",
+      "creator": "Joseph SARDIN",
+      "license": "CC0-1.0",
+      "source_url": "https://bigsoundbank.com/broken-twigs-1-s1299.html",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "642173b3ee69b4245ee592291edbbaa674fffb7bf092fecef6663750d0024970",
+      "license_evidence": "1299-page.html",
+      "fidelity": "Original 48k 24bit mono WAV retained."
+    },
+    {
+      "file": "impactWood_heavy_000.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "15ff82332f342c30e469215539e1cc57e11b221aa2cf7e11e811d313a9927f3d",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "footstep_grass_000.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "9d49497777405d78d7cf7f2888e28277f3a23192300cfd1d79d54876b20f479f",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "1300.wav",
+      "creator": "Joseph SARDIN",
+      "license": "CC0-1.0",
+      "source_url": "https://bigsoundbank.com/broken-twigs-2-s1300.html",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "f3466550a88d256682d36005657b8d7af24293bebcd107d55c4eebcf1a7e6aca",
+      "license_evidence": "1300-page.html",
+      "fidelity": "Original 48k 24bit mono WAV retained."
+    },
+    {
+      "file": "impactWood_heavy_001.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "f1b07a53ac10c615fff9ba470511fdeb722b5902e1a8520759fc20ad6f546015",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "footstep_grass_001.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "fb28781bd22b2eefdc14077f1adf5c94d7fe9c3a130194633b55f3e0d39d9f04",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "impactGlass_light_000.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "d750cf88097d0c3e69920e6e14496e1444e1a9da01aa4cca8f5ec8cb44c57b4f",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "3322.wav",
+      "creator": "Joseph SARDIN & Axeline T.",
+      "license": "CC0-1.0",
+      "source_url": "https://bigsoundbank.com/fire-foley-s3322.html",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "7c3e2c968bcf9199259462d027fd6f69fff310720de638705aca6b56de407a37",
+      "license_evidence": "3322-page.html",
+      "fidelity": "Original 48k 24bit mono WAV retained."
+    },
+    {
+      "file": "impactGlass_light_001.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "05e513fbd42829060eb37855f8c3866722ec5c39a8937c9bfde518cc609effa2",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "impactGlass_light_002.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "710db7451bb7857b9140dfe6afe4621ea2188ad65eda3919c569d1bb285b933d",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "impactGlass_light_003.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "765290ce32fa108c939a0dbd6fbacbcd05abde622b57b708eb8a64058ef4225a",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "impactGlass_heavy_000.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "b44b39a940e8948e74b9bd3776bff980df43cf220abdaf0d467dc4c43c0244a5",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "impactGlass_heavy_001.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "58686e0e562612cc566791844a10e269f8d1921f4766c14ba43976fd0a429f4e",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "impactGlass_heavy_002.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "4978654ac840ad519692d5d5ba48a8101cabce13b9a577be73ad589185e5e9ed",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "impactGlass_heavy_003.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "aed07b154f24410c17e5262bbef832842fb275d41fe297f721af7501d0e9c23a",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "impactGlass_light_004.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "f535b7cb7835400d8d28bcf9e1cf047ce3c0eb7a6456bdb1a4a27acbec1ed2cb",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "footstep_grass_002.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "73a520139f5be716a403bfe9c80e0e94d1e61d8e9de04a354b336392164b53dc",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "footstep_grass_003.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "0546e1d8ab2def714425701a18bd34c5ee2794b12e858e5b595aabcf38a34137",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "impactTin_medium_000.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "f4bbee66ca191ec744b84fc07ac9ed2a6fda955d51cfed8360f12b62815d3cbd",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "impactTin_medium_001.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "84253095543c094d83cd749f42ecfbc96e356b60385f18a192c18eafb25b3cc6",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "impactTin_medium_002.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "c1d2c4f9910d4529581ae56a9a9a01454c4619fbb7d6da7616221d8ec58cc0c4",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "impactTin_medium_003.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "0d18737d93ba7aa0669f751094cbc1671bbebac4fe207783922938ce75e24334",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "impactMining_000.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "36b4ea107222d073c67ca64dde26944975609202d5090b2f2021213c1a7e35cd",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "impactMining_001.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "61235a18de3f3d92118235398222dbf51d448f1be70b1c8bc962b10b86f2d9c6",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "impactMining_002.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "059558ec751115ca6b1441e00f0adc837c1a3eeb0a066b109e0fd879fc5d0b0c",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "impactMining_003.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "4237fa2cd80364ad81cd0af44f67d7497f1c5edcc7bdb02cd22be2ba4580c83d",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "impactGlass_medium_000.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "9252d50bfb85edb17d6073c4a7806e10cdb9de56d3dbfc93a4b9727146d2df6d",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "1529.wav",
+      "creator": "Joseph SARDIN",
+      "license": "CC0-1.0",
+      "source_url": "https://bigsoundbank.com/splash-small-1-s1529.html",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "fd7504403d6c176b598c0023cb7f6e5dcbbf6176b5ad9742fece4ef07237244f",
+      "license_evidence": "1529-page.html",
+      "fidelity": "Original 48k 24bit mono WAV retained."
+    },
+    {
+      "file": "impactSoft_medium_000.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "7d3ba0bb5e60a11b5d3e558c141303dcf494256675fbf753c0d252d2cf0481e3",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "impactSoft_medium_001.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "7642a4fd43e547afe4f7adfadb3dabb681c0ff512f52c1674bae30a726841faf",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "impactSoft_medium_002.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "5069e3571a77d7f7aae9ef71d0364aa245fb7d64a7c8cc9956f221d03088c089",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "impactSoft_medium_003.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "5c4a1f35fde7e14046931da7bc3d1b23736541b7190ba107e08a379c4ca43cd6",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "impactPlate_light_000.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "6e797cf8a5bfc52d7ed5eb47c227974c1cf2a674954fec5b539cea7d62c7282c",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "impactPlate_light_001.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "947915c2eb6ac57ee08fd3a48b297fd108d69abc72076e79882c21cad0eef56e",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "impactPlate_light_002.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "8ac5869ea434cf0d364872774efe70b2d666a4f02ba35ddfc1e051d336721be8",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "impactPlate_light_003.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "dbfb7c1d002576696df3e9a43d6639ee3f342068398b5e7b55bc2389d20508a9",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "cloth1.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/rpg-audio",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "ddb93a3671233f95da0e0b10367f082f7eb42fa6caaddcf776410aa8833c747d",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "cloth2.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/rpg-audio",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "8a7451193c38bc05483aec25dd193e163a15d44cf7fff04ac7912573231b0201",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "impactWood_heavy_002.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "ce1e06f2a05f2634c645cb72f6a1623e64bc2d92be34917430a61031fb6597d4",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "cloth3.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/rpg-audio",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "a48632d17a4f1416541d261a32a31612e01267144c407fa3ecab3ff410f0085b",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "impactWood_heavy_003.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "af07511902b309b3f6d8f0e1fafbe93869127fb88099ebdc0aa6a00a98dc3cb0",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    },
+    {
+      "file": "cloth4.ogg",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "source_url": "https://kenney.nl/assets/rpg-audio",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "e7ab9a6c4466dea874196c61f59bf1da05cfe58748f42fadd695d441a154a99b",
+      "fidelity": "Original lossy OGG; converted mono 48k WAV does not restore lost fidelity."
+    }
+  ],
+  "candidates": [
+    {
+      "file": "harvest_wood_01.wav",
+      "sha256": "355f4cc8142887208f2c31ce3efb56acca5590cd0e9d56f4136c996d885a2505",
+      "duration": 0.3121041666666667,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -19.73587864700751,
+      "recipe": {
+        "layers": [
+          {
+            "source": "Artifacts\\NaturalSfx\\Harvesting\\v001\\candidates\\harvest_wood_01.wav",
+            "sha256": "43e8672660af8c1f0e407af9eb25a84a274a9f513c1315c7dded4a20ccd535c2",
+            "gain_db": 0,
+            "prior_provenance": "../v001/manifest.json",
+            "delay_seconds": 0
+          }
+        ],
+        "final_gain_db": 4.741027573058436,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "harvest_wood_02.wav",
+      "sha256": "450d127dadb0f2b7d2f22cf5d859762aa83687821c576a8219aeda7a37e6df1c",
+      "duration": 0.3211041666666667,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -20.02158046556385,
+      "recipe": {
+        "layers": [
+          {
+            "source": "Artifacts\\NaturalSfx\\Harvesting\\v001\\candidates\\harvest_wood_02.wav",
+            "sha256": "49b017f2e6d19e39aa3ef55e0e7f9a7199e62783c4e93462d0b2c4a95d1e5e22",
+            "gain_db": 0,
+            "prior_provenance": "../v001/manifest.json",
+            "delay_seconds": 0
+          }
+        ],
+        "final_gain_db": 4.733631237838278,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "harvest_wood_03.wav",
+      "sha256": "fb5e343644e203b200c27399b43a56720ae4e5c9a67c4c77d65149bb8e41ff95",
+      "duration": 0.33010416666666664,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -19.580611088321763,
+      "recipe": {
+        "layers": [
+          {
+            "source": "Artifacts\\NaturalSfx\\Harvesting\\v001\\candidates\\harvest_wood_03.wav",
+            "sha256": "a2ce03ca3294e4b5c6fc942004bc7e39c48c47b754b1f0a225dd430b33aca708",
+            "gain_db": 0,
+            "prior_provenance": "../v001/manifest.json",
+            "delay_seconds": 0
+          }
+        ],
+        "final_gain_db": 4.771050805338074,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "harvest_wood_04.wav",
+      "sha256": "5d0a0f502e5e01bbff4779b90fcf0b1c897105aa8901ca758953c74beec14b03",
+      "duration": 0.33910416666666665,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -21.231448984612765,
+      "recipe": {
+        "layers": [
+          {
+            "source": "Artifacts\\NaturalSfx\\Harvesting\\v001\\candidates\\harvest_wood_04.wav",
+            "sha256": "8dff43a224acb08b4279ebb6e36397f26dcfe0a93e0645a258dfb67ff34cce0b",
+            "gain_db": 0,
+            "prior_provenance": "../v001/manifest.json",
+            "delay_seconds": 0
+          }
+        ],
+        "final_gain_db": 4.7210047537443165,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "harvest_stone_01.wav",
+      "sha256": "618889319a672d0c1e77429452ba294fe8be9e68ad46ef5f247fcd147ced020f",
+      "duration": 0.55,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -18.49192216044091,
+      "recipe": {
+        "layers": [
+          {
+            "source": "Artifacts\\NaturalSfx\\Harvesting\\v001\\candidates\\harvest_stone_01.wav",
+            "sha256": "e89ca1d4dd1e393a2e66ff0d46d4c5f24a35e61d121a88dcb7a129cdfabf5b5d",
+            "gain_db": 0,
+            "prior_provenance": "../v001/manifest.json",
+            "delay_seconds": 0
+          }
+        ],
+        "final_gain_db": 4.851494298725544,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "harvest_stone_02.wav",
+      "sha256": "6084ad856792823e1487d278eaa9ffa38af4038e165e71712c32414be4e25fdb",
+      "duration": 0.55,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -19.31769555832166,
+      "recipe": {
+        "layers": [
+          {
+            "source": "Artifacts\\NaturalSfx\\Harvesting\\v001\\candidates\\harvest_stone_02.wav",
+            "sha256": "a9f4f03a2ebbaed8dfefe08752ebfc2fb2308c2e31159427dca75cdd222254c2",
+            "gain_db": 0,
+            "prior_provenance": "../v001/manifest.json",
+            "delay_seconds": 0
+          }
+        ],
+        "final_gain_db": 4.859992288257095,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "harvest_stone_03.wav",
+      "sha256": "2487c675de599d958cad082373562d548ea7d1793796247d63509b7014dd4c37",
+      "duration": 0.55,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -21.326669543399895,
+      "recipe": {
+        "layers": [
+          {
+            "source": "Artifacts\\NaturalSfx\\Harvesting\\v001\\candidates\\harvest_stone_03.wav",
+            "sha256": "4d3e7b5347499a6b31f975315a6587387b7485b606343448e6afe7719202967c",
+            "gain_db": 0,
+            "prior_provenance": "../v001/manifest.json",
+            "delay_seconds": 0
+          }
+        ],
+        "final_gain_db": 4.991029292937289,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "harvest_stone_04.wav",
+      "sha256": "26099c6420ff274b8d25c66054828cfecc7fdf5421da9eebccdbe82a3c037c95",
+      "duration": 0.55,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -21.087539202848838,
+      "recipe": {
+        "layers": [
+          {
+            "source": "Artifacts\\NaturalSfx\\Harvesting\\v001\\candidates\\harvest_stone_04.wav",
+            "sha256": "e45d07cd7f51f703054d5984cc42f1b483b157b4f4e6dea9a0e1a79b04a14234",
+            "gain_db": 0,
+            "prior_provenance": "../v001/manifest.json",
+            "delay_seconds": 0
+          }
+        ],
+        "final_gain_db": 4.856772595114361,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "harvest_ore_01.wav",
+      "sha256": "22907f05c3c662e64303a148d5b7441dffd52f12d454046423c7cf479a96c006",
+      "duration": 0.55,
+      "peak_dbfs": -1.5514963524531853,
+      "rms_dbfs": -18.59894615155699,
+      "recipe": {
+        "layers": [
+          {
+            "source": "Artifacts\\NaturalSfx\\Harvesting\\v001\\candidates\\harvest_ore_01.wav",
+            "sha256": "2796e7d704d923e92a7747e164b34196a73aa40f4cfac53ef85426156a6b9e37",
+            "gain_db": 0,
+            "prior_provenance": "../v001/manifest.json",
+            "delay_seconds": 0
+          }
+        ],
+        "final_gain_db": 5.5,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "harvest_ore_02.wav",
+      "sha256": "854152659e583022ff414519db2f1cf105d51e1f0c55079bf17d8465c9062ead",
+      "duration": 0.55,
+      "peak_dbfs": -1.5599927677681382,
+      "rms_dbfs": -19.366160823741744,
+      "recipe": {
+        "layers": [
+          {
+            "source": "Artifacts\\NaturalSfx\\Harvesting\\v001\\candidates\\harvest_ore_02.wav",
+            "sha256": "a14a67d0ab4d431f7d685e96530cb75abe63835da23f615e14237f07d11d779c",
+            "gain_db": 0,
+            "prior_provenance": "../v001/manifest.json",
+            "delay_seconds": 0
+          }
+        ],
+        "final_gain_db": 5.5,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "harvest_ore_03.wav",
+      "sha256": "f53deaa495e3ff51975b6d1360dd6f61b7f5615f24299b5a0060b57c6cd9db2d",
+      "duration": 0.55,
+      "peak_dbfs": -1.6910294139135573,
+      "rms_dbfs": -20.97611612950342,
+      "recipe": {
+        "layers": [
+          {
+            "source": "Artifacts\\NaturalSfx\\Harvesting\\v001\\candidates\\harvest_ore_03.wav",
+            "sha256": "778902c48d76ed068471a9a19c167ec85025bb34072a74c8d9109a7a3ee473cf",
+            "gain_db": 0,
+            "prior_provenance": "../v001/manifest.json",
+            "delay_seconds": 0
+          }
+        ],
+        "final_gain_db": 5.5,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "harvest_ore_04.wav",
+      "sha256": "42dd76ac00bf2b8a379bb01995c3064413c87e4828d4bc34b28f2e115897ce57",
+      "duration": 0.55,
+      "peak_dbfs": -1.5567746706501877,
+      "rms_dbfs": -21.10740257396676,
+      "recipe": {
+        "layers": [
+          {
+            "source": "Artifacts\\NaturalSfx\\Harvesting\\v001\\candidates\\harvest_ore_04.wav",
+            "sha256": "59b9f9de90424a95e8369a1f7706e2df7b07689d909ffaccf6919d83eba8ea88",
+            "gain_db": 0,
+            "prior_provenance": "../v001/manifest.json",
+            "delay_seconds": 0
+          }
+        ],
+        "final_gain_db": 5.5,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "harvest_foliage_01.wav",
+      "sha256": "399f4a24be9ec1b5432468f3d00c585d7e641fef348633af310b655686448648",
+      "duration": 0.5471041666666666,
+      "peak_dbfs": -4.925341198305981,
+      "rms_dbfs": -29.31138093858361,
+      "recipe": {
+        "layers": [
+          {
+            "source": "Artifacts\\NaturalSfx\\Harvesting\\v001\\candidates\\harvest_foliage_01.wav",
+            "sha256": "86e8ddf761fbeceeaba21f4c7724acde7c52767449d6dc43f109b1b3a675c5b6",
+            "gain_db": 0,
+            "prior_provenance": "../v001/manifest.json",
+            "delay_seconds": 0
+          }
+        ],
+        "final_gain_db": 5.5,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "harvest_foliage_02.wav",
+      "sha256": "e2a1df1460912416ff6017b493750fba8ed9535844b8b8fe7288ef2bd76b7b85",
+      "duration": 0.5471041666666666,
+      "peak_dbfs": -5.286063176846571,
+      "rms_dbfs": -27.926214192099415,
+      "recipe": {
+        "layers": [
+          {
+            "source": "Artifacts\\NaturalSfx\\Harvesting\\v001\\candidates\\harvest_foliage_02.wav",
+            "sha256": "9dc57b10d633155f2134ecdb4193be1d13649487a4b5b7bd3a13594c25e6c786",
+            "gain_db": 0,
+            "prior_provenance": "../v001/manifest.json",
+            "delay_seconds": 0
+          }
+        ],
+        "final_gain_db": 5.5,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "harvest_foliage_03.wav",
+      "sha256": "16dc532b628c68a0081931a55b0c24987eb8e13ec70357876a874ad6c36fad97",
+      "duration": 0.5471041666666666,
+      "peak_dbfs": -4.2008409684892465,
+      "rms_dbfs": -28.823644186593835,
+      "recipe": {
+        "layers": [
+          {
+            "source": "Artifacts\\NaturalSfx\\Harvesting\\v001\\candidates\\harvest_foliage_03.wav",
+            "sha256": "17287d31954af9044aa51c4e0b6a2fa912a381459414db17a0ad002335fe8337",
+            "gain_db": 0,
+            "prior_provenance": "../v001/manifest.json",
+            "delay_seconds": 0
+          }
+        ],
+        "final_gain_db": 5.5,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "harvest_foliage_04.wav",
+      "sha256": "69dff024068ad6507e188ea8ba0d716da9fb0e77740555cb13abcdade8ff577d",
+      "duration": 0.5471041666666666,
+      "peak_dbfs": -4.789182641840424,
+      "rms_dbfs": -30.0034258671446,
+      "recipe": {
+        "layers": [
+          {
+            "source": "Artifacts\\NaturalSfx\\Harvesting\\v001\\candidates\\harvest_foliage_04.wav",
+            "sha256": "ff6a90886c97f46e5a5819d6c99ddcab2715d8d6761cf02fb4bea93452314ca7",
+            "gain_db": 0,
+            "prior_provenance": "../v001/manifest.json",
+            "delay_seconds": 0
+          }
+        ],
+        "final_gain_db": 5.5,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "tree_break_01.wav",
+      "sha256": "fcd18074e1ddce1588c6ab1b8f8f6f18d7573f53a9d4282e3230db71e1db28ba",
+      "duration": 0.9500208333333333,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -24.841269702272015,
+      "recipe": {
+        "layers": [
+          {
+            "source": "1299.wav",
+            "start": 0.24993749999999998,
+            "duration": 0.95,
+            "gain_db": 0,
+            "playback_rate": 0.78,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactWood_heavy_000.ogg",
+            "start": 0,
+            "duration": 0.55,
+            "gain_db": -5,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.08
+          },
+          {
+            "source": "footstep_grass_000.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.25
+          }
+        ],
+        "final_gain_db": 1.734736373262433,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "tree_break_02.wav",
+      "sha256": "21bc9d7e7babe35955df5d6ecf26dfe794523df37c938b8ef9f4e480d01fe7d2",
+      "duration": 0.95,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -27.20786134404292,
+      "recipe": {
+        "layers": [
+          {
+            "source": "1300.wav",
+            "start": 0.17860416666666667,
+            "duration": 0.95,
+            "gain_db": 0,
+            "playback_rate": 0.78,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactWood_heavy_001.ogg",
+            "start": 0,
+            "duration": 0.55,
+            "gain_db": -5,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.08
+          },
+          {
+            "source": "footstep_grass_001.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.25
+          }
+        ],
+        "final_gain_db": -1.1999999999999993,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_flame_hit_01.wav",
+      "sha256": "94bba768ad1cfcbc3647a31753377a4d4ebb042fce9efbbb1a45a7201fd7ff13",
+      "duration": 0.33497916666666666,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -20.90691199947308,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_000.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "3322.wav",
+            "start": 2,
+            "duration": 0.32,
+            "gain_db": -9,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.015
+          }
+        ],
+        "final_gain_db": 2.256559309757195,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_flame_hit_02.wav",
+      "sha256": "1735c7b1c44c061544f26a113fd01db2255d5f3f7d4f7d9902313e3ee47c9bc3",
+      "duration": 0.335,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -21.196523816758926,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_001.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "3322.wav",
+            "start": 6,
+            "duration": 0.32,
+            "gain_db": -9,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.015
+          }
+        ],
+        "final_gain_db": 1.9402017748305829,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_flame_hit_03.wav",
+      "sha256": "3bdcb6b4ce2f460079dd91e820dede2c73e1d43224b06ebccc05cbbd767bf92d",
+      "duration": 0.335,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -21.197084718592194,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_002.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "3322.wav",
+            "start": 10,
+            "duration": 0.32,
+            "gain_db": -9,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.015
+          }
+        ],
+        "final_gain_db": 0.46090075193637564,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_flame_hit_04.wav",
+      "sha256": "1e8bda59dd6a9ed1c43da4498340a95b6b33d269bebcb868a096c8b25ef99294",
+      "duration": 0.335,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -21.429719953340815,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_003.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "3322.wav",
+            "start": 14,
+            "duration": 0.32,
+            "gain_db": -9,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.015
+          }
+        ],
+        "final_gain_db": 1.4498095634500106,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_flame_break_01.wav",
+      "sha256": "d235809b0a96dce8ffa4b3893466ca21040ed1cf18dae24d40e91f3b039d51a1",
+      "duration": 0.665,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -27.613316863252187,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_000.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "3322.wav",
+            "start": 2,
+            "duration": 0.65,
+            "gain_db": -9,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.015
+          },
+          {
+            "source": "impactGlass_light_001.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": -1.1192624152361363,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_flame_break_02.wav",
+      "sha256": "6b1c12f1abb2b3bbb1e3dad40b75a29517f0f8dd963a13322dc3a51c0c772624",
+      "duration": 0.665,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -27.353105040178388,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_001.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "3322.wav",
+            "start": 6,
+            "duration": 0.65,
+            "gain_db": -9,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.015
+          },
+          {
+            "source": "impactGlass_light_002.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": -0.7326196624085292,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_flame_break_03.wav",
+      "sha256": "651ddd18ad5959121a8efecc17f857d1bb66db72fdb43da6dad289fa7d9a2630",
+      "duration": 0.665,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -27.101916008214857,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_002.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "3322.wav",
+            "start": 10,
+            "duration": 0.65,
+            "gain_db": -9,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.015
+          },
+          {
+            "source": "impactGlass_light_003.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": 0.35742005287222706,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_flame_break_04.wav",
+      "sha256": "2450b42dd11008fc4511221e03068856297198e589877bd47d779162581adc82",
+      "duration": 0.665,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -24.659459812105105,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_003.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "3322.wav",
+            "start": 14,
+            "duration": 0.65,
+            "gain_db": -9,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.015
+          },
+          {
+            "source": "impactGlass_light_004.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": 0.7164269282996214,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_nature_hit_01.wav",
+      "sha256": "7088b9a64cb92b79deea8d12571add6a82b5d824c37253ddb9ab0e885b10156f",
+      "duration": 0.34,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -20.733902881374505,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_000.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "footstep_grass_000.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.02
+          }
+        ],
+        "final_gain_db": 2.256559309757195,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_nature_hit_02.wav",
+      "sha256": "6b7d1a21ebe230f7ea6400414290c7339567f543e7f5698999afa6b55c4c96bf",
+      "duration": 0.34,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -20.88632413390289,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_001.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "footstep_grass_001.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.02
+          }
+        ],
+        "final_gain_db": 1.9402017748305829,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_nature_hit_03.wav",
+      "sha256": "ef97bbe754242a0815f9968b5e7afd7a6214dd964eb96daa8dc4ae6f010853d2",
+      "duration": 0.34,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -21.00191084480745,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_002.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "footstep_grass_002.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.02
+          }
+        ],
+        "final_gain_db": 0.46090075193637564,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_nature_hit_04.wav",
+      "sha256": "aec8108eb4045b25674fd4c3e5190df315cb00458f95e8d376d3d4c1de3927b0",
+      "duration": 0.34,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -21.278330149247424,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_003.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "footstep_grass_003.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.02
+          }
+        ],
+        "final_gain_db": 1.4498095634500106,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_nature_break_01.wav",
+      "sha256": "caba3e5116615a0371486f7983806f6c8b6e967c34a1c9156858110fb45e7b6e",
+      "duration": 0.67,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -27.376107461863157,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_000.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "footstep_grass_000.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.02
+          },
+          {
+            "source": "impactGlass_light_001.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": -1.1192624152361363,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_nature_break_02.wav",
+      "sha256": "e6a6d4b6769c5ccb3ad1f239b432d41266359ce59cb1fafffbcfef50b9c2df42",
+      "duration": 0.67,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -26.980037769562244,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_001.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "footstep_grass_001.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.02
+          },
+          {
+            "source": "impactGlass_light_002.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": -0.7326196624085292,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_nature_break_03.wav",
+      "sha256": "76e1d3793f131b47aba0b651ed88320b2524f0af86492e9013fc7359e25ae74c",
+      "duration": 0.67,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -26.70167190005469,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_002.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "footstep_grass_002.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.02
+          },
+          {
+            "source": "impactGlass_light_003.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": 0.35742005287222706,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_nature_break_04.wav",
+      "sha256": "9d9a37ebc6e41af6b4413bfe002a695644a29c330bc9a7d3021915235dca3fa8",
+      "duration": 0.67,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -24.550569124248852,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_003.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "footstep_grass_003.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.02
+          },
+          {
+            "source": "impactGlass_light_004.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": 0.7164269282996214,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_storm_hit_01.wav",
+      "sha256": "6fe995f67171e9459cbb955c04e1a8b285a3468655b6d519ae422c264e5992cd",
+      "duration": 0.23075,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -20.29065239607543,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_000.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactTin_medium_000.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.008
+          }
+        ],
+        "final_gain_db": 0.4821444003236678,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_storm_hit_02.wav",
+      "sha256": "f3759a5a9c8e17962b395a1c57b8ae2d563c745da759c18e0b0498f89afc7454",
+      "duration": 0.20670833333333333,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -19.266251567537502,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_001.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactTin_medium_001.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.008
+          }
+        ],
+        "final_gain_db": 1.252867558681614,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_storm_hit_03.wav",
+      "sha256": "a334157c5006af29581cc5ef87e565532cf030657c935cebe729ecb077019e51",
+      "duration": 0.20670833333333333,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -18.766560387723928,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_002.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactTin_medium_002.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 26.179166666666667,
+            "delay_seconds": 0.008
+          }
+        ],
+        "final_gain_db": 0.46090075193637564,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_storm_hit_04.wav",
+      "sha256": "1a9e17c3fde97d6be11fbf52e4d0a1e16a17a80fab9b31daf8879116b7ea8695",
+      "duration": 0.21966666666666668,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -19.92679455421049,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_003.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactTin_medium_003.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.008
+          }
+        ],
+        "final_gain_db": 0.6852683274951108,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_storm_break_01.wav",
+      "sha256": "0be82f33b9964e9a9403ab9b4aeca9c103ede8fb53d130b469373f076f85e42b",
+      "duration": 0.34670833333333334,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -23.89570940334339,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_000.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactTin_medium_000.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.008
+          },
+          {
+            "source": "impactGlass_light_001.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": -1.1192624152361363,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_storm_break_02.wav",
+      "sha256": "26af223aed112ad4fc7987e809d466aa8bb19c88e445e3d3591b139296bc65e6",
+      "duration": 0.42902083333333335,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -25.064598617848354,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_001.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactTin_medium_001.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.008
+          },
+          {
+            "source": "impactGlass_light_002.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": -0.7326196624085292,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_storm_break_03.wav",
+      "sha256": "86f59ed34d569693e4b12920009c14f13b4659c55765f9d7987dea755e87171d",
+      "duration": 0.34670833333333334,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -23.67131560100828,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_002.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactTin_medium_002.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 26.179166666666667,
+            "delay_seconds": 0.008
+          },
+          {
+            "source": "impactGlass_light_003.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": 0.35742005287222706,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_storm_break_04.wav",
+      "sha256": "5ad4ac21c0ebbbd2737f7f918e298b8984e289d47d8b7162714a87f3d964f761",
+      "duration": 0.34670833333333334,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -21.546302106107373,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_003.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactTin_medium_003.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.008
+          },
+          {
+            "source": "impactGlass_light_004.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": 0.7164269282996214,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_earth_hit_01.wav",
+      "sha256": "dedb4dfdca0571eb33e0c86ec41daf62b5402097c79224b013e2d8fa0b65220e",
+      "duration": 0.33,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -17.652067482780666,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_000.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactMining_000.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -5,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": -0.6086026342743355,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_earth_hit_02.wav",
+      "sha256": "adbccac721a24bcd39b44923152c67bd1180a7d637933cd2f1204b932c90742f",
+      "duration": 0.33,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -18.12390173377484,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_001.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactMining_001.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -5,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": -0.5173424068939204,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_earth_hit_03.wav",
+      "sha256": "67ef82f880eb6c96f6fde7104c178138c45a1b7209787c26b540ea13cc757f94",
+      "duration": 0.33,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -19.092053475819792,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_002.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactMining_002.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -5,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": -0.6839208266504684,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_earth_hit_04.wav",
+      "sha256": "e43df71c7c5755c6676b9c2298382ffb9f431480121e4655adcd443a3b31e0c8",
+      "duration": 0.33,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -20.435655155391416,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_003.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactMining_003.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -5,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": -1.7316097930132313,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_earth_break_01.wav",
+      "sha256": "5f16c57a7cc49966f39162b1f59f2fda2095521442d4d9560cecbe67448bf9d8",
+      "duration": 0.66,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -21.18065472820408,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_000.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactMining_000.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -5,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          },
+          {
+            "source": "impactGlass_light_001.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": -1.1192624152361363,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_earth_break_02.wav",
+      "sha256": "b4bde83182c9ff152511d2ab761fa362d6b02e77b1f75212fa0144b463785813",
+      "duration": 0.66,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -21.353851243236534,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_001.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactMining_001.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -5,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          },
+          {
+            "source": "impactGlass_light_002.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": -0.7326196624085292,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_earth_break_03.wav",
+      "sha256": "36a9544bce931db7e5d72bc76c27b786eae8cf12dff7328244472967b12e42be",
+      "duration": 0.66,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -22.20975794783332,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_002.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactMining_002.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -5,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          },
+          {
+            "source": "impactGlass_light_003.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": 0.35742005287222706,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_earth_break_04.wav",
+      "sha256": "7191b0d4020e814c3aeab27e682b1d0f5685b8c087cb356c9279ad27f160c108",
+      "duration": 0.66,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -22.187701326438027,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_003.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactMining_003.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -5,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          },
+          {
+            "source": "impactGlass_light_004.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": -0.7337964002185609,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_frost_hit_01.wav",
+      "sha256": "723cb69bccc2372f6b7930abbe72d7b03401fe1352b7d0d4721573b2e7a4f207",
+      "duration": 0.2517083333333333,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -19.14028309039193,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_000.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactGlass_light_002.ogg",
+            "start": 0,
+            "duration": 0.22,
+            "gain_db": -11,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.045
+          }
+        ],
+        "final_gain_db": 2.256559309757195,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_frost_hit_02.wav",
+      "sha256": "23a776baded148bd881dbadb098f5194144a2c7e59f177156d212df12642f702",
+      "duration": 0.2517083333333333,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -19.3896094484284,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_001.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactGlass_light_003.ogg",
+            "start": 0,
+            "duration": 0.22,
+            "gain_db": -11,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.045
+          }
+        ],
+        "final_gain_db": 1.9402017748305829,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_frost_hit_03.wav",
+      "sha256": "7dd2289f1c6769193e521f4253ded722dba78461a74719ab783181a29170f7d9",
+      "duration": 0.2517083333333333,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -19.521887037396986,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_002.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactGlass_light_004.ogg",
+            "start": 0,
+            "duration": 0.22,
+            "gain_db": -11,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.045
+          }
+        ],
+        "final_gain_db": 0.46090075193637564,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_frost_hit_04.wav",
+      "sha256": "e58350d090fa9a62565a9dda8aa8a90e6123a0294af6cf24673dc2fb2a6bb3f3",
+      "duration": 0.265,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -20.036235696884454,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_003.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactGlass_medium_000.ogg",
+            "start": 0,
+            "duration": 0.22,
+            "gain_db": -11,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.045
+          }
+        ],
+        "final_gain_db": 1.4498095634500106,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_frost_break_01.wav",
+      "sha256": "3fce48256a0f681b2f708a24c8806b0ecb04242d00971196167bd8494280d698",
+      "duration": 0.34670833333333334,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -24.029338701072756,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_000.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactGlass_light_002.ogg",
+            "start": 0,
+            "duration": 0.22,
+            "gain_db": -11,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.045
+          },
+          {
+            "source": "impactGlass_light_001.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": -1.1192624152361363,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_frost_break_02.wav",
+      "sha256": "81daa4aa93348a2e3803bc474c32f8c3a3dface7fed45ed41a6ed9a71e8fea63",
+      "duration": 0.42902083333333335,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -24.88505144380546,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_001.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactGlass_light_003.ogg",
+            "start": 0,
+            "duration": 0.22,
+            "gain_db": -11,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.045
+          },
+          {
+            "source": "impactGlass_light_002.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": -0.7326196624085292,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_frost_break_03.wav",
+      "sha256": "23557ebf5ab6f68e0047d916f77ae7d90d346bb6f3ca88c86bd9e9267a83b3a0",
+      "duration": 0.34670833333333334,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -23.440920608519633,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_002.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactGlass_light_004.ogg",
+            "start": 0,
+            "duration": 0.22,
+            "gain_db": -11,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.045
+          },
+          {
+            "source": "impactGlass_light_003.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": 0.35742005287222706,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_frost_break_04.wav",
+      "sha256": "8780cf77f03ac8a73b492340d44053db7fc280fa7aba93e05ab525b648073e26",
+      "duration": 0.34670833333333334,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -21.504277439945312,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_003.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactGlass_medium_000.ogg",
+            "start": 0,
+            "duration": 0.22,
+            "gain_db": -11,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.045
+          },
+          {
+            "source": "impactGlass_light_004.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": 0.7164269282996214,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_blood_hit_01.wav",
+      "sha256": "6304c5540cebc939cbafe119c83df31e5441ccbdc36def78613b84a80e8f41b1",
+      "duration": 0.3400208333333333,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -18.736112360012573,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_000.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 0.8,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "1529.wav",
+            "start": 0.070375,
+            "duration": 0.32,
+            "gain_db": -9,
+            "playback_rate": 0.85,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.02
+          }
+        ],
+        "final_gain_db": 1.9987732967702874,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_blood_hit_02.wav",
+      "sha256": "a38d8e0187e9c087923232b73c67d2708f0699aa20aca20b7dc60a6462c81c5c",
+      "duration": 0.3400208333333333,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -18.834266069094785,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_001.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 0.8,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "1529.wav",
+            "start": 0.070375,
+            "duration": 0.32,
+            "gain_db": -9,
+            "playback_rate": 0.85,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.02
+          }
+        ],
+        "final_gain_db": 1.9402017748305829,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_blood_hit_03.wav",
+      "sha256": "a60411531d53a5061da0f8ae68361011b38869cf8ebe8276cb934b1bfef989b9",
+      "duration": 0.3400208333333333,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -19.15879960010306,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_002.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 0.8,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "1529.wav",
+            "start": 0.070375,
+            "duration": 0.32,
+            "gain_db": -9,
+            "playback_rate": 0.85,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.02
+          }
+        ],
+        "final_gain_db": 0.46090075193637564,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_blood_hit_04.wav",
+      "sha256": "969a03c97442b993c2d9264143b7c4c51fa5865808acaa2868fd2d7f5895e955",
+      "duration": 0.3400208333333333,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -19.11481912992366,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_003.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 0.8,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "1529.wav",
+            "start": 0.070375,
+            "duration": 0.32,
+            "gain_db": -9,
+            "playback_rate": 0.85,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.02
+          }
+        ],
+        "final_gain_db": 1.4498095634500106,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_blood_break_01.wav",
+      "sha256": "0b9e895aecb9957f082c234e9b7a291c2e4383a8a05aaf85e9bb104f2dad53fe",
+      "duration": 0.67,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -24.789609902596084,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_000.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 0.8,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "1529.wav",
+            "start": 0.070375,
+            "duration": 0.65,
+            "gain_db": -9,
+            "playback_rate": 0.85,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.02
+          },
+          {
+            "source": "impactGlass_light_001.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": -1.1192624152361363,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_blood_break_02.wav",
+      "sha256": "6d74ab415e56074b524f97a5c01652cafa61d19cc402dc0b30e6cf532c5ad946",
+      "duration": 0.67,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -24.99518653980088,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_001.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 0.8,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "1529.wav",
+            "start": 0.070375,
+            "duration": 0.65,
+            "gain_db": -9,
+            "playback_rate": 0.85,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.02
+          },
+          {
+            "source": "impactGlass_light_002.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": -1.2580490209983275,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_blood_break_03.wav",
+      "sha256": "17a8893e9b46b86cc3f162b6d8612870d5638b37d7a7c5ed6b4d41698be6603f",
+      "duration": 0.67,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -23.987789115496945,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_002.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 0.8,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "1529.wav",
+            "start": 0.070375,
+            "duration": 0.65,
+            "gain_db": -9,
+            "playback_rate": 0.85,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.02
+          },
+          {
+            "source": "impactGlass_light_003.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": 0.35742005287222706,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_blood_break_04.wav",
+      "sha256": "1892ec6d518d49aca38d2d94b392279b28cd18c686729a2295c32ad852898666",
+      "duration": 0.67,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -22.77688881346885,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_003.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 0.8,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "1529.wav",
+            "start": 0.070375,
+            "duration": 0.65,
+            "gain_db": -9,
+            "playback_rate": 0.85,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.02
+          },
+          {
+            "source": "impactGlass_light_004.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": 0.21332561958038895,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_dark_hit_01.wav",
+      "sha256": "17f87ac165fd4595f32e923b65ffa87408bd511df7b8f3528e8380f87567163d",
+      "duration": 0.29791666666666666,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -19.302570040610604,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_000.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 0.8,
+            "lowpass_hz": 6500,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactSoft_medium_000.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -6,
+            "playback_rate": 0.8,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 28.775,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": -1.0842004737607784,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_dark_hit_02.wav",
+      "sha256": "5f0ccbb16583a3aadf7d232ac2440d4461e24ba584f317ee303d66cb375d25c9",
+      "duration": 0.32,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -19.045078132888214,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_001.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 0.8,
+            "lowpass_hz": 6500,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactSoft_medium_001.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -6,
+            "playback_rate": 0.8,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": -1.2294094226883252,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_dark_hit_03.wav",
+      "sha256": "21cdf62846fdec58b31d1318c5737995db367f8456c71b0920e33e19524a025e",
+      "duration": 0.30533333333333335,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -17.88113601532658,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_002.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 0.8,
+            "lowpass_hz": 6500,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactSoft_medium_002.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -6,
+            "playback_rate": 0.8,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": 0.36183867852058405,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_dark_hit_04.wav",
+      "sha256": "e0683bfb2cd08babec0ac4d5bce367293eba4b080a7e217ace456a522e858060",
+      "duration": 0.21079166666666665,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -15.59431299391079,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_003.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 0.8,
+            "lowpass_hz": 6500,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactSoft_medium_003.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -6,
+            "playback_rate": 0.8,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": 0.22576039139473783,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_dark_break_01.wav",
+      "sha256": "a169693cd0350237bf04cf63bf190a686041892f93deed5eebd2248cbad80080",
+      "duration": 0.34670833333333334,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -19.719636529661145,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_000.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 0.8,
+            "lowpass_hz": 6500,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactSoft_medium_000.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -6,
+            "playback_rate": 0.8,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 28.775,
+            "delay_seconds": 0.01
+          },
+          {
+            "source": "impactGlass_light_001.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": -1.0842004737607784,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_dark_break_02.wav",
+      "sha256": "6d8b20ef8be192d3be3ca3e29587925ab4e08cc7655e9cf01d5ba3b9dc4b7235",
+      "duration": 0.5362708333333334,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -20.99095948872399,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_001.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 0.8,
+            "lowpass_hz": 6500,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactSoft_medium_001.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -6,
+            "playback_rate": 0.8,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          },
+          {
+            "source": "impactGlass_light_002.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": -1.2294094226883252,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_dark_break_03.wav",
+      "sha256": "1b882cc07ed1bef00a3b3f08039834d56329f7c507e098bbf244e98a1fac4477",
+      "duration": 0.34670833333333334,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -18.180869354338828,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_002.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 0.8,
+            "lowpass_hz": 6500,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactSoft_medium_002.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -6,
+            "playback_rate": 0.8,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          },
+          {
+            "source": "impactGlass_light_003.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": 0.36183867852058405,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_dark_break_04.wav",
+      "sha256": "770d141d693107e63ad594f9baf98fecaf45fbef8ebfeac43b71789fed35d4ea",
+      "duration": 0.34670833333333334,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -17.51923338916811,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_003.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 0.8,
+            "lowpass_hz": 6500,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactSoft_medium_003.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -6,
+            "playback_rate": 0.8,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          },
+          {
+            "source": "impactGlass_light_004.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": 0.22576039139473783,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_light_hit_01.wav",
+      "sha256": "69c6440fce42b620f8ae2d219d1d87e12b795f5024cd4fe96268bf6cd30586f2",
+      "duration": 0.33,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -20.440488172249083,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_000.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactPlate_light_000.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": 1.9714820067931407,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_light_hit_02.wav",
+      "sha256": "0d6c055ff3a58899da525896861706153474afa9e8b01d839a8b839e99843e5d",
+      "duration": 0.33,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -20.795549995654422,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_001.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactPlate_light_001.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": 1.9402017748305829,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_light_hit_03.wav",
+      "sha256": "09454e8feccd3ae306397af2f8b0ff797b82d0b239b8353b3ead240657b0c966",
+      "duration": 0.33,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -20.47408047675008,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_002.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactPlate_light_002.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": 0.46090075193637564,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_light_hit_04.wav",
+      "sha256": "773b2e42040ae6c8ad4a97ba30d3f6256973b681c1772222244bf33a1c2ae41f",
+      "duration": 0.33,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -20.75974389907071,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_003.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactPlate_light_003.ogg",
+            "start": 0,
+            "duration": 0.32,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": 1.4498095634500106,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_light_break_01.wav",
+      "sha256": "3c4f801f1be382accc8cd210965c00aeb73487fd27ca3c84122f7e4299b1eaab",
+      "duration": 0.5524375,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -25.954428260984006,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_000.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactPlate_light_000.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          },
+          {
+            "source": "impactGlass_light_001.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": -1.1192624152361363,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_light_break_02.wav",
+      "sha256": "214fdee3fd5ae55f981e00cc7f81fefaa7b5994dbe8c5a3608299a3f1b84412e",
+      "duration": 0.66,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -26.666526014573087,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_001.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactPlate_light_001.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          },
+          {
+            "source": "impactGlass_light_002.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": -0.7326196624085292,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_light_break_03.wav",
+      "sha256": "fc92b8c541425ec377eb6c1b6e1e3cb11efeec2d14ec222e50ab8a4b4e37eef5",
+      "duration": 0.49883333333333335,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -24.854403191328206,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_002.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactPlate_light_002.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          },
+          {
+            "source": "impactGlass_light_003.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": 0.35742005287222706,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "crystal_light_break_04.wav",
+      "sha256": "575e312f95e8ddd06a1d4efc079e57ddc1bd7af0f47479f1885126705dd60d31",
+      "duration": 0.5376041666666667,
+      "peak_dbfs": -1.2000001645528333,
+      "rms_dbfs": -22.984826206525156,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_heavy_003.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -2,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "impactPlate_light_003.ogg",
+            "start": 0,
+            "duration": 0.65,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          },
+          {
+            "source": "impactGlass_light_004.ogg",
+            "start": 0,
+            "duration": 0.4,
+            "gain_db": -10,
+            "playback_rate": 1,
+            "lowpass_hz": null,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.14
+          }
+        ],
+        "final_gain_db": 0.7164269282996214,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "collect_wood_01.wav",
+      "sha256": "41005eee2f0158b346c07bd5499bd4f11e1af92b583ff113aead9efddcf937bd",
+      "duration": 0.24997916666666667,
+      "peak_dbfs": -7.000000126534257,
+      "rms_dbfs": -22.091537163012408,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactWood_heavy_000.ogg",
+            "start": 0,
+            "duration": 0.19,
+            "gain_db": -12,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "cloth1.ogg",
+            "start": 0.07610416666666667,
+            "duration": 0.24,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": 2.9436565469550913,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "collect_wood_02.wav",
+      "sha256": "1a92af6878ae123e2bd75dc76784c40edf21ca5f712e97fbf76973f4d168cc02",
+      "duration": 0.25,
+      "peak_dbfs": -7.000000126534257,
+      "rms_dbfs": -23.929361510042643,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactWood_heavy_001.ogg",
+            "start": 0,
+            "duration": 0.19,
+            "gain_db": -12,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "cloth2.ogg",
+            "start": 0.06583333333333333,
+            "duration": 0.24,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": 2.9361725931009124,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "collect_wood_03.wav",
+      "sha256": "128cac704588c96a4c69bec1bf090131f2ea8ad63c376d2de413ac3f72ea774d",
+      "duration": 0.24997916666666667,
+      "peak_dbfs": -7.000000126534257,
+      "rms_dbfs": -23.33135889985514,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactWood_heavy_002.ogg",
+            "start": 0,
+            "duration": 0.19,
+            "gain_db": -12,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "cloth3.ogg",
+            "start": 0.021375,
+            "duration": 0.24,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": 2.965908267012926,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "collect_wood_04.wav",
+      "sha256": "d8d17b69cd9a808d430d30c98b4f548774b4ba049939607183bd8e107628392d",
+      "duration": 0.25,
+      "peak_dbfs": -7.000000126534257,
+      "rms_dbfs": -25.753835909210633,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactWood_heavy_003.ogg",
+            "start": 0,
+            "duration": 0.19,
+            "gain_db": -12,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "cloth4.ogg",
+            "start": 0.016166666666666666,
+            "duration": 0.24,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": 2.927828022845796,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "collect_stone_01.wav",
+      "sha256": "8b22507caf4ef5e7c03d31389fe5b24ea57174d3be1b7392fee6dac7f5be79d6",
+      "duration": 0.24997916666666667,
+      "peak_dbfs": -7.698091999531473,
+      "rms_dbfs": -19.39484503762362,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactMining_000.ogg",
+            "start": 0,
+            "duration": 0.19,
+            "gain_db": -12,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "cloth1.ogg",
+            "start": 0.07610416666666667,
+            "duration": 0.24,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": 3.0000000000000004,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "collect_stone_02.wav",
+      "sha256": "15e7dc873e3aa1f0dedc89b54c74156e01f9db9008da1caedc356a0c2e863aaf",
+      "duration": 0.25,
+      "peak_dbfs": -7.251791808577534,
+      "rms_dbfs": -21.16424381065205,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactMining_001.ogg",
+            "start": 0,
+            "duration": 0.19,
+            "gain_db": -12,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "cloth2.ogg",
+            "start": 0.06583333333333333,
+            "duration": 0.24,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": 3.0000000000000004,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "collect_stone_03.wav",
+      "sha256": "2e47e1ffa532231ed34b898f8ba28d266b1efeb67ea1f6fe3c71eb64ca24fb65",
+      "duration": 0.24997916666666667,
+      "peak_dbfs": -7.624314437430502,
+      "rms_dbfs": -23.40575840275681,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactMining_002.ogg",
+            "start": 0,
+            "duration": 0.19,
+            "gain_db": -12,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "cloth3.ogg",
+            "start": 0.021375,
+            "duration": 0.24,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": 3.0000000000000004,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "collect_stone_04.wav",
+      "sha256": "82e7183f2e5776b08fcefdfe4f33c3db9c7cecc113e94b496b02624c0b538b12",
+      "duration": 0.25,
+      "peak_dbfs": -7.358168861742877,
+      "rms_dbfs": -23.551248142232257,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactMining_003.ogg",
+            "start": 0,
+            "duration": 0.19,
+            "gain_db": -12,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "cloth4.ogg",
+            "start": 0.016166666666666666,
+            "duration": 0.24,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": 3.0000000000000004,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "collect_crystal_01.wav",
+      "sha256": "457f45f5fffe192eb6a23b77e0f23e209c5f8369e5afe7170bd65eaafe8f50bc",
+      "duration": 0.24997916666666667,
+      "peak_dbfs": -7.252892531204341,
+      "rms_dbfs": -23.789990341181245,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_000.ogg",
+            "start": 0,
+            "duration": 0.19,
+            "gain_db": -12,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "cloth1.ogg",
+            "start": 0.07610416666666667,
+            "duration": 0.24,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": 3.0000000000000004,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "collect_crystal_02.wav",
+      "sha256": "5956d34d330c4392051a47d577ba9205b1ef26c615b1537b8c85649b08651e70",
+      "duration": 0.25,
+      "peak_dbfs": -10.938163228744841,
+      "rms_dbfs": -26.581817228557565,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_001.ogg",
+            "start": 0,
+            "duration": 0.19,
+            "gain_db": -12,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "cloth2.ogg",
+            "start": 0.06583333333333333,
+            "duration": 0.24,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": 3.0000000000000004,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "collect_crystal_03.wav",
+      "sha256": "c2428b891892e3401d5dd09cc47d361c00d2855b6baa96087bb8400a6fac4a8a",
+      "duration": 0.24997916666666667,
+      "peak_dbfs": -9.259695053778183,
+      "rms_dbfs": -26.101231692780736,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_002.ogg",
+            "start": 0,
+            "duration": 0.19,
+            "gain_db": -12,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "cloth3.ogg",
+            "start": 0.021375,
+            "duration": 0.24,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": 3.0000000000000004,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "collect_crystal_04.wav",
+      "sha256": "7285c479e6a1ccd85441ecc3d9f5f5188b003e2ce0201f0b679508277744aa1a",
+      "duration": 0.25,
+      "peak_dbfs": -10.223820145115535,
+      "rms_dbfs": -28.638903186377807,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactGlass_light_003.ogg",
+            "start": 0,
+            "duration": 0.19,
+            "gain_db": -12,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "cloth4.ogg",
+            "start": 0.016166666666666666,
+            "duration": 0.24,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": 3.0000000000000004,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "collect_soft_01.wav",
+      "sha256": "4044d221c0a459e3ffc5f2632d2d6c5fd8ff21bd32ef29f95944a853bd6b69e2",
+      "duration": 0.24997916666666667,
+      "peak_dbfs": -7.000000126534257,
+      "rms_dbfs": -21.45555141722975,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactSoft_medium_000.ogg",
+            "start": 0,
+            "duration": 0.19,
+            "gain_db": -12,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 23.020833333333332,
+            "delay_seconds": 0
+          },
+          {
+            "source": "cloth1.ogg",
+            "start": 0.07610416666666667,
+            "duration": 0.24,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": 2.9591978397589984,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "collect_soft_02.wav",
+      "sha256": "a7a0fc5e5f5901989cbb81bb789570d3965a04335121ab8c48ddde9480a07f78",
+      "duration": 0.25,
+      "peak_dbfs": -7.000000126534257,
+      "rms_dbfs": -21.577214628776314,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactSoft_medium_001.ogg",
+            "start": 0,
+            "duration": 0.19,
+            "gain_db": -12,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0
+          },
+          {
+            "source": "cloth2.ogg",
+            "start": 0.06583333333333333,
+            "duration": 0.24,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": 2.923293609335005,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "collect_soft_03.wav",
+      "sha256": "30289e64ed89bfaf032e8f3fcc1c022dde07b56d23aa959ca90671d01587261d",
+      "duration": 0.24997916666666667,
+      "peak_dbfs": -7.000000126534257,
+      "rms_dbfs": -22.22400549536989,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactSoft_medium_002.ogg",
+            "start": 0,
+            "duration": 0.19,
+            "gain_db": -12,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 26.458333333333332,
+            "delay_seconds": 0
+          },
+          {
+            "source": "cloth3.ogg",
+            "start": 0.021375,
+            "duration": 0.24,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": 2.9911016744812264,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    },
+    {
+      "file": "collect_soft_04.wav",
+      "sha256": "241f018a566318966cd0e4d6ccfb2b9b62c7444edfae8d86a414f061713855e4",
+      "duration": 0.25,
+      "peak_dbfs": -7.000000126534257,
+      "rms_dbfs": -22.83327664066267,
+      "recipe": {
+        "layers": [
+          {
+            "source": "impactSoft_medium_003.ogg",
+            "start": 0,
+            "duration": 0.19,
+            "gain_db": -12,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 27.466666666666665,
+            "delay_seconds": 0
+          },
+          {
+            "source": "cloth4.ogg",
+            "start": 0.016166666666666666,
+            "duration": 0.24,
+            "gain_db": -8,
+            "playback_rate": 1,
+            "lowpass_hz": 4200,
+            "fade_in_ms": 2,
+            "fade_out_ms": 30,
+            "delay_seconds": 0.01
+          }
+        ],
+        "final_gain_db": 2.942556230694357,
+        "sample_rate": 48000,
+        "channels": 1,
+        "encoding": "PCM24"
+      }
+    }
+  ],
+  "perceptual_quality": "Not auditioned by agent; live playback unverified."
+}

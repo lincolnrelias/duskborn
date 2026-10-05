@@ -1,0 +1,16 @@
+{
+  "layers": [
+    {
+      "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_wood_break_01_crack.wav",
+      "delay_ms": 0
+    },
+    {
+      "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_wood_break_01_fall.wav",
+      "delay_ms": 75
+    },
+    {
+      "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_wood_break_01_debris.wav",
+      "delay_ms": 170
+    }
+  ]
+}

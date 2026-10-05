@@ -38,6 +38,8 @@ namespace Duskborn.Editor
             RunTest(Test_ConsumableItems_Functionality, ref passed, ref total);
             RunTest(Test_EquipmentTradeoffs_Calculations, ref passed, ref total);
             RunTest(Test_RecipeDiscoveryTracker_Logic, ref passed, ref total);
+            RunTest(Test_WorkbenchUI_RequirementsAndEmptyCategory, ref passed, ref total);
+            RunTest(Test_WorkbenchUI_ScrollBoundaries, ref passed, ref total);
 
             Debug.Log($"<color=#55FF55><b>[CraftingTests] {passed}/{total} tests passed!</b></color>");
         }
@@ -54,6 +56,49 @@ namespace Duskborn.Editor
             catch (Exception ex)
             {
                 Debug.LogError($"[FAIL] {testMethod.Method.Name}: {ex.Message}");
+            }
+        }
+
+        private static void Test_WorkbenchUI_RequirementsAndEmptyCategory()
+        {
+            using var fixture = new CraftingUIFixture();
+            var root = fixture.Manager.CraftingRoot;
+            var action = root.Find("RightColumn/CraftButton").GetComponent<UnityEngine.UI.Button>();
+            var status = root.Find("RightColumn/StatusLabel").GetComponent<TMPro.TextMeshProUGUI>();
+            if (action.interactable || !status.text.Contains("Need 5 more"))
+                throw new Exception("Missing materials must disable crafting and name the deficit.");
+            fixture.Call("ShowCraftConfirmation", "Stone Axe crafted!");
+            if (!status.text.Contains("Stone Axe crafted!") || !status.text.Contains("Need 5 more"))
+                throw new Exception("Confirmation must preserve the blocker for the next craft.");
+            fixture.Stock();
+            if (!action.interactable || !status.text.Contains("Ready to craft"))
+                throw new Exception("Resource refresh must enable the selected recipe.");
+            fixture.Call("SetActiveCategory", "No recipes fixture");
+            if (action.interactable || !status.text.Contains("No recipes"))
+                throw new Exception("An empty category must clear the action and blocker.");
+            var costs = root.Find("RightColumn/IngredientsScroll/Viewport/IngredientsContainer");
+            var views = (System.Collections.ICollection)typeof(CraftingUIManager)
+                .GetField("_ingredientViews", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(fixture.Manager);
+            if (views.Count != 0 || costs.childCount != 0 || root.Find("RightColumn/PreviewBox/IconSlot/Icon").GetComponent<UnityEngine.UI.Image>().color.a != 0)
+                throw new Exception("Empty categories must clear the previous icon and costs.");
+        }
+
+        private static void Test_WorkbenchUI_ScrollBoundaries()
+        {
+            using var fixture = new CraftingUIFixture();
+            var scroll = fixture.Manager.CraftingRoot.Find("LeftColumn/RecipeListScroll").GetComponent<UnityEngine.UI.ScrollRect>();
+            // Populate enough real recipe cards to exercise both boundaries.
+            var content = scroll.content;
+            for (int i = 0; i < 25; i++) fixture.Call("CreateRecipeEntryView", fixture.Axe, content, false);
+            Canvas.ForceUpdateCanvases();
+            var method = typeof(CraftingUIManager).GetMethod("ScrollTo", BindingFlags.Static | BindingFlags.NonPublic);
+            foreach (float delta in new[] { -10000f, 10000f })
+            {
+                method.Invoke(null, new object[] { scroll, delta });
+                var boundary = content.anchoredPosition;
+                for (int i = 0; i < 12; i++) method.Invoke(null, new object[] { scroll, delta });
+                if (Vector2.Distance(boundary, content.anchoredPosition) > .01f || scroll.velocity.sqrMagnitude > .01f)
+                    throw new Exception("Repeated wheel input must stop at the recipe boundary.");
             }
         }
 

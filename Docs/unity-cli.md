@@ -61,6 +61,10 @@ and builds. The wrapper reads the required Unity version from
   selected station and placeholder fixtures at 1080p and 720p into `Artifacts/BriarwoodUI`.
   Both commands use a hidden graphics process in edit mode; use an isolated project copy
   if the live checkout is already open. Neither enters Play Mode.
+- `capture-crafting-ui` captures the production workbench crafting panel with real recipe
+  and inventory fixtures in missing-material, ready, and empty-category states at 720p
+  and 1080p into `Artifacts/BriarwoodUI`. It uses the same hidden edit-mode graphics
+  workflow. The paired inventory and live input still require a manual check.
 - `build-windows` invokes the project's synchronous `BuildPipeline` entry point
   and creates `Builds/Windows/Mugg.exe` by default.
 

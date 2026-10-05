@@ -1,0 +1,85 @@
+{
+  "operation": "export",
+  "sources": [
+    {
+      "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\source\\impactWood_heavy_003.ogg",
+      "sha256": "af07511902b309b3f6d8f0e1fafbe93869127fb88099ebdc0aa6a00a98dc3cb0"
+    }
+  ],
+  "settings": {
+    "command": "export",
+    "input": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\source\\impactWood_heavy_003.ogg",
+    "output": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_wood_04_body.wav",
+    "start": 0.0,
+    "duration": 0.31014583333333334,
+    "gain_db": -5.0,
+    "fade_ms": 2.0,
+    "channels": 1
+  },
+  "channels": 1,
+  "inspection": {
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "pcm_s24le",
+        "codec_long_name": "PCM signed 24-bit little-endian",
+        "codec_type": "audio",
+        "codec_tag_string": "[1][0][0][0]",
+        "codec_tag": "0x0001",
+        "sample_fmt": "s32",
+        "sample_rate": "48000",
+        "channels": 1,
+        "channel_layout": "mono",
+        "bits_per_sample": 24,
+        "initial_padding": 0,
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "0/0",
+        "time_base": "1/48000",
+        "duration_ts": 14748,
+        "duration": "0.307250",
+        "bit_rate": "1152000",
+        "bits_per_raw_sample": "24",
+        "disposition": {
+          "default": 0,
+          "dub": 0,
+          "original": 0,
+          "comment": 0,
+          "lyrics": 0,
+          "karaoke": 0,
+          "forced": 0,
+          "hearing_impaired": 0,
+          "visual_impaired": 0,
+          "clean_effects": 0,
+          "attached_pic": 0,
+          "timed_thumbnails": 0,
+          "non_diegetic": 0,
+          "captions": 0,
+          "descriptions": 0,
+          "metadata": 0,
+          "dependent": 0,
+          "still_image": 0,
+          "multilayer": 0
+        }
+      }
+    ],
+    "format": {
+      "filename": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_wood_04_body.wav",
+      "nb_streams": 1,
+      "nb_programs": 0,
+      "nb_stream_groups": 0,
+      "format_name": "wav",
+      "format_long_name": "WAV / WAVE (Waveform Audio)",
+      "duration": "0.307250",
+      "size": "44346",
+      "bit_rate": "1154655",
+      "probe_score": 99,
+      "tags": {
+        "encoder": "Lavf62.3.100"
+      }
+    }
+  },
+  "output": {
+    "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_wood_04_body.wav",
+    "sha256": "e029b389b49709f29d4e0134ec124f0be8ebd3f78ce1620e94c36b839ae7c75f"
+  }
+}

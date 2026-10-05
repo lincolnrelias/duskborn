@@ -1,0 +1,41 @@
+{
+  "layers": [
+    {
+      "source": "1529.wav",
+      "start": 0.185,
+      "duration": 0.56,
+      "gain_db": 0,
+      "playback_rate": 0.92,
+      "lowpass_hz": null,
+      "fade_in_ms": 2,
+      "fade_out_ms": 30,
+      "delay_seconds": 0
+    },
+    {
+      "source": "impactPunch_medium_001.ogg",
+      "start": 0.0002499999999999998,
+      "duration": 0.19,
+      "gain_db": -8,
+      "playback_rate": 1,
+      "lowpass_hz": 2500,
+      "fade_in_ms": 2,
+      "fade_out_ms": 30,
+      "delay_seconds": 0
+    },
+    {
+      "source": "1529.wav",
+      "start": 0.96,
+      "duration": 0.22,
+      "gain_db": -5,
+      "playback_rate": 1,
+      "lowpass_hz": null,
+      "fade_in_ms": 2,
+      "fade_out_ms": 30,
+      "delay_seconds": 0.17
+    }
+  ],
+  "final_gain_db": 2.313354256013482,
+  "sample_rate": 48000,
+  "channels": 1,
+  "encoding": "PCM24"
+}

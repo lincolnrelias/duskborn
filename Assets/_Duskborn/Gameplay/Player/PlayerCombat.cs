@@ -549,6 +549,14 @@ namespace Duskborn.Gameplay.Player
             DuskLog.Log(LogChannel.ActionBar, $"Item consumed from slot {slotIndex}.");
         }
 
+        [TargetRpc]
+        private void RpcOnNodeHitFeedback(NetworkConnection conn, string surfaceTag, bool foliage, bool depleted)
+        {
+            CameraShake.ShakeDealt();
+            if (!depleted)
+                ResourceNode.PlayHarvestHit(transform.position + Vector3.up * .85f, surfaceTag, foliage, true);
+        }
+
         // ── Resource Node ─────────────────────────────────────────────────────
 
         [ServerRpc]
@@ -582,19 +590,12 @@ namespace Duskborn.Gameplay.Player
                 damage = Mathf.Min(damage, 1f); // Glancing hit / insufficient tool
             }
 
-            string surfaceTag = node.GetSurfaceTag();
-            node.TakeDamage(damage, _stats);
-
-            if (node.IsAlive)
-            {
-                RpcOnHitAudio(Owner, surfaceTag);
-                RpcOnHitEffect(surfaceTag, nodeObj.transform.position);
-            }
-            else
-            {
-                RpcOnHitEffect(surfaceTag, nodeObj.transform.position);
-                nodeObj.Despawn();
-            }
+            string surfaceTag = node.GetAudioMaterial();
+            bool foliage = (node.Types & TargetType.Bush) != 0;
+            node.TakeDamage(damage, _stats, ownerAudioHandled: true);
+            RpcOnNodeHitFeedback(Owner, surfaceTag, foliage, !node.IsAlive);
+            // ResourceNode broadcasts material contact feedback for every damage source.
+            if (!node.IsAlive) nodeObj.Despawn();
         }
 
         // ─────────────────────────────────────────────────────────────────────

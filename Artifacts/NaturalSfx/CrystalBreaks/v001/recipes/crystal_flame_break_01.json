@@ -1,0 +1,41 @@
+{
+  "layers": [
+    {
+      "source": "3322.wav",
+      "start": 2,
+      "duration": 0.68,
+      "gain_db": 0,
+      "playback_rate": 1,
+      "lowpass_hz": null,
+      "fade_in_ms": 2,
+      "fade_out_ms": 30,
+      "delay_seconds": 0
+    },
+    {
+      "source": "impactWood_heavy_000.ogg",
+      "start": 0,
+      "duration": 0.18,
+      "gain_db": -14,
+      "playback_rate": 1,
+      "lowpass_hz": null,
+      "fade_in_ms": 2,
+      "fade_out_ms": 30,
+      "delay_seconds": 0
+    },
+    {
+      "source": "3322.wav",
+      "start": 18,
+      "duration": 0.24,
+      "gain_db": -5,
+      "playback_rate": 1,
+      "lowpass_hz": null,
+      "fade_in_ms": 2,
+      "fade_out_ms": 30,
+      "delay_seconds": 0.13
+    }
+  ],
+  "final_gain_db": 8.0,
+  "sample_rate": 48000,
+  "channels": 1,
+  "encoding": "PCM24"
+}

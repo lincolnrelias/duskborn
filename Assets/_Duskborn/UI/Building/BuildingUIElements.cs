@@ -100,23 +100,26 @@ namespace Duskborn.UI.Building
             return button;
         }
 
-        internal static ScrollRect Scroll(string name, Transform parent, out RectTransform content)
+        internal static ScrollRect Scroll(string name, Transform parent, out RectTransform content, bool gridLayout = false)
         {
             var root = Object(name, parent, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(RectMask2D), typeof(ScrollRect));
             root.GetComponent<Image>().color = Color.clear;
-            var contentObject = Object("Content", root.transform, typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
+            var contentObject = Object("Content", root.transform, typeof(RectTransform), gridLayout ? typeof(GridLayoutGroup) : typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
             content = (RectTransform)contentObject.transform;
             content.anchorMin = new Vector2(0, 1);
             content.anchorMax = Vector2.one;
             content.pivot = new Vector2(.5f, 1);
             content.sizeDelta = Vector2.zero;
-            var layout = contentObject.GetComponent<VerticalLayoutGroup>();
-            layout.spacing = 10;
-            layout.padding = new RectOffset(4, 8, 4, 8);
-            layout.childControlWidth = true;
-            layout.childForceExpandWidth = true;
-            layout.childControlHeight = true;
-            layout.childForceExpandHeight = false;
+            if (!gridLayout)
+            {
+                var layout = contentObject.GetComponent<VerticalLayoutGroup>();
+                layout.spacing = 10;
+                layout.padding = new RectOffset(4, 8, 4, 8);
+                layout.childControlWidth = true;
+                layout.childForceExpandWidth = true;
+                layout.childControlHeight = true;
+                layout.childForceExpandHeight = false;
+            }
             contentObject.GetComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             var scroll = root.GetComponent<ScrollRect>();
             scroll.content = content;

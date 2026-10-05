@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Position = 0)]
-    [ValidateSet('help', 'compile', 'validate', 'test', 'test-warden', 'build-windows', 'build-warden', 'build-briarback', 'build-bramblekin', 'build-thornwing', 'build-ironroot', 'test-ironroot', 'clear-terrain', 'capture-runes', 'capture-map', 'build-crystals', 'capture-crystals', 'capture-building-icons', 'capture-building-ui', 'all')]
+    [ValidateSet('help', 'compile', 'validate', 'test', 'test-warden', 'build-windows', 'build-warden', 'build-briarback', 'build-bramblekin', 'build-thornwing', 'build-ironroot', 'test-ironroot', 'clear-terrain', 'capture-runes', 'capture-map', 'build-crystals', 'capture-crystals', 'capture-building-icons', 'capture-building-ui', 'capture-crafting-ui', 'all')]
     [string]$Command = 'help',
 
     [string]$UnityPath,
@@ -37,6 +37,7 @@ Unity CLI workflow
   .\Tools\unity.ps1 capture-map
   .\Tools\unity.ps1 capture-building-icons
   .\Tools\unity.ps1 capture-building-ui
+  .\Tools\unity.ps1 capture-crafting-ui
   .\Tools\unity.ps1 all
 
 Options:
@@ -95,7 +96,7 @@ function Invoke-UnityTask {
         '-logFile', $logPath,
         '-timestamps'
     ) + $TaskArguments
-    if ($Name -notin @('capture-runes', 'capture-crystals', 'capture-map', 'capture-building-icons', 'capture-building-ui')) { $unityArguments += '-nographics' }
+    if ($Name -notin @('capture-runes', 'capture-crystals', 'capture-map', 'capture-building-icons', 'capture-building-ui', 'capture-crafting-ui')) { $unityArguments += '-nographics' }
 
     Write-Host "[unity-cli] Running $Name with $script:resolvedUnityPath"
     $quotedArguments = $unityArguments | ForEach-Object {
@@ -147,6 +148,9 @@ if ($Command -eq 'help') {
 $script:resolvedUnityPath = Resolve-UnityExecutable
 
 switch ($Command) {
+    'capture-crafting-ui' {
+        Invoke-UnityTask -Name 'capture-crafting-ui' -TaskArguments @('-quit', '-executeMethod', 'Duskborn.Editor.BriarwoodCraftingCapture.Run') -SuccessMarker '[BriarwoodCrafting] Capture succeeded.' -ExpectedOutput (Join-Path $projectRoot 'Artifacts/BriarwoodUI/crafting-ready-1920.png')
+    }
     'capture-building-icons' {
         Invoke-UnityTask -Name 'capture-building-icons' -TaskArguments @('-quit', '-executeMethod', 'Duskborn.Editor.BriarwoodBuildingCapture.Icons') -SuccessMarker '[Briarwood] Icons succeeded.' -ExpectedOutput (Join-Path $projectRoot 'Assets/_Duskborn/Resources/UI/Briarwood/Icon_arcane_table.png')
     }

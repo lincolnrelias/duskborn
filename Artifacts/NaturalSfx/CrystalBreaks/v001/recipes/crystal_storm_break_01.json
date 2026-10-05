@@ -1,0 +1,41 @@
+{
+  "layers": [
+    {
+      "source": "3180.wav",
+      "start": 4.713000000000001,
+      "duration": 0.95,
+      "gain_db": 0,
+      "playback_rate": 1,
+      "lowpass_hz": null,
+      "fade_in_ms": 2,
+      "fade_out_ms": 30,
+      "delay_seconds": 0
+    },
+    {
+      "source": "impactTin_medium_000.ogg",
+      "start": 0,
+      "duration": 0.13,
+      "gain_db": -8,
+      "playback_rate": 1,
+      "lowpass_hz": null,
+      "fade_in_ms": 2,
+      "fade_out_ms": 26.0,
+      "delay_seconds": 0.006
+    },
+    {
+      "source": "impactMetal_light_000.ogg",
+      "start": 0,
+      "duration": 0.12,
+      "gain_db": -15,
+      "playback_rate": 1,
+      "lowpass_hz": null,
+      "fade_in_ms": 2,
+      "fade_out_ms": 24.0,
+      "delay_seconds": 0.047
+    }
+  ],
+  "final_gain_db": -1.32141322575559,
+  "sample_rate": 48000,
+  "channels": 1,
+  "encoding": "PCM24"
+}

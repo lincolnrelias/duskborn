@@ -1,0 +1,15 @@
+{
+  "layers": [
+    {
+      "source": "Artifacts\\NaturalSfx\\Harvesting\\v001\\candidates\\harvest_foliage_04.wav",
+      "sha256": "ff6a90886c97f46e5a5819d6c99ddcab2715d8d6761cf02fb4bea93452314ca7",
+      "gain_db": 0,
+      "prior_provenance": "../v001/manifest.json",
+      "delay_seconds": 0
+    }
+  ],
+  "final_gain_db": 5.5,
+  "sample_rate": 48000,
+  "channels": 1,
+  "encoding": "PCM24"
+}

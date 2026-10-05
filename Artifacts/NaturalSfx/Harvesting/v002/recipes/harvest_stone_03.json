@@ -1,0 +1,15 @@
+{
+  "layers": [
+    {
+      "source": "Artifacts\\NaturalSfx\\Harvesting\\v001\\candidates\\harvest_stone_03.wav",
+      "sha256": "4d3e7b5347499a6b31f975315a6587387b7485b606343448e6afe7719202967c",
+      "gain_db": 0,
+      "prior_provenance": "../v001/manifest.json",
+      "delay_seconds": 0
+    }
+  ],
+  "final_gain_db": 4.991029292937289,
+  "sample_rate": 48000,
+  "channels": 1,
+  "encoding": "PCM24"
+}

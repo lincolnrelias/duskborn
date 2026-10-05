@@ -1,0 +1,41 @@
+{
+  "layers": [
+    {
+      "source": "impactPlate_light_001.ogg",
+      "start": 0,
+      "duration": 0.64,
+      "gain_db": 0,
+      "playback_rate": 1,
+      "lowpass_hz": null,
+      "fade_in_ms": 2,
+      "fade_out_ms": 30,
+      "delay_seconds": 0
+    },
+    {
+      "source": "impactMetal_light_001.ogg",
+      "start": 0,
+      "duration": 0.35,
+      "gain_db": -9,
+      "playback_rate": 1,
+      "lowpass_hz": null,
+      "fade_in_ms": 2,
+      "fade_out_ms": 30,
+      "delay_seconds": 0.035
+    },
+    {
+      "source": "impactPlate_light_002.ogg",
+      "start": 0,
+      "duration": 0.38,
+      "gain_db": -10,
+      "playback_rate": 1,
+      "lowpass_hz": null,
+      "fade_in_ms": 2,
+      "fade_out_ms": 30,
+      "delay_seconds": 0.16
+    }
+  ],
+  "final_gain_db": -1.5669773164209282,
+  "sample_rate": 48000,
+  "channels": 1,
+  "encoding": "PCM24"
+}

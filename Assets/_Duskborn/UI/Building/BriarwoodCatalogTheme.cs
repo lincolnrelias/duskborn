@@ -4,11 +4,12 @@ using UnityEngine.UI;
 
 namespace Duskborn.UI.Building
 {
-    // Catalog-only skin: station processors and placement retain their existing UI.
+    // Shared skin for the building catalog and forge station.
     internal static class BriarwoodCatalogTheme
     {
         private const string Folder = "UI/Briarwood/";
         private static Sprite buttonSprite;
+        private static readonly System.Collections.Generic.Dictionary<string, Sprite> ForgeSprites = new();
         private static readonly System.Collections.Generic.Dictionary<string, Texture2D> Icons = new();
         internal static readonly Color Leather = new(.105f, .083f, .065f, 1f);
         internal static readonly Color Raised = new(.16f, .13f, .10f, 1f);
@@ -20,6 +21,33 @@ namespace Duskborn.UI.Building
 
         internal static Image Panel(string name, Transform parent, Color color) =>
             BuildingUIElements.SolidPanel(name, parent, color);
+
+        internal static Image ForgeSurface(string name, Transform parent, Color tint)
+        {
+            var image = Panel(name, parent, tint);
+            image.sprite = ForgeSprite("surface");
+            image.type = Image.Type.Sliced;
+            image.pixelsPerUnitMultiplier = 6f;
+            return image;
+        }
+
+        // Forge controls use visible alpha bounds and source-normalized borders.
+        // Import downscaling must not change the frame's thickness or inner space.
+        internal static Sprite ForgeSprite(string resource)
+        {
+            if (ForgeSprites.TryGetValue(resource, out var cached) && cached != null) return cached;
+            var texture = Resources.Load<Texture2D>(Folder + (resource == "surface" ? "socket" : resource));
+            if (texture == null) return null;
+            float scale = texture.width / 1254f;
+            var rect = resource == "surface" ? new Rect(132, 145, 990, 962) :
+                resource == "socket" ? new Rect(57, 85, 1140, 1107) : new Rect(18, 36, 1219, 1185);
+            rect = new Rect(rect.x * scale, rect.y * scale, rect.width * scale, rect.height * scale);
+            var border = Vector4.one * (resource == "surface" ? 80 : resource == "socket" ? 100 : 180) * scale;
+            var sprite = UnityEngine.Sprite.Create(texture, rect, new Vector2(.5f, .5f), 100 * scale, 0, SpriteMeshType.FullRect, border);
+            sprite.name = "Forge " + resource + " (trimmed)";
+            ForgeSprites[resource] = sprite;
+            return sprite;
+        }
 
         internal static Image Sprite(string name, Transform parent, string resource, bool sliced = false)
         {

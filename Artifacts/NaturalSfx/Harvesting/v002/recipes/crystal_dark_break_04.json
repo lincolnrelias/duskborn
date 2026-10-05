@@ -1,0 +1,41 @@
+{
+  "layers": [
+    {
+      "source": "impactGlass_heavy_003.ogg",
+      "start": 0,
+      "duration": 0.65,
+      "gain_db": -2,
+      "playback_rate": 0.8,
+      "lowpass_hz": 6500,
+      "fade_in_ms": 2,
+      "fade_out_ms": 30,
+      "delay_seconds": 0
+    },
+    {
+      "source": "impactSoft_medium_003.ogg",
+      "start": 0,
+      "duration": 0.65,
+      "gain_db": -6,
+      "playback_rate": 0.8,
+      "lowpass_hz": null,
+      "fade_in_ms": 2,
+      "fade_out_ms": 30,
+      "delay_seconds": 0.01
+    },
+    {
+      "source": "impactGlass_light_004.ogg",
+      "start": 0,
+      "duration": 0.4,
+      "gain_db": -10,
+      "playback_rate": 1,
+      "lowpass_hz": null,
+      "fade_in_ms": 2,
+      "fade_out_ms": 30,
+      "delay_seconds": 0.14
+    }
+  ],
+  "final_gain_db": 0.22576039139473783,
+  "sample_rate": 48000,
+  "channels": 1,
+  "encoding": "PCM24"
+}

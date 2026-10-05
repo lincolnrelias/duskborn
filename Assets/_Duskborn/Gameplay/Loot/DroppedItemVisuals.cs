@@ -17,6 +17,7 @@ namespace Duskborn.Gameplay.Loot
     /// such as iron (20x20x20) and wood (15x30x30).
     /// </summary>
     [DisallowMultipleComponent]
+    [DefaultExecutionOrder(100)]
     public class DroppedItemVisuals : MonoBehaviour
     {
         [Header("Tier Configuration")]
@@ -45,8 +46,19 @@ namespace Duskborn.Gameplay.Loot
         private float _beamYaw;
         private float _haloYaw;
         private bool  _isSettled;
+        private bool _isCollecting;
         private Vector3 _settledPosition;
         private float _spawnTime;
+        private float _arrivalTime = float.NegativeInfinity;
+        private float _lastGroundContact = float.NegativeInfinity;
+        private Vector3 _hoverVelocity;
+        private Quaternion _catchRotation;
+        private Quaternion _hoverRotation;
+        private static PhysicsMaterial _dropContactMaterial;
+
+        // Low air drag preserves the launch; extra gravity gives the descent weight.
+        private const float AirDrag = 0.08f;
+        private const float GravityScale = 1.75f;
         private bool  _isSetup;
 
         // Terrain anchoring.
@@ -76,6 +88,7 @@ namespace Duskborn.Gameplay.Loot
             _beamYaw = Random.Range(0f, 360f);
             _haloYaw = Random.Range(0f, 360f);
 
+            ConfigureDropPhysics();
             EnsureVfxRoot();
         }
 
@@ -117,6 +130,12 @@ namespace Duskborn.Gameplay.Loot
 
         public void Setup(ItemRarity rarity)
         {
+            // SyncVar/client initialization may repeat Setup while a drop is moving.
+            // Rebuilding the same rarity must not release an already caught item.
+            if (_isSetup && currentRarity == rarity) return;
+            if (!_isCollecting) ConfigureDropPhysics();
+            _arrivalTime = float.NegativeInfinity;
+            _hoverVelocity = Vector3.zero;
             _isSetup       = true;
             currentRarity  = rarity;
             _baseIntensity = ItemTierHelper.GetLightIntensity(rarity);
@@ -135,7 +154,7 @@ namespace Duskborn.Gameplay.Loot
                 if (_vfxRoot != null) _vfxRoot.SetActive(false);
 
                 _isSettled = false;
-                if (_rb != null)
+                if (_rb != null && !_isCollecting)
                 {
                     _rb.isKinematic = false;
                     _rb.useGravity = true;
@@ -154,7 +173,7 @@ namespace Duskborn.Gameplay.Loot
                 SetupWaveOverlay(rarity);
 
                 _isSettled = false;
-                if (_rb != null)
+                if (_rb != null && !_isCollecting)
                 {
                     _rb.isKinematic = false;
                     _rb.useGravity = true;
@@ -175,7 +194,7 @@ namespace Duskborn.Gameplay.Loot
             SetupWaveOverlay(rarity);
 
             _isSettled = false;
-            if (_rb != null)
+            if (_rb != null && !_isCollecting)
             {
                 _rb.isKinematic = false;
                 _rb.useGravity = true;
@@ -646,8 +665,8 @@ namespace Duskborn.Gameplay.Loot
             _vfxRoot.transform.rotation = Quaternion.identity;
             _vfxRoot.transform.localScale = Vector3.one;
 
-            // Initial impact effect (flash / spike that settles smoothly).
-            float elapsedSinceDrop = time - _spawnTime;
+            // Arrival accent starts at contact/hover catch, rather than expiring in flight.
+            float elapsedSinceDrop = time - _arrivalTime;
             float dropSpike = 1f;
             if (elapsedSinceDrop < 0.40f)
             {
@@ -695,57 +714,158 @@ namespace Duskborn.Gameplay.Loot
             }
         }
 
+        private void ConfigureDropPhysics()
+        {
+            if (_rb == null) _rb = GetComponent<Rigidbody>();
+            if (_rb == null) return;
+            _rb.interpolation = RigidbodyInterpolation.Interpolate;
+            _rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+            _rb.linearDamping = AirDrag;
+            _rb.angularDamping = 0.35f;
+
+            if (_dropContactMaterial == null)
+            {
+                _dropContactMaterial = new PhysicsMaterial("Loot weighted contact")
+                {
+                    staticFriction = 0.65f,
+                    dynamicFriction = 0.5f,
+                    bounciness = 0.22f,
+                    frictionCombine = PhysicsMaterialCombine.Maximum,
+                    bounceCombine = PhysicsMaterialCombine.Maximum
+                };
+            }
+            foreach (var collider in GetComponentsInChildren<Collider>(true))
+            {
+                if (!collider.isTrigger && collider.attachedRigidbody == _rb)
+                    collider.sharedMaterial = _dropContactMaterial;
+            }
+        }
+
+        public void BeginDropMotion(Vector3 velocity, Vector3 angularVelocity)
+        {
+            _isCollecting = false;
+            _spawnTime = Time.time;
+            _arrivalTime = float.NegativeInfinity;
+            _lastGroundContact = float.NegativeInfinity;
+            _isSettled = false;
+            _hoverVelocity = Vector3.zero;
+            ConfigureDropPhysics();
+            if (_rb == null) return;
+            _rb.isKinematic = false;
+            _rb.useGravity = true;
+            _rb.linearVelocity = velocity;
+            // Direct angular speed avoids prefab inertia/scale changing the tumble.
+            _rb.angularVelocity = angularVelocity;
+            _rb.WakeUp();
+        }
+
+        public void BeginCollectionMotion()
+        {
+            _isCollecting = true;
+            if (_rb == null) _rb = GetComponent<Rigidbody>();
+            if (_rb == null) return;
+            // Physics interpolation must not overwrite the per-render-frame magnet pose.
+            Vector3 visiblePosition = transform.position;
+            Quaternion visibleRotation = transform.rotation;
+            _rb.interpolation = RigidbodyInterpolation.None;
+            if (!_rb.isKinematic)
+            {
+                _rb.linearVelocity = Vector3.zero;
+                _rb.angularVelocity = Vector3.zero;
+            }
+            _rb.isKinematic = true;
+            _rb.useGravity = false;
+            _rb.position = visiblePosition;
+            _rb.rotation = visibleRotation;
+            transform.SetPositionAndRotation(visiblePosition, visibleRotation);
+        }
+
+        private void FixedUpdate()
+        {
+            // Magnet collection owns a kinematic body; never fight that movement.
+            if (_rb == null || _rb.isKinematic || _rb.IsSleeping()) return;
+            bool touchingGround = Time.fixedTime - _lastGroundContact <= Time.fixedDeltaTime * 1.5f;
+            _rb.linearDamping = touchingGround ? 5f : AirDrag;
+            _rb.angularDamping = touchingGround ? 8f : 0.35f;
+            if (_rb.useGravity)
+                _rb.AddForce(Physics.gravity * (GravityScale - 1f), ForceMode.Acceleration);
+        }
+
+        private void OnCollisionEnter(Collision collision) => RegisterGroundContact(collision);
+        private void OnCollisionStay(Collision collision) => RegisterGroundContact(collision);
+
+        private void RegisterGroundContact(Collision collision)
+        {
+            for (int i = 0; i < collision.contactCount; i++)
+            {
+                if (Vector3.Dot(collision.GetContact(i).normal, Vector3.up) < 0.5f) continue;
+                _lastGroundContact = Time.fixedTime;
+                if (float.IsNegativeInfinity(_arrivalTime)) _arrivalTime = Time.time;
+                break;
+            }
+        }
+
+        // Exact damped spring step: preserves incoming momentum, allows one small
+        // overshoot, and converges identically at different rendering frame rates.
+        public static void StepHoverSpring(ref Vector3 position, ref Vector3 velocity,
+            Vector3 target, float deltaTime)
+        {
+            const float damping = 9f;
+            const float frequency = 11f;
+            float decay = Mathf.Exp(-damping * deltaTime);
+            float cos = Mathf.Cos(frequency * deltaTime);
+            float sin = Mathf.Sin(frequency * deltaTime);
+            Vector3 offset = position - target;
+            Vector3 wave = (velocity + damping * offset) / frequency;
+            position = target + decay * (offset * cos + wave * sin);
+            velocity = decay * (velocity * cos - (damping * wave + frequency * offset) * sin);
+        }
+
         private void UpdateIdleHover(float time)
         {
-            // Only Epic or higher rarity items (Epic, Legendary) float in the air.
-            if (!ItemTierHelper.ShouldFloatInAir(currentRarity))
+            if (_isCollecting) return;
+            if (!ItemTierHelper.ShouldFloatInAir(currentRarity)) return;
+
+            if (!_isSettled && time >= _nextGroundCheckTime)
             {
-                return;
+                CheckGround();
+                _nextGroundCheckTime = time + 0.08f;
             }
-
-            // Airborne Epic and Legendary items rotate continuously while suspended.
-            transform.Rotate(Vector3.up, 38f * Time.deltaTime, Space.World);
-
-            float hoverHeight = ItemTierHelper.GetHoverHeight(currentRarity);
-            CheckGround();
-            float targetHoverY = _hasGroundHit
-                ? _groundPoint.y + hoverHeight
-                : transform.position.y;
+            if (!_hasGroundHit) return; // No timeout freeze over cliffs/missing ground.
+            float targetHoverY = _groundPoint.y + ItemTierHelper.GetHoverHeight(currentRarity);
 
             if (!_isSettled)
             {
+                // Let the launch/apex read before catching the descending item.
+                if (time - _spawnTime < 0.06f) return;
+                if (_rb != null && (_rb.linearVelocity.y > 0f ||
+                    transform.position.y > targetHoverY + 0.12f)) return;
+
+                _hoverVelocity = _rb != null ? _rb.linearVelocity : Vector3.zero;
+                _settledPosition = new Vector3(transform.position.x, targetHoverY, transform.position.z);
+                _catchRotation = transform.rotation;
+                _hoverRotation = Quaternion.Euler(0f, transform.eulerAngles.y, 0f);
+                _arrivalTime = time;
+                _isSettled = true;
                 if (_rb != null)
                 {
-                    // Transition smoothly when descending to hover height,
-                    // when speed approaches zero, or after a timeout.
-                    bool reachedHoverHeight = _hasGroundHit && transform.position.y <= (targetHoverY + 0.15f) && _rb.linearVelocity.y <= 0.2f;
-                    bool isSlow = _rb.linearVelocity.sqrMagnitude < 0.04f;
-                    bool timeout = (time - _spawnTime) > 1.2f;
-
-                    if (reachedHoverHeight || isSlow || timeout)
-                    {
-                        _isSettled = true;
-                        _rb.linearVelocity = Vector3.zero;
-                        _rb.angularVelocity = Vector3.zero;
-                        _rb.isKinematic = true;
-                        _rb.useGravity = false;
-                        _settledPosition = new Vector3(transform.position.x, targetHoverY, transform.position.z);
-                    }
-                }
-                else
-                {
-                    _isSettled = true;
-                    _settledPosition = new Vector3(transform.position.x, targetHoverY, transform.position.z);
+                    _rb.linearVelocity = Vector3.zero;
+                    _rb.angularVelocity = Vector3.zero;
+                    _rb.isKinematic = true;
+                    _rb.useGravity = false;
                 }
             }
 
-            if (_isSettled)
-            {
-                // Smooth sinusoidal levitation anchored to ground height.
-                float bobY = Mathf.Sin((time + _pulseOffset) * 2.2f) * 0.04f;
-                Vector3 desiredPos = new Vector3(_settledPosition.x, targetHoverY + bobY, _settledPosition.z);
-                transform.position = Vector3.MoveTowards(transform.position, desiredPos, 3.0f * Time.deltaTime);
-            }
+            float age = time - _arrivalTime;
+            float idleBlend = 1f - Mathf.Exp(-age * 4f);
+            Vector3 target = _settledPosition;
+            target.y += Mathf.Sin(age * 2.2f) * 0.04f * idleBlend;
+            Vector3 position = transform.position;
+            StepHoverSpring(ref position, ref _hoverVelocity, target, Time.deltaTime);
+            transform.position = position;
+            // Recover gracefully from the launch tumble, then ease into idle spin.
+            _hoverRotation = Quaternion.AngleAxis(38f * idleBlend * Time.deltaTime, Vector3.up) * _hoverRotation;
+            transform.rotation = Quaternion.Slerp(_catchRotation, _hoverRotation, 1f - Mathf.Exp(-age * 7f));
         }
 
         private static void DestroyVisual(UnityEngine.Object visual)

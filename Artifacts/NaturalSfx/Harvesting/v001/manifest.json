@@ -1,0 +1,792 @@
+{
+  "brief": "Close, dry medieval tool contact: woody crack and bark fragments; stone bite and loose grit; ore contact with a short metal tick; foliage snap and rustle. Distinct performances with restrained tails, no synthetic bass boom.",
+  "sources": [
+    {
+      "file": "impactWood_heavy_000.ogg",
+      "sha256": "15ff82332f342c30e469215539e1cc57e11b221aa2cf7e11e811d313a9927f3d",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source_fidelity": "Original lossy OGG retained; WAV conversion does not restore lost detail."
+    },
+    {
+      "file": "impactWood_heavy_001.ogg",
+      "sha256": "f1b07a53ac10c615fff9ba470511fdeb722b5902e1a8520759fc20ad6f546015",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source_fidelity": "Original lossy OGG retained; WAV conversion does not restore lost detail."
+    },
+    {
+      "file": "impactWood_heavy_002.ogg",
+      "sha256": "ce1e06f2a05f2634c645cb72f6a1623e64bc2d92be34917430a61031fb6597d4",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source_fidelity": "Original lossy OGG retained; WAV conversion does not restore lost detail."
+    },
+    {
+      "file": "impactWood_heavy_003.ogg",
+      "sha256": "af07511902b309b3f6d8f0e1fafbe93869127fb88099ebdc0aa6a00a98dc3cb0",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source_fidelity": "Original lossy OGG retained; WAV conversion does not restore lost detail."
+    },
+    {
+      "file": "impactWood_heavy_004.ogg",
+      "sha256": "2c647ae6bd29c72ae2523f7e16e325d8d331b75cc99ab4f637c48a0e11c34677",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source_fidelity": "Original lossy OGG retained; WAV conversion does not restore lost detail."
+    },
+    {
+      "file": "impactMining_000.ogg",
+      "sha256": "36b4ea107222d073c67ca64dde26944975609202d5090b2f2021213c1a7e35cd",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source_fidelity": "Original lossy OGG retained; WAV conversion does not restore lost detail."
+    },
+    {
+      "file": "footstep_concrete_001.ogg",
+      "sha256": "507a75eb19b897087855a3be3cf11a12d7fa37d143ad535eeebe0b8031c7325d",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source_fidelity": "Original lossy OGG retained; WAV conversion does not restore lost detail."
+    },
+    {
+      "file": "impactMining_001.ogg",
+      "sha256": "61235a18de3f3d92118235398222dbf51d448f1be70b1c8bc962b10b86f2d9c6",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source_fidelity": "Original lossy OGG retained; WAV conversion does not restore lost detail."
+    },
+    {
+      "file": "footstep_concrete_002.ogg",
+      "sha256": "b21fa546d74941196b25da8a20b7010abd8c05c4fcf93545d1f344e66a664e13",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source_fidelity": "Original lossy OGG retained; WAV conversion does not restore lost detail."
+    },
+    {
+      "file": "impactMining_002.ogg",
+      "sha256": "059558ec751115ca6b1441e00f0adc837c1a3eeb0a066b109e0fd879fc5d0b0c",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source_fidelity": "Original lossy OGG retained; WAV conversion does not restore lost detail."
+    },
+    {
+      "file": "footstep_concrete_003.ogg",
+      "sha256": "8b513c2f0316324060b9174b8f28df6c2147418c506e6a53b77f18e149a5547b",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source_fidelity": "Original lossy OGG retained; WAV conversion does not restore lost detail."
+    },
+    {
+      "file": "impactMining_003.ogg",
+      "sha256": "4237fa2cd80364ad81cd0af44f67d7497f1c5edcc7bdb02cd22be2ba4580c83d",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source_fidelity": "Original lossy OGG retained; WAV conversion does not restore lost detail."
+    },
+    {
+      "file": "footstep_concrete_004.ogg",
+      "sha256": "24dd8db2413e5b81ad181e1205c12a1c7801da5f85715d471b92a4b2f632e45e",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source_fidelity": "Original lossy OGG retained; WAV conversion does not restore lost detail."
+    },
+    {
+      "file": "impactMetal_light_001.ogg",
+      "sha256": "fba69c467ddd85da7b1d82e259f936b876d9ba6a3d6f1b24bdd10468e46bfe08",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source_fidelity": "Original lossy OGG retained; WAV conversion does not restore lost detail."
+    },
+    {
+      "file": "impactMetal_light_002.ogg",
+      "sha256": "25a96f90a9a1f88a531e824e126f0519504625e5635e65a72e4f31611428db29",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source_fidelity": "Original lossy OGG retained; WAV conversion does not restore lost detail."
+    },
+    {
+      "file": "impactMetal_light_003.ogg",
+      "sha256": "92d5db6bfc672d9dc1b4f390b2900504f013187fa36335472554fafefa9050b1",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source_fidelity": "Original lossy OGG retained; WAV conversion does not restore lost detail."
+    },
+    {
+      "file": "impactMetal_light_004.ogg",
+      "sha256": "9b1c35820fba507081261f19ab5f461f69a5e2627a7d91acdb73ca3cfc997979",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source_fidelity": "Original lossy OGG retained; WAV conversion does not restore lost detail."
+    },
+    {
+      "file": "footstep_grass_000.ogg",
+      "sha256": "9d49497777405d78d7cf7f2888e28277f3a23192300cfd1d79d54876b20f479f",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source_fidelity": "Original lossy OGG retained; WAV conversion does not restore lost detail."
+    },
+    {
+      "file": "footstep_grass_001.ogg",
+      "sha256": "fb28781bd22b2eefdc14077f1adf5c94d7fe9c3a130194633b55f3e0d39d9f04",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source_fidelity": "Original lossy OGG retained; WAV conversion does not restore lost detail."
+    },
+    {
+      "file": "footstep_grass_002.ogg",
+      "sha256": "73a520139f5be716a403bfe9c80e0e94d1e61d8e9de04a354b336392164b53dc",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source_fidelity": "Original lossy OGG retained; WAV conversion does not restore lost detail."
+    },
+    {
+      "file": "footstep_grass_003.ogg",
+      "sha256": "0546e1d8ab2def714425701a18bd34c5ee2794b12e858e5b595aabcf38a34137",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source_fidelity": "Original lossy OGG retained; WAV conversion does not restore lost detail."
+    },
+    {
+      "file": "creak1.ogg",
+      "sha256": "8a346186fd297254248cab8e8117060a52a5cf2a84f603153a762108550ea95e",
+      "source_url": "https://kenney.nl/assets/rpg-audio",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source_fidelity": "Original lossy OGG retained; WAV conversion does not restore lost detail."
+    },
+    {
+      "file": "creak2.ogg",
+      "sha256": "8a990afdc03aebb91d528f5385e2f95582dbfa8e2c12c71098ab01be9142294a",
+      "source_url": "https://kenney.nl/assets/rpg-audio",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source_fidelity": "Original lossy OGG retained; WAV conversion does not restore lost detail."
+    },
+    {
+      "file": "creak3.ogg",
+      "sha256": "f9638787f95004b9d2d06f8eff8e99d4e594c21b51947daf562856fbcec905d1",
+      "source_url": "https://kenney.nl/assets/rpg-audio",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source_fidelity": "Original lossy OGG retained; WAV conversion does not restore lost detail."
+    },
+    {
+      "file": "footstep_concrete_000.ogg",
+      "sha256": "d7267e183067757c92c169de2a379abea592cfca6b39bb2e8feea15221ad79fe",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source_fidelity": "Original lossy OGG retained; WAV conversion does not restore lost detail."
+    },
+    {
+      "file": "impactMetal_light_000.ogg",
+      "sha256": "33b5e6e37c6e9d54e07bf5a89b12c76e879f40c1ea83cdd82714df1d6f9fec6d",
+      "source_url": "https://kenney.nl/assets/impact-sounds",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source_fidelity": "Original lossy OGG retained; WAV conversion does not restore lost detail."
+    }
+  ],
+  "candidates": [
+    {
+      "file": "harvest_wood_01.wav",
+      "material": "wood",
+      "sha256": "43e8672660af8c1f0e407af9eb25a84a274a9f513c1315c7dded4a20ccd535c2",
+      "sample_rate": 48000,
+      "channels": 1,
+      "encoding": "PCM 24-bit",
+      "duration": 0.3121041666666667,
+      "peak_dbfs": -5.941027573058436,
+      "rms_dbfs": -24.47690622852168,
+      "distinct_primary_source": "impactWood_heavy_000.ogg",
+      "recipe": {
+        "layers": [
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_wood_01_body.wav",
+            "delay_ms": 0
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_wood_01_texture.wav",
+            "delay_ms": 35
+          }
+        ]
+      }
+    },
+    {
+      "file": "harvest_wood_02.wav",
+      "material": "wood",
+      "sha256": "49b017f2e6d19e39aa3ef55e0e7f9a7199e62783c4e93462d0b2c4a95d1e5e22",
+      "sample_rate": 48000,
+      "channels": 1,
+      "encoding": "PCM 24-bit",
+      "duration": 0.3211041666666667,
+      "peak_dbfs": -5.933631237838278,
+      "rms_dbfs": -24.75521171898679,
+      "distinct_primary_source": "impactWood_heavy_001.ogg",
+      "recipe": {
+        "layers": [
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_wood_02_body.wav",
+            "delay_ms": 0
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_wood_02_texture.wav",
+            "delay_ms": 44
+          }
+        ]
+      }
+    },
+    {
+      "file": "harvest_wood_03.wav",
+      "material": "wood",
+      "sha256": "a2ce03ca3294e4b5c6fc942004bc7e39c48c47b754b1f0a225dd430b33aca708",
+      "sample_rate": 48000,
+      "channels": 1,
+      "encoding": "PCM 24-bit",
+      "duration": 0.33010416666666664,
+      "peak_dbfs": -5.9710508053380735,
+      "rms_dbfs": -24.35166190410639,
+      "distinct_primary_source": "impactWood_heavy_002.ogg",
+      "recipe": {
+        "layers": [
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_wood_03_body.wav",
+            "delay_ms": 0
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_wood_03_texture.wav",
+            "delay_ms": 53
+          }
+        ]
+      }
+    },
+    {
+      "file": "harvest_wood_04.wav",
+      "material": "wood",
+      "sha256": "8dff43a224acb08b4279ebb6e36397f26dcfe0a93e0645a258dfb67ff34cce0b",
+      "sample_rate": 48000,
+      "channels": 1,
+      "encoding": "PCM 24-bit",
+      "duration": 0.33910416666666665,
+      "peak_dbfs": -5.921004753744316,
+      "rms_dbfs": -25.95245374328418,
+      "distinct_primary_source": "impactWood_heavy_003.ogg",
+      "recipe": {
+        "layers": [
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_wood_04_body.wav",
+            "delay_ms": 0
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_wood_04_texture.wav",
+            "delay_ms": 62
+          }
+        ]
+      }
+    },
+    {
+      "file": "harvest_stone_01.wav",
+      "material": "stone",
+      "sha256": "e89ca1d4dd1e393a2e66ff0d46d4c5f24a35e61d121a88dcb7a129cdfabf5b5d",
+      "sample_rate": 48000,
+      "channels": 1,
+      "encoding": "PCM 24-bit",
+      "duration": 0.55,
+      "peak_dbfs": -6.051494298725544,
+      "rms_dbfs": -23.343416452718856,
+      "distinct_primary_source": "impactMining_000.ogg",
+      "recipe": {
+        "layers": [
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_stone_01_body.wav",
+            "delay_ms": 0
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_stone_01_texture.wav",
+            "delay_ms": 35
+          }
+        ]
+      }
+    },
+    {
+      "file": "harvest_stone_02.wav",
+      "material": "stone",
+      "sha256": "a9f4f03a2ebbaed8dfefe08752ebfc2fb2308c2e31159427dca75cdd222254c2",
+      "sample_rate": 48000,
+      "channels": 1,
+      "encoding": "PCM 24-bit",
+      "duration": 0.55,
+      "peak_dbfs": -6.059992288257094,
+      "rms_dbfs": -24.177687839511325,
+      "distinct_primary_source": "impactMining_001.ogg",
+      "recipe": {
+        "layers": [
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_stone_02_body.wav",
+            "delay_ms": 0
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_stone_02_texture.wav",
+            "delay_ms": 44
+          }
+        ]
+      }
+    },
+    {
+      "file": "harvest_stone_03.wav",
+      "material": "stone",
+      "sha256": "4d3e7b5347499a6b31f975315a6587387b7485b606343448e6afe7719202967c",
+      "sample_rate": 48000,
+      "channels": 1,
+      "encoding": "PCM 24-bit",
+      "duration": 0.55,
+      "peak_dbfs": -6.191029292937289,
+      "rms_dbfs": -26.317698841648816,
+      "distinct_primary_source": "impactMining_002.ogg",
+      "recipe": {
+        "layers": [
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_stone_03_body.wav",
+            "delay_ms": 0
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_stone_03_texture.wav",
+            "delay_ms": 53
+          }
+        ]
+      }
+    },
+    {
+      "file": "harvest_stone_04.wav",
+      "material": "stone",
+      "sha256": "e45d07cd7f51f703054d5984cc42f1b483b157b4f4e6dea9a0e1a79b04a14234",
+      "sample_rate": 48000,
+      "channels": 1,
+      "encoding": "PCM 24-bit",
+      "duration": 0.55,
+      "peak_dbfs": -6.05677259511436,
+      "rms_dbfs": -25.944311805189137,
+      "distinct_primary_source": "impactMining_003.ogg",
+      "recipe": {
+        "layers": [
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_stone_04_body.wav",
+            "delay_ms": 0
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_stone_04_texture.wav",
+            "delay_ms": 62
+          }
+        ]
+      }
+    },
+    {
+      "file": "harvest_ore_01.wav",
+      "material": "ore",
+      "sha256": "2796e7d704d923e92a7747e164b34196a73aa40f4cfac53ef85426156a6b9e37",
+      "sample_rate": 48000,
+      "channels": 1,
+      "encoding": "PCM 24-bit",
+      "duration": 0.55,
+      "peak_dbfs": -7.051496317745195,
+      "rms_dbfs": -24.098946153671985,
+      "distinct_primary_source": "impactMining_000.ogg",
+      "recipe": {
+        "layers": [
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_ore_01_body.wav",
+            "delay_ms": 0
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_ore_01_texture.wav",
+            "delay_ms": 35
+          }
+        ]
+      }
+    },
+    {
+      "file": "harvest_ore_02.wav",
+      "material": "ore",
+      "sha256": "a14a67d0ab4d431f7d685e96530cb75abe63835da23f615e14237f07d11d779c",
+      "sample_rate": 48000,
+      "channels": 1,
+      "encoding": "PCM 24-bit",
+      "duration": 0.55,
+      "peak_dbfs": -7.059993042793878,
+      "rms_dbfs": -24.866160828113365,
+      "distinct_primary_source": "impactMining_001.ogg",
+      "recipe": {
+        "layers": [
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_ore_02_body.wav",
+            "delay_ms": 0
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_ore_02_texture.wav",
+            "delay_ms": 44
+          }
+        ]
+      }
+    },
+    {
+      "file": "harvest_ore_03.wav",
+      "material": "ore",
+      "sha256": "778902c48d76ed068471a9a19c167ec85025bb34072a74c8d9109a7a3ee473cf",
+      "sample_rate": 48000,
+      "channels": 1,
+      "encoding": "PCM 24-bit",
+      "duration": 0.55,
+      "peak_dbfs": -7.191029265364508,
+      "rms_dbfs": -26.476116129793468,
+      "distinct_primary_source": "impactMining_002.ogg",
+      "recipe": {
+        "layers": [
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_ore_03_body.wav",
+            "delay_ms": 0
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_ore_03_texture.wav",
+            "delay_ms": 53
+          }
+        ]
+      }
+    },
+    {
+      "file": "harvest_ore_04.wav",
+      "material": "ore",
+      "sha256": "59b9f9de90424a95e8369a1f7706e2df7b07689d909ffaccf6919d83eba8ea88",
+      "sample_rate": 48000,
+      "channels": 1,
+      "encoding": "PCM 24-bit",
+      "duration": 0.55,
+      "peak_dbfs": -7.056774881045154,
+      "rms_dbfs": -26.60740257555485,
+      "distinct_primary_source": "impactMining_003.ogg",
+      "recipe": {
+        "layers": [
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_ore_04_body.wav",
+            "delay_ms": 0
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_ore_04_texture.wav",
+            "delay_ms": 62
+          }
+        ]
+      }
+    },
+    {
+      "file": "harvest_foliage_01.wav",
+      "material": "foliage",
+      "sha256": "86e8ddf761fbeceeaba21f4c7724acde7c52767449d6dc43f109b1b3a675c5b6",
+      "sample_rate": 48000,
+      "channels": 1,
+      "encoding": "PCM 24-bit",
+      "duration": 0.5471041666666666,
+      "peak_dbfs": -10.425340837840649,
+      "rms_dbfs": -34.811380901059195,
+      "distinct_primary_source": "footstep_grass_000.ogg",
+      "recipe": {
+        "layers": [
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_foliage_01_body.wav",
+            "delay_ms": 0
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_foliage_01_texture.wav",
+            "delay_ms": 35
+          }
+        ]
+      }
+    },
+    {
+      "file": "harvest_foliage_02.wav",
+      "material": "foliage",
+      "sha256": "9dc57b10d633155f2134ecdb4193be1d13649487a4b5b7bd3a13594c25e6c786",
+      "sample_rate": 48000,
+      "channels": 1,
+      "encoding": "PCM 24-bit",
+      "duration": 0.5471041666666666,
+      "peak_dbfs": -10.786062981671503,
+      "rms_dbfs": -33.42621419600492,
+      "distinct_primary_source": "footstep_grass_001.ogg",
+      "recipe": {
+        "layers": [
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_foliage_02_body.wav",
+            "delay_ms": 0
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_foliage_02_texture.wav",
+            "delay_ms": 44
+          }
+        ]
+      }
+    },
+    {
+      "file": "harvest_foliage_03.wav",
+      "material": "foliage",
+      "sha256": "17287d31954af9044aa51c4e0b6a2fa912a381459414db17a0ad002335fe8337",
+      "sample_rate": 48000,
+      "channels": 1,
+      "encoding": "PCM 24-bit",
+      "duration": 0.5471041666666666,
+      "peak_dbfs": -9.70084072565424,
+      "rms_dbfs": -34.32364421367253,
+      "distinct_primary_source": "footstep_grass_002.ogg",
+      "recipe": {
+        "layers": [
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_foliage_03_body.wav",
+            "delay_ms": 0
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_foliage_03_texture.wav",
+            "delay_ms": 53
+          }
+        ]
+      }
+    },
+    {
+      "file": "harvest_foliage_04.wav",
+      "material": "foliage",
+      "sha256": "ff6a90886c97f46e5a5819d6c99ddcab2715d8d6761cf02fb4bea93452314ca7",
+      "sample_rate": 48000,
+      "channels": 1,
+      "encoding": "PCM 24-bit",
+      "duration": 0.5471041666666666,
+      "peak_dbfs": -10.289182883879906,
+      "rms_dbfs": -35.5034259050985,
+      "distinct_primary_source": "footstep_grass_003.ogg",
+      "recipe": {
+        "layers": [
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_foliage_04_body.wav",
+            "delay_ms": 0
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_foliage_04_texture.wav",
+            "delay_ms": 62
+          }
+        ]
+      }
+    },
+    {
+      "file": "harvest_wood_break_01.wav",
+      "material": "wood",
+      "role": "depletion",
+      "sha256": "a861fd954719cfb5fe17af46fa905c39890c456e8d29ec8f0a5a4aa207fd349e",
+      "sample_rate": 48000,
+      "channels": 1,
+      "encoding": "PCM 24-bit",
+      "duration": 0.97,
+      "peak_dbfs": -5.941027573058436,
+      "recipe": {
+        "layers": [
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_wood_break_01_crack.wav",
+            "delay_ms": 0
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_wood_break_01_fall.wav",
+            "delay_ms": 75
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_wood_break_01_debris.wav",
+            "delay_ms": 170
+          }
+        ]
+      }
+    },
+    {
+      "file": "harvest_wood_break_02.wav",
+      "material": "wood",
+      "role": "depletion",
+      "sha256": "296022f3b9c5aba14d0b1896ecb2e10e915e81f56f04baba1c0dd21a3b9f6650",
+      "sample_rate": 48000,
+      "channels": 1,
+      "encoding": "PCM 24-bit",
+      "duration": 0.8978541666666666,
+      "peak_dbfs": -5.933631237838278,
+      "recipe": {
+        "layers": [
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_wood_break_02_crack.wav",
+            "delay_ms": 0
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_wood_break_02_fall.wav",
+            "delay_ms": 75
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_wood_break_02_debris.wav",
+            "delay_ms": 170
+          }
+        ]
+      }
+    },
+    {
+      "file": "harvest_stone_break_01.wav",
+      "material": "stone",
+      "role": "depletion",
+      "sha256": "1fc635b8931786470bb620b75f76dac29fd2f7c7846dea53ca661a5e08dfb635",
+      "sample_rate": 48000,
+      "channels": 1,
+      "encoding": "PCM 24-bit",
+      "duration": 0.7,
+      "peak_dbfs": -6.051494298725544,
+      "recipe": {
+        "layers": [
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_stone_break_01_crack.wav",
+            "delay_ms": 0
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_stone_break_01_fall.wav",
+            "delay_ms": 75
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_stone_break_01_debris.wav",
+            "delay_ms": 170
+          }
+        ]
+      }
+    },
+    {
+      "file": "harvest_stone_break_02.wav",
+      "material": "stone",
+      "role": "depletion",
+      "sha256": "0ccb171c2eed1c614f5051bed86bf6e92247d6131ede2a1dbbdf97b7441dbb5e",
+      "sample_rate": 48000,
+      "channels": 1,
+      "encoding": "PCM 24-bit",
+      "duration": 0.7,
+      "peak_dbfs": -6.059992288257094,
+      "recipe": {
+        "layers": [
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_stone_break_02_crack.wav",
+            "delay_ms": 0
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_stone_break_02_fall.wav",
+            "delay_ms": 75
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_stone_break_02_debris.wav",
+            "delay_ms": 170
+          }
+        ]
+      }
+    },
+    {
+      "file": "harvest_ore_break_01.wav",
+      "material": "ore",
+      "role": "depletion",
+      "sha256": "012c6ce644e9afe927dbf2f19ff44c4719be9c28caf59930104995b8f7fde9cc",
+      "sample_rate": 48000,
+      "channels": 1,
+      "encoding": "PCM 24-bit",
+      "duration": 0.7,
+      "peak_dbfs": -6.051494298725544,
+      "recipe": {
+        "layers": [
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_ore_break_01_crack.wav",
+            "delay_ms": 0
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_ore_break_01_fall.wav",
+            "delay_ms": 75
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_ore_break_01_debris.wav",
+            "delay_ms": 170
+          }
+        ]
+      }
+    },
+    {
+      "file": "harvest_ore_break_02.wav",
+      "material": "ore",
+      "role": "depletion",
+      "sha256": "3396590eb105ba9622d6a474594964dff2f3a41bdcbde3fd37c64639dcebea53",
+      "sample_rate": 48000,
+      "channels": 1,
+      "encoding": "PCM 24-bit",
+      "duration": 0.7,
+      "peak_dbfs": -6.059992288257094,
+      "recipe": {
+        "layers": [
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_ore_break_02_crack.wav",
+            "delay_ms": 0
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_ore_break_02_fall.wav",
+            "delay_ms": 75
+          },
+          {
+            "path": "C:\\Users\\linco\\Documents\\Codex\\2026-10-05\\re\\work\\HarvestAudio\\layers\\harvest_ore_break_02_debris.wav",
+            "delay_ms": 170
+          }
+        ]
+      }
+    }
+  ],
+  "perceptual_audition": "Unverified; playable matched-level audition supplied.",
+  "source_pack_manifests": [
+    "https://kenney.nl/assets/impact-sounds",
+    "https://kenney.nl/assets/rpg-audio"
+  ]
+}

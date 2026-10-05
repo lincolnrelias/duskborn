@@ -281,7 +281,7 @@ namespace Duskborn.Editor
 
                 // The detailed two-column layout is scaled down as a whole.
                 AssertApproximately(craftingRoot.sizeDelta.x, 460f, 1f, "Internal width must be 460.");
-                AssertApproximately(craftingRoot.sizeDelta.y, 420f, 1f, "Internal height must be 420.");
+                AssertApproximately(craftingRoot.sizeDelta.y, 480f, 1f, "Internal height must be 480.");
                 AssertApproximately(craftingRoot.localScale.x, 0.67f, 0.001f, "Panel scale must be 0.67.");
                 AssertApproximately(craftingRoot.localScale.y, 0.67f, 0.001f, "Vertical scale must be 0.67.");
                 float displayedHeight = craftingRoot.sizeDelta.y * craftingRoot.localScale.y;

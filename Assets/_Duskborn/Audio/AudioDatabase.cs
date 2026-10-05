@@ -138,11 +138,129 @@ namespace Duskborn.Audio
         }
     }
 
+    // Short recorded foley banks are cached independently of rarity fanfares.
+    public static class GatheringFoley
+    {
+        private sealed class Bank
+        {
+            public AudioClip[] clips;
+            public AudioClip previous;
+        }
+        private static readonly Dictionary<string, Bank> Banks = new();
+        private static float _nextPickupTime = float.NegativeInfinity;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void Reset()
+        {
+            Banks.Clear();
+            _nextPickupTime = float.NegativeInfinity;
+        }
+
+        public static AudioClip Pick(string name)
+        {
+            if (!Banks.TryGetValue(name, out var bank))
+            {
+                bank = new Bank { clips = new AudioClip[4] };
+                for (int i = 0; i < bank.clips.Length; i++)
+                    bank.clips[i] = AudioDatabase.LoadAsset($"Harvesting/{name}_{i + 1:00}");
+                Banks.Add(name, bank);
+            }
+            return ResourceAudioSettings.PickWithoutRepeat(bank.clips, ref bank.previous);
+        }
+
+        public static string PickupMaterial(string resourceId)
+        {
+            string id = (resourceId ?? "").ToLowerInvariant();
+            if (id.Contains("crystal")) return "crystal";
+            if (id.Contains("wood") || id.Contains("log") || id.Contains("branch")) return "wood";
+            if (id.Contains("stone") || id.Contains("ore") || id.Contains("iron") || id.Contains("copper")) return "stone";
+            return "soft";
+        }
+
+        public static void PlayPickup(string resourceId, Vector3 position,
+            Gameplay.Loot.ItemRarity rarity = Gameplay.Loot.ItemRarity.Common)
+        {
+            // A pile enters the inventory together; avoid a chorus of identical confirmations.
+            if (rarity <= Gameplay.Loot.ItemRarity.Uncommon && Time.unscaledTime < _nextPickupTime) return;
+            AudioClip clip = Pick("collect_" + PickupMaterial(resourceId) + "_" + rarity.ToString().ToLowerInvariant())
+                ?? Pick("collect_" + PickupMaterial(resourceId));
+            if (clip == null) return;
+            _nextPickupTime = Time.unscaledTime + .09f;
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PlayAtPoint(clip, position,
+                    AudioDatabase.Instance != null ? AudioDatabase.Instance.GetPickupVolume(rarity) : .8f,
+                    8f, 30f, .025f, 0f);
+            else AudioSource.PlayClipAtPoint(clip, position, .8f);
+        }
+    }
+
     // 1. Resources and Gathering (Ore, Stone, and Tree Nodes)
+
+    [Serializable]
+    public class CrystalBreakBank
+    {
+        public string element;
+        public AudioClip[] clips = Array.Empty<AudioClip>();
+        [NonSerialized] public AudioClip previous;
+    }
 
     [Serializable]
     public class ResourceAudioSettings
     {
+        public CrystalBreakBank[] crystalBreakBanks = Array.Empty<CrystalBreakBank>();
+        [Header("Harvest Contact Clips")]
+        public AudioClip[] woodHarvestClips = Array.Empty<AudioClip>();
+        public AudioClip[] stoneHarvestClips = Array.Empty<AudioClip>();
+        public AudioClip[] oreHarvestClips = Array.Empty<AudioClip>();
+        public AudioClip[] foliageHarvestClips = Array.Empty<AudioClip>();
+        [Range(0f, 1f)] public float hitVolume = 1f;
+        [NonSerialized] private AudioClip _previousWood, _previousStone, _previousOre, _previousFoliage, _previousDepletion;
+
+        public AudioClip GetHitClip(string surfaceTag, bool foliage = false)
+        {
+            if (surfaceTag != null && surfaceTag.StartsWith("Crystal_", StringComparison.Ordinal))
+                return GatheringFoley.Pick("crystal_" + surfaceTag.Substring(8) + "_hit");
+            if (foliage)
+            {
+                EnsureHarvestBank(ref foliageHarvestClips, "foliage");
+                return PickWithoutRepeat(foliageHarvestClips, ref _previousFoliage);
+            }
+            if (surfaceTag == "Tree" || surfaceTag == "Wood")
+            {
+                EnsureHarvestBank(ref woodHarvestClips, "wood");
+                return PickWithoutRepeat(woodHarvestClips, ref _previousWood);
+            }
+            if (surfaceTag == "Metal" || surfaceTag == "Ore")
+            {
+                EnsureHarvestBank(ref oreHarvestClips, "ore");
+                return PickWithoutRepeat(oreHarvestClips, ref _previousOre);
+            }
+            EnsureHarvestBank(ref stoneHarvestClips, "stone");
+            return PickWithoutRepeat(stoneHarvestClips, ref _previousStone);
+        }
+
+        private static void EnsureHarvestBank(ref AudioClip[] clips, string material)
+        {
+            if (clips != null && clips.Length > 0) return;
+            clips = new AudioClip[4];
+            for (int i = 0; i < clips.Length; i++)
+                clips[i] = AudioDatabase.LoadAsset($"Harvesting/harvest_{material}_{i + 1:00}");
+        }
+
+        public static AudioClip PickWithoutRepeat(AudioClip[] clips, ref AudioClip previous)
+        {
+            if (clips == null || clips.Length == 0) return null;
+            int start = UnityEngine.Random.Range(0, clips.Length);
+            for (int i = 0; i < clips.Length; i++)
+            {
+                var clip = clips[(start + i) % clips.Length];
+                if (clip != null && clip != previous) { previous = clip; return clip; }
+            }
+            foreach (var clip in clips)
+                if (clip != null) { previous = clip; return clip; }
+            return null;
+        }
+
         [Header("Destruction / Depletion Clips")]
         public AudioClip[] rockShatterClips = Array.Empty<AudioClip>();
         public AudioClip[] oreShatterClips  = Array.Empty<AudioClip>();
@@ -155,21 +273,30 @@ namespace Duskborn.Audio
 
         public AudioClip GetDepletedClip(Gameplay.TargetType type, string surfaceTag)
         {
+            if (surfaceTag != null && surfaceTag.StartsWith("Crystal_", StringComparison.Ordinal))
+            {
+                string element = surfaceTag.Substring(8);
+                foreach (var bank in crystalBreakBanks ?? Array.Empty<CrystalBreakBank>())
+                    if (bank != null && bank.element == element)
+                        return PickWithoutRepeat(bank.clips, ref bank.previous);
+                Debug.LogWarning($"Missing explicit crystal destruction bank: {element}.");
+                return null;
+            }
             if (string.Equals(surfaceTag, "Metal", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(surfaceTag, "Ore", StringComparison.OrdinalIgnoreCase) ||
                 type.HasFlag(Gameplay.TargetType.Ore))
             {
-                return oreShatterClips.RandomOrNull() ?? rockShatterClips.RandomOrNull();
+                return PickWithoutRepeat(oreShatterClips, ref _previousDepletion) ?? PickWithoutRepeat(rockShatterClips, ref _previousDepletion);
             }
 
             if (string.Equals(surfaceTag, "Tree", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(surfaceTag, "Wood", StringComparison.OrdinalIgnoreCase) ||
                 type.HasFlag(Gameplay.TargetType.Tree))
             {
-                return treeFallClips.RandomOrNull();
+                return PickWithoutRepeat(treeFallClips, ref _previousDepletion);
             }
 
-            return rockShatterClips.RandomOrNull();
+            return PickWithoutRepeat(rockShatterClips, ref _previousDepletion);
         }
 
         public void AutoPopulate()
@@ -566,6 +693,8 @@ namespace Duskborn.Audio
 
         public AudioClip GetPickupClip(Gameplay.Loot.ItemRarity rarity)
         {
+            var foley = GatheringFoley.Pick("pickup_" + rarity.ToString().ToLowerInvariant());
+            if (foley != null) return foley;
             AudioClip clip = rarity switch
             {
                 Gameplay.Loot.ItemRarity.Common    => commonPickupClip,

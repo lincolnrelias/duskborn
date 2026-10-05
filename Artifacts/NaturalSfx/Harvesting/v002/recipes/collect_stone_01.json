@@ -1,0 +1,30 @@
+{
+  "layers": [
+    {
+      "source": "impactMining_000.ogg",
+      "start": 0,
+      "duration": 0.19,
+      "gain_db": -12,
+      "playback_rate": 1,
+      "lowpass_hz": 4200,
+      "fade_in_ms": 2,
+      "fade_out_ms": 30,
+      "delay_seconds": 0
+    },
+    {
+      "source": "cloth1.ogg",
+      "start": 0.07610416666666667,
+      "duration": 0.24,
+      "gain_db": -8,
+      "playback_rate": 1,
+      "lowpass_hz": 4200,
+      "fade_in_ms": 2,
+      "fade_out_ms": 30,
+      "delay_seconds": 0.01
+    }
+  ],
+  "final_gain_db": 3.0000000000000004,
+  "sample_rate": 48000,
+  "channels": 1,
+  "encoding": "PCM24"
+}

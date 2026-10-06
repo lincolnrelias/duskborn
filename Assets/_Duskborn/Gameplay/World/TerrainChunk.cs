@@ -26,6 +26,14 @@ public class TerrainChunk : MonoBehaviour
     private MeshFilter meshFilter;
     private MeshCollider meshCollider;
     private Mesh runtimeMesh;
+    private float[,] foliageHeightMap;
+
+    public bool TryGetFoliageHeightMap(LowPolyTerrainConfig requestedConfig, int seed, out float[,] heights)
+    {
+        heights = foliageHeightMap;
+        return requestedConfig == config && seed == activeSeed && heights != null &&
+            heights.GetLength(0) == requestedConfig.chunkSize + 1;
+    }
 
     private void Awake()
     {
@@ -37,6 +45,7 @@ public class TerrainChunk : MonoBehaviour
     {
         ChunkCoord = coord;
         config = configuration;
+        foliageHeightMap = null;
         activeSeed = seedOverride != 0 ? seedOverride : (config != null ? config.seed : 4242);
         meshFilter = GetComponent<MeshFilter>();
         meshCollider = GetComponent<MeshCollider>();
@@ -97,6 +106,9 @@ public class TerrainChunk : MonoBehaviour
                 heightMap[x, z] = TerrainNoise.SampleHeight(worldX, worldZ, config, activeSeed, halfMapX, halfMapZ);
             }
         }
+
+        // Keep the existing samples for vegetation rather than evaluating terrain noise a second time.
+        foliageHeightMap = heightMap;
 
         // 2. Mesh Construction with Duplicated Vertices (Flat Shading).
         List<Vector3> vertices = new List<Vector3>();

@@ -26,6 +26,9 @@ namespace Duskborn.Editor
             RunTest(Test_RockArchetypeMeshes, ref passed, ref total);
             RunTest(Test_WeedAndWaterArchetypeMeshes, ref passed, ref total);
             RunTest(Test_GenerationBudget, ref passed, ref total);
+            RunTest(Test_MeadowTerrainGrounding, ref passed, ref total);
+            RunTest(Test_MeadowGenerationAndCleanup, ref passed, ref total);
+            RunTest(Test_MeadowStreamingScheduler, ref passed, ref total);
 
             Debug.Log($"<color=#55FF55><b>[SpatialOccupancyMapTests] {passed}/{total} tests passed!</b></color>");
         }
@@ -390,6 +393,120 @@ namespace Duskborn.Editor
                 }
                 Assert(windyVerts > 0, $"Weed {weedNames[w]} must have wind-affected vertices (alpha > 0.05). Got: {windyVerts}");
             }
+        }
+
+        public static void Test_MeadowTerrainGrounding()
+        {
+            // A non-planar quad exposes the difference between bilinear and triangle interpolation.
+            float lower = Gameplay.World.Foliage.MeadowGrassGeometry.SampleTriangle(0f, 2f, 4f, 10f,
+                0.25f, 0.25f, 1f, out Vector3 lowerNormal);
+            float upper = Gameplay.World.Foliage.MeadowGrassGeometry.SampleTriangle(0f, 2f, 4f, 10f,
+                0.75f, 0.75f, 1f, out Vector3 upperNormal);
+            Assert(Mathf.Abs(lower - 1.5f) < 0.0001f && Mathf.Abs(upper - 6.5f) < 0.0001f,
+                "Grass must follow the two rendered terrain faces, rather than bilinear heights.");
+            Assert(Vector3.Dot(lowerNormal, new Vector3(-2, 1, -4).normalized) > 0.999f &&
+                Vector3.Dot(upperNormal, new Vector3(-6, 1, -8).normalized) > 0.999f, "Terrain normals must match each face.");
+            float hash = Gameplay.World.Foliage.MeadowGrassGeometry.Hash(-32, 17, 4242, 0);
+            Assert(hash >= 0f && hash < 1f && hash == Gameplay.World.Foliage.MeadowGrassGeometry.Hash(-32, 17, 4242, 0),
+                "Global cell hashes must be deterministic, including negative coordinates.");
+        }
+
+        public static void Test_MeadowGenerationAndCleanup()
+        {
+            var config = ScriptableObject.CreateInstance<LowPolyTerrainConfig>();
+            var go = new GameObject("MeadowTest");
+            try
+            {
+                config.chunkSize = 8; config.cellSize = 1f; config.chunksX = config.chunksZ = 1;
+                config.boundaryType = LowPolyTerrainConfig.MapBoundaryType.None;
+                config.centralSanctuaryRadius = 0f; config.waterLevel = -10f;
+                config.noiseScale = 0.01f; config.steepSlopeThreshold = 89f;
+                var chunk = go.AddComponent<TerrainChunk>();
+                chunk.Initialize(Vector2Int.zero, config, 4242, autoGenerateMesh: false);
+                var placer = go.AddComponent<Gameplay.World.Foliage.ChunkFoliagePlacer>();
+                placer.SetFoliageCounts(150, 0, 0);
+                var serialized = new SerializedObject(placer);
+                serialized.FindProperty("macroDensityThreshold").floatValue = -1f;
+                serialized.ApplyModifiedPropertiesWithoutUndo();
+                placer.GenerateFoliage(config, 4242, new SpatialOccupancyMap(4f));
+                Transform meadow = go.transform.Find("Foliage_MeadowBatch");
+                Assert(meadow != null && meadow.childCount > 0, "Default foliage must generate a continuous blade layer.");
+                Mesh firstMesh = meadow.GetChild(0).GetComponent<MeshFilter>().sharedMesh;
+                Material meadowMaterial = meadow.GetChild(0).GetComponent<MeshRenderer>().sharedMaterial;
+                Assert(meadowMaterial.GetFloat("_MeadowEnabled") == 1f, "Only meadow tiles must opt into blade-root deformation.");
+                var accent = go.transform.Find("Foliage_GrassBatch");
+                Assert(accent != null, "The fixture must include legacy foliage accents.");
+                Material accentMaterial = accent.GetComponent<MeshRenderer>().sharedMaterial;
+                Assert(accentMaterial != meadowMaterial && accentMaterial.GetFloat("_MeadowEnabled") == 0f,
+                    "Legacy foliage must use a separate material with meadow deformation disabled, regardless of UV1 contents.");
+                int count = firstMesh.vertexCount;
+                var roots = new System.Collections.Generic.List<Vector4>();
+                firstMesh.GetUVs(1, roots);
+                Assert(roots.Count == count && roots[0].w == 1f, "Each meadow vertex must carry its blade root for coherent wind and fade.");
+                Color[] colors = firstMesh.colors;
+                Assert(colors[0].a == 0f && colors[4].a == 1f, "Roots must stay anchored while tips bend.");
+                Assert(meadow.GetChild(0).GetComponent<MeshRenderer>().shadowCastingMode == UnityEngine.Rendering.ShadowCastingMode.Off,
+                    "Dense meadow must not add a grass shadow-caster pass.");
+                chunk.GenerateMesh();
+                Assert(chunk.TryGetFoliageHeightMap(config, 4242, out var cachedHeights), "Fresh terrain must expose its already-computed height samples.");
+                Assert(!chunk.TryGetFoliageHeightMap(config, 4243, out _), "Foliage must not reuse terrain samples from a different seed.");
+                placer.GenerateFoliage(config, 4242, new SpatialOccupancyMap(4f));
+                Assert(firstMesh == null, "Regeneration must release the previous generated mesh.");
+                Mesh regenerated = go.transform.Find("Foliage_MeadowBatch").GetChild(0).GetComponent<MeshFilter>().sharedMesh;
+                var nextRoots = new System.Collections.Generic.List<Vector4>();
+                regenerated.GetUVs(1, nextRoots);
+                Assert(regenerated.vertexCount == count && roots[0] == nextRoots[0], "Cached and lazily sampled terrain must produce identical seeded meadow geometry.");
+                Assert(meadowMaterial == null, "Regeneration must release the previous owned meadow material.");
+                Material regeneratedMaterial = go.transform.Find("Foliage_MeadowBatch").GetChild(0).GetComponent<MeshRenderer>().sharedMaterial;
+                Assert(regeneratedMaterial.GetFloat("_MeadowEnabled") == 1f, "Regenerated tiles must retain explicit meadow deformation.");
+                var blocked = new SpatialOccupancyMap(4f);
+                blocked.Register(new Vector2(4, 4), 30f, 0f, OccupancyType.Resource_Solid);
+                placer.GenerateFoliage(config, 4242, blocked);
+                Assert(go.transform.Find("Foliage_MeadowBatch").childCount == 0, "Solid obstacles must exclude all covered blades.");
+                Assert(regenerated == null, "Even empty regeneration must release meshes.");
+                Assert(regeneratedMaterial == null, "Even empty regeneration must release the owned meadow material.");
+                placer.ClearFoliage();
+                Assert(go.transform.Find("Foliage_MeadowBatch") == null, "ClearFoliage must remove all meadow tiles.");
+                UnityEngine.Object.DestroyImmediate(placer);
+                Assert(accentMaterial != null && accentMaterial.GetFloat("_MeadowEnabled") == 0f,
+                    "Destroying meadow materials must preserve the shared legacy material.");
+            }
+            finally
+            {
+                Mesh terrainMesh = go.GetComponent<MeshFilter>().sharedMesh;
+                UnityEngine.Object.DestroyImmediate(go);
+                if (terrainMesh != null) UnityEngine.Object.DestroyImmediate(terrainMesh);
+                UnityEngine.Object.DestroyImmediate(config);
+            }
+        }
+
+        public static void Test_MeadowStreamingScheduler()
+        {
+            var go = new GameObject("Meadow scheduler test");
+            var cameraGO = new GameObject("Meadow scheduler camera", typeof(Camera));
+            var streamer = go.AddComponent<Gameplay.World.Foliage.MeadowTileStreamer>();
+            const System.Reflection.BindingFlags flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+            var type = streamer.GetType();
+            int built = 0;
+            try
+            {
+                streamer.Initialize(8, 8, -32f, -32f, 8f, (x, z) => CountTile());
+                type.GetMethod("OnEnable", flags).Invoke(streamer, null);
+                type.GetField("view", flags).SetValue(streamer, cameraGO.GetComponent<Camera>());
+                type.GetMethod("ScanCandidates", flags).Invoke(streamer, new object[] { Vector3.zero });
+                var tick = type.GetMethod("LateUpdate", flags);
+                for (int i = 0; i < 10 && built < 64; i++) tick.Invoke(streamer, null);
+                Assert(built == 64, "The scheduler must finish multiple cheap/empty nearby tiles per tick instead of imposing a frame wait per tile.");
+                tick.Invoke(streamer, null);
+                Assert(built == 64, "Completed empty tiles must not repeatedly rebuild while the camera stays still.");
+            }
+            finally
+            {
+                type.GetMethod("OnDisable", flags).Invoke(streamer, null);
+                UnityEngine.Object.DestroyImmediate(go);
+                UnityEngine.Object.DestroyImmediate(cameraGO);
+            }
+            System.Collections.IEnumerator CountTile() { built++; yield break; }
         }
 
         public static void Test_GenerationBudget()

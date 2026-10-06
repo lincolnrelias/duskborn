@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Position = 0)]
-    [ValidateSet('help', 'compile', 'validate', 'test', 'test-warden', 'build-windows', 'build-warden', 'build-briarback', 'build-bramblekin', 'build-thornwing', 'build-ironroot', 'test-ironroot', 'clear-terrain', 'capture-runes', 'capture-map', 'build-crystals', 'capture-crystals', 'capture-building-icons', 'capture-building-ui', 'capture-crafting-ui', 'all')]
+    [ValidateSet('help', 'compile', 'validate', 'test', 'test-warden', 'build-windows', 'build-warden', 'build-briarback', 'build-bramblekin', 'build-thornwing', 'build-ironroot', 'test-ironroot', 'clear-terrain', 'capture-runes', 'capture-map', 'capture-meadow', 'benchmark-foliage', 'build-crystals', 'capture-crystals', 'capture-building-icons', 'capture-building-ui', 'capture-crafting-ui', 'all')]
     [string]$Command = 'help',
 
     [string]$UnityPath,
@@ -35,6 +35,8 @@ Unity CLI workflow
   .\Tools\unity.ps1 capture-crystals
   .\Tools\unity.ps1 capture-runes
   .\Tools\unity.ps1 capture-map
+  .\Tools\unity.ps1 capture-meadow
+  .\Tools\unity.ps1 benchmark-foliage
   .\Tools\unity.ps1 capture-building-icons
   .\Tools\unity.ps1 capture-building-ui
   .\Tools\unity.ps1 capture-crafting-ui
@@ -96,7 +98,7 @@ function Invoke-UnityTask {
         '-logFile', $logPath,
         '-timestamps'
     ) + $TaskArguments
-    if ($Name -notin @('capture-runes', 'capture-crystals', 'capture-map', 'capture-building-icons', 'capture-building-ui', 'capture-crafting-ui')) { $unityArguments += '-nographics' }
+    if ($Name -notin @('capture-runes', 'capture-crystals', 'capture-map', 'capture-meadow', 'capture-building-icons', 'capture-building-ui', 'capture-crafting-ui')) { $unityArguments += '-nographics' }
 
     Write-Host "[unity-cli] Running $Name with $script:resolvedUnityPath"
     $quotedArguments = $unityArguments | ForEach-Object {
@@ -156,6 +158,12 @@ switch ($Command) {
     }
     'capture-building-ui' {
         Invoke-UnityTask -Name 'capture-building-ui' -TaskArguments @('-quit', '-executeMethod', 'Duskborn.Editor.BriarwoodBuildingCapture.Preview') -SuccessMarker '[Briarwood] UI capture succeeded.' -ExpectedOutput (Join-Path $projectRoot 'Artifacts/BriarwoodUI/building-workbench-1920.png')
+    }
+    'benchmark-foliage' {
+        Invoke-UnityTask -Name 'benchmark-foliage' -TaskArguments @('-quit', '-executeMethod', 'Duskborn.Editor.MeadowCapture.Benchmark') -SuccessMarker '[MeadowBenchmark]'
+    }
+    'capture-meadow' {
+        Invoke-UnityTask -Name 'capture-meadow' -TaskArguments @('-quit', '-executeMethod', 'Duskborn.Editor.MeadowCapture.Run') -SuccessMarker '[MeadowCapture] Capture succeeded:' -ExpectedOutput (Join-Path $projectRoot 'Artifacts/Meadow/meadow-overview.png')
     }
     'capture-map' {
         Invoke-UnityTask -Name 'capture-map' -TaskArguments @('-quit', '-executeMethod', 'Duskborn.Editor.WorldMapCapture.Run') -SuccessMarker '[WorldMapCapture] Capture succeeded:' -ExpectedOutput (Join-Path $projectRoot 'Artifacts/WorldMap/world-map.png')

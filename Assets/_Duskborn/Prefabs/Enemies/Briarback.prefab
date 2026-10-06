@@ -70,7 +70,7 @@ MonoBehaviour:
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 2
+  <PrefabId>k__BackingField: 5
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 1768059387911145891
   SceneId: 0
@@ -98,7 +98,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584105750096837617
+  _initializedTimestamp: -8584102797620097865
 --- !u!114 &4932080801962433153
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -272,6 +272,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Duskborn.Gameplay.Enemies.EnemyRagdoll
   _animator: {fileID: 1545550049594573122}
   _impulseScale: 5
+  _wholeBodyImpulseFraction: 0
+  _applyImpulseAtHitPoint: 0
   _settleDuration: 2.5
   _disableBoneCollidersWhileAlive: 1
   _restorePoseOnReset: 1

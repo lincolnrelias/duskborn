@@ -158,7 +158,7 @@ public class ChunkGridManager : MonoBehaviour
         if (config == null) return;
 
         // Do nothing if Awake already initialized instantly using existing terrain.
-        if (IsWorldReady) return;
+        if (IsWorldReady || IsGenerating) return;
 
         // Retry if a chunk was registered or created between Awake and Start.
         if (CheckAndApplyExistingTerrain())
@@ -251,6 +251,20 @@ public class ChunkGridManager : MonoBehaviour
 
         if (TryFindExistingChunks(out var chunks) && chunks.Count > 0)
         {
+            // Older saved terrain can retain the former clump batches. Upgrade foliage once,
+            // using the existing budgeted initialization path before gameplay becomes ready.
+            if (Application.isPlaying && generateFoliage)
+            {
+                foreach (var chunk in chunks)
+                {
+                    var foliage = chunk.GetComponent<Duskborn.Gameplay.World.Foliage.ChunkFoliagePlacer>();
+                    if (foliage == null || foliage.NeedsMeadowUpgrade)
+                    {
+                        StartCoroutine(InitExistingSceneTerrainAsync(chunks.ToArray()));
+                        return true;
+                    }
+                }
+            }
             UseExistingSceneTerrain(chunks);
             return true;
         }
@@ -336,6 +350,7 @@ public class ChunkGridManager : MonoBehaviour
         else if (propsPlacer != null)
         {
             propsPlacer.EnsureSpawnPointsReady(propsConfig);
+            propsPlacer.RestoreFoliageOccupancy(config, propsConfig, ActivePropsSeed);
         }
 
         if (generateFoliage)

@@ -19,6 +19,11 @@ Shader "Duskborn/StylizedFoliage"
         _WindFlutterSpeed("Leaf Flutter Frequency", Range(1.0, 20.0)) = 6.5
         _WindFlutterStrength("Leaf Flutter Micro-Shake", Range(0.0, 0.3)) = 0.06
 
+        [Header(Continuous Meadow)]
+        [HideInInspector] _MeadowEnabled("Meadow Blade Geometry", Float) = 0
+        _MeadowFadeStart("Meadow Distance Fade Start", Float) = 45
+        _MeadowFadeEnd("Meadow Distance Fade End", Float) = 70
+
         [Header(Subsurface Scattering Backlight)]
         _SSSColor("Subsurface Scatter Tint", Color) = (0.65, 0.95, 0.32, 1.0)
         _SSSIntensity("SSS Backlight Intensity", Range(0.0, 2.5)) = 1.15
@@ -37,11 +42,11 @@ Shader "Duskborn/StylizedFoliage"
 
     SubShader
     {
-        Tags 
-        { 
-            "RenderType" = "Opaque" 
-            "Queue" = "Geometry" 
-            "RenderPipeline" = "UniversalPipeline" 
+        Tags
+        {
+            "RenderType" = "Opaque"
+            "Queue" = "Geometry"
+            "RenderPipeline" = "UniversalPipeline"
         }
         Cull Off
         LOD 100
@@ -50,8 +55,8 @@ Shader "Duskborn/StylizedFoliage"
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
         CBUFFER_START(UnityPerMaterial)
-            half4  _RootColor;
-            half4  _TipColor;
+            float4 _RootColor;
+            float4 _TipColor;
             float  _VertexColorBlend;
             float  _TerrainBlendHeight;
             float  _TerrainBlendStrength;
@@ -64,8 +69,11 @@ Shader "Duskborn/StylizedFoliage"
             float  _WindFrequency;
             float  _WindFlutterSpeed;
             float  _WindFlutterStrength;
+            float  _MeadowFadeStart;
+            float  _MeadowFadeEnd;
+            float  _MeadowEnabled;
 
-            half4  _SSSColor;
+            float4 _SSSColor;
             float  _SSSIntensity;
             float  _SSSPower;
 
@@ -73,7 +81,7 @@ Shader "Duskborn/StylizedFoliage"
             float  _RootAOIntensity;
             float  _CelCutoff;
             float  _CelSmoothness;
-            half4  _ShadowTint;
+            float4 _ShadowTint;
             float  _SunlightBoost;
             float  _RimIntensity;
             float  _RimPower;
@@ -83,23 +91,23 @@ Shader "Duskborn/StylizedFoliage"
         SAMPLER(sampler_BaseMap);
 
         // Wind vertex displacement anchored to the ground.
-        float3 ApplyFoliageWind(float3 positionWS, float anchorWeight)
+        float3 ApplyFoliageWind(float3 positionWS, float anchorWeight, float3 rootWS, float meadow)
         {
             float anchor = saturate(anchorWeight);
             if (anchor < 0.001) return positionWS;
 
-            float2 windDir = normalize(_WindDirection.xy);
+            float2 windDir = _WindDirection.xy / max(length(_WindDirection.xy), 0.001);
             float t = _Time.y * _WindSpeed;
 
             // 1. Continuous harmonic wind gusts (macro gust waves in the BotW / Genshin style).
-            float gustCoord = dot(positionWS.xz, windDir) * _WindFrequency - t;
+            float gustCoord = dot(rootWS.xz, windDir) * _WindFrequency * lerp(1.0, 0.25, meadow) - t;
             float gust = sin(gustCoord) * 0.70 + sin(gustCoord * 1.85 + 1.2) * 0.30;
             float gustEnvelope = pow(sin(gustCoord * 0.45) * 0.5 + 0.5, 2.0);
             float totalGust = (gust * 0.75 + gustEnvelope * 1.1) * _WindStrength;
 
             // 2. High-frequency tremor / flutter at leaves and tips.
             float flutterPhase = (positionWS.x * 1.6 + positionWS.y * 2.4 + positionWS.z * 1.6) + _Time.y * _WindFlutterSpeed;
-            float flutter = sin(flutterPhase) * _WindFlutterStrength;
+            float flutter = sin(flutterPhase) * _WindFlutterStrength * lerp(1.0, 0.25, meadow);
 
             // 3. Displacement with organic curvature and volume preservation.
             float displacement = (totalGust + flutter) * anchor;
@@ -107,6 +115,26 @@ Shader "Duskborn/StylizedFoliage"
             positionWS.y -= abs(displacement) * 0.14;
 
             return positionWS;
+        }
+
+        // UV1 is not a reliable type marker: absent/2D UV attributes can supply w=1.
+        // Only a dedicated meadow material may interpret UV1 as blade-root geometry.
+        float MeadowWeight(float4 rootData)
+        {
+            return _MeadowEnabled > 0.5 ? saturate(rootData.w) : 0.0;
+        }
+
+        // All rendering passes use the same deformation so depth/shadows track the visible blades.
+        float3 ApplyFoliageVertex(float3 positionOS, float anchor, float4 rootData)
+        {
+            float meadow = MeadowWeight(rootData);
+            float3 posWS = TransformObjectToWorld(positionOS);
+            if (meadow < 0.5) return ApplyFoliageWind(posWS, anchor, posWS, 0.0);
+            float3 rootWS = lerp(posWS, TransformObjectToWorld(rootData.xyz), meadow);
+            posWS = ApplyFoliageWind(posWS, anchor, rootWS, meadow);
+            float distanceToCamera = length(GetCameraPositionWS().xz - rootWS.xz);
+            float fade = 1.0 - smoothstep(_MeadowFadeStart, max(_MeadowFadeStart + 1.0, _MeadowFadeEnd), distanceToCamera);
+            return lerp(posWS, rootWS + (posWS - rootWS) * fade, meadow);
         }
         ENDHLSL
 
@@ -136,6 +164,7 @@ Shader "Duskborn/StylizedFoliage"
                 float3 normalOS     : NORMAL;
                 float2 uv           : TEXCOORD0;
                 float4 color        : COLOR;
+                float4 rootData     : TEXCOORD1;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
@@ -146,7 +175,9 @@ Shader "Duskborn/StylizedFoliage"
                 float3 normalWS     : TEXCOORD1;
                 float2 uv           : TEXCOORD2;
                 float4 color        : COLOR;
+
                 float  fogFactor    : TEXCOORD3;
+                float meadow : TEXCOORD4;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
@@ -156,12 +187,10 @@ Shader "Duskborn/StylizedFoliage"
                 UNITY_SETUP_INSTANCE_ID(input);
                 UNITY_TRANSFER_INSTANCE_ID(input, output);
 
-                float3 posWS = TransformObjectToWorld(input.positionOS.xyz);
+                float3 posWS = ApplyFoliageVertex(input.positionOS.xyz, input.color.a, input.rootData);
                 float3 normWS = TransformObjectToWorldNormal(input.normalOS);
 
                 // Wind anchoring: vertex color alpha is the authoritative weight (0 = static / rocks, >0 = foliage sway).
-                float windWeight = input.color.a;
-                posWS = ApplyFoliageWind(posWS, windWeight);
 
                 output.positionWS = posWS;
                 output.positionCS = TransformWorldToHClip(posWS);
@@ -169,6 +198,7 @@ Shader "Duskborn/StylizedFoliage"
                 output.uv         = TRANSFORM_TEX(input.uv, _BaseMap);
                 output.color      = input.color;
                 output.fogFactor  = ComputeFogFactor(output.positionCS.z);
+                output.meadow = MeadowWeight(input.rootData);
 
                 return output;
             }
@@ -189,7 +219,7 @@ Shader "Duskborn/StylizedFoliage"
 
                 // Identify whether this element is a static rigid object (e.g. small rocks, pebbles).
                 // Rocks have alpha <= 0.001, retaining fully faceted normals for low-poly shading.
-                float isRigid = step(input.color.a, 0.001);
+                float isRigid = step(input.color.a, 0.001) * (1.0 - saturate(input.meadow));
                 float effectiveUpBlend = lerp(_NormalUpBlend, 0.0, isRigid);
 
                 // Upward normal alignment (homogeneous anime lighting in the Genshin / Zelda style).
@@ -279,6 +309,7 @@ Shader "Duskborn/StylizedFoliage"
                 float3 normalOS   : NORMAL;
                 float2 uv         : TEXCOORD0;
                 float4 color      : COLOR;
+                float4 rootData   : TEXCOORD1;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
@@ -297,11 +328,8 @@ Shader "Duskborn/StylizedFoliage"
                 UNITY_SETUP_INSTANCE_ID(input);
                 UNITY_TRANSFER_INSTANCE_ID(input, output);
 
-                float3 posWS = TransformObjectToWorld(input.positionOS.xyz);
+                float3 posWS = ApplyFoliageVertex(input.positionOS.xyz, input.color.a, input.rootData);
                 float3 normWS = TransformObjectToWorldNormal(input.normalOS);
-
-                float windWeight = input.color.a;
-                posWS = ApplyFoliageWind(posWS, windWeight);
 
                 output.positionCS = TransformWorldToHClip(ApplyShadowBias(posWS, normWS, _LightDirection));
                 output.uv = TRANSFORM_TEX(input.uv, _BaseMap);
@@ -342,6 +370,8 @@ Shader "Duskborn/StylizedFoliage"
                 float4 positionOS : POSITION;
                 float2 uv         : TEXCOORD0;
                 float4 color      : COLOR;
+
+                float4 rootData : TEXCOORD1;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
@@ -358,9 +388,7 @@ Shader "Duskborn/StylizedFoliage"
                 UNITY_SETUP_INSTANCE_ID(input);
                 UNITY_TRANSFER_INSTANCE_ID(input, output);
 
-                float3 posWS = TransformObjectToWorld(input.positionOS.xyz);
-                float windWeight = input.color.a;
-                posWS = ApplyFoliageWind(posWS, windWeight);
+                float3 posWS = ApplyFoliageVertex(input.positionOS.xyz, input.color.a, input.rootData);
 
                 output.positionCS = TransformWorldToHClip(posWS);
                 output.uv = TRANSFORM_TEX(input.uv, _BaseMap);
@@ -401,6 +429,8 @@ Shader "Duskborn/StylizedFoliage"
                 float3 normalOS   : NORMAL;
                 float2 uv         : TEXCOORD0;
                 float4 color      : COLOR;
+
+                float4 rootData : TEXCOORD1;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
@@ -410,6 +440,8 @@ Shader "Duskborn/StylizedFoliage"
                 float3 normalWS   : TEXCOORD0;
                 float2 uv         : TEXCOORD1;
                 float4 color      : COLOR;
+
+                float meadow : TEXCOORD2;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
@@ -419,14 +451,13 @@ Shader "Duskborn/StylizedFoliage"
                 UNITY_SETUP_INSTANCE_ID(input);
                 UNITY_TRANSFER_INSTANCE_ID(input, output);
 
-                float3 posWS = TransformObjectToWorld(input.positionOS.xyz);
-                float windWeight = input.color.a;
-                posWS = ApplyFoliageWind(posWS, windWeight);
+                float3 posWS = ApplyFoliageVertex(input.positionOS.xyz, input.color.a, input.rootData);
 
                 output.positionCS = TransformWorldToHClip(posWS);
                 output.normalWS   = TransformObjectToWorldNormal(input.normalOS);
                 output.uv         = TRANSFORM_TEX(input.uv, _BaseMap);
                 output.color      = input.color;
+                output.meadow = MeadowWeight(input.rootData);
                 return output;
             }
 
@@ -439,7 +470,7 @@ Shader "Duskborn/StylizedFoliage"
                     clip(texColor.a - _Cutoff);
                 }
                 float3 rawNorm = normalize(input.normalWS);
-                float isRigid = step(input.color.a, 0.001);
+                float isRigid = step(input.color.a, 0.001) * (1.0 - saturate(input.meadow));
                 float effectiveUpBlend = lerp(_NormalUpBlend, 0.0, isRigid);
                 float3 normWS = normalize(lerp(rawNorm, float3(0.0, 1.0, 0.0), effectiveUpBlend));
                 return half4(NormalizeNormalPerPixel(normWS), 0.0);

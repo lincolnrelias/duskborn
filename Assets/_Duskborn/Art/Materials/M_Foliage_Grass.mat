@@ -30,17 +30,17 @@ Material:
     - _CelSmoothness: 0.08
     - _Cutoff: 0
     - _NormalUpBlend: 0.92
-    - _RimIntensity: 0.22
+    - _RimIntensity: 0.06
     - _RimPower: 4
-    - _RootAOIntensity: 0.38
+    - _RootAOIntensity: 0.16
     - _SSSIdealDist: 1
-    - _SSSIntensity: 1.25
+    - _SSSIntensity: 0.40
     - _SSSPower: 2.8
     - _SunlightBoost: 1.15
     - _TerrainBlendHeight: 0.38
     - _TerrainBlendStrength: 0.85
     - _WindFlutterSpeed: 7
-    - _WindFlutterStrength: 0.06
+    - _WindFlutterStrength: 0.025
     - _WindFrequency: 0.38
     - _WindSpeed: 1.6
     - _WindStrength: 0.28

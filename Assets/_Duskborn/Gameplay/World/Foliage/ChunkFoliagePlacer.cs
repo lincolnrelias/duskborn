@@ -20,14 +20,12 @@ namespace Duskborn.Gameplay.World.Foliage
     }
 
     /// <summary>
-    /// High-density procedural foliage manager per chunk (Genshin Impact / Zelda: BotW style).
-    /// Generate grass tufts, dense lush clumps, wildflowers, and shrubs / ferns while respecting
-    /// terrain topography, macro density waves (meadow fields), physical occupancy maps (SpatialOccupancyMap),
-    /// and combat clearings, consolidating all geometry into unified meshes per chunk (1 draw call for all grass,
-    /// 1 draw call for shrubs, executed entirely on the GPU with shadows and wind animation support).
+    /// Terrain-grounded meadow tiles with shader wind and camera-local runtime streaming.
+    /// Clumps, flowers, weeds and stones remain a sparse accent batch. Placement respects
+    /// terrain topography, meadow fields, physical occupancy and combat clearings.
     /// </summary>
     [RequireComponent(typeof(TerrainChunk))]
-    public class ChunkFoliagePlacer : MonoBehaviour
+    public partial class ChunkFoliagePlacer : MonoBehaviour
     {
         [Header("Foliage Materials")]
         [Tooltip("Grass tuft and flower material (Duskborn/StylizedFoliage shader).")]
@@ -40,9 +38,36 @@ namespace Duskborn.Gameplay.World.Foliage
         [Tooltip("Preset vegetation density profile.")]
         [SerializeField] private FoliageDensityPreset densityPreset = FoliageDensityPreset.High;
 
-        [Tooltip("Number of grass tufts generated per chunk.")]
+        [Tooltip("Grass quality budget: 1800 gives the full meadow density plus sparse ecological accents.")]
         [Range(0, 6000)]
         [SerializeField] private int grassTuftsPerChunk = 1800;
+
+        [Header("Continuous Meadow")]
+        [Tooltip("Generate individually grounded blades as a continuous meadow; keep clumps as sparse accents.")]
+        [SerializeField] private bool continuousMeadow = true;
+
+        [Tooltip("Blades per square meter at High quality. Density presets scale this coverage.")]
+        [Range(4, 24)] [SerializeField] private int meadowBladesPerSquareMeter = 18;
+
+        [Tooltip("Short meadow height in meters, preserving combat readability.")]
+        [Range(0.2f, 1.2f)] [SerializeField] private float meadowHeight = 0.62f;
+
+        private readonly List<Mesh> ownedBatchMeshes = new List<Mesh>();
+        private sealed class TemplateData
+        {
+            public Vector3[] vertices, normals;
+            public Vector2[] uvs;
+            public Color[] colors;
+            public int[] triangles;
+            public TemplateData(Mesh mesh)
+            {
+                vertices = mesh.vertices; normals = mesh.normals; uvs = mesh.uv;
+                colors = mesh.colors; triangles = mesh.triangles;
+            }
+        }
+        private readonly Dictionary<Mesh, TemplateData> templateData = new Dictionary<Mesh, TemplateData>();
+        private Material fallbackGrassMaterial;
+        private Material fallbackBushMaterial;
 
         [Tooltip("Number of small rocks and pebbles generated per chunk.")]
         [Range(0, 500)]
@@ -140,6 +165,18 @@ namespace Duskborn.Gameplay.World.Foliage
         [SerializeField] private float waterClearance = 0.65f;
 
         private TerrainChunk _terrainChunk;
+
+        public bool NeedsMeadowUpgrade
+        {
+            get
+            {
+                if (!continuousMeadow || grassTuftsPerChunk <= 0) return false;
+                Transform meadow = transform.Find("Foliage_MeadowBatch");
+                if (meadow == null) return true;
+                var streamer = meadow.GetComponent<MeadowTileStreamer>();
+                return Application.isPlaying && (streamer == null || !streamer.IsInitialized);
+            }
+        }
 
         // Stylized wildflower palette (Genshin / Zelda anime palette).
         public static readonly Color[] WildflowerPalettes = new Color[]
@@ -265,17 +302,33 @@ namespace Duskborn.Gameplay.World.Foliage
             if (grassMaterial == null)
             {
                 Shader s = Shader.Find("Duskborn/StylizedFoliage");
-                if (s != null) grassMaterial = new Material(s);
+                if (s != null)
+                {
+                    fallbackGrassMaterial = new Material(s);
+                    grassMaterial = fallbackGrassMaterial;
+                    grassMaterial.SetFloat("_RimIntensity", 0.06f);
+                    grassMaterial.SetFloat("_RootAOIntensity", 0.16f);
+                    grassMaterial.SetFloat("_SSSIntensity", 0.40f);
+                    grassMaterial.SetFloat("_WindFlutterStrength", 0.025f);
+                }
             }
             if (bushMaterial == null)
             {
                 Shader s = Shader.Find("Duskborn/StylizedFoliage");
-                if (s != null) bushMaterial = new Material(s);
+                if (s != null) bushMaterial = fallbackBushMaterial = new Material(s);
             }
         }
 
         public void ClearFoliage()
         {
+            ReleaseBatchMeshes();
+            Transform meadow = transform.Find("Foliage_MeadowBatch");
+            if (meadow != null)
+            {
+                meadow.gameObject.SetActive(false);
+                if (Application.isPlaying) Destroy(meadow.gameObject);
+                else DestroyImmediate(meadow.gameObject);
+            }
             Transform existing = transform.Find("Foliage_GrassBatch");
             if (existing != null)
             {
@@ -472,6 +525,13 @@ namespace Duskborn.Gameplay.World.Foliage
         {
             if ((grassTuftsPerChunk <= 0 && littleRocksPerChunk <= 0) || grassMaterial == null) yield break;
 
+            if (continuousMeadow && grassTuftsPerChunk > 0)
+            {
+                var meadow = BuildContinuousMeadow(config, activeSeed, minX, maxX, minZ, maxZ,
+                    halfMapX, halfMapZ, centerRadiusSqr, occupancyMap, budget);
+                while (meadow.MoveNext()) yield return meadow.Current;
+            }
+
             // 1. Grass and Wildflower Archetypes.
             Mesh carpetMesh = FoliageMeshUtility.CreateDenseCarpetMesh(bladeCount: 18, radius: 0.85f, height: 0.90f, baseWidth: 0.28f);
             Mesh lushMesh = FoliageMeshUtility.CreateLushGrassClumpMesh(bladeCount: 15, radius: 0.75f, height: 1.30f, baseWidth: 0.22f);
@@ -493,6 +553,10 @@ namespace Duskborn.Gameplay.World.Foliage
             Mesh pebbleClusterMesh = FoliageMeshUtility.CreatePebbleClusterMesh(pebbleCount: 4, radius: 0.42f);
             Mesh riverStoneMesh = FoliageMeshUtility.CreateRiverStoneMesh(radiusX: 0.30f, radiusZ: 0.20f, height: 0.08f);
             Mesh screeRockMesh = FoliageMeshUtility.CreateScreeRockMesh(size: 0.26f);
+
+            TrackTemplateMeshes(carpetMesh, lushMesh, prairieMesh, reedMesh, flowerMesh,
+                wildWeedMesh, broadleafMesh, tallStalkMesh, cloverMesh, cattailBedMesh,
+                singlePebbleMesh, pebbleClusterMesh, riverStoneMesh, screeRockMesh);
 
             List<Vector3> combinedVerts = new List<Vector3>();
             List<Vector3> combinedNormals = new List<Vector3>();
@@ -530,6 +594,9 @@ namespace Duskborn.Gameplay.World.Foliage
 
                         // Strictly constrain to chunk bounds.
                         if (worldX < minX || worldX > maxX || worldZ < minZ || worldZ > maxZ) continue;
+
+                        // Reject sparse accents before noise, occupancy and ecological classification.
+                        if (continuousMeadow && MeadowGrassGeometry.Hash(gx, gz, activeSeed, 17) > 0.10f) continue;
 
                         Vector2 worldXZ = new Vector2(worldX, worldZ);
 
@@ -613,6 +680,8 @@ namespace Duskborn.Gameplay.World.Foliage
                         {
                             if (rng.Range(0f, 1f) > 0.05f * elevFactor) continue;
                         }
+
+                        // The blade layer provides coverage; clumps now provide occasional ecological accents.
 
                         // 4. Ecological Archetype Selection.
                         Mesh chosenMesh;
@@ -782,6 +851,7 @@ namespace Duskborn.Gameplay.World.Foliage
                     if (budget != null && budget.ShouldYield())
                     {
                         yield return null;
+                        budget.Reset();
                     }
                 }
             }
@@ -875,6 +945,7 @@ namespace Duskborn.Gameplay.World.Foliage
                     if (budget != null && placedRocks % 20 == 0 && budget.ShouldYield())
                     {
                         yield return null;
+                        budget.Reset();
                     }
                 }
             }
@@ -883,6 +954,10 @@ namespace Duskborn.Gameplay.World.Foliage
             {
                 CreateBatchGameObject("Foliage_GrassBatch", combinedVerts, combinedNormals, combinedUVs, combinedColors, combinedTris, grassMaterial);
             }
+            ReleaseTemplateMeshes(carpetMesh, lushMesh, prairieMesh, reedMesh, flowerMesh,
+                wildWeedMesh, broadleafMesh, tallStalkMesh, cloverMesh, cattailBedMesh,
+                singlePebbleMesh, pebbleClusterMesh, riverStoneMesh, screeRockMesh);
+
         }
 
         private void BuildBushBatch(
@@ -900,6 +975,8 @@ namespace Duskborn.Gameplay.World.Foliage
             Mesh floweringBushMesh = FoliageMeshUtility.CreateFloweringBushMesh(lobes: 4, flowerCount: 12, baseRadius: 0.65f, height: 1.0f);
             Mesh fernBushMesh = FoliageMeshUtility.CreateFernBushMesh(frondCount: 7, radius: 0.85f, height: 0.65f);
             Mesh groundShrubMesh = FoliageMeshUtility.CreateGroundShrubMesh(lobes: 5, radius: 0.95f, height: 0.45f);
+
+            TrackTemplateMeshes(puffBushMesh, floweringBushMesh, fernBushMesh, groundShrubMesh);
 
             List<Vector3> combinedVerts = new List<Vector3>();
             List<Vector3> combinedNormals = new List<Vector3>();
@@ -1070,6 +1147,8 @@ namespace Duskborn.Gameplay.World.Foliage
             {
                 CreateBatchGameObject("Foliage_BushBatch", combinedVerts, combinedNormals, combinedUVs, combinedColors, combinedTris, bushMaterial);
             }
+            ReleaseTemplateMeshes(puffBushMesh, floweringBushMesh, fernBushMesh, groundShrubMesh);
+
         }
 
         private void AppendMeshInstance(
@@ -1091,11 +1170,16 @@ namespace Duskborn.Gameplay.World.Foliage
             bool isRock = false,
             Color rockColor = default)
         {
-            Vector3[] baseVerts = templateMesh.vertices;
-            Vector3[] baseNormals = templateMesh.normals;
-            Vector2[] baseUVs = templateMesh.uv;
-            Color[] baseColors = templateMesh.colors;
-            int[] baseTris = templateMesh.triangles;
+            if (!templateData.TryGetValue(templateMesh, out TemplateData data))
+            {
+                data = new TemplateData(templateMesh);
+                templateData.Add(templateMesh, data);
+            }
+            Vector3[] baseVerts = data.vertices;
+            Vector3[] baseNormals = data.normals;
+            Vector2[] baseUVs = data.uvs;
+            Color[] baseColors = data.colors;
+            int[] baseTris = data.triangles;
 
             int vertCount = baseVerts.Length;
             int triCount = baseTris.Length;
@@ -1207,7 +1291,8 @@ namespace Duskborn.Gameplay.World.Foliage
             List<Vector2> uvs,
             List<Color> colors,
             List<int> tris,
-            Material material)
+            Material material,
+            List<Vector4> bladeRoots = null)
         {
             GameObject holder = new GameObject(holderName);
             holder.transform.parent = transform;
@@ -1228,9 +1313,16 @@ namespace Duskborn.Gameplay.World.Foliage
             combinedMesh.SetVertices(verts);
             combinedMesh.SetNormals(normals);
             combinedMesh.SetUVs(0, uvs);
+            if (bladeRoots != null) combinedMesh.SetUVs(1, bladeRoots);
             combinedMesh.SetColors(colors);
             combinedMesh.SetTriangles(tris, 0);
             combinedMesh.RecalculateBounds();
+
+            // Wind can move vertices beyond the undeformed mesh bounds.
+            Bounds windBounds = combinedMesh.bounds;
+            windBounds.Expand(new Vector3(5f, 1f, 5f));
+            combinedMesh.bounds = windBounds;
+            ownedBatchMeshes.Add(combinedMesh);
 
             mf.sharedMesh = combinedMesh;
             mr.sharedMaterial = material;

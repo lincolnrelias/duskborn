@@ -14,6 +14,8 @@ and builds. The wrapper reads the required Unity version from
 .\Tools\unity.ps1 clear-terrain
 .\Tools\unity.ps1 all
 .\Tools\unity.ps1 capture-map
+.\Tools\unity.ps1 capture-meadow
+.\Tools\unity.ps1 benchmark-foliage
 .\Tools\unity.ps1 capture-building-icons
 .\Tools\unity.ps1 capture-building-ui
 .\Tools\unity.ps1 build-windows
@@ -54,6 +56,15 @@ and builds. The wrapper reads the required Unity version from
 - `capture-map` renders the production minimap and world-map canvases with seeded terrain,
   player and structure fixtures into `Artifacts/WorldMap`, in edit mode using a hidden graphics
   process. This verifies the static HUD composition, not a live multiplayer session.
+- `capture-meadow` renders the production grass and terrain materials across two adjacent
+  seeded chunks, including a combat clearing, into `Artifacts/Meadow`. It uses a hidden
+  graphics process in edit mode. Wind motion, runtime streaming and gameplay performance
+  still require an in-game check; use an isolated copy while Unity is open. The transient capture pipeline disables SRP batching because immediate batched captures produced black foliage. Production pipeline settings are preserved; verify live batched lighting manually. The capture also checks that legacy foliage renders identically with missing, lightmap, and meadow-like UV1 data; a positive control reproduces the former distance-collapse regression.
+- `benchmark-foliage` records the median of three warmed 128 m foliage generations and a
+  32 m coroutine run with simulated 16 ms frame waits in `Artifacts/Meadow/foliage-benchmark.json`.
+  Terrain generation is excluded from the timer. This compares foliage CPU work and coroutine
+  wait overhead without entering Play Mode; it does not measure full world loading, GPU cost,
+  or live runtime streaming. Run in an isolated copy while Unity is open.
 - `capture-building-icons` renders the actual Workbench, Forge, and Arcane Table prefabs
   into transparent 512 px icons under `Resources/UI/Briarwood`, and configures the skin
   sprite import settings. It preserves model geometry and materials.

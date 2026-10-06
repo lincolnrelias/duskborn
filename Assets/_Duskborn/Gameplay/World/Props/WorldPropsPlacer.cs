@@ -31,6 +31,46 @@ namespace Duskborn.Gameplay.World
         private readonly SpatialOccupancyMap _occupancyMap = new SpatialOccupancyMap();
         public SpatialOccupancyMap OccupancyMap => _occupancyMap;
 
+        // Occupancy is runtime data, so saved props need it rebuilt before their grass is upgraded.
+        public void RestoreFoliageOccupancy(LowPolyTerrainConfig terrainConfig, WorldPropsConfig propsConfig, int seed)
+        {
+            if (terrainConfig == null || propsConfig == null || propsContainer == null) return;
+            _occupancyMap.Clear();
+            _occupancyMap.RegisterClearing(Vector2.zero, propsConfig.centerClearingRadius, OccupancyType.Player_Sanctuary);
+            Physics.SyncTransforms();
+            // Central placement does not consume the props RNG; combat clearings are its first random pass.
+            PlaceCombatClearings(terrainConfig, propsConfig, new SeededRNG(seed));
+            var definitions = new List<PropDefinition> { propsConfig.treeProp, propsConfig.stoneProp,
+                propsConfig.ironProp, propsConfig.fiberProp };
+            if (propsConfig.extraProps != null) definitions.AddRange(propsConfig.extraProps);
+            foreach (Transform prop in propsContainer)
+            {
+                PropDefinition match = null;
+                foreach (PropDefinition definition in definitions)
+                {
+                    if (definition == null) continue;
+                    bool matches = MatchesPrefabName(prop.name, definition.prefab);
+                    if (!matches && definition.prefabVariations != null)
+                        foreach (GameObject variant in definition.prefabVariations)
+                            if (MatchesPrefabName(prop.name, variant)) { matches = true; break; }
+                    if (matches) { match = definition; break; }
+                }
+                float solid = 1.5f, canopy = 0f;
+                if (match != null)
+                {
+                    float scale = Mathf.Max(Mathf.Abs(prop.lossyScale.x), Mathf.Abs(prop.lossyScale.z));
+                    solid = (match.solidRadius > 0.05f ? match.solidRadius : match.exclusionRadius * 0.5f) * scale;
+                    canopy = match.canopyRadius * scale;
+                }
+                _occupancyMap.Register(prop.position, solid, canopy, OccupancyType.Resource_Solid);
+            }
+        }
+
+        private static bool MatchesPrefabName(string instance, GameObject prefab)
+        {
+            return prefab != null && (instance == prefab.name || instance == prefab.name + "(Clone)");
+        }
+
         private bool _isSubscribed;
         private ChunkGridManager _worldManager;
 

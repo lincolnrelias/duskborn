@@ -1,0 +1,14 @@
+{
+  "model_sha256": "066AC27E6DAC79EA0DFE25BB6C5EEE4901325AB6A3AB073F09A569E61F2700D8",
+  "validation": "Isolated non-interactive Unity project; build-bramblekin and all passed.",
+  "suites_passed": 24,
+  "suites_failed": 0,
+  "swing_ground_clearance_m": 0.1289689,
+  "death_checks": [
+    "Club reparented from right arm to corpse root",
+    "Dynamic rigidbody and enabled collider on death",
+    "Repeated killing impulse does not double corpse impulse",
+    "Pool reset restores parent, grip pose, kinematic state and disabled collider"
+  ],
+  "visual_checks": "Blender previews inspected; live gameplay and multiplayer unverified."
+}

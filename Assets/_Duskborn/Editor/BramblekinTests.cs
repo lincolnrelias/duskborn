@@ -49,7 +49,10 @@ namespace Duskborn.Editor
                     BramblekinBuilder.Require(clips.GetArrayElementAtIndex(i).objectReferenceValue != null, "Null audio cue.");
             }
             var parts = prefab.GetComponentsInChildren<MeshFilter>();
-            BramblekinBuilder.Require(parts.Length == 10 && parts.All(p => p.sharedMesh != null && p.sharedMesh.uv.Length == p.sharedMesh.vertexCount), "Ten articulated UV-mapped parts.");
+            BramblekinBuilder.Require(parts.Length == 11 && parts.All(p => p.sharedMesh != null && p.sharedMesh.uv.Length == p.sharedMesh.vertexCount), "Ten articulated parts and a separate UV-mapped club.");
+            var club = parts.Single(p => p.name == "Club");
+            BramblekinBuilder.Require(club.transform.parent.name == "Arm.R" && club.GetComponent<Rigidbody>().isKinematic &&
+                !club.GetComponent<Collider>().enabled && club.GetComponent<Joint>() == null, "Club held safely in right hand.");
             BramblekinBuilder.Require(prefab.GetComponentsInChildren<CharacterJoint>().Length == 9, "Articulated corpse graph.");
             BramblekinBuilder.Require(agent.speed == 6.2f && stats.FindProperty("_entity.moveSpeed").floatValue == 6.2f, "Faster movement.");
             foreach (string path in new[] { "Assets/DefaultPrefabObjects.asset", "Assets/_Duskborn/Network/DefaultPrefabObjects.asset" })
@@ -72,6 +75,7 @@ namespace Duskborn.Editor
                 "Approach closely instead of swinging at outer reach.");
             GroundedParts(prefab);
             KillingImpact(prefab);
+            ClubScaleAcrossReuse(prefab);
             SpawnBudgets();
             Debug.Log("[Bramblekin] Asset, combat and registration checks passed.");
         }
@@ -177,8 +181,8 @@ namespace Duskborn.Editor
                 smooth.Invoke(presentation, new object[] { 1 - Mathf.Exp(-26f / 60) });
                 BramblekinBuilder.Require(Quaternion.Angle(start, arm.rotation) < Quaternion.Angle(start, target) * .6f &&
                     Quaternion.Angle(start, arm.rotation) > 1, "Interrupted attack must ease rather than snap or freeze.");
-                var clubArm = meshes.Single(m => m.name == "Arm.R");
-                var clubVertices = clubArm.sharedMesh.vertices.Where((v, i) => clubArm.sharedMesh.uv[i].x >= .3f).ToArray();
+                var clubArm = meshes.Single(m => m.name == "Club");
+                var clubVertices = clubArm.sharedMesh.vertices;
                 float clubLowest = float.PositiveInfinity;
                 foreach (var phase in new[] { BramblekinPhase.Windup, BramblekinPhase.Swing, BramblekinPhase.Recover })
                     for (int sample = 0; sample <= 60; sample++)
@@ -230,6 +234,39 @@ namespace Duskborn.Editor
             BramblekinBuilder.Require(basicCount > 0, "Basic enemy never selected.");
             Debug.Log($"[Bramblekin] {scenarios} seeded wave scenarios, {basicCount} basic spawns, budgets bounded.");
         }
+        private static void ClubScaleAcrossReuse(GameObject prefab)
+        {
+            var root = Object.Instantiate(prefab);
+            try
+            {
+                root.GetComponent<NavMeshAgent>().enabled = false;
+                var ragdoll = root.GetComponent<EnemyRagdoll>(); ragdoll.EnsureInitialized();
+                var club = root.GetComponentsInChildren<MeshFilter>().Single(m => m.name == "Club").transform;
+                var hand = club.parent;
+                var localScale = club.localScale;
+                var worldScale = club.lossyScale;
+                // Imported arm scale is 100: losing the club's local scale on reset
+                // grows it 100x per life, despite restoring the grip position/rotation.
+                foreach (float size in new[] { .65f, 1f, 1.5f })
+                {
+                    root.transform.localScale = Vector3.one * size;
+                    for (int life = 0; life < 4; life++)
+                    {
+                        ragdoll.EnableRagdoll();
+                        BramblekinBuilder.Require(club.parent == root.transform &&
+                            Vector3.Distance(club.lossyScale, worldScale * size) < .001f,
+                            "Detached club must preserve world size across scaled goblins.");
+                        ragdoll.DisableRagdoll();
+                        BramblekinBuilder.Require(club.parent == hand &&
+                            Vector3.Distance(club.localScale, localScale) < .0001f &&
+                            Vector3.Distance(club.lossyScale, worldScale * size) < .001f,
+                            "Reused club scale compounded at goblin size " + size + ", life " + life);
+                    }
+                }
+                Debug.Log("[Bramblekin] Club scale preserved across 12 deaths/reuses at three goblin sizes.");
+            }
+            finally { Object.DestroyImmediate(root); }
+        }
         private static void KillingImpact(GameObject prefab)
         {
             var scene = UnityEditor.SceneManagement.EditorSceneManager.NewPreviewScene();
@@ -243,12 +280,18 @@ namespace Duskborn.Editor
                 var ragdoll = root.GetComponent<EnemyRagdoll>(); ragdoll.EnsureInitialized();
                 var bodies = root.GetComponentsInChildren<Rigidbody>().Where(b => b.gameObject != root).ToArray();
                 var torso = bodies.Single(b => b.name == "Body");
+                var club = bodies.Single(b => b.name == "Club");
+                var hand = club.transform.parent;
+                var heldPosition = club.transform.localPosition;
+                var heldRotation = club.transform.localRotation;
                 foreach (var direction in new[] { Vector3.right, Vector3.left, Vector3.forward })
                 {
                     ragdoll.DisableRagdoll(); root.transform.position = Vector3.up * 3;
                     Physics.SyncTransforms();
                     Vector3 contact = torso.worldCenterOfMass + Vector3.up * .18f;
                     ragdoll.ApplyImpulse(contact, direction);
+                    BramblekinBuilder.Require(club.transform.parent == root.transform && !club.isKinematic && club.GetComponent<Collider>().enabled,
+                        "Club must detach and simulate on death while remaining owned by the corpse.");
                     // Duplicate delivery must not double the killing impulse.
                     ragdoll.ApplyImpulse(contact, direction);
                     physics.Simulate(.02f);
@@ -257,6 +300,9 @@ namespace Duskborn.Editor
                     BramblekinBuilder.Require(bodies.Any(b => b.angularVelocity.sqrMagnitude > .01f), "Off-center killing contact must turn corpse.");
                 }
                 ragdoll.DisableRagdoll();
+                BramblekinBuilder.Require(club.transform.parent == hand && Vector3.Distance(club.transform.localPosition, heldPosition) < .0001f &&
+                    Quaternion.Angle(club.transform.localRotation, heldRotation) < .01f && !club.GetComponent<Collider>().enabled,
+                    "Reused goblin must recover its club and exact grip pose.");
                 BramblekinBuilder.Require(bodies.All(b => b.isKinematic), "Death impulse reuse reset.");
                 Debug.Log("[Bramblekin] Isolated killing-hit physics: right/left/forward momentum, contact torque, duplicate guard and reuse passed.");
             }

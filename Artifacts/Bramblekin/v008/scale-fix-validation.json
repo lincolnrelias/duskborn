@@ -1,0 +1,15 @@
+{
+  "bug": "Detach preserves world scale; reset omitted local scale restoration under a 100x imported arm transform.",
+  "control": "Regression test failed on first reuse with scale restoration disabled.",
+  "fix": "Cache and restore original rigidbody local scales alongside parent and grip pose.",
+  "validation": "Tools/unity.ps1 all passed in isolated cached project.",
+  "suites_passed": 24,
+  "suites_failed": 0,
+  "repeated_deaths_and_reuses": 12,
+  "goblin_scales": [
+    0.65,
+    1,
+    1.5
+  ],
+  "live_visuals": "Unverified; check a fresh gameplay run and reused goblins."
+}

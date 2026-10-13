@@ -23,6 +23,7 @@ namespace Duskborn.Gameplay.Enemies
         private Collider[]  _rootColliders;
         private Coroutine   _freezeCoroutine;
         private Vector3[] _restPositions;
+        private Vector3[] _restScales;
         private Quaternion[] _restRotations;
         private Transform[] _restParents;
         private bool _deathImpulseApplied;
@@ -72,10 +73,12 @@ namespace Duskborn.Gameplay.Enemies
             _rootColliders = rootCols.ToArray();
             _boneColliders = boneCols.ToArray();
             _restPositions = new Vector3[_bones.Length];
+            _restScales = new Vector3[_bones.Length];
             _restRotations = new Quaternion[_bones.Length];
             _restParents = new Transform[_bones.Length];
             for (int i = 0; i < _bones.Length; i++)
             { _restPositions[i] = _bones[i].transform.localPosition; _restRotations[i] = _bones[i].transform.localRotation;
+                _restScales[i] = _bones[i].transform.localScale;
                 _restParents[i] = _bones[i].transform.parent; }
         }
 
@@ -146,6 +149,9 @@ namespace Duskborn.Gameplay.Enemies
                 for (int i = 0; i < _bones.Length; i++)
                     if (_bones[i] != null)
                     { _bones[i].transform.SetParent(_restParents[i], false);
+                        // Detaching preserves world scale and changes local scale. Restore
+                        // it too, or imported FBX parent scales compound on every reuse.
+                        _bones[i].transform.localScale = _restScales[i];
                         _bones[i].transform.localPosition = _restPositions[i]; _bones[i].transform.localRotation = _restRotations[i]; }
             if (_animator != null) _animator.enabled = true;
             foreach (var col in _rootColliders)

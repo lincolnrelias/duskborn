@@ -23,7 +23,7 @@ namespace Duskborn.Editor
 
         public static void Build()
         {
-            Require(File.Exists("Artifacts/Bramblekin/v007/Bramblekin.fbx"), "Build the Blender model first.");
+            Require(File.Exists("Artifacts/Bramblekin/v008/Bramblekin.fbx"), "Build the Blender model first.");
             foreach (string cue in Cues) for (int i = 1; i <= Takes(cue); i++)
                 Require(File.Exists("Artifacts/NaturalSfx/Bramblekin/v002/unity/" + AudioName(cue, i)), "Missing foley " + cue);
             if (AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath) == null)
@@ -33,7 +33,7 @@ namespace Duskborn.Editor
             }
             Directory.CreateDirectory(Folder);
             foreach (string file in new[] { "Bramblekin.fbx", "BK_Palette.png" })
-                File.Copy("Artifacts/Bramblekin/v007/" + file, Folder + "/" + file, true);
+                File.Copy("Artifacts/Bramblekin/v008/" + file, Folder + "/" + file, true);
             foreach (string cue in Cues) for (int i = 1; i <= Takes(cue); i++)
                 File.Copy("Artifacts/NaturalSfx/Bramblekin/v002/unity/" + AudioName(cue, i), Folder + "/" + AudioName(cue, i), true);
             AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
@@ -87,6 +87,7 @@ namespace Duskborn.Editor
                 foreach (var renderer in visual.GetComponentsInChildren<MeshRenderer>()) renderer.sharedMaterial = material;
                 foreach (var part in visual.GetComponentsInChildren<Transform>()) part.gameObject.layer = root.layer;
                 var nodes = visual.GetComponentsInChildren<Transform>().ToDictionary(t => t.name);
+                nodes["Club"].SetParent(nodes["Arm.R"], true);
                 foreach (string side in new[] { "L", "R" })
                 {
                     nodes["Shin." + side].SetParent(nodes["Leg." + side], true);
@@ -179,6 +180,9 @@ namespace Duskborn.Editor
                 joint.swing1Limit = new SoftJointLimit { limit = 35 }; joint.swing2Limit = new SoftJointLimit { limit = 25 };
             }
             var ragdoll = new SerializedObject(root.GetComponent<EnemyRagdoll>());
+            Body("Club", .65f);
+            var detached = ragdoll.FindProperty("_detachOnDeath"); detached.arraySize = 1;
+            detached.GetArrayElementAtIndex(0).objectReferenceValue = nodes["Club"];
             ragdoll.FindProperty("_animator").objectReferenceValue = null; ragdoll.FindProperty("_impulseScale").floatValue = 22f;
             ragdoll.FindProperty("_wholeBodyImpulseFraction").floatValue = .65f;
             ragdoll.FindProperty("_applyImpulseAtHitPoint").boolValue = true;
